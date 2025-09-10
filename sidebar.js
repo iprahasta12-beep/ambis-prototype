@@ -1,4 +1,10 @@
 // sidebar.js — sidebar collapse + persistent state + safe navigation
+// Apply saved collapse state early to avoid width flicker on page load
+const STORAGE_KEY = 'ambis:sidebar-collapsed';
+let initialCollapsed = false;
+try { initialCollapsed = localStorage.getItem(STORAGE_KEY) === '1'; } catch {}
+if (initialCollapsed) document.documentElement.classList.add('sidebar-collapsed');
+
 document.addEventListener('DOMContentLoaded', () => {
   const sidebar = document.getElementById('sidebar');
   const btn     = document.getElementById('navToggle');
@@ -16,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Config
-  const STORAGE_KEY     = 'ambis:sidebar-collapsed';
   const EXPANDED_WIDTH  = 300;
   const COLLAPSED_WIDTH = 84;
   const ANIM_MS         = 250;
@@ -81,9 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Restore saved state instantly (no flicker, handled by CSS + body class)
-  let saved = false;
-  try { saved = localStorage.getItem(STORAGE_KEY) === '1'; } catch {}
-  setCollapsed(saved, { persist: false, animate: false });
+  setCollapsed(initialCollapsed, { persist: false, animate: false });
 
   // --- Toggle button (with animation)
   btn.addEventListener('click', () => {

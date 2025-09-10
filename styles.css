@@ -15,23 +15,19 @@
 
 /* collapse behavior */
 #sidebar{ transition: width .25s ease; }
-#sidebar.collapsed{ width:84px !important; }
+#sidebar.collapsed,
+.sidebar-collapsed #sidebar{ width:84px !important; }
 
 /* keep labels in flow but don't animate width */
 .sb-label{
   display:inline-block; white-space:nowrap;
   transition: opacity .15s ease, margin .15s ease; /* no width transition */
 }
-#sidebar.collapsed .sb-label{
-  opacity:0; width:0; margin-left:0; overflow:hidden;
+#sidebar.collapsed .sb-label,
+.sidebar-collapsed #sidebar .sb-label{
+  opacity:0; width:0; margin-left:0; overflow:hidden; display:none;
 }
 
 /* center items when collapsed */
-#sidebar.collapsed .sb-item{ justify-content:center; padding-left:0; padding-right:0; gap:.5rem; }
-
-#sidebar.collapsed {
-  width: 84px !important;
-}
-#sidebar.collapsed .sb-label {
-  display: none;
-}
+#sidebar.collapsed .sb-item,
+.sidebar-collapsed #sidebar .sb-item{ justify-content:center; padding-left:0; padding-right:0; gap:.5rem; }
