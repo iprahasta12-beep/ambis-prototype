@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sidebar.classList.toggle('collapsed', collapsed);
     document.body.classList.toggle('sidebar-collapsed', collapsed);
+    document.documentElement.classList.toggle('sidebar-collapsed', collapsed);
     applyWidth(collapsed);
 
     if (label) label.textContent = collapsed ? 'Perbesar Navigasi' : 'Perkecil Navigasi';
