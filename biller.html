@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AMBIS — Beli dan Bayar</title>
+
+  <!-- Tailwind + fonts -->
+  <script>
+    /* CDN JIT safelist: only classes toggled by local JS on this page */
+    tailwind = window.tailwind || {};
+    tailwind.config = {
+      safelist: [
+        "opacity-0","opacity-100","translate-y-0","translate-y-1",
+        "ring-2","ring-cyan-400","bg-cyan-50","border-cyan-300",
+        "text-slate-900","text-slate-400"
+      ]
+    };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Global styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="font-[Mulish] bg-gray-50 text-slate-900">
+  <div class="h-screen overflow-hidden flex">
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sb-bg sticky top-0 self-start h-screen w-[300px] text-slate-300 relative border-r border-slate-800/60 shrink-0 overflow-hidden">
+
+      <div class="px-6 pt-6 flex items-center gap-4 overflow-hidden">
+        <img
+          src="img/ambis-vertical-logo.svg"
+          alt="AMBIS"
+          class="w-14 h-14 flex-none"
+        />
+
+        <!-- text may wrap to 2 lines; hidden when sidebar collapses via .sb-label -->
+        <div class="sb-label min-w-0 pr-2">
+          <p id="brandName" class="text-slate-400 text-[18px] leading-tight whitespace-normal break-words">
+            PT Sarana Pancing Indonesia
+          </p>
+
+        </div>
+      </div>
+
+
+
+
+      <nav class="mt-8 px-4 pb-28">
+        <p class="px-2 text-[11px] tracking-[.18em] text-slate-400/80 mb-3">UTAMA</p>
+
+        <a href="dashboard.html" aria-current="page" class="sb-item group flex items-center gap-3 px-3 py-3 rounded-xl border border-transparent hover:border-slate-700/60 hover:bg-white/[.03] transition">
+          <img class="w-6 h-6" src="img/sidebar/dashboard.svg" alt="">
+          <span class="sb-label text-slate-400 text-[16px] text-white">Beranda</span>
+        </a>
+
+        <a href="informasi-rekening.html" class="sb-item group flex items-center gap-3 px-3 py-3 rounded-xl border border-transparent hover:border-slate-700/60 hover:bg-white/[.03] transition">
+          <img class="w-6 h-6" src="img/sidebar/inforekening.svg" alt="">
+          <span class="sb-label sb-text text-[16px]">Informasi Rekening</span>
+        </a>
+
+        <a href="transfer.html" class="sb-item group flex items-center gap-3 px-3 py-3 rounded-xl border border-transparent hover:border-slate-700/60 hover:bg-white/[.03] transition">
+          <img class="w-6 h-6" src="img/sidebar/transfer.svg" alt="">
+          <span class="sb-label sb-text text-[16px]">Transfer</span>
+        </a>
+
+        <a href="persetujuan-transaksi.html" class="sb-item group flex items-center gap-3 px-3 py-3 rounded-xl border border-transparent hover:border-slate-700/60 hover:bg-white/[.03] transition">
+          <img class="w-6 h-6" src="img/sidebar/otorisasi.svg" alt="">
+          <span class="sb-label sb-text text-[16px]">Persetujuan Transaksi</span>
+        </a>
+
+        <a href="biller.html" class="sb-item group flex items-center gap-3 px-3 py-3 rounded-xl border border-transparent hover:border-slate-700/60 hover:bg-white/[.03] transition">
+            <img class="block w-6 h-6" src="img/sidebar/biller.svg" alt="">
+          <span class="sb-label text-[16px] font-medium">Beli &amp; Bayar</span>
+        </a>
+
+        <a href="mutasi.html" class="sb-item group flex items-center gap-3 px-3 py-3 rounded-xl border border-transparent hover:border-slate-700/60 hover:bg-white/[.03] transition">
+          <img class="w-6 h-6" src="img/sidebar/mutasi.svg" alt="">
+          <span class="sb-label sb-text text-[16px]">Mutasi &amp; e-Statement</span>
+        </a>
+
+        <p class="px-2 mt-7 text-[11px] tracking-[.18em] text-slate-400/80 mb-3">ATUR</p>
+
+        <a href="manajemen-pengguna.html" class="sb-item group flex items-center gap-3 px-3 py-3 rounded-xl border border-transparent hover:border-slate-700/60 hover:bg-white/[.03] transition">
+          <img class="w-6 h-6" src="img/sidebar/user.svg" alt="">
+          <span class="sb-label sb-text text-[16px]">Manajemen Pengguna</span>
+        </a>
+
+        <a href="batas-transaksi.html" class="sb-item group flex items-center gap-3 px-3 py-3 rounded-xl border border-transparent hover:border-slate-700/60 hover:bg-white/[.03] transition">
+          <img class="w-6 h-6" src="img/sidebar/limit.svg" alt="">
+          <span class="sb-label sb-text text-[16px]">Batas Transaksi</span>
+        </a>
+
+        <a href="atur-persetujuan.html" class="sb-item group flex items-center gap-3 px-3 py-3 rounded-xl border border-transparent hover:border-slate-700/60 hover:bg-white/[.03] transition">
+          <img class="w-6 h-6" src="img/sidebar/akses.svg" alt="">
+          <span class="sb-label sb-text text-[16px]">Atur Persetujuan</span>
+        </a>
+      </nav>
+
+      <div class="absolute left-0 right-0 bottom-0 border-t border-white/10 px-6 py-4 flex items-center justify-between">
+        <span id="collapseLabel" class="sb-label text-slate-300">Perkecil Navigasi</span>
+        <button id="navToggle" aria-expanded="true"
+                class="w-6 h-6 grid place-items-center rounded-md border border-white/15 bg-white/5 hover:bg-white/10">
+          <img id="collapseIcon" src="img/shrink.svg" alt="" class="w-4 h-4">
+        </button>
+      </div>
+    </aside>
+    <!-- ============ /SIDEBAR ============ -->
+
+    <!-- ============ MAIN ============ -->
+    <main class="flex-1 min-w-0 bg-white h-screen overflow-y-auto">
+      <div class="px-6 py-2">
+    <!-- ============ HEADER ============ -->
+      <div class="flex items-center justify-between flex-wrap gap-4 mb-6 pb-2 border-b border-slate-200">
+          <div class="h-16 flex items-center gap-3">
+              <img src="img/header/biller.svg" alt="Beli & Bayar"/>
+              <h1 class="text-[24px] leading-none tracking-tight font-semibold">Beli &amp; Bayar </h1>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="px-4 py-2 rounded-xl border text-base bg-white hover:bg-slate-50 flex items-center gap-2">
+              <!-- bell icon -->
+              <img src="img/dashboard/bantuan.svg" alt="Notifikasi" class="w-5 h-5 object-contain" />
+              <span class="text-slate-700 font-medium">Bantuan</span>
+            </button>
+            <button class="px-4 py-2 rounded-xl border text-base bg-white hover:bg-slate-50 flex items-center gap-2">
+              <!-- bell icon -->
+              <img src="img/dashboard/keluar.svg" alt="Notifikasi" class="w-5 h-5 object-contain" />
+              <span class="text-slate-700 font-medium">Keluar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Subheader -->
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="font-semibold text-lg">Pilih Layanan</h2>
+            <p class="text-slate-600">Akses catatan transaksi terkini melalui menu <span class="font-medium">Riwayat</span>.</p>
+          </div>
+          <button class="h-9 px-4 rounded-lg border border-cyan-500 text-cyan-600 bg-white hover:bg-cyan-50">Riwayat</button>
+        </div>
+
+        <!-- Listrik PLN -->
+        <div class="mb-8">
+          <div class="flex items-center gap-2 mb-3">
+            <img src="img/pln.svg" alt="" class="w-8 h-8"/>
+            <h3 class="font-medium">Listrik PLN</h3>
+          </div>
+          <div class="grid grid-cols-4 gap-4">
+            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-3">
+              <img src="img/biller/pln.svg" class="w-6 h-6"/>
+              Token Listrik
+            </button>
+            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-3">
+              <img src="img/biller/pln.svg" class="w-6 h-6"/>
+              Tagihan Listrik
+            </button>
+          </div>
+        </div>
+
+        <!-- Internet -->
+        <div class="mb-8">
+          <div class="flex items-center gap-2 mb-3">
+            <img src="img/internet.svg" alt="" class="w-8 h-8"/>
+            <h3 class="font-medium">Internet</h3>
+          </div>
+          <div class="grid grid-cols-4 gap-4">
+            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+              <img src="img/biller/indihome.svg" class="w-6 h-6"/> Indihome
+            </button>
+            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+              <img src="img/biller/myrepublic.svg" class="w-6 h-6"/> My Republic
+            </button>
+            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+              <img src="img/biller/cbn.png" class="w-6 h-6"/> CBN
+            </button>
+            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+              <img src="img/biller/iconnet.png" class="w-6 h-6"/> Iconnet
+            </button>
+          </div>
+        </div>
+
+        <!-- BPJS -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <img src="img/bpjs.svg" alt="" class="w-8 h-8"/>
+            <h3 class="font-medium">BPJS</h3>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+              <img src="img/biller/bpjs.svg" class="w-6 h-6 mr-2"/> BPJS Kesehatan keluarga
+            </button>
+            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+              <img src="img/biller/bpjs.svg" class="w-6 h-6 mr-2"/> BPJS Kesehatan Badan Usaha
+            </button>
+            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+              <img src="img/biller/jmo.svg" class="w-6 h-6 mr-2"/> BPJSTK Penerima Upah
+            </button>
+            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+              <img src="img/biller/jmo.svg" class="w-6 h-6 mr-2"/> BPJSTK Bukan Penerima Upah
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </main>
+    <!-- ============ /MAIN ============ -->
+  </div>
+
+  <script src="sidebar.js"></script>
+</body>
+</html>
