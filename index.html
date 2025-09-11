@@ -205,7 +205,7 @@
                   <img class="w-6 h-6" src="img/dashboard/akses-cepat.svg" alt="">
                   <h3 class="text-[18px] font-semibold">Akses Cepat</h3>
                 </div>
-                <button class="rounded-xl border border-cyan-500 text-cyan-500 px-4 py-2 hover:bg-cyan-100">Ubah Akses</button>
+                <button id="ubahAksesBtn" class="rounded-xl border border-cyan-500 text-cyan-500 px-4 py-2 hover:bg-cyan-100">Ubah Akses</button>
               </div>
 
               <p class="text-slate-500 mb-3">Akses fitur transaksi yang Anda gunakan.</p>
@@ -383,6 +383,18 @@
       </div>
     </main>
     <!-- ============ /MAIN ============ -->
+  </div>
+
+  <!-- Drawer overlay and panel -->
+  <div id="drawerOverlay" class="fixed inset-0 bg-black/50 opacity-0 pointer-events-none transition-opacity duration-300 z-40"></div>
+  <div id="drawer" class="fixed top-0 right-0 h-full w-full max-w-[480px] bg-white shadow-xl transform translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
+    <div class="flex items-center justify-between p-4 border-b">
+      <h2 class="text-lg font-semibold">Riwayat</h2>
+      <button id="drawerCloseBtn" class="text-2xl leading-none">&times;</button>
+    </div>
+    <div class="p-4">
+      <p>drawer content</p>
+    </div>
   </div>
 
   <script src="index.js"></script>
