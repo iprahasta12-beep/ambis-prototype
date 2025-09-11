@@ -73,15 +73,18 @@ function formatCurrency(num) {
 const drawer = document.getElementById('drawer');
 const openBtn = document.getElementById('ubahAksesBtn');
 const closeBtn = document.getElementById('drawerCloseBtn');
+const dashboardGrid = document.getElementById('dashboardGrid');
 
 function openDrawer() {
   tempSelectedAkses = [...selectedAkses];
   renderDrawer();
   drawer.classList.add('open');
+  dashboardGrid?.classList.replace('lg:grid-cols-3', 'lg:grid-cols-2');
 }
 
 function closeDrawer() {
   drawer.classList.remove('open');
+  dashboardGrid?.classList.replace('lg:grid-cols-2', 'lg:grid-cols-3');
 }
 
 openBtn?.addEventListener('click', openDrawer);
