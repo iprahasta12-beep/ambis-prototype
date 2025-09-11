@@ -100,14 +100,14 @@ const aksesItems = [
   { id: 'statement', label: 'e-Statement', icon: 'img/dashboard/akses-cepat/e-statement.svg', category: 'TRANSAKSI' },
   { id: 'token', label: 'Token Listrik', icon: 'img/dashboard/akses-cepat/pln.svg', category: 'LISTRIK PLN' },
   { id: 'tagihan', label: 'Tagihan Listrik', icon: 'img/dashboard/akses-cepat/pln.svg', category: 'LISTRIK PLN' },
-  { id: 'indihome', label: 'Indihome', icon: 'img/dashboard/akses-cepat/detail.svg', category: 'INTERNET' },
-  { id: 'myrepublic', label: 'MyRepublic', icon: 'img/dashboard/akses-cepat/detail.svg', category: 'INTERNET' },
-  { id: 'cbn', label: 'CBN', icon: 'img/dashboard/akses-cepat/detail.svg', category: 'INTERNET' },
-  { id: 'iconnect', label: 'Iconnect', icon: 'img/dashboard/akses-cepat/detail.svg', category: 'INTERNET' },
-  { id: 'bpjs-keluarga', label: 'BPJS Kesehatan Keluarga', icon: 'img/dashboard/akses-cepat/pengaturan-sistem.svg', category: 'BPJS' },
-  { id: 'bpjs-badan-usaha', label: 'BPJS Ketenagakerjaan Badan Usaha', icon: 'img/dashboard/akses-cepat/pengaturan-sistem.svg', category: 'BPJS' },
-  { id: 'bpjstk-penerima-upah', label: 'BPJSTK Penerima Upah', icon: 'img/dashboard/akses-cepat/pengaturan-sistem.svg', category: 'BPJS' },
-  { id: 'bpjstk-bukan-penerima-upah', label: 'BPJSTK Bukan Penerima Upah', icon: 'img/dashboard/akses-cepat/pengaturan-sistem.svg', category: 'BPJS' }
+  { id: 'indihome', label: 'Indihome', icon: 'img/internet.svg', category: 'INTERNET' },
+  { id: 'myrepublic', label: 'MyRepublic', icon: 'img/internet.svg', category: 'INTERNET' },
+  { id: 'cbn', label: 'CBN', icon: 'img/internet.svg', category: 'INTERNET' },
+  { id: 'iconnect', label: 'Iconnect', icon: 'img/internet.svg', category: 'INTERNET' },
+  { id: 'bpjs-keluarga', label: 'BPJS Kesehatan Keluarga', icon: 'img/bpjs.svg', category: 'BPJS' },
+  { id: 'bpjs-badan-usaha', label: 'BPJS Ketenagakerjaan Badan Usaha', icon: 'img/bpjs.svg', category: 'BPJS' },
+  { id: 'bpjstk-penerima-upah', label: 'BPJSTK Penerima Upah', icon: 'img/bpjs.svg', category: 'BPJS' },
+  { id: 'bpjstk-bukan-penerima-upah', label: 'BPJSTK Bukan Penerima Upah', icon: 'img/bpjs.svg', category: 'BPJS' }
 ];
 
 let selectedAkses = ['transfer', 'pindah', 'mutasi', 'statement', 'token', 'tagihan'];
