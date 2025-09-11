@@ -156,26 +156,34 @@ function renderDrawer() {
   if (!drawerContent) return;
   drawerContent.innerHTML = '';
   const categories = [...new Set(aksesItems.map((i) => i.category))];
+
   categories.forEach((cat, idx) => {
     const section = document.createElement('section');
     section.className = 'p-4';
+
     const heading = document.createElement('h3');
     heading.className = 'text-xs font-semibold text-slate-500 mb-3';
     heading.textContent = cat;
     section.appendChild(heading);
 
+    // 2-column grid for most, full width for BPJS
     const list = document.createElement('div');
-    list.className = 'flex flex-col gap-3';
+    list.className = (cat === 'BPJS')
+      ? 'flex flex-col gap-3'
+      : 'grid grid-cols-2 gap-3';
 
     aksesItems.filter((i) => i.category === cat).forEach((item) => {
       const label = document.createElement('label');
       label.className = 'block cursor-pointer';
       label.innerHTML = `
         <input type="checkbox" data-id="${item.id}" class="sr-only peer" ${tempSelectedAkses.includes(item.id) ? 'checked' : ''}>
-        <div class="flex items-center justify-between rounded-xl border border-slate-200 p-4 peer-checked:border-cyan-500">
-          <span class="text-slate-900">${item.label}</span>
-          <span class="w-5 h-5 rounded bg-slate-100 border border-slate-200 grid place-items-center peer-checked:bg-cyan-500 peer-checked:border-cyan-500"> AA
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-transparent peer-checked:text-white"><path d="M5 13l4 4L19 7" /></svg>
+        
+        <div class="flex items-center justify-between rounded-xl border border-slate-300 px-4 py-3 peer-checked:border-cyan-500">
+          <span class="text-slate-900 text-sm">${item.label}</span>
+          <span class="w-5 h-5 rounded-full border border-slate-300 grid place-items-center peer-checked:bg-cyan-500 peer-checked:border-cyan-500">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 text-transparent peer-checked:text-white">
+              <path d="M5 13l4 4L19 7" />
+            </svg>
           </span>
         </div>`;
       list.appendChild(label);
@@ -183,6 +191,7 @@ function renderDrawer() {
 
     section.appendChild(list);
     drawerContent.appendChild(section);
+
     if (idx < categories.length - 1) {
       const divider = document.createElement('div');
       divider.className = 'bg-slate-100 h-6';
