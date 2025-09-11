@@ -82,12 +82,18 @@ function openDrawer() {
   drawer.classList.add('open');
   dashboardGrid?.classList.replace('lg:grid-cols-3', 'lg:grid-cols-2');
   pendingSection?.classList.replace('lg:col-span-1', 'lg:col-span-2');
+  if (typeof window.sidebarCollapseForDrawer === 'function') {
+    window.sidebarCollapseForDrawer();
+  }
 }
 
 function closeDrawer() {
   drawer.classList.remove('open');
   dashboardGrid?.classList.replace('lg:grid-cols-2', 'lg:grid-cols-3');
   pendingSection?.classList.replace('lg:col-span-2', 'lg:col-span-1');
+  if (typeof window.sidebarRestoreForDrawer === 'function') {
+    window.sidebarRestoreForDrawer();
+  }
 }
 
 openBtn?.addEventListener('click', openDrawer);

@@ -107,4 +107,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // expose helper for other scripts
   window.sidebarSetCollapsed = (collapsed, opts = {}) => setCollapsed(collapsed, opts);
   window.isSidebarCollapsed = () => sidebar.classList.contains('collapsed');
+
+  // Helpers to temporarily collapse the sidebar when a drawer is open
+  let prevCollapsed = false;
+  window.sidebarCollapseForDrawer = () => {
+    prevCollapsed = sidebar.classList.contains('collapsed');
+    if (!prevCollapsed) setCollapsed(true, { persist: false });
+  };
+  window.sidebarRestoreForDrawer = () => {
+    if (!prevCollapsed) setCollapsed(false, { persist: false });
+  };
 });
