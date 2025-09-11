@@ -84,3 +84,118 @@ function closeDrawer() {
 
 openBtn?.addEventListener('click', openDrawer);
 closeBtn?.addEventListener('click', closeDrawer);
+
+// Quick access configuration
+const aksesContainer = document.getElementById('aksesCepatContainer');
+const drawerContent = document.getElementById('drawerContent');
+const drawerError = document.getElementById('drawerError');
+const saveBtn = document.getElementById('saveAksesBtn');
+
+const aksesItems = [
+  { id: 'transfer', label: 'Transfer Saldo', icon: 'img/dashboard/akses-cepat/transfer.svg', category: 'TRANSAKSI' },
+  { id: 'pindah', label: 'Pemindahan Saldo', icon: 'img/dashboard/akses-cepat/pindah-saldo.svg', category: 'TRANSAKSI' },
+  { id: 'mutasi', label: 'Mutasi Rekening', icon: 'img/dashboard/akses-cepat/mutasi.svg', category: 'TRANSAKSI' },
+  { id: 'statement', label: 'e-Statement', icon: 'img/dashboard/akses-cepat/e-statement.svg', category: 'TRANSAKSI' },
+  { id: 'token', label: 'Token Listrik', icon: 'img/dashboard/akses-cepat/pln.svg', category: 'LISTRIK PLN' },
+  { id: 'tagihan', label: 'Tagihan Listrik', icon: 'img/dashboard/akses-cepat/pln.svg', category: 'LISTRIK PLN' },
+  { id: 'indihome', label: 'Indihome', icon: 'img/dashboard/akses-cepat/detail.svg', category: 'INTERNET' },
+  { id: 'myrepublic', label: 'MyRepublic', icon: 'img/dashboard/akses-cepat/detail.svg', category: 'INTERNET' },
+  { id: 'cbn', label: 'CBN', icon: 'img/dashboard/akses-cepat/detail.svg', category: 'INTERNET' },
+  { id: 'iconnect', label: 'Iconnect', icon: 'img/dashboard/akses-cepat/detail.svg', category: 'INTERNET' },
+  { id: 'bpjs-keluarga', label: 'BPJS Kesehatan Keluarga', icon: 'img/dashboard/akses-cepat/pengaturan-sistem.svg', category: 'BPJS' },
+  { id: 'bpjs-badan-usaha', label: 'BPJS Ketenagakerjaan Badan Usaha', icon: 'img/dashboard/akses-cepat/pengaturan-sistem.svg', category: 'BPJS' },
+  { id: 'bpjstk-penerima-upah', label: 'BPJSTK Penerima Upah', icon: 'img/dashboard/akses-cepat/pengaturan-sistem.svg', category: 'BPJS' },
+  { id: 'bpjstk-bukan-penerima-upah', label: 'BPJSTK Bukan Penerima Upah', icon: 'img/dashboard/akses-cepat/pengaturan-sistem.svg', category: 'BPJS' }
+];
+
+let selectedAkses = ['transfer', 'pindah', 'mutasi', 'statement', 'token', 'tagihan'];
+
+function renderQuickAccess() {
+  if (!aksesContainer) return;
+  aksesContainer.innerHTML = '';
+  selectedAkses.forEach((id) => {
+    const item = aksesItems.find((i) => i.id === id);
+    if (!item) return;
+    const btn = document.createElement('button');
+    btn.className = 'w-full h-[130px] rounded-[18px] border border-slate-200 bg-white hover:bg-slate-50 transition flex flex-col items-center justify-center gap-3';
+    btn.innerHTML = `
+      <span class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 grid place-items-center">
+        <img src="${item.icon}" alt="" class="w-6 h-6 object-contain">
+      </span>
+      <span class="text-slate-900 font-medium">${item.label}</span>
+    `;
+    aksesContainer.appendChild(btn);
+  });
+}
+
+function showDrawerError(msg) {
+  if (!drawerError) return;
+  drawerError.textContent = msg;
+  drawerError.classList.remove('hidden');
+  setTimeout(() => drawerError.classList.add('hidden'), 2000);
+}
+
+function onCheckboxChange(e) {
+  const id = e.target.dataset.id;
+  if (e.target.checked) {
+    if (selectedAkses.length >= 6) {
+      e.target.checked = false;
+      showDrawerError('Maksimal 6 item di akses cepat');
+      return;
+    }
+    selectedAkses.push(id);
+  } else {
+    selectedAkses = selectedAkses.filter((x) => x !== id);
+  }
+  renderQuickAccess();
+}
+
+function renderDrawer() {
+  if (!drawerContent) return;
+  drawerContent.innerHTML = '';
+  const categories = [...new Set(aksesItems.map((i) => i.category))];
+  categories.forEach((cat, idx) => {
+    const section = document.createElement('section');
+    section.className = 'p-4';
+    const heading = document.createElement('h3');
+    heading.className = 'text-xs font-semibold text-slate-500 mb-3';
+    heading.textContent = cat;
+    section.appendChild(heading);
+
+    const grid = document.createElement('div');
+    grid.className = 'grid grid-cols-2 gap-3';
+
+    aksesItems.filter((i) => i.category === cat).forEach((item) => {
+      const label = document.createElement('label');
+      label.className = 'relative block cursor-pointer';
+      label.innerHTML = `
+        <input type="checkbox" data-id="${item.id}" class="absolute top-2 right-2 w-5 h-5" ${selectedAkses.includes(item.id) ? 'checked' : ''}>
+        <div class="w-full h-[130px] rounded-[18px] border border-slate-200 bg-white flex flex-col items-center justify-center gap-3">
+          <span class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 grid place-items-center">
+            <img src="${item.icon}" alt="" class="w-6 h-6 object-contain">
+          </span>
+          <span class="text-slate-900 font-medium text-center px-2">${item.label}</span>
+        </div>`;
+      grid.appendChild(label);
+    });
+
+    section.appendChild(grid);
+    drawerContent.appendChild(section);
+    if (idx < categories.length - 1) {
+      const divider = document.createElement('div');
+      divider.className = 'bg-slate-100 h-6';
+      drawerContent.appendChild(divider);
+    }
+  });
+
+  drawerContent.querySelectorAll('input[type="checkbox"]').forEach((cb) => {
+    cb.addEventListener('change', onCheckboxChange);
+  });
+}
+
+renderQuickAccess();
+renderDrawer();
+
+saveBtn?.addEventListener('click', () => {
+  closeDrawer();
+});
