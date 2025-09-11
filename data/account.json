@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "Rekening Utama",
+    "balance": 100000000000,
+    "transactions": [
+      {"date": "12 September", "description": "Ke BCA - PT Sinar Jaya Utama", "amount": -2000000},
+      {"date": "12 September", "description": "Dari BRI - PT Roti Manis Indonesia", "amount": 100000000},
+      {"date": "12 September", "description": "Ke BRI - PT Roti Manis Indonesia", "amount": -100000000},
+      {"date": "12 September", "description": "Dari BRI - PT Roti Manis Indonesia", "amount": 100000000}
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Rekening Operasional",
+    "balance": 50000000,
+    "transactions": [
+      {"date": "10 September", "description": "Pembelian ATK", "amount": -500000},
+      {"date": "11 September", "description": "Penjualan Produk", "amount": 2000000}
+    ]
+  }
+]

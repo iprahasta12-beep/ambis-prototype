@@ -1,0 +1,60 @@
+const accountSelect = document.getElementById('accountSelect');
+const balanceEl = document.getElementById('dashBalanceValue');
+const transactionListEl = document.getElementById('transactionList');
+
+let accounts = [];
+
+fetch('data/account.json')
+  .then((res) => res.json())
+  .then((data) => {
+    accounts = data;
+    populateSelect();
+    accountSelect.addEventListener('change', updateView);
+    updateView();
+  })
+  .catch((err) => {
+    console.error('Failed to load accounts', err);
+  });
+
+function populateSelect() {
+  accountSelect.innerHTML = '';
+  accounts.forEach((acc) => {
+    const opt = document.createElement('option');
+    opt.value = acc.id;
+    opt.textContent = acc.name;
+    if (acc.name === 'Rekening Utama') {
+      opt.selected = true;
+    }
+    accountSelect.appendChild(opt);
+  });
+}
+
+function updateView() {
+  const selectedId = parseInt(accountSelect.value, 10);
+  const account = accounts.find((a) => a.id === selectedId);
+  if (!account) return;
+
+  balanceEl.textContent = formatCurrency(account.balance);
+
+  transactionListEl.innerHTML = '';
+  account.transactions.forEach((tx) => {
+    const tr = document.createElement('tr');
+    tr.className = 'hover:bg-slate-50';
+    tr.innerHTML = `
+      <td class="px-4 py-3">${tx.description}</td>
+      <td class="px-4 py-3"><span class="text-xs rounded border px-2 py-0.5">${account.name}</span></td>
+      <td class="px-4 py-3">${tx.date}</td>
+      <td class="px-4 py-3">${formatCurrency(tx.amount)}</td>
+      <td class="px-4 py-3"></td>
+    `;
+    transactionListEl.appendChild(tr);
+  });
+}
+
+function formatCurrency(num) {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+  }).format(num);
+}
