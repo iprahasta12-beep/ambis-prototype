@@ -1,0 +1,49 @@
+name: PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages-pr-${{ github.event.pull_request.number }}"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      # 🔧 Replace with your actual build steps if you have one
+      - name: Build static site
+        run: |
+          mkdir -p dist
+          cp -R * dist/
+
+      # Put PR files under a unique folder: preview/pr-<PR_NUMBER>
+      - name: Prepare PR folder
+        run: |
+          mkdir -p "deploy/preview/pr-${{ github.event.pull_request.number }}"
+          cp -R dist/* "deploy/preview/pr-${{ github.event.pull_request.number}}"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: deploy
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
