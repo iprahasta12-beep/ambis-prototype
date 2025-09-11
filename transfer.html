@@ -149,7 +149,7 @@
             <p class="text-slate-500 mb-6">
               Ke rekening sesama Amar Bank ataupun bank lainnya
             </p>
-            <button class="mt-auto w-full h-[60px] rounded-xl border border-cyan-500 text-cyan-600 font-medium flex items-center justify-center gap-2 hover:bg-cyan-50">
+            <button id="openTransferDrawer" class="mt-auto w-full h-[60px] rounded-xl border border-cyan-500 text-cyan-600 font-medium flex items-center justify-center gap-2 hover:bg-cyan-50">
               Transfer Saldo
               <img src="img/icon/transfer.svg" alt="" class="w-5 h-5">
             </button>
@@ -171,8 +171,56 @@
       </div>
     </main>
     <!-- ============ /MAIN ============ -->
+
+    <!-- Drawer -->
+    <div id="drawer" class="h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-200">
+      <div class="flex items-center justify-between p-4 border-b">
+        <h2 class="text-lg font-semibold">Transfer Saldo</h2>
+        <button id="drawerCloseBtn" class="text-2xl leading-none">&times;</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4 space-y-4">
+        <div>
+          <label class="block text-sm mb-1">Sumber Rekening</label>
+          <button class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih sumber rekening</button>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Rekening Tujuan</label>
+          <button class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih rekening tujuan</button>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-sm">Sisa Batas Transaksi Harian</span>
+            <img src="img/icon/info.svg" alt="" class="w-4 h-4">
+          </div>
+          <div class="border rounded-xl px-3 py-3 bg-slate-50">
+            <p class="font-medium">Rp 200.000.000</p>
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Nominal</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">Rp</span>
+            <input type="text" placeholder="Masukkan nominal transfer" class="w-full border rounded-xl pl-8 pr-3 py-3" />
+          </div>
+        </div>
+        <p class="text-[11px] tracking-[.18em] text-slate-400 pt-4">DETAIL</p>
+        <div>
+          <label class="block text-sm mb-1">Kategori</label>
+          <button class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih kategori</button>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Catatan (Opsional)</label>
+          <textarea class="w-full border rounded-xl px-3 py-3" placeholder="Tulis catatan" maxlength="50"></textarea>
+          <div class="text-right text-xs text-slate-400">0/50</div>
+        </div>
+      </div>
+      <div class="p-4 border-t">
+        <button class="w-full rounded-xl bg-cyan-500 text-white py-3">Lanjut</button>
+      </div>
+    </div>
   </div>
 
+  <script src="transfer.js"></script>
   <script src="sidebar.js"></script>
 </body>
 </html>
