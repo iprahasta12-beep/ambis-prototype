@@ -174,7 +174,7 @@ function renderDrawer() {
         <input type="checkbox" data-id="${item.id}" class="sr-only peer" ${tempSelectedAkses.includes(item.id) ? 'checked' : ''}>
         <div class="flex items-center justify-between rounded-xl border border-slate-200 p-4 peer-checked:border-cyan-500">
           <span class="text-slate-900">${item.label}</span>
-          <span class="w-5 h-5 rounded bg-slate-100 border border-slate-200 grid place-items-center peer-checked:bg-cyan-500 peer-checked:border-cyan-500">
+          <span class="w-5 h-5 rounded bg-slate-100 border border-slate-200 grid place-items-center peer-checked:bg-cyan-500 peer-checked:border-cyan-500"> AA
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-transparent peer-checked:text-white"><path d="M5 13l4 4L19 7" /></svg>
           </span>
         </div>`;
