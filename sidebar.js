@@ -103,4 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const lbl = a.querySelector('.sb-label');
     if (lbl && !a.title) a.title = lbl.textContent.trim();
   });
+
+  // expose helper for other scripts
+  window.sidebarSetCollapsed = (collapsed, opts = {}) => setCollapsed(collapsed, opts);
+  window.isSidebarCollapsed = () => sidebar.classList.contains('collapsed');
 });
