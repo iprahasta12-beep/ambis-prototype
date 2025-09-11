@@ -75,6 +75,8 @@ const openBtn = document.getElementById('ubahAksesBtn');
 const closeBtn = document.getElementById('drawerCloseBtn');
 
 function openDrawer() {
+  tempSelectedAkses = [...selectedAkses];
+  renderDrawer();
   drawer.classList.add('open');
 }
 
@@ -109,6 +111,7 @@ const aksesItems = [
 ];
 
 let selectedAkses = ['transfer', 'pindah', 'mutasi', 'statement', 'token', 'tagihan'];
+let tempSelectedAkses = [...selectedAkses];
 
 function renderQuickAccess() {
   if (!aksesContainer) return;
@@ -138,16 +141,15 @@ function showDrawerError(msg) {
 function onCheckboxChange(e) {
   const id = e.target.dataset.id;
   if (e.target.checked) {
-    if (selectedAkses.length >= 6) {
+    if (tempSelectedAkses.length >= 6) {
       e.target.checked = false;
       showDrawerError('Maksimal 6 item di akses cepat');
       return;
     }
-    selectedAkses.push(id);
+    tempSelectedAkses.push(id);
   } else {
-    selectedAkses = selectedAkses.filter((x) => x !== id);
+    tempSelectedAkses = tempSelectedAkses.filter((x) => x !== id);
   }
-  renderQuickAccess();
 }
 
 function renderDrawer() {
@@ -162,24 +164,24 @@ function renderDrawer() {
     heading.textContent = cat;
     section.appendChild(heading);
 
-    const grid = document.createElement('div');
-    grid.className = 'grid grid-cols-2 gap-3';
+    const list = document.createElement('div');
+    list.className = 'flex flex-col gap-3';
 
     aksesItems.filter((i) => i.category === cat).forEach((item) => {
       const label = document.createElement('label');
-      label.className = 'relative block cursor-pointer';
+      label.className = 'block cursor-pointer';
       label.innerHTML = `
-        <input type="checkbox" data-id="${item.id}" class="absolute top-2 right-2 w-5 h-5" ${selectedAkses.includes(item.id) ? 'checked' : ''}>
-        <div class="w-full h-[130px] rounded-[18px] border border-slate-200 bg-white flex flex-col items-center justify-center gap-3">
-          <span class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 grid place-items-center">
-            <img src="${item.icon}" alt="" class="w-6 h-6 object-contain">
+        <input type="checkbox" data-id="${item.id}" class="sr-only peer" ${tempSelectedAkses.includes(item.id) ? 'checked' : ''}>
+        <div class="flex items-center justify-between rounded-xl border border-slate-200 p-4 peer-checked:border-cyan-500">
+          <span class="text-slate-900">${item.label}</span>
+          <span class="w-5 h-5 rounded bg-slate-100 border border-slate-200 grid place-items-center peer-checked:bg-cyan-500 peer-checked:border-cyan-500">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-transparent peer-checked:text-white"><path d="M5 13l4 4L19 7" /></svg>
           </span>
-          <span class="text-slate-900 font-medium text-center px-2">${item.label}</span>
         </div>`;
-      grid.appendChild(label);
+      list.appendChild(label);
     });
 
-    section.appendChild(grid);
+    section.appendChild(list);
     drawerContent.appendChild(section);
     if (idx < categories.length - 1) {
       const divider = document.createElement('div');
@@ -194,8 +196,9 @@ function renderDrawer() {
 }
 
 renderQuickAccess();
-renderDrawer();
 
 saveBtn?.addEventListener('click', () => {
+  selectedAkses = [...tempSelectedAkses];
+  renderQuickAccess();
   closeDrawer();
 });

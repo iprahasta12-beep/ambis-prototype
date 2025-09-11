@@ -317,13 +317,15 @@
     <!-- ============ /MAIN ============ -->
 
     <!-- Drawer -->
-    <div id="drawer" class="h-full bg-white overflow-y-auto flex-shrink-0 border-l border-slate-200">
+    <div id="drawer" class="h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-200">
       <div class="flex items-center justify-between p-4 border-b">
         <h2 class="text-lg font-semibold">Akses Cepat</h2>
         <button id="drawerCloseBtn" class="text-2xl leading-none">&times;</button>
       </div>
-      <p id="drawerError" class="hidden text-red-600 px-4 py-2 text-sm"></p>
-      <div id="drawerContent"></div>
+      <div class="flex-1 overflow-y-auto">
+        <p id="drawerError" class="hidden text-red-600 px-4 py-2 text-sm"></p>
+        <div id="drawerContent"></div>
+      </div>
       <div class="p-4 border-t">
         <button id="saveAksesBtn" class="w-full rounded-xl bg-cyan-500 text-white py-3">Simpan Akses Cepat</button>
       </div>
