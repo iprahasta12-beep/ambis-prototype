@@ -71,22 +71,16 @@ function formatCurrency(num) {
 
 // Drawer logic for "Ubah Akses"
 const drawer = document.getElementById('drawer');
-const overlay = document.getElementById('drawerOverlay');
 const openBtn = document.getElementById('ubahAksesBtn');
 const closeBtn = document.getElementById('drawerCloseBtn');
 
 function openDrawer() {
-  drawer.classList.remove('translate-x-full');
-  overlay.classList.remove('opacity-0', 'pointer-events-none');
-  overlay.classList.add('opacity-100');
+  drawer.classList.add('open');
 }
 
 function closeDrawer() {
-  drawer.classList.add('translate-x-full');
-  overlay.classList.add('opacity-0', 'pointer-events-none');
-  overlay.classList.remove('opacity-100');
+  drawer.classList.remove('open');
 }
 
 openBtn?.addEventListener('click', openDrawer);
 closeBtn?.addEventListener('click', closeDrawer);
-overlay?.addEventListener('click', closeDrawer);

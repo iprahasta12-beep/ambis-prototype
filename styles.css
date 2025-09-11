@@ -31,3 +31,11 @@
 /* center items when collapsed */
 #sidebar.collapsed .sb-item,
 .sidebar-collapsed #sidebar .sb-item{ justify-content:center; padding-left:0; padding-right:0; gap:.5rem; }
+
+/* Drawer push panel */
+#drawer{
+  width:0;
+  max-width:480px;
+  transition:width .3s ease;
+}
+#drawer.open{ width:480px; }
