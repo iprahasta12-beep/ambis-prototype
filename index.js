@@ -40,8 +40,16 @@ function updateView() {
   account.transactions.forEach((tx) => {
     const tr = document.createElement('tr');
     tr.className = 'hover:bg-slate-50';
+    const iconSrc = tx.amount < 0
+      ? 'img/dashboard/akses-cepat/transfer-out.svg'
+      : 'img/dashboard/akses-cepat/transfer-in.svg';
     tr.innerHTML = `
-      <td class="px-4 py-3">${tx.description}</td>
+      <td class="px-4 py-3">
+        <div class="flex items-center gap-2">
+          <img src="${iconSrc}" alt="" class="w-5 h-5">
+          <span>${tx.description}</span>
+        </div>
+      </td>
       <td class="px-4 py-3"><span class="text-xs rounded border px-2 py-0.5">${account.name}</span></td>
       <td class="px-4 py-3">${tx.date}</td>
       <td class="px-4 py-3">${formatCurrency(tx.amount)}</td>
