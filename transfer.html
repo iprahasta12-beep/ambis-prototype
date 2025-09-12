@@ -200,22 +200,36 @@
           <label class="block text-sm mb-1">Nominal</label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">Rp</span>
-            <input type="text" placeholder="Masukkan nominal transfer" class="w-full border rounded-xl pl-8 pr-3 py-3" />
+            <input id="amountInput" type="text" placeholder="Masukkan nominal transfer" class="w-full border rounded-xl pl-8 pr-3 py-3" />
           </div>
         </div>
+
+        <!-- Metode Transfer (hidden until destination & nominal filled) -->
+        <div id="methodContainer" class="hidden">
+          <label class="block text-sm mb-1">Metode Transfer</label>
+          <select id="transferMethod" class="w-full border rounded-xl px-3 py-3" disabled>
+            <option value="">Pilih metode transfer</option>
+          </select>
+          <div id="feeBreakdown" class="hidden mt-2 text-sm space-y-1">
+            <div class="flex justify-between"><span>Nominal</span><span id="nominalDisplay">Rp0</span></div>
+            <div class="flex justify-between"><span>Biaya Transfer</span><span id="feeDisplay">Rp0</span></div>
+            <div class="flex justify-between font-semibold"><span>Total</span><span id="totalDisplay">Rp0</span></div>
+          </div>
+        </div>
+
         <p class="text-[11px] tracking-[.18em] text-slate-400 pt-4">DETAIL</p>
         <div>
           <label class="block text-sm mb-1">Kategori</label>
-          <button class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih kategori</button>
+          <button id="categoryBtn" class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih kategori</button>
         </div>
         <div>
           <label class="block text-sm mb-1">Catatan (Opsional)</label>
-          <textarea class="w-full border rounded-xl px-3 py-3" placeholder="Tulis catatan" maxlength="50"></textarea>
-          <div class="text-right text-xs text-slate-400">0/50</div>
+          <textarea id="noteInput" class="w-full border rounded-xl px-3 py-3" placeholder="Tulis catatan" maxlength="50"></textarea>
+          <div id="noteCounter" class="text-right text-xs text-slate-400">0/50</div>
         </div>
       </div>
       <div class="p-4 border-t">
-        <button class="w-full rounded-xl bg-cyan-500 text-white py-3">Lanjut</button>
+        <button id="confirmBtn" class="w-full rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Konfirmasi Transfer Saldo</button>
       </div>
 
       <!-- Bottom Sheet Overlay & Panel -->
@@ -283,6 +297,19 @@
         <div class="p-4 flex gap-3 border-t">
           <button id="destBack" class="flex-1 rounded-xl border py-3">Kembali</button>
           <button id="destProceed" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Masukkan Detail Transfer</button>
+        </div>
+      </div>
+
+      <!-- Confirmation Bottom Sheet -->
+      <div id="confirmSheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform h-full z-20 flex flex-col">
+        <div class="p-4 border-b">
+          <h3 class="text-base font-semibold">Konfirmasi Transfer Saldo</h3>
+          <p class="text-sm text-slate-600">Mohon pastikan data sudah sesuai</p>
+        </div>
+        <div id="confirmContent" class="flex-1 overflow-y-auto p-4 space-y-4"></div>
+        <div class="p-4 flex gap-3 border-t">
+          <button id="confirmBack" class="flex-1 rounded-xl border py-3">Batalkan</button>
+          <button id="confirmProceed" class="flex-1 rounded-xl bg-cyan-500 text-white py-3">Lanjut Transfer Saldo</button>
         </div>
       </div>
     </div>
