@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const confirmBtn = document.getElementById('confirmBtn');
   const noteInput = document.getElementById('noteInput');
   const noteCounter = document.getElementById('noteCounter');
-  const methodSelect = document.getElementById('methodSelect');
+  const methodBtn = document.getElementById('methodBtn');
+  const methodText = document.getElementById('methodText');
   const methodSection = document.getElementById('methodSection');
 
   // generic bottom sheet
@@ -83,10 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const transferMethodsData = [
-    { name:'BI Fast', fee:2500, min:0, max:250000000, check: () => true },
-    { name:'RTOL', fee:6500, min:0, max:25000000, check: () => true },
-    { name:'SKN/LLG', fee:2900, min:0, max:500000000, check: now => isBusinessDay(now) && isWithinHours(now,8,15) },
-    { name:'RTGS', fee:25000, min:100000000, max:Infinity, check: now => isBusinessDay(now) && isWithinHours(now,8,16) }
+    { name:'BI Fast', fee:2500, min:10000, max:250000000, desc:'Dana langsung sampai ke penerima', check: () => true },
+    { name:'RTOL', fee:6500, min:10000, max:1000000000, desc:'Dana langsung sampai ke penerima', check: () => true },
+    { name:'SKN/LLG', fee:2900, min:100000, max:1000000000, desc:'Dana sampai 1-3 hari kerja', check: now => isBusinessDay(now) && isWithinHours(now,8,15) },
+    { name:'RTGS', fee:25000, min:100000000, max:1000000000, desc:'Dana sampai dalam 1 jam', check: now => isBusinessDay(now) && isWithinHours(now,8,16) }
   ];
 
   // state
@@ -105,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let methodSelected = false;
   let selectedMethod = '';
   let selectedFee = 0;
+  let availableMethods = [];
   let currentSheetType = 'source';
 
   function renderList(data) {
@@ -125,6 +127,23 @@ document.addEventListener('DOMContentLoaded', () => {
       </li>`).join('');
   }
 
+  function renderMethodList(data) {
+    sheetList.innerHTML = data.map((m, idx) => `
+      <li>
+        <button type="button" data-index="${idx}" class="sheet-item w-full flex items-start gap-3 px-4 py-3 text-left">
+          <div class="flex-1 min-w-0">
+            <p class="font-medium">${m.name}</p>
+            <p class="text-sm text-slate-500">Rp${formatter.format(m.fee)}</p>
+            <p class="text-sm text-slate-500">${m.desc}</p>
+            <p class="text-sm text-slate-500">Nominal transfer: Rp${formatter.format(m.min)} - Rp${formatter.format(m.max)}</p>
+          </div>
+          <span class="ml-2 w-5 h-5 rounded-full border border-slate-300 grid place-items-center">
+            <span class="radio-dot w-2 h-2 rounded-full bg-cyan-500 hidden"></span>
+          </span>
+        </button>
+      </li>`).join('');
+  }
+
   function openSheet() {
     currentSheetType = 'source';
     selectedIndex = null;
@@ -132,6 +151,22 @@ document.addEventListener('DOMContentLoaded', () => {
     sheetTitle.textContent = 'Sumber Rekening';
     sheetChoose.textContent = 'Pilih Rekening';
     renderList(currentData);
+    sheetChoose.disabled = true;
+    sheetChoose.classList.add('opacity-50','cursor-not-allowed');
+    sheetOverlay.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      sheetOverlay.classList.add('opacity-100');
+      sheet.classList.remove('translate-y-full');
+    });
+  }
+
+  function openMethodSheet() {
+    currentSheetType = 'method';
+    selectedIndex = null;
+    currentData = availableMethods;
+    sheetTitle.textContent = 'Metode Transfer';
+    sheetChoose.textContent = 'Pilih Metode';
+    renderMethodList(currentData);
     sheetChoose.disabled = true;
     sheetChoose.classList.add('opacity-50','cursor-not-allowed');
     sheetOverlay.classList.remove('hidden');
@@ -223,13 +258,25 @@ document.addEventListener('DOMContentLoaded', () => {
       sourceBtn.textContent = `${acc.name} - ${acc.number}`;
       sourceBtn.classList.remove('text-slate-500');
       sourceSelected = true;
+      updateMethodVisibility();
+    } else if (currentSheetType === 'method') {
+      const m = currentData[selectedIndex];
+      methodText.textContent = m.name;
+      methodText.classList.remove('text-slate-500');
+      methodSelected = true;
+      selectedMethod = m.name;
+      selectedFee = m.fee;
+      updateConfirmState();
     }
-    updateMethodVisibility();
     closeSheet();
   });
 
   sourceBtn?.addEventListener('click', openSheet);
   destBtn?.addEventListener('click', openDestSheet);
+  methodBtn?.addEventListener('click', () => {
+    if (methodBtn.disabled) return;
+    openMethodSheet();
+  });
 
   categoryBtn?.addEventListener('click', () => {
     categoryList.classList.toggle('hidden');
@@ -349,16 +396,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateMethodOptions() {
     const now = new Date();
-    const validMethods = (amountValid && sourceSelected && destSelected)
+    availableMethods = (amountValid && sourceSelected && destSelected)
       ? transferMethodsData.filter(m => amountValue >= m.min && amountValue <= m.max && m.check(now))
       : [];
-    methodSelect.innerHTML = '<option value="">Pilih metode transfer</option>' +
-      validMethods.map(m => `<option value="${m.name}" data-fee="${m.fee}">${m.name}</option>`).join('');
-    methodSelect.disabled = validMethods.length === 0;
-    methodSelect.value = '';
+    methodBtn.disabled = availableMethods.length === 0;
+    methodBtn.classList.toggle('opacity-50', methodBtn.disabled);
+    methodBtn.classList.toggle('cursor-not-allowed', methodBtn.disabled);
     methodSelected = false;
     selectedMethod = '';
     selectedFee = 0;
+    methodText.textContent = 'Pilih metode transfer';
+    methodText.classList.add('text-slate-500');
     updateConfirmState();
   }
 
@@ -368,8 +416,10 @@ document.addEventListener('DOMContentLoaded', () => {
       updateMethodOptions();
     } else {
       methodSection.classList.add('hidden');
-      methodSelect.value = '';
-      methodSelect.disabled = true;
+      methodBtn.disabled = true;
+      methodBtn.classList.add('opacity-50','cursor-not-allowed');
+      methodText.textContent = 'Pilih metode transfer';
+      methodText.classList.add('text-slate-500');
       methodSelected = false;
       selectedMethod = '';
       selectedFee = 0;
@@ -394,18 +444,6 @@ document.addEventListener('DOMContentLoaded', () => {
     noteCounter.textContent = `${e.target.value.length}/50`;
   });
 
-  methodSelect?.addEventListener('change', (e) => {
-    if (e.target.value) {
-      methodSelected = true;
-      selectedMethod = e.target.value;
-      selectedFee = parseInt(e.target.selectedOptions[0].dataset.fee);
-    } else {
-      methodSelected = false;
-      selectedMethod = '';
-      selectedFee = 0;
-    }
-    updateConfirmState();
-  });
 
   confirmBtn?.addEventListener('click', () => {
     const ref = Math.floor(100000000 + Math.random()*900000000);
