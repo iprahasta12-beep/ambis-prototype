@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const noteInput = document.getElementById('noteInput');
   const noteCounter = document.getElementById('noteCounter');
   const methodSelect = document.getElementById('methodSelect');
+  const methodSection = document.getElementById('methodSection');
 
   // generic bottom sheet
   const sheetOverlay = document.getElementById('sheetOverlay');
@@ -71,11 +72,21 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
 
+  function isBusinessDay(date) {
+    const day = date.getDay();
+    return day >= 1 && day <= 5; // Monday-Friday
+  }
+
+  function isWithinHours(date, start, end) {
+    const hour = date.getHours();
+    return hour >= start && hour < end;
+  }
+
   const transferMethodsData = [
-    { name:'BI Fast', fee:2500, min:0, max:250000000 },
-    { name:'RTGS', fee:25000, min:100000000, max:Infinity },
-    { name:'SKN/LLG', fee:2900, min:0, max:500000000 },
-    { name:'Online Transfer', fee:6500, min:0, max:25000000 }
+    { name:'BI Fast', fee:2500, min:0, max:250000000, check: () => true },
+    { name:'RTOL', fee:6500, min:0, max:25000000, check: () => true },
+    { name:'SKN/LLG', fee:2900, min:0, max:500000000, check: now => isBusinessDay(now) && isWithinHours(now,8,15) },
+    { name:'RTGS', fee:25000, min:100000000, max:Infinity, check: now => isBusinessDay(now) && isWithinHours(now,8,16) }
   ];
 
   // state
@@ -213,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sourceBtn.classList.remove('text-slate-500');
       sourceSelected = true;
     }
-    updateConfirmState();
+    updateMethodVisibility();
     closeSheet();
   });
 
@@ -299,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     destBtn.classList.remove('text-slate-500');
     destSelected = true;
     closeDestSheet();
-    updateConfirmState();
+    updateMethodVisibility();
   });
 
   function openDrawer() {
@@ -337,7 +348,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateMethodOptions() {
-    const validMethods = amountValid ? transferMethodsData.filter(m => amountValue >= m.min && amountValue <= m.max) : [];
+    const now = new Date();
+    const validMethods = (amountValid && sourceSelected && destSelected)
+      ? transferMethodsData.filter(m => amountValue >= m.min && amountValue <= m.max && m.check(now))
+      : [];
     methodSelect.innerHTML = '<option value="">Pilih metode transfer</option>' +
       validMethods.map(m => `<option value="${m.name}" data-fee="${m.fee}">${m.name}</option>`).join('');
     methodSelect.disabled = validMethods.length === 0;
@@ -348,7 +362,22 @@ document.addEventListener('DOMContentLoaded', () => {
     updateConfirmState();
   }
 
-  updateMethodOptions();
+  function updateMethodVisibility() {
+    if (sourceSelected && destSelected) {
+      methodSection.classList.remove('hidden');
+      updateMethodOptions();
+    } else {
+      methodSection.classList.add('hidden');
+      methodSelect.value = '';
+      methodSelect.disabled = true;
+      methodSelected = false;
+      selectedMethod = '';
+      selectedFee = 0;
+      updateConfirmState();
+    }
+  }
+
+  updateMethodVisibility();
 
   amountInput?.addEventListener('input', (e) => {
     const raw = e.target.value.replace(/\D/g,'');

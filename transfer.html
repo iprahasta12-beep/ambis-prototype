@@ -228,13 +228,14 @@
           <textarea id="noteInput" class="w-full border rounded-xl px-3 py-3" placeholder="Tulis catatan" maxlength="50"></textarea>
           <div id="noteCounter" class="text-right text-xs text-slate-400">0/50</div>
         </div>
-
-        <p class="text-[11px] tracking-[.18em] text-slate-400 pt-4">METODE</p>
-        <div>
-          <label class="block text-sm mb-1">Metode Transfer</label>
-          <select id="methodSelect" class="w-full border rounded-xl px-3 py-3">
-            <option value="">Pilih metode transfer</option>
-          </select>
+        <div id="methodSection" class="hidden">
+          <p class="text-[11px] tracking-[.18em] text-slate-400 pt-4">METODE</p>
+          <div>
+            <label class="block text-sm mb-1">Metode Transfer</label>
+            <select id="methodSelect" class="w-full border rounded-xl px-3 py-3" disabled>
+              <option value="">Pilih metode transfer</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="p-4 border-t">
