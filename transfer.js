@@ -9,13 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const sourceBtn = document.getElementById('sourceAccountBtn');
   const destBtn   = document.getElementById('destinationAccountBtn');
   const categoryBtn = document.getElementById('categoryBtn');
+  const categoryList = document.getElementById('categoryList');
+  const categoryDropdown = document.getElementById('categoryDropdown');
+  const categoryText = document.getElementById('categoryText');
   const amountInput = document.getElementById('amountInput');
-  const methodContainer = document.getElementById('methodContainer');
-  const transferMethod = document.getElementById('transferMethod');
-  const feeBreakdown = document.getElementById('feeBreakdown');
-  const nominalDisplay = document.getElementById('nominalDisplay');
-  const feeDisplay = document.getElementById('feeDisplay');
-  const totalDisplay = document.getElementById('totalDisplay');
   const confirmBtn = document.getElementById('confirmBtn');
   const noteInput = document.getElementById('noteInput');
   const noteCounter = document.getElementById('noteCounter');
@@ -46,9 +43,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // confirmation sheet
   const confirmSheet = document.getElementById('confirmSheet');
-  const confirmContent = document.getElementById('confirmContent');
   const confirmBack = document.getElementById('confirmBack');
   const confirmProceed = document.getElementById('confirmProceed');
+  const confirmClose = document.getElementById('confirmClose');
+  const sheetSource = document.getElementById('sheetSource');
+  const sheetDestination = document.getElementById('sheetDestination');
+  const sheetNominal = document.getElementById('sheetNominal');
+  const sheetFee = document.getElementById('sheetFee');
+  const sheetTotal = document.getElementById('sheetTotal');
+  const sheetCategory = document.getElementById('sheetCategory');
+  const sheetNote = document.getElementById('sheetNote');
+  const sheetMethod = document.getElementById('sheetMethod');
+  const sheetRef = document.getElementById('sheetRef');
+  const sheetDate = document.getElementById('sheetDate');
 
   // data
   const accounts = [
@@ -59,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
     { initial:'B', color:'bg-red-100 text-red-600', name:'Bill', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp3.000.000.000,00' }
   ];
 
-  const categories = ['Tagihan','Pembayaran','Transportasi','Pemindahan Dana','Investasi','Lainnya'];
 
   const transferMethodsData = [
     { name:'BI Fast', fee:2500, min:0, max:250000000 },
@@ -79,48 +85,35 @@ document.addEventListener('DOMContentLoaded', () => {
   let destSelected = false;
   let amountValue = 0;
   let amountValid = false;
-  let methodSelected = false;
   let categorySelected = false;
   let selectedCategory = '';
   let currentSheetType = 'source';
 
-  function renderList(data, type) {
-    if (type === 'source') {
-      sheetList.innerHTML = data.map((acc, idx) => `
-        <li>
-          <button type="button" data-index="${idx}" class="sheet-item w-full flex items-center gap-3 px-4 py-3 text-left">
-            <div class="w-10 h-10 rounded-full ${acc.color} flex items-center justify-center font-semibold">${acc.initial}</div>
-            <div class="flex-1 min-w-0">
-              <p class="font-medium">${acc.name}</p>
-              <p class="text-sm text-slate-500">${acc.company}</p>
-              <p class="text-sm text-slate-500">${acc.bank} - ${acc.number}</p>
-            </div>
-            <div class="text-sm font-medium whitespace-nowrap mr-2">${acc.balance}</div>
-            <span class="ml-2 w-5 h-5 rounded-full border border-slate-300 grid place-items-center">
-              <span class="radio-dot w-2 h-2 rounded-full bg-cyan-500 hidden"></span>
-            </span>
-          </button>
-        </li>`).join('');
-    } else if (type === 'category') {
-      sheetList.innerHTML = data.map((cat, idx) => `
-        <li>
-          <button type="button" data-index="${idx}" class="sheet-item w-full flex items-center justify-between px-4 py-3 text-left">
-            <span>${cat}</span>
-            <span class="ml-2 w-5 h-5 rounded-full border border-slate-300 grid place-items-center">
-              <span class="radio-dot w-2 h-2 rounded-full bg-cyan-500 hidden"></span>
-            </span>
-          </button>
-        </li>`).join('');
-    }
+  function renderList(data) {
+    sheetList.innerHTML = data.map((acc, idx) => `
+      <li>
+        <button type="button" data-index="${idx}" class="sheet-item w-full flex items-center gap-3 px-4 py-3 text-left">
+          <div class="w-10 h-10 rounded-full ${acc.color} flex items-center justify-center font-semibold">${acc.initial}</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-medium">${acc.name}</p>
+            <p class="text-sm text-slate-500">${acc.company}</p>
+            <p class="text-sm text-slate-500">${acc.bank} - ${acc.number}</p>
+          </div>
+          <div class="text-sm font-medium whitespace-nowrap mr-2">${acc.balance}</div>
+          <span class="ml-2 w-5 h-5 rounded-full border border-slate-300 grid place-items-center">
+            <span class="radio-dot w-2 h-2 rounded-full bg-cyan-500 hidden"></span>
+          </span>
+        </button>
+      </li>`).join('');
   }
 
-  function openSheet(type = 'source') {
-    currentSheetType = type;
+  function openSheet() {
+    currentSheetType = 'source';
     selectedIndex = null;
-    currentData = type === 'source' ? accounts : categories;
-    sheetTitle.textContent = type === 'source' ? 'Sumber Rekening' : 'Kategori';
-    sheetChoose.textContent = type === 'source' ? 'Pilih Rekening' : 'Pilih';
-    renderList(currentData, type);
+    currentData = accounts;
+    sheetTitle.textContent = 'Sumber Rekening';
+    sheetChoose.textContent = 'Pilih Rekening';
+    renderList(currentData);
     sheetChoose.disabled = true;
     sheetChoose.classList.add('opacity-50','cursor-not-allowed');
     sheetOverlay.classList.remove('hidden');
@@ -210,19 +203,38 @@ document.addEventListener('DOMContentLoaded', () => {
       sourceBtn.textContent = `${acc.name} - ${acc.number}`;
       sourceBtn.classList.remove('text-slate-500');
       sourceSelected = true;
-    } else if (currentSheetType === 'category') {
-      selectedCategory = currentData[selectedIndex];
-      categoryBtn.textContent = selectedCategory;
-      categoryBtn.classList.remove('text-slate-500');
-      categorySelected = true;
     }
     updateConfirmState();
     closeSheet();
   });
 
-  sourceBtn?.addEventListener('click', () => openSheet('source'));
-  categoryBtn?.addEventListener('click', () => openSheet('category'));
+  sourceBtn?.addEventListener('click', openSheet);
   destBtn?.addEventListener('click', openDestSheet);
+
+  categoryBtn?.addEventListener('click', () => {
+    categoryList.classList.toggle('hidden');
+  });
+
+  categoryList?.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-value]');
+    if (!btn) return;
+    categoryList.querySelectorAll('button[data-value]').forEach(b => {
+      b.classList.remove('bg-cyan-50','border-l-2','border-dashed','border-cyan-500');
+    });
+    btn.classList.add('bg-cyan-50','border-l-2','border-dashed','border-cyan-500');
+    selectedCategory = btn.dataset.value;
+    categoryText.textContent = selectedCategory;
+    categoryText.classList.remove('text-slate-500');
+    categorySelected = true;
+    categoryList.classList.add('hidden');
+    updateConfirmState();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!categoryDropdown.contains(e.target)) {
+      categoryList.classList.add('hidden');
+    }
+  });
 
   destNumber?.addEventListener('input', (e) => {
     e.target.value = e.target.value.replace(/\D/g,'');
@@ -259,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
     destBtn.classList.remove('text-slate-500');
     destSelected = true;
     closeDestSheet();
-    checkMethodVisibility();
     updateConfirmState();
   });
 
@@ -287,27 +298,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const formatter = new Intl.NumberFormat('id-ID');
   const dailyLimit = 200000000;
 
-  function checkMethodVisibility() {
-    if (destSelected && amountValid) {
-      methodContainer.classList.remove('hidden');
-      updateMethodOptions();
-    } else {
-      methodContainer.classList.add('hidden');
-      transferMethod.value = '';
-      feeBreakdown.classList.add('hidden');
-      methodSelected = false;
-    }
-  }
-
-  function updateMethodOptions() {
-    const validMethods = transferMethodsData.filter(m => amountValue >= m.min && amountValue <= m.max);
-    transferMethod.innerHTML = '<option value="">Pilih metode transfer</option>' +
-      validMethods.map(m => `<option value="${m.name}" data-fee="${m.fee}">${m.name}</option>`).join('');
-    transferMethod.disabled = validMethods.length === 0;
-  }
-
   function updateConfirmState() {
-    if (sourceSelected && destSelected && amountValid && categorySelected && methodSelected) {
+    if (sourceSelected && destSelected && amountValid && categorySelected) {
       confirmBtn.disabled = false;
       confirmBtn.classList.remove('opacity-50','cursor-not-allowed');
     } else {
@@ -321,22 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
     e.target.value = raw ? formatter.format(raw) : '';
     amountValue = parseInt(raw) || 0;
     amountValid = amountValue > 0 && amountValue <= dailyLimit;
-    checkMethodVisibility();
-    updateConfirmState();
-  });
-
-  transferMethod?.addEventListener('change', (e) => {
-    if (e.target.value) {
-      const fee = parseInt(e.target.selectedOptions[0].dataset.fee);
-      nominalDisplay.textContent = 'Rp' + formatter.format(amountValue);
-      feeDisplay.textContent = 'Rp' + formatter.format(fee);
-      totalDisplay.textContent = 'Rp' + formatter.format(amountValue + fee);
-      feeBreakdown.classList.remove('hidden');
-      methodSelected = true;
-    } else {
-      feeBreakdown.classList.add('hidden');
-      methodSelected = false;
-    }
     updateConfirmState();
   });
 
@@ -348,41 +324,26 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   confirmBtn?.addEventListener('click', () => {
-    const fee = parseInt(transferMethod.selectedOptions[0].dataset.fee);
-    const total = amountValue + fee;
     const ref = Math.floor(100000000 + Math.random()*900000000);
     const now = new Date();
     const dateStr = now.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
     const timeStr = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-    const noteVal = noteInput.value || '-';
-    confirmContent.innerHTML = `
-      <div class="space-y-4">
-        <div>
-          <p class="font-semibold mb-1">Transfer Saldo</p>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between"><span class="text-slate-600">Sumber</span><span>${sourceBtn.textContent}</span></div>
-            <div class="flex justify-between"><span class="text-slate-600">Tujuan</span><span>${destBtn.textContent}</span></div>
-          </div>
-        </div>
-        <div>
-          <p class="font-semibold mb-1">Total Transaksi</p>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between"><span>Nominal</span><span>Rp${formatter.format(amountValue)}</span></div>
-            <div class="flex justify-between"><span>Biaya Transfer</span><span>Rp${formatter.format(fee)}</span></div>
-            <div class="flex justify-between font-semibold"><span>Total</span><span>Rp${formatter.format(total)}</span></div>
-          </div>
-        </div>
-        <div>
-          <p class="font-semibold mb-1">Detail Transaksi</p>
-          <div class="space-y-2 text-sm">
-            <div class="flex justify-between"><span>Metode Transfer</span><span>${transferMethod.value}</span></div>
-            <div class="flex justify-between"><span>Nomor Referensi</span><span>${ref}</span></div>
-            <div class="flex justify-between"><span>Tanggal dan Waktu</span><span>${dateStr} ${timeStr}</span></div>
-            <div class="flex justify-between"><span>Kategori</span><span>${selectedCategory}</span></div>
-            <div class="flex justify-between"><span>Catatan</span><span>${noteVal}</span></div>
-          </div>
-        </div>
-      </div>`;
+    sheetSource.textContent = sourceBtn.textContent;
+    sheetDestination.textContent = destBtn.textContent;
+    sheetNominal.textContent = 'Rp' + formatter.format(amountValue);
+    sheetFee.textContent = 'Rp0';
+    sheetTotal.textContent = 'Rp' + formatter.format(amountValue);
+    sheetCategory.textContent = selectedCategory;
+    sheetNote.textContent = noteInput.value || '-';
+    sheetRef.textContent = ref;
+    sheetDate.textContent = `${dateStr} ${timeStr}`;
+    const validMethods = transferMethodsData.filter(m => amountValue >= m.min && amountValue <= m.max);
+    sheetMethod.innerHTML = '<option value="">Pilih metode transfer</option>' +
+      validMethods.map(m => `<option value="${m.name}" data-fee="${m.fee}">${m.name}</option>`).join('');
+    sheetMethod.value = '';
+    sheetMethod.disabled = validMethods.length === 0;
+    confirmProceed.disabled = true;
+    confirmProceed.classList.add('opacity-50','cursor-not-allowed');
     sheetOverlay.classList.remove('hidden');
     requestAnimationFrame(() => {
       sheetOverlay.classList.add('opacity-100');
@@ -390,7 +351,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  sheetMethod?.addEventListener('change', (e) => {
+    if (e.target.value) {
+      const fee = parseInt(e.target.selectedOptions[0].dataset.fee);
+      sheetFee.textContent = 'Rp' + formatter.format(fee);
+      sheetTotal.textContent = 'Rp' + formatter.format(amountValue + fee);
+      confirmProceed.disabled = false;
+      confirmProceed.classList.remove('opacity-50','cursor-not-allowed');
+    } else {
+      sheetFee.textContent = 'Rp0';
+      sheetTotal.textContent = 'Rp' + formatter.format(amountValue);
+      confirmProceed.disabled = true;
+      confirmProceed.classList.add('opacity-50','cursor-not-allowed');
+    }
+  });
+
   confirmBack?.addEventListener('click', closeConfirmSheet);
+  confirmClose?.addEventListener('click', closeConfirmSheet);
   confirmProceed?.addEventListener('click', () => {
     alert('Transfer diproses (dummy).');
     closeConfirmSheet();
