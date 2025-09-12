@@ -204,8 +204,11 @@
           </div>
         </div>
 
-        <p class="text-[11px] tracking-[.18em] text-slate-400 pt-4">DETAIL</p>
-        <div id="categoryDropdown" class="relative">
+      <p class="text-[11px] tracking-[.18em] text-slate-400 pt-4">DETAIL</p>
+      <div class="p-4 rounded-xl bg-slate-100 text-sm text-slate-600">
+        Pilih kategori untuk memudahkan Anda mencari riwayat transaksi yang Anda butuhkan
+      </div>
+      <div id="categoryDropdown" class="relative">
           <label class="block text-sm mb-1">Kategori</label>
           <button id="categoryBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between">
             <span id="categoryText" class="text-slate-500">Pilih kategori</span>
@@ -224,6 +227,14 @@
           <label class="block text-sm mb-1">Catatan (Opsional)</label>
           <textarea id="noteInput" class="w-full border rounded-xl px-3 py-3" placeholder="Tulis catatan" maxlength="50"></textarea>
           <div id="noteCounter" class="text-right text-xs text-slate-400">0/50</div>
+        </div>
+
+        <p class="text-[11px] tracking-[.18em] text-slate-400 pt-4">METODE</p>
+        <div>
+          <label class="block text-sm mb-1">Metode Transfer</label>
+          <select id="methodSelect" class="w-full border rounded-xl px-3 py-3">
+            <option value="">Pilih metode transfer</option>
+          </select>
         </div>
       </div>
       <div class="p-4 border-t">
@@ -323,10 +334,7 @@
           <div>
             <p class="font-semibold mb-1">Detail Transaksi</p>
             <div class="space-y-2">
-              <div>
-                <label class="block mb-1">Metode Transfer</label>
-                <select id="sheetMethod" class="w-full border rounded-xl px-3 py-3"></select>
-              </div>
+              <div class="flex justify-between"><span>Metode Transfer</span><span id="sheetMethod"></span></div>
               <div class="flex justify-between"><span>Nomor Referensi</span><span id="sheetRef"></span></div>
               <div class="flex justify-between"><span>Tanggal &amp; Waktu</span><span id="sheetDate"></span></div>
               <div class="flex justify-between"><span>Kategori</span><span id="sheetCategory"></span></div>
