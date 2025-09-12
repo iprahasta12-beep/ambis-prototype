@@ -115,8 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <button type="button" data-index="${idx}" class="sheet-item w-full flex items-center gap-3 px-4 py-3 text-left">
           <div class="w-10 h-10 rounded-full ${acc.color} flex items-center justify-center font-semibold">${acc.initial}</div>
           <div class="flex-1 min-w-0">
-            <p class="font-medium mb-2">${acc.name}</p>
-            <p class="text-slate-500 mb-2">${acc.company}</p>
+            <p class="font-medium">${acc.name}</p>
+            <p class="text-slate-500">${acc.company}</p>
             <p class="text-slate-500">${acc.bank} - ${acc.number}</p>
           </div>
           <div class="text-sm font-medium whitespace-nowrap mr-2">${acc.balance}</div>
@@ -132,8 +132,8 @@ document.addEventListener('DOMContentLoaded', () => {
       <li>
         <button type="button" data-index="${idx}" class="sheet-item w-full flex items-start gap-3 px-4 py-3 text-left">
           <div class="flex-1 min-w-0">
-            <p class="font-medium">${m.name}</p>
-            <p class="text-sm text-slate-500">Rp${formatter.format(m.fee)}</p>
+            <p class="font-medium mb-2">${m.name}</p>
+            <p class="text-slate-500 mb-2">Rp${formatter.format(m.fee)}</p>
             <p class="text-sm text-slate-500">${m.desc}</p>
             <p class="text-sm text-slate-500">Nominal transfer: Rp${formatter.format(m.min)} - Rp${formatter.format(m.max)}</p>
           </div>
