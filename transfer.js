@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const confirmBtn = document.getElementById('confirmBtn');
   const noteInput = document.getElementById('noteInput');
   const noteCounter = document.getElementById('noteCounter');
+  const methodSelect = document.getElementById('methodSelect');
 
   // generic bottom sheet
   const sheetOverlay = document.getElementById('sheetOverlay');
@@ -87,6 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let amountValid = false;
   let categorySelected = false;
   let selectedCategory = '';
+  let methodSelected = false;
+  let selectedMethod = '';
+  let selectedFee = 0;
   let currentSheetType = 'source';
 
   function renderList(data) {
@@ -299,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const dailyLimit = 200000000;
 
   function updateConfirmState() {
-    if (sourceSelected && destSelected && amountValid && categorySelected) {
+    if (sourceSelected && destSelected && amountValid && categorySelected && methodSelected) {
       confirmBtn.disabled = false;
       confirmBtn.classList.remove('opacity-50','cursor-not-allowed');
     } else {
@@ -308,12 +312,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function updateMethodOptions() {
+    const validMethods = amountValid ? transferMethodsData.filter(m => amountValue >= m.min && amountValue <= m.max) : [];
+    methodSelect.innerHTML = '<option value="">Pilih metode transfer</option>' +
+      validMethods.map(m => `<option value="${m.name}" data-fee="${m.fee}">${m.name}</option>`).join('');
+    methodSelect.disabled = validMethods.length === 0;
+    methodSelect.value = '';
+    methodSelected = false;
+    selectedMethod = '';
+    selectedFee = 0;
+    updateConfirmState();
+  }
+
+  updateMethodOptions();
+
   amountInput?.addEventListener('input', (e) => {
     const raw = e.target.value.replace(/\D/g,'');
     e.target.value = raw ? formatter.format(raw) : '';
     amountValue = parseInt(raw) || 0;
     amountValid = amountValue > 0 && amountValue <= dailyLimit;
-    updateConfirmState();
+    updateMethodOptions();
   });
 
   noteInput?.addEventListener('input', (e) => {
@@ -321,6 +339,19 @@ document.addEventListener('DOMContentLoaded', () => {
       e.target.value = e.target.value.slice(0,50);
     }
     noteCounter.textContent = `${e.target.value.length}/50`;
+  });
+
+  methodSelect?.addEventListener('change', (e) => {
+    if (e.target.value) {
+      methodSelected = true;
+      selectedMethod = e.target.value;
+      selectedFee = parseInt(e.target.selectedOptions[0].dataset.fee);
+    } else {
+      methodSelected = false;
+      selectedMethod = '';
+      selectedFee = 0;
+    }
+    updateConfirmState();
   });
 
   confirmBtn?.addEventListener('click', () => {
@@ -331,39 +362,20 @@ document.addEventListener('DOMContentLoaded', () => {
     sheetSource.textContent = sourceBtn.textContent;
     sheetDestination.textContent = destBtn.textContent;
     sheetNominal.textContent = 'Rp' + formatter.format(amountValue);
-    sheetFee.textContent = 'Rp0';
-    sheetTotal.textContent = 'Rp' + formatter.format(amountValue);
+    sheetFee.textContent = 'Rp' + formatter.format(selectedFee);
+    sheetTotal.textContent = 'Rp' + formatter.format(amountValue + selectedFee);
     sheetCategory.textContent = selectedCategory;
     sheetNote.textContent = noteInput.value || '-';
     sheetRef.textContent = ref;
     sheetDate.textContent = `${dateStr} ${timeStr}`;
-    const validMethods = transferMethodsData.filter(m => amountValue >= m.min && amountValue <= m.max);
-    sheetMethod.innerHTML = '<option value="">Pilih metode transfer</option>' +
-      validMethods.map(m => `<option value="${m.name}" data-fee="${m.fee}">${m.name}</option>`).join('');
-    sheetMethod.value = '';
-    sheetMethod.disabled = validMethods.length === 0;
-    confirmProceed.disabled = true;
-    confirmProceed.classList.add('opacity-50','cursor-not-allowed');
+    sheetMethod.textContent = selectedMethod;
+    confirmProceed.disabled = false;
+    confirmProceed.classList.remove('opacity-50','cursor-not-allowed');
     sheetOverlay.classList.remove('hidden');
     requestAnimationFrame(() => {
       sheetOverlay.classList.add('opacity-100');
       confirmSheet.classList.remove('translate-y-full');
     });
-  });
-
-  sheetMethod?.addEventListener('change', (e) => {
-    if (e.target.value) {
-      const fee = parseInt(e.target.selectedOptions[0].dataset.fee);
-      sheetFee.textContent = 'Rp' + formatter.format(fee);
-      sheetTotal.textContent = 'Rp' + formatter.format(amountValue + fee);
-      confirmProceed.disabled = false;
-      confirmProceed.classList.remove('opacity-50','cursor-not-allowed');
-    } else {
-      sheetFee.textContent = 'Rp0';
-      sheetTotal.textContent = 'Rp' + formatter.format(amountValue);
-      confirmProceed.disabled = true;
-      confirmProceed.classList.add('opacity-50','cursor-not-allowed');
-    }
   });
 
   confirmBack?.addEventListener('click', closeConfirmSheet);
