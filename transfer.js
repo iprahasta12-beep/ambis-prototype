@@ -28,7 +28,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // destination sheet elements
   const destSheet   = document.getElementById('destSheet');
-  const destBank    = document.getElementById('destBank');
+  const bankBtn     = document.getElementById('bankBtn');
+  const bankList    = document.getElementById('bankList');
+  const bankDropdown = document.getElementById('bankDropdown');
+  const bankText    = document.getElementById('bankText');
   const destNumber  = document.getElementById('destNumber');
   const checkAccount = document.getElementById('checkAccount');
   const accountInfo = document.getElementById('accountInfo');
@@ -136,7 +139,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resetDestForm() {
-    destBank.value = '';
+    bankText.textContent = 'Pilih bank';
+    bankText.classList.add('text-slate-500');
+    bankList.classList.add('hidden');
     destNumber.value = '';
     accountOwnerField.value = '';
     accountInfo.classList.add('hidden');
@@ -230,13 +235,33 @@ document.addEventListener('DOMContentLoaded', () => {
     categoryText.textContent = selectedCategory;
     categoryText.classList.remove('text-slate-500');
     categorySelected = true;
-    categoryList.classList.add('hidden');
+  categoryList.classList.add('hidden');
     updateConfirmState();
   });
 
+  bankBtn?.addEventListener('click', () => {
+    bankList.classList.toggle('hidden');
+  });
+
+  bankList?.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-value]');
+    if (!btn) return;
+    bankList.querySelectorAll('button[data-value]').forEach(b => {
+      b.classList.remove('bg-cyan-50','border-l-2','border-dashed','border-cyan-500');
+    });
+    btn.classList.add('bg-cyan-50','border-l-2','border-dashed','border-cyan-500');
+    selectedBank = btn.dataset.value;
+    bankText.textContent = selectedBank;
+    bankText.classList.remove('text-slate-500');
+    bankList.classList.add('hidden');
+  });
+
   document.addEventListener('click', (e) => {
-    if (!categoryDropdown.contains(e.target)) {
+    if (categoryDropdown && !categoryDropdown.contains(e.target)) {
       categoryList.classList.add('hidden');
+    }
+    if (bankDropdown && !bankDropdown.contains(e.target)) {
+      bankList.classList.add('hidden');
     }
   });
 
@@ -245,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   checkAccount?.addEventListener('click', () => {
-    selectedBank = destBank.value;
     accountNumber = destNumber.value;
     if (!selectedBank || !accountNumber) return;
     accountOwner = 'PT XYZ Indonesia';
