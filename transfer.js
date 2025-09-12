@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <li>
         <button type="button" data-index="${idx}" class="sheet-item w-full flex items-start gap-3 px-4 py-3 text-left">
           <div class="flex-1 min-w-0">
-            <p class="font-medium mb-2">${m.name}</p>
+            <p class="font-medium mb-2 font-bold">${m.name}</p>
             <p class="text-slate-500 mb-2">Rp${formatter.format(m.fee)}</p>
             <p class="text-sm text-slate-500">${m.desc}</p>
             <p class="text-sm text-slate-500">Nominal transfer: Rp${formatter.format(m.min)} - Rp${formatter.format(m.max)}</p>
