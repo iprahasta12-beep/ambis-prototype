@@ -232,6 +232,59 @@
           <button id="sheetChoose" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Pilih Rekening</button>
         </div>
       </div>
+
+      <!-- Destination Account Bottom Sheet -->
+      <div id="destSheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform h-full z-20 flex flex-col">
+        <div class="p-4 border-b">
+          <h3 class="text-base font-semibold">Daftar Rekening Tujuan</h3>
+        </div>
+        <div class="p-4 flex-1 overflow-y-auto space-y-4">
+          <div>
+            <label class="block text-sm mb-1">Nama Bank</label>
+            <select id="destBank" class="w-full border rounded-xl px-3 py-3">
+              <option value="">Pilih bank</option>
+              <option>BCA</option>
+              <option>BNI</option>
+              <option>BRI</option>
+              <option>Mandiri</option>
+              <option>CIMB Niaga</option>
+              <option>Permata</option>
+              <option>Bank Danamon</option>
+              <option>BTN</option>
+              <option>Maybank</option>
+              <option>OCBC NISP</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Nomor Rekening</label>
+            <div class="flex gap-2">
+              <input id="destNumber" type="text" placeholder="Masukkan nomor rekening" class="flex-1 border rounded-xl px-3 py-3" />
+              <button id="checkAccount" class="whitespace-nowrap border border-cyan-500 text-cyan-600 rounded-xl px-4 py-3">Periksa Rekening</button>
+            </div>
+          </div>
+          <div id="accountInfo" class="hidden p-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600">Pastikan pemilik rekening sesuai</div>
+          <div id="ownerField" class="hidden">
+            <label class="block text-sm mb-1">Pemilik Rekening</label>
+            <input id="accountOwnerField" type="text" readonly class="w-full border rounded-xl px-3 py-3 bg-slate-50" />
+          </div>
+          <div id="saveContainer" class="hidden">
+            <label class="flex items-start gap-2 text-sm">
+              <input id="saveCheckbox" type="checkbox" class="mt-1" />
+              <span>Simpan Daftar Rekening Tujuan</span>
+            </label>
+          </div>
+          <div id="aliasContainer" class="hidden">
+            <label class="block text-sm mb-1">Nama Alias</label>
+            <input id="aliasInput" type="text" maxlength="15" placeholder="Tulis nama alias" class="w-full border rounded-xl px-3 py-3" />
+            <div class="text-right text-xs text-slate-400" id="aliasCounter">0/15</div>
+            <p class="text-xs text-slate-500 mt-1">Daftar Rekening tujuan tersimpan pada saat transaksi selesai</p>
+          </div>
+        </div>
+        <div class="p-4 flex gap-3 border-t">
+          <button id="destBack" class="flex-1 rounded-xl border py-3">Kembali</button>
+          <button id="destProceed" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Masukkan Detail Transfer</button>
+        </div>
+      </div>
     </div>
   </div>
 
