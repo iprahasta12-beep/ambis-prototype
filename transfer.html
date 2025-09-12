@@ -173,7 +173,7 @@
     <!-- ============ /MAIN ============ -->
 
     <!-- Drawer -->
-    <div id="drawer" class="h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-200">
+    <div id="drawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-200">
       <div class="flex items-center justify-between p-4 border-b">
         <h2 class="text-lg font-semibold">Transfer Saldo</h2>
         <button id="drawerCloseBtn" class="text-2xl leading-none">&times;</button>
@@ -181,11 +181,11 @@
       <div class="flex-1 overflow-y-auto p-4 space-y-4">
         <div>
           <label class="block text-sm mb-1">Sumber Rekening</label>
-          <button class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih sumber rekening</button>
+          <button id="sourceAccountBtn" class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih sumber rekening</button>
         </div>
         <div>
           <label class="block text-sm mb-1">Rekening Tujuan</label>
-          <button class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih rekening tujuan</button>
+          <button id="destinationAccountBtn" class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih rekening tujuan</button>
         </div>
         <div>
           <div class="flex items-center justify-between mb-1">
@@ -216,6 +216,21 @@
       </div>
       <div class="p-4 border-t">
         <button class="w-full rounded-xl bg-cyan-500 text-white py-3">Lanjut</button>
+      </div>
+
+      <!-- Bottom Sheet Overlay & Panel -->
+      <div id="sheetOverlay" class="hidden absolute inset-0 bg-black/20 opacity-0 transition-opacity z-10"></div>
+      <div id="bottomSheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform max-h-[80%] h-1/2 z-20 flex flex-col">
+        <div class="p-4 border-b">
+          <h3 id="sheetTitle" class="text-base font-semibold">Sumber Rekening</h3>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <ul id="sheetList" class="divide-y"></ul>
+        </div>
+        <div class="p-4 flex gap-3 border-t">
+          <button id="sheetCancel" class="flex-1 rounded-xl border py-3">Batalkan</button>
+          <button id="sheetChoose" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Pilih Rekening</button>
+        </div>
       </div>
     </div>
   </div>
