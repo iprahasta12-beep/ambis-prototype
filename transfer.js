@@ -235,10 +235,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!btn) return;
     selectedIndex = btn.dataset.index;
     sheetList.querySelectorAll('button[data-index]').forEach(b => {
-      b.classList.remove('ring-2','ring-cyan-400');
+      b.classList.remove('ring-2');
       b.querySelector('.radio-dot').classList.add('hidden');
     });
-    btn.classList.add('ring-2','ring-cyan-400');
+    btn.classList.add('ring-2');
     btn.querySelector('.radio-dot').classList.remove('hidden');
     sheetChoose.disabled = false;
     sheetChoose.classList.remove('opacity-50','cursor-not-allowed');
