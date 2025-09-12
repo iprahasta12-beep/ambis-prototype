@@ -115,9 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <button type="button" data-index="${idx}" class="sheet-item w-full flex items-center gap-3 px-4 py-3 text-left">
           <div class="w-10 h-10 rounded-full ${acc.color} flex items-center justify-center font-semibold">${acc.initial}</div>
           <div class="flex-1 min-w-0">
-            <p class="font-medium">${acc.name}</p>
-            <p class="text-sm text-slate-500">${acc.company}</p>
-            <p class="text-sm text-slate-500">${acc.bank} - ${acc.number}</p>
+            <p class="font-medium mb-2">${acc.name}</p>
+            <p class="text-slate-500 mb-2">${acc.company}</p>
+            <p class="text-slate-500">${acc.bank} - ${acc.number}</p>
           </div>
           <div class="text-sm font-medium whitespace-nowrap mr-2">${acc.balance}</div>
           <span class="ml-2 w-5 h-5 rounded-full border border-slate-300 grid place-items-center">
