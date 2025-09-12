@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <button type="button" data-index="${idx}" class="sheet-item w-full flex items-start gap-3 px-4 py-3 text-left">
           <div class="flex-1 min-w-0">
             <p class="font-medium mb-2 font-bold">${m.name}</p>
-            <p class="text-slate-600 mb-2">Rp${formatter.format(m.fee)}</p>
+            <p class="mb-2">Rp${formatter.format(m.fee)}</p>
             <p class="text-sm text-slate-500">${m.desc}</p>
             <p class="text-sm text-slate-500">Nominal transfer: Rp${formatter.format(m.min)} - Rp${formatter.format(m.max)}</p>
           </div>
@@ -235,10 +235,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!btn) return;
     selectedIndex = btn.dataset.index;
     sheetList.querySelectorAll('button[data-index]').forEach(b => {
-      b.classList.remove('bg-cyan-50','ring-2','ring-cyan-400');
+      b.classList.remove('ring-2','ring-cyan-400');
       b.querySelector('.radio-dot').classList.add('hidden');
     });
-    btn.classList.add('bg-cyan-50','ring-2','ring-cyan-400');
+    btn.classList.add('ring-2','ring-cyan-400');
     btn.querySelector('.radio-dot').classList.remove('hidden');
     sheetChoose.disabled = false;
     sheetChoose.classList.remove('opacity-50','cursor-not-allowed');
