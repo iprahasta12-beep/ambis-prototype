@@ -262,24 +262,24 @@
           <h3 class="text-base font-semibold">Daftar Rekening Tujuan</h3>
         </div>
         <div class="p-4 flex-1 overflow-y-auto space-y-4">
-          <div>
+          <div id="bankDropdown" class="relative">
             <label class="block text-sm mb-1">Nama Bank</label>
-          <button id="categoryBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between">
-            <span id="categoryText" class="text-slate-500">Pilih bank</span>
-            <span class="text-slate-400">▾</span>
-          </button>
-          <ul id="categoryList" class="hidden absolute left-0 right-0 mt-1 bg-white rounded-xl border shadow divide-y z-10">
-            <li><button type="button" data-value="Tagihan" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BCA</button></li>
-            <li><button type="button" data-value="Tagihan" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BNI</button></li>
-            <li><button type="button" data-value="Tagihan" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BRI</button></li>
-            <li><button type="button" data-value="Tagihan" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Mandiri</button></li>
-            <li><button type="button" data-value="Tagihan" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">CIMB Niaga</button></li>
-            <li><button type="button" data-value="Tagihan" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Permata</button></li>
-            <li><button type="button" data-value="Tagihan" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BTN</button></li>
-            <li><button type="button" data-value="Tagihan" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Bank Danamon</button></li>
-            <li><button type="button" data-value="Tagihan" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Maybank</button></li>
-            <li><button type="button" data-value="Tagihan" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">OCBC NISP</button></li>
-          </ul>
+            <button id="bankBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between">
+              <span id="bankText" class="text-slate-500">Pilih bank</span>
+              <span class="text-slate-400">▾</span>
+            </button>
+            <ul id="bankList" class="hidden absolute left-0 right-0 mt-1 bg-white rounded-xl border shadow divide-y z-10">
+              <li><button type="button" data-value="BCA" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BCA</button></li>
+              <li><button type="button" data-value="BNI" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BNI</button></li>
+              <li><button type="button" data-value="BRI" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BRI</button></li>
+              <li><button type="button" data-value="Mandiri" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Mandiri</button></li>
+              <li><button type="button" data-value="CIMB Niaga" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">CIMB Niaga</button></li>
+              <li><button type="button" data-value="Permata" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Permata</button></li>
+              <li><button type="button" data-value="BTN" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BTN</button></li>
+              <li><button type="button" data-value="Bank Danamon" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Bank Danamon</button></li>
+              <li><button type="button" data-value="Maybank" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Maybank</button></li>
+              <li><button type="button" data-value="OCBC NISP" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">OCBC NISP</button></li>
+            </ul>
           </div>
           <div>
             <label class="block text-sm mb-1">Nomor Rekening</label>
