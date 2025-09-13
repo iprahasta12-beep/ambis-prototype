@@ -39,7 +39,7 @@ function updateView() {
   transactionListEl.innerHTML = '';
   account.transactions.forEach((tx) => {
     const tr = document.createElement('tr');
-    tr.className = "";
+    tr.className = 'hover:bg-slate-50';
     const iconSrc = tx.amount < 0
       ? 'img/dashboard/akses-cepat/transfer-out.svg'
       : 'img/dashboard/akses-cepat/transfer-in.svg';
@@ -133,7 +133,7 @@ function renderQuickAccess() {
     const item = aksesItems.find((i) => i.id === id);
     if (!item) return;
     const btn = document.createElement('button');
-    btn.className = 'w-full h-[130px] rounded-[18px] border border-slate-200 bg-white  transition flex flex-col items-center justify-center gap-3';
+    btn.className = 'w-full h-[130px] rounded-[18px] border border-slate-200 bg-white hover:bg-slate-50 transition flex flex-col items-center justify-center gap-3';
     btn.innerHTML = `
       <span class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 grid place-items-center">
         <img src="${item.icon}" alt="" class="w-6 h-6 object-contain">
