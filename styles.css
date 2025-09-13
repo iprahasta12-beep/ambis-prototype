@@ -7,12 +7,6 @@
 }
 .sb-item[aria-current="page"]{padding-left:.75rem;}
 .sb-item[aria-current="page"] .sb-label{color:#fff;font-weight:600;}
-.sb-item:focus,
-.sb-item:hover{
-  outline:none;
-  border-color:transparent !important;
-  background-color:transparent !important;
-}
 
 /* keep rows steady */
 .sb-item{ height:48px; min-height:48px; align-items:center; }
@@ -52,4 +46,16 @@ button:disabled{
   border-color:transparent !important;
   cursor:not-allowed;
   opacity:1 !important;
+}
+/* Remove focus and hover styles globally */
+*:hover,
+*:focus,
+*:focus-visible,
+*:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: inherit !important;
+  color: inherit !important;
+  border-color: inherit !important;
+  text-decoration: none !important;
 }
