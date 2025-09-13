@@ -2,7 +2,7 @@
   {
     "id": 1,
     "name": "Rekening Utama",
-    "balance": 100000000000,
+    "balance": 100000000,
     "transactions": [
       {"date": "12 September", "description": "Ke BCA - PT Sinar Jaya Utama", "amount": -2000000},
       {"date": "12 September", "description": "Dari BRI - PT Roti Manis Indonesia", "amount": 100000000},
