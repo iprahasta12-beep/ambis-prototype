@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const methodBtn = document.getElementById('methodBtn');
   const methodText = document.getElementById('methodText');
   const methodSection = document.getElementById('methodSection');
+  const summarySection = document.getElementById('summarySection');
+  const summaryNominal = document.getElementById('summaryNominal');
+  const summaryFee = document.getElementById('summaryFee');
+  const summaryTotal = document.getElementById('summaryTotal');
 
   // generic bottom sheet
   const sheetOverlay = document.getElementById('sheetOverlay');
@@ -264,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedMethod = m.name;
       selectedFee = m.fee;
       updateConfirmState();
+      updateSummary();
     }
     closeSheet();
   });
@@ -391,6 +396,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function updateSummary() {
+    if (methodSelected && amountValid) {
+      summaryNominal.textContent = 'Rp' + formatter.format(amountValue);
+      summaryFee.textContent = 'Rp' + formatter.format(selectedFee);
+      summaryTotal.textContent = 'Rp' + formatter.format(amountValue + selectedFee);
+      summarySection.classList.remove('hidden');
+    } else {
+      summarySection.classList.add('hidden');
+    }
+  }
+
   function updateMethodOptions() {
     const now = new Date();
     availableMethods = (amountValid && sourceSelected && destSelected)
@@ -405,6 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
     methodText.textContent = 'Pilih metode transfer';
     methodText.classList.add('text-slate-500');
     updateConfirmState();
+    updateSummary();
   }
 
   function updateMethodVisibility() {
@@ -421,6 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
       selectedMethod = '';
       selectedFee = 0;
       updateConfirmState();
+      updateSummary();
     }
   }
 
