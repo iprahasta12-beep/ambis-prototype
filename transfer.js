@@ -65,11 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // data
   const accounts = [
-    { initial:'O', color:'bg-cyan-100 text-cyan-600', name:'Operasional', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp3.000.000.000,00' },
-    { initial:'D', color:'bg-orange-100 text-orange-600', name:'Distributor', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp3.000.000.000,00' },
-    { initial:'P', color:'bg-teal-100 text-teal-600', name:'Partnership', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp3.000.000.000,00' },
-    { initial:'A', color:'bg-purple-100 text-purple-600', name:'Admin', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp3.000.000.000,00' },
-    { initial:'B', color:'bg-red-100 text-red-600', name:'Bill', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp3.000.000.000,00' }
+    { initial:'O', color:'bg-cyan-100 text-cyan-600', name:'Utama', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp100.000.000,00' },
+    { initial:'D', color:'bg-orange-100 text-orange-600', name:'Operasional', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp50.000.000,00' }
   ];
 
 
