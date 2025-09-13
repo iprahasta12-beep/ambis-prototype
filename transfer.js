@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderMethodList(data) {
     sheetList.innerHTML = data.map((m, idx) => `
       <li>
-        <button type="button" data-index="${idx}" class="sheet-item w-full flex items-start gap-3 px-4 py-3 text-left">
+        <button type="button" data-index="${idx}" class="sheet-item w-full flex items-center gap-3 px-4 py-3 text-left">
           <div class="flex-1 min-w-0">
             <p class="font-medium mb-2 font-bold">${m.name}</p>
             <p class="mb-2">Rp${formatter.format(m.fee)}</p>
