@@ -78,7 +78,6 @@
     confirm.classList.toggle('text-slate-400', !enable);
     confirm.classList.toggle('bg-cyan-600', enable);
     confirm.classList.toggle('text-white', enable);
-    confirm.classList.toggle('hover:bg-cyan-700', enable);
   }
 
   trigger?.addEventListener('click', (e)=>{ e.preventDefault(); openPane(); });
@@ -205,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
     confirm.classList.toggle('text-slate-400', !enable);
     confirm.classList.toggle('bg-cyan-600', enable);
     confirm.classList.toggle('text-white', enable);
-    confirm.classList.toggle('hover:bg-cyan-700', enable);
   }
 
   function setMode(next) {
@@ -295,7 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sheetChoose.classList.toggle('bg-cyan-600', enable);
     sheetChoose.classList.toggle('text-white', enable);
-    sheetChoose.classList.toggle('hover:bg-cyan-700', enable);
   }
 
   function openSheet() {
@@ -423,10 +420,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (idValid && rekValid && nominalValid) {
       confirmBtn.disabled = false;
       confirmBtn.classList.remove("bg-slate-200", "text-slate-400");
-      confirmBtn.classList.add("bg-cyan-600", "text-white", "hover:bg-cyan-700");
+      confirmBtn.classList.add("bg-cyan-600", "text-white");
     } else {
       confirmBtn.disabled = true;
-      confirmBtn.classList.remove("bg-cyan-600", "text-white", "hover:bg-cyan-700");
+      confirmBtn.classList.remove("bg-cyan-600", "text-white");
       confirmBtn.classList.add("bg-slate-200", "text-slate-400");
     }
   };
@@ -460,7 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
       rekeningLabel.classList.remove("text-slate-400");
       sheetChoose.disabled = false;
       sheetChoose.classList.remove("bg-slate-200", "text-slate-400", "cursor-not-allowed");
-      sheetChoose.classList.add("bg-cyan-600", "text-white", "hover:bg-cyan-700");
+      sheetChoose.classList.add("bg-cyan-600", "text-white");
       updateConfirmState();
     });
   });
@@ -604,7 +601,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ubah tombol -> Verifikasi (disabled)
     btnPay.textContent = "Verifikasi";
     btnPay.disabled = true;
-    btnPay.classList.remove("bg-cyan-600", "hover:bg-cyan-700", "text-white");
+    btnPay.classList.remove("bg-cyan-600", "text-white");
     btnPay.classList.add("bg-slate-200", "text-slate-400", "cursor-not-allowed");
 
     // hapus note dengan ikon i di dalam sheet
@@ -629,11 +626,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const filled = Array.from(inputs).every(i => i.value.trim() !== "");
       if (filled) {
         btnPay.disabled = false;
-        btnPay.classList.add("bg-cyan-600", "hover:bg-cyan-700", "text-white");
+        btnPay.classList.add("bg-cyan-600", "text-white");
         btnPay.classList.remove("bg-slate-200", "text-slate-400", "cursor-not-allowed");
       } else {
         btnPay.disabled = true;
-        btnPay.classList.remove("bg-cyan-600", "hover:bg-cyan-700", "text-white");
+        btnPay.classList.remove("bg-cyan-600", "text-white");
         btnPay.classList.add("bg-slate-200", "text-slate-400", "cursor-not-allowed");
       }
     });
