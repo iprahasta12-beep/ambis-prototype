@@ -67,6 +67,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const sheetRef = document.getElementById('sheetRef');
   const sheetDate = document.getElementById('sheetDate');
 
+  // move drawer elements
+  const openMoveBtn = document.getElementById('openMoveDrawer');
+  const moveDrawer = document.getElementById('moveDrawer');
+  const moveCloseBtn = document.getElementById('moveDrawerCloseBtn');
+  const moveSourceBtn = document.getElementById('moveSourceBtn');
+  const moveDestInput = document.getElementById('moveDestInput');
+  const moveAmountInput = document.getElementById('moveAmountInput');
+  const moveCategoryBtn = document.getElementById('moveCategoryBtn');
+  const moveCategoryList = document.getElementById('moveCategoryList');
+  const moveCategoryDropdown = document.getElementById('moveCategoryDropdown');
+  const moveCategoryText = document.getElementById('moveCategoryText');
+  const moveNoteInput = document.getElementById('moveNoteInput');
+  const moveNoteCounter = document.getElementById('moveNoteCounter');
+  const moveConfirmBtn = document.getElementById('moveConfirmBtn');
+  const moveDestError = document.getElementById('moveDestError');
+  const moveAmountError = document.getElementById('moveAmountError');
+
   // data
   const accounts = [
     { initial:'O', color:'bg-cyan-100 text-cyan-600', name:'Utama', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp100.000.000,00' },
@@ -110,6 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let availableMethods = [];
   let currentSheetType = 'source';
 
+  // move drawer state
+  let moveSourceSelected = false;
+  let moveDestination = '';
+  let moveDestValid = false;
+  let moveAmountValue = 0;
+  let moveAmountValid = false;
+  let moveCategorySelected = false;
+  let moveSelectedCategory = '';
+
   function renderList(data) {
     sheetList.innerHTML = data.map((acc, idx) => `
       <li>
@@ -147,6 +173,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function openSheet() {
     currentSheetType = 'source';
+    selectedIndex = null;
+    currentData = accounts;
+    sheetTitle.textContent = 'Sumber Rekening';
+    sheetChoose.textContent = 'Pilih Rekening';
+    renderList(currentData);
+    sheetChoose.disabled = true;
+    sheetChoose.classList.add('opacity-50','cursor-not-allowed');
+    sheetOverlay.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      sheetOverlay.classList.add('opacity-100');
+      sheet.classList.remove('translate-y-full');
+    });
+  }
+
+  function openMoveSourceSheet() {
+    currentSheetType = 'moveSource';
     selectedIndex = null;
     currentData = accounts;
     sheetTitle.textContent = 'Sumber Rekening';
@@ -260,6 +302,17 @@ document.addEventListener('DOMContentLoaded', () => {
       sourceBtn.classList.remove('text-slate-500');
       sourceSelected = true;
       updateMethodVisibility();
+    } else if (currentSheetType === 'moveSource') {
+      const acc = currentData[selectedIndex];
+      moveSourceBtn.textContent = `${acc.name} - ${acc.number}`;
+      moveSourceBtn.classList.remove('text-slate-500');
+      moveSourceSelected = true;
+      const dest = accounts.find(a => a.name !== acc.name);
+      moveDestination = dest ? `${dest.name} - ${dest.number}` : '';
+      moveDestInput.value = moveDestination;
+      moveDestValid = !!dest && dest.name !== acc.name;
+      moveDestError.classList.toggle('hidden', moveDestValid);
+      updateMoveConfirmState();
     } else if (currentSheetType === 'method') {
       const m = currentData[selectedIndex];
       methodText.textContent = m.name;
@@ -279,9 +332,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (methodBtn.disabled) return;
     openMethodSheet();
   });
+  moveSourceBtn?.addEventListener('click', openMoveSourceSheet);
 
   categoryBtn?.addEventListener('click', () => {
     categoryList.classList.toggle('hidden');
+  });
+  moveCategoryBtn?.addEventListener('click', () => {
+    moveCategoryList.classList.toggle('hidden');
   });
 
   categoryList?.addEventListener('click', (e) => {
@@ -297,6 +354,21 @@ document.addEventListener('DOMContentLoaded', () => {
     categorySelected = true;
   categoryList.classList.add('hidden');
     updateConfirmState();
+  });
+
+  moveCategoryList?.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-value]');
+    if (!btn) return;
+    moveCategoryList.querySelectorAll('button[data-value]').forEach(b => {
+      b.classList.remove('bg-cyan-50','border-l-2','border-dashed','border-cyan-500');
+    });
+    btn.classList.add('bg-cyan-50','border-l-2','border-dashed','border-cyan-500');
+    moveSelectedCategory = btn.dataset.value;
+    moveCategoryText.textContent = moveSelectedCategory;
+    moveCategoryText.classList.remove('text-slate-500');
+    moveCategorySelected = true;
+    moveCategoryList.classList.add('hidden');
+    updateMoveConfirmState();
   });
 
   bankBtn?.addEventListener('click', () => {
@@ -322,6 +394,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (bankDropdown && !bankDropdown.contains(e.target)) {
       bankList.classList.add('hidden');
+    }
+    if (moveCategoryDropdown && !moveCategoryDropdown.contains(e.target)) {
+      moveCategoryList.classList.add('hidden');
     }
   });
 
@@ -376,11 +451,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function openMoveDrawerPanel() {
+    moveDrawer.classList.remove('hidden');
+    moveSourceBtn.textContent = 'Pilih sumber rekening';
+    moveSourceBtn.classList.add('text-slate-500');
+    moveDestInput.value = 'Pilih rekening tujuan';
+    moveDestError.classList.add('hidden');
+    moveAmountInput.value = '';
+    moveAmountError.classList.add('hidden');
+    moveCategoryText.textContent = 'Pilih kategori';
+    moveCategoryText.classList.add('text-slate-500');
+    moveCategorySelected = false;
+    moveSelectedCategory = '';
+    moveNoteInput.value = '';
+    moveNoteCounter.textContent = '0/50';
+    moveSourceSelected = false;
+    moveDestination = '';
+    moveDestValid = false;
+    moveAmountValue = 0;
+    moveAmountValid = false;
+    updateMoveConfirmState();
+    if (typeof window.sidebarCollapseForDrawer === 'function') {
+      window.sidebarCollapseForDrawer();
+    }
+  }
+
+  function closeMoveDrawerPanel() {
+    moveDrawer.classList.add('hidden');
+    if (typeof window.sidebarRestoreForDrawer === 'function') {
+      window.sidebarRestoreForDrawer();
+    }
+  }
+
   openBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     openDrawer();
   });
   closeBtn?.addEventListener('click', closeDrawer);
+  openMoveBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openMoveDrawerPanel();
+  });
+  moveCloseBtn?.addEventListener('click', closeMoveDrawerPanel);
 
   // helpers
   const formatter = new Intl.NumberFormat('id-ID');
@@ -393,6 +505,16 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       confirmBtn.disabled = true;
       confirmBtn.classList.add('opacity-50','cursor-not-allowed');
+    }
+  }
+
+  function updateMoveConfirmState() {
+    if (moveSourceSelected && moveDestValid && moveAmountValid && moveCategorySelected) {
+      moveConfirmBtn.disabled = false;
+      moveConfirmBtn.classList.remove('opacity-50','cursor-not-allowed');
+    } else {
+      moveConfirmBtn.disabled = true;
+      moveConfirmBtn.classList.add('opacity-50','cursor-not-allowed');
     }
   }
 
@@ -443,6 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   updateMethodVisibility();
+  updateMoveConfirmState();
 
   amountInput?.addEventListener('input', (e) => {
     const raw = e.target.value.replace(/\D/g,'');
@@ -457,6 +580,22 @@ document.addEventListener('DOMContentLoaded', () => {
       e.target.value = e.target.value.slice(0,50);
     }
     noteCounter.textContent = `${e.target.value.length}/50`;
+  });
+
+  moveAmountInput?.addEventListener('input', (e) => {
+    const raw = e.target.value.replace(/\D/g,'');
+    e.target.value = raw ? formatter.format(raw) : '';
+    moveAmountValue = parseInt(raw) || 0;
+    moveAmountValid = moveAmountValue > 0;
+    moveAmountError.classList.toggle('hidden', moveAmountValid);
+    updateMoveConfirmState();
+  });
+
+  moveNoteInput?.addEventListener('input', (e) => {
+    if (e.target.value.length > 50) {
+      e.target.value = e.target.value.slice(0,50);
+    }
+    moveNoteCounter.textContent = `${e.target.value.length}/50`;
   });
 
 
@@ -475,6 +614,30 @@ document.addEventListener('DOMContentLoaded', () => {
     sheetRef.textContent = ref;
     sheetDate.textContent = `${dateStr} ${timeStr}`;
     sheetMethod.textContent = selectedMethod;
+    confirmProceed.disabled = false;
+    confirmProceed.classList.remove('opacity-50','cursor-not-allowed');
+    sheetOverlay.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      sheetOverlay.classList.add('opacity-100');
+      confirmSheet.classList.remove('translate-y-full');
+    });
+  });
+
+  moveConfirmBtn?.addEventListener('click', () => {
+    const ref = Math.floor(100000000 + Math.random()*900000000);
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
+    const timeStr = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    sheetSource.textContent = moveSourceBtn.textContent;
+    sheetDestination.textContent = moveDestInput.value;
+    sheetNominal.textContent = 'Rp' + formatter.format(moveAmountValue);
+    sheetFee.textContent = 'Rp0';
+    sheetTotal.textContent = 'Rp' + formatter.format(moveAmountValue);
+    sheetCategory.textContent = moveSelectedCategory;
+    sheetNote.textContent = moveNoteInput.value || '-';
+    sheetMethod.textContent = 'Pindah Buku';
+    sheetRef.textContent = ref;
+    sheetDate.textContent = `${dateStr} ${timeStr}`;
     confirmProceed.disabled = false;
     confirmProceed.classList.remove('opacity-50','cursor-not-allowed');
     sheetOverlay.classList.remove('hidden');
