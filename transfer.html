@@ -324,15 +324,13 @@
       <div id="confirmSheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform h-full z-20 flex flex-col">
         <div class="p-6 text-center border-b relative">
           <h3 class="text-base font-semibold">Konfirmasi Transfer Saldo</h3>
-          <p class="text-sm text-slate-500 mt-1">Mohon pastikan data sudah benar</p>
-          <button id="confirmClose" class="absolute right-4 top-4 text-2xl leading-none">&times;</button>
         </div>
         <div class="flex-1 overflow-y-auto p-6 space-y-6 text-sm">
           <div>
             <p class="font-semibold mb-3">Transfer Saldo</p>
             <div class="bg-slate-50 border rounded-xl divide-y">
               <div class="flex gap-3 p-4 items-center">
-                <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
+                <div class="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-slate-600">
                   <span class="text-sm font-medium">O</span>
                 </div>
                 <div class="min-w-0">
@@ -341,7 +339,7 @@
                 </div>
               </div>
               <div class="flex gap-3 p-4 items-center">
-                <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
+                <div class="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center text-slate-600">
                   <span class="text-sm font-medium">D</span>
                 </div>
                 <div class="min-w-0">
@@ -352,21 +350,21 @@
             </div>
           </div>
           <div>
-            <p class="font-semibold mb-3">Total Transaksi</p>
-            <div class="bg-slate-50 border rounded-xl divide-y">
-              <div class="flex justify-between p-4"><span>Nominal</span><span id="sheetNominal">Rp0</span></div>
-              <div class="flex justify-between p-4"><span>Biaya Transfer</span><span id="sheetFee">Rp0</span></div>
-              <div class="flex justify-between font-semibold p-4"><span>Total</span><span id="sheetTotal">Rp0</span></div>
+            <p class="text-[16px] tracking-[.05em] text-slate-400 p-3 bg-slate-100 mb-3">Total Transaksi</p>
+            <div>
+              <div class="flex justify-between py-3"><span>Nominal</span><span id="sheetNominal">Rp0</span></div>
+              <div class="flex justify-between py-3"><span>Biaya Transfer</span><span id="sheetFee">Rp0</span></div>
+              <div class="flex justify-between font-semibold py-3"><span>Total</span><span id="sheetTotal">Rp0</span></div>
             </div>
           </div>
           <div>
-            <p class="font-semibold mb-3">Detail Transaksi</p>
-            <div class="bg-slate-50 border rounded-xl divide-y">
-              <div class="flex justify-between p-4"><span>Metode Transfer</span><span id="sheetMethod"></span></div>
-              <div class="flex justify-between p-4"><span>Nomor Referensi</span><span id="sheetRef"></span></div>
-              <div class="flex justify-between p-4"><span>Tanggal &amp; Waktu</span><span id="sheetDate"></span></div>
-              <div class="flex justify-between p-4"><span>Kategori</span><span id="sheetCategory"></span></div>
-              <div class="flex justify-between p-4"><span>Catatan</span><span id="sheetNote"></span></div>
+            <p class="text-[16px] tracking-[.05em] text-slate-400 p-3 bg-slate-100 mb-3">Detail Transaksi</p>
+            <div>
+              <div class="flex justify-between py-3"><span>Metode Transfer</span><span id="sheetMethod"></span></div>
+              <div class="flex justify-between py-3"><span>Nomor Referensi</span><span id="sheetRef"></span></div>
+              <div class="flex justify-between py-3"><span>Tanggal &amp; Waktu</span><span id="sheetDate"></span></div>
+              <div class="flex justify-between py-3"><span>Kategori</span><span id="sheetCategory"></span></div>
+              <div class="flex justify-between py-3"><span>Catatan</span><span id="sheetNote"></span></div>
             </div>
           </div>
         </div>
