@@ -248,138 +248,10 @@
       <div class="p-4 border-t">
         <button id="confirmBtn" class="w-full rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Konfirmasi Transfer Saldo</button>
       </div>
-
-      <!-- Bottom Sheet Overlay & Panel -->
-      <div id="sheetOverlay" class="hidden absolute inset-0 bg-black/20 opacity-0 transition-opacity z-10"></div>
-      <div id="bottomSheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform max-h-[80%] h-1/2 z-20 flex flex-col">
-        <div class="p-4 border-b">
-          <h3 id="sheetTitle" class="text-base font-semibold">Sumber Rekening</h3>
-        </div>
-        <div class="flex-1 overflow-y-auto">
-          <ul id="sheetList" class="divide-y"></ul>
-        </div>
-        <div class="p-4 flex gap-3 border-t">
-          <button id="sheetCancel" class="flex-1 rounded-xl border py-3">Batalkan</button>
-          <button id="sheetChoose" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Pilih Rekening</button>
-        </div>
-      </div>
-
-      <!-- Destination Account Bottom Sheet -->
-      <div id="destSheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform h-full z-20 flex flex-col">
-        <div class="p-4 border-b">
-          <h3 class="text-base font-semibold">Daftar Rekening Tujuan</h3>
-        </div>
-        <div class="p-4 flex-1 overflow-y-auto space-y-4">
-          <div id="bankDropdown" class="relative">
-            <label class="block text-sm mb-1">Nama Bank</label>
-            <button id="bankBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between">
-              <span id="bankText" class="text-slate-500">Pilih bank</span>
-              <span class="text-slate-400">▾</span>
-            </button>
-            <ul id="bankList" class="hidden absolute left-0 right-0 mt-1 bg-white rounded-xl border shadow divide-y z-10">
-              <li><button type="button" data-value="BCA" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BCA</button></li>
-              <li><button type="button" data-value="BNI" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BNI</button></li>
-              <li><button type="button" data-value="BRI" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BRI</button></li>
-              <li><button type="button" data-value="Mandiri" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Mandiri</button></li>
-              <li><button type="button" data-value="CIMB Niaga" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">CIMB Niaga</button></li>
-              <li><button type="button" data-value="Permata" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Permata</button></li>
-              <li><button type="button" data-value="BTN" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BTN</button></li>
-              <li><button type="button" data-value="Bank Danamon" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Bank Danamon</button></li>
-              <li><button type="button" data-value="Maybank" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Maybank</button></li>
-              <li><button type="button" data-value="OCBC NISP" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">OCBC NISP</button></li>
-            </ul>
-          </div>
-          <div>
-            <label class="block text-sm mb-1">Nomor Rekening</label>
-            <div class="flex gap-2">
-              <input id="destNumber" type="text" placeholder="Masukkan nomor rekening" class="flex-1 border rounded-xl px-3 py-3" />
-              <button id="checkAccount" class="whitespace-nowrap border border-cyan-500 text-cyan-600 rounded-xl px-4 py-3">Periksa Rekening</button>
-            </div>
-          </div>
-          <div id="accountInfo" class="hidden p-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600">Pastikan pemilik rekening sesuai</div>
-          <div id="ownerField" class="hidden">
-            <label class="block text-sm mb-1">Pemilik Rekening</label>
-            <input id="accountOwnerField" type="text" readonly class="w-full border rounded-xl px-3 py-3 bg-slate-50" />
-          </div>
-          <div id="saveContainer" class="hidden">
-            <label class="flex items-start gap-2 text-sm">
-              <input id="saveCheckbox" type="checkbox" class="mt-1" />
-              <span>Simpan Daftar Rekening Tujuan</span>
-            </label>
-          </div>
-          <div id="aliasContainer" class="hidden">
-            <label class="block text-sm mb-1">Nama Alias</label>
-            <input id="aliasInput" type="text" maxlength="15" placeholder="Tulis nama alias" class="w-full border rounded-xl px-3 py-3" />
-            <div class="text-right text-xs text-slate-400" id="aliasCounter">0/15</div>
-            <p class="text-xs text-slate-500 mt-1">Daftar Rekening tujuan tersimpan pada saat transaksi selesai</p>
-          </div>
-        </div>
-        <div class="p-4 flex gap-3 border-t">
-          <button id="destBack" class="flex-1 rounded-xl border py-3">Kembali</button>
-          <button id="destProceed" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Masukkan Detail Transfer</button>
-        </div>
-      </div>
-
-      <!-- Confirmation Bottom Sheet -->
-      <div id="confirmSheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform h-full z-20 flex flex-col">
-        <div class="p-6 text-center border-b relative">
-          <h3 class="text-base font-semibold">Konfirmasi Transfer Saldo</h3>
-        </div>
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
-          <div>
-            <div class="p-4 rounded-xl bg-sky-100 text-sm text-slate-600 mb-4">
-              Mohon pastikan data sudah sesuai
-            </div>
-            <p class="font-semibold mb-3">Transfer Saldo</p>
-            <div class="bg-slate-50 border rounded-xl">
-              <div class="flex gap-3 p-6 items-center bg-sky100">
-                <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
-                  <span class="text-sm font-medium">O</span>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Sumber</p>
-                  <p id="sheetSource" class="font-medium truncate"></p>
-                </div>
-              </div>
-              <div class="flex gap-3 p-6 items-center bg-sky100">
-                <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
-                  <span class="text-sm font-medium">D</span>
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs text-slate-500 mb-1">Tujuan</p>
-                  <p id="sheetDestination" class="font-medium truncate"></p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div>
-            <p class="text-[16px] tracking-[.05em] text-slate-400 p-3 bg-slate-100 mb-3">TOTAL TRANSAKSI</p>
-            <div>
-              <div class="flex justify-between py-3"><span>Nominal</span><span id="sheetNominal">Rp0</span></div>
-              <div class="flex justify-between py-3"><span>Biaya Transfer</span><span id="sheetFee">Rp0</span></div>
-              <div class="flex justify-between font-semibold py-3"><span>Total</span><span id="sheetTotal">Rp0</span></div>
-            </div>
-          </div>
-          <div>
-            <p class="text-[16px] tracking-[.05em] text-slate-400 p-3 bg-slate-100 mb-3">DETAIL TRANSAKSI</p>
-            <div>
-              <div class="flex justify-between py-3"><span>Metode Transfer</span><span id="sheetMethod"></span></div>
-              <div class="flex justify-between py-3"><span>Nomor Referensi</span><span id="sheetRef"></span></div>
-              <div class="flex justify-between py-3"><span>Tanggal &amp; Waktu</span><span id="sheetDate"></span></div>
-              <div class="flex justify-between py-3"><span>Kategori</span><span id="sheetCategory"></span></div>
-              <div class="flex justify-between py-3"><span>Catatan</span><span id="sheetNote"></span></div>
-            </div>
-          </div>
-        </div>
-      <div class="p-6 flex gap-3 border-t">
-        <button id="confirmBack" class="flex-1 rounded-xl border py-3">Batalkan</button>
-        <button id="confirmProceed" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Lanjut Transfer Saldo</button>
-      </div>
-    </div>
     </div>
 
     <!-- Pemindahan Drawer -->
-    <div id="moveDrawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-200 hidden w-[480px]">
+    <div id="moveDrawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-200">
       <div class="flex items-center justify-between p-4 border-b">
         <h2 class="text-lg font-semibold">Pemindahan Saldo</h2>
         <button id="moveDrawerCloseBtn" class="text-2xl leading-none">&times;</button>
@@ -425,6 +297,134 @@
       </div>
       <div class="p-4 border-t">
         <button id="moveConfirmBtn" class="w-full rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Konfirmasi Pemindahan Saldo</button>
+      </div>
+    </div>
+
+    <!-- Bottom Sheet Overlay & Panel -->
+    <div id="sheetOverlay" class="hidden fixed inset-0 bg-black/20 opacity-0 transition-opacity z-10"></div>
+    <div id="bottomSheet" class="fixed bottom-0 right-0 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform max-h-[80%] h-1/2 z-20 flex flex-col">
+      <div class="p-4 border-b">
+        <h3 id="sheetTitle" class="text-base font-semibold">Sumber Rekening</h3>
+      </div>
+      <div class="flex-1 overflow-y-auto">
+        <ul id="sheetList" class="divide-y"></ul>
+      </div>
+      <div class="p-4 flex gap-3 border-t">
+        <button id="sheetCancel" class="flex-1 rounded-xl border py-3">Batalkan</button>
+        <button id="sheetChoose" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Pilih Rekening</button>
+      </div>
+    </div>
+
+    <!-- Destination Account Bottom Sheet -->
+    <div id="destSheet" class="fixed inset-y-0 right-0 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform z-20 flex flex-col">
+      <div class="p-4 border-b">
+        <h3 class="text-base font-semibold">Daftar Rekening Tujuan</h3>
+      </div>
+      <div class="p-4 flex-1 overflow-y-auto space-y-4">
+        <div id="bankDropdown" class="relative">
+          <label class="block text-sm mb-1">Nama Bank</label>
+          <button id="bankBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between">
+            <span id="bankText" class="text-slate-500">Pilih bank</span>
+            <span class="text-slate-400">▾</span>
+          </button>
+          <ul id="bankList" class="hidden absolute left-0 right-0 mt-1 bg-white rounded-xl border shadow divide-y z-10">
+            <li><button type="button" data-value="BCA" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BCA</button></li>
+            <li><button type="button" data-value="BNI" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BNI</button></li>
+            <li><button type="button" data-value="BRI" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BRI</button></li>
+            <li><button type="button" data-value="Mandiri" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Mandiri</button></li>
+            <li><button type="button" data-value="CIMB Niaga" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">CIMB Niaga</button></li>
+            <li><button type="button" data-value="Permata" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Permata</button></li>
+            <li><button type="button" data-value="BTN" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">BTN</button></li>
+            <li><button type="button" data-value="Bank Danamon" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Bank Danamon</button></li>
+            <li><button type="button" data-value="Maybank" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Maybank</button></li>
+            <li><button type="button" data-value="OCBC NISP" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">OCBC NISP</button></li>
+          </ul>
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Nomor Rekening</label>
+          <div class="flex gap-2">
+            <input id="destNumber" type="text" placeholder="Masukkan nomor rekening" class="flex-1 border rounded-xl px-3 py-3" />
+            <button id="checkAccount" class="whitespace-nowrap border border-cyan-500 text-cyan-600 rounded-xl px-4 py-3">Periksa Rekening</button>
+          </div>
+        </div>
+        <div id="accountInfo" class="hidden p-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600">Pastikan pemilik rekening sesuai</div>
+        <div id="ownerField" class="hidden">
+          <label class="block text-sm mb-1">Pemilik Rekening</label>
+          <input id="accountOwnerField" type="text" readonly class="w-full border rounded-xl px-3 py-3 bg-slate-50" />
+        </div>
+        <div id="saveContainer" class="hidden">
+          <label class="flex items-start gap-2 text-sm">
+            <input id="saveCheckbox" type="checkbox" class="mt-1" />
+            <span>Simpan Daftar Rekening Tujuan</span>
+          </label>
+        </div>
+        <div id="aliasContainer" class="hidden">
+          <label class="block text-sm mb-1">Nama Alias</label>
+          <input id="aliasInput" type="text" maxlength="15" placeholder="Tulis nama alias" class="w-full border rounded-xl px-3 py-3" />
+          <div class="text-right text-xs text-slate-400" id="aliasCounter">0/15</div>
+          <p class="text-xs text-slate-500 mt-1">Daftar Rekening tujuan tersimpan pada saat transaksi selesai</p>
+        </div>
+      </div>
+      <div class="p-4 flex gap-3 border-t">
+        <button id="destBack" class="flex-1 rounded-xl border py-3">Kembali</button>
+        <button id="destProceed" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Masukkan Detail Transfer</button>
+      </div>
+    </div>
+
+    <!-- Confirmation Bottom Sheet -->
+    <div id="confirmSheet" class="fixed inset-y-0 right-0 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform z-20 flex flex-col">
+      <div class="p-6 text-center border-b relative">
+        <h3 class="text-base font-semibold">Konfirmasi Transfer Saldo</h3>
+      </div>
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <div>
+          <div class="p-4 rounded-xl bg-sky-100 text-sm text-slate-600 mb-4">
+            Mohon pastikan data sudah sesuai
+          </div>
+          <p class="font-semibold mb-3">Transfer Saldo</p>
+          <div class="bg-slate-50 border rounded-xl">
+            <div class="flex gap-3 p-6 items-center bg-sky100">
+              <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
+                <span class="text-sm font-medium">O</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs text-slate-500 mb-1">Sumber</p>
+                <p id="sheetSource" class="font-medium truncate"></p>
+              </div>
+            </div>
+            <div class="flex gap-3 p-6 items-center bg-sky100">
+              <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
+                <span class="text-sm font-medium">D</span>
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs text-slate-500 mb-1">Tujuan</p>
+                <p id="sheetDestination" class="font-medium truncate"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="text-[16px] tracking-[.05em] text-slate-400 p-3 bg-slate-100 mb-3">TOTAL TRANSAKSI</p>
+          <div>
+            <div class="flex justify-between py-3"><span>Nominal</span><span id="sheetNominal">Rp0</span></div>
+            <div class="flex justify-between py-3"><span>Biaya Transfer</span><span id="sheetFee">Rp0</span></div>
+            <div class="flex justify-between font-semibold py-3"><span>Total</span><span id="sheetTotal">Rp0</span></div>
+          </div>
+        </div>
+        <div>
+          <p class="text-[16px] tracking-[.05em] text-slate-400 p-3 bg-slate-100 mb-3">DETAIL TRANSAKSI</p>
+          <div>
+            <div class="flex justify-between py-3"><span>Metode Transfer</span><span id="sheetMethod"></span></div>
+            <div class="flex justify-between py-3"><span>Nomor Referensi</span><span id="sheetRef"></span></div>
+            <div class="flex justify-between py-3"><span>Tanggal &amp; Waktu</span><span id="sheetDate"></span></div>
+            <div class="flex justify-between py-3"><span>Kategori</span><span id="sheetCategory"></span></div>
+            <div class="flex justify-between py-3"><span>Catatan</span><span id="sheetNote"></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="p-6 flex gap-3 border-t">
+        <button id="confirmBack" class="flex-1 rounded-xl border py-3">Batalkan</button>
+        <button id="confirmProceed" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Lanjut Transfer Saldo</button>
       </div>
     </div>
   </div>

@@ -38,12 +38,12 @@
 .sidebar-collapsed #sidebar .sb-item{ justify-content:center; padding-left:0; padding-right:0; gap:.5rem; }
 
 /* Drawer push panel */
-#drawer{
+#drawer, #moveDrawer{
   width:0;
   max-width:480px;
   transition:width .3s ease;
 }
-#drawer.open{ width:480px; }
+#drawer.open, #moveDrawer.open{ width:480px; }
 
 /* Disabled button appearance */
 button:disabled{
