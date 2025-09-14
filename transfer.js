@@ -438,6 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function openDrawer() {
+    closeMoveDrawerPanel();
     drawer.classList.add('open');
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
@@ -446,13 +447,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeDrawer() {
     drawer.classList.remove('open');
+    closeSheet();
+    closeDestSheet();
+    closeConfirmSheet();
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
   }
 
   function openMoveDrawerPanel() {
-    moveDrawer.classList.remove('hidden');
+    closeDrawer();
+    moveDrawer.classList.add('open');
     moveSourceBtn.textContent = 'Pilih sumber rekening';
     moveSourceBtn.classList.add('text-slate-500');
     moveDestInput.value = 'Pilih rekening tujuan';
@@ -477,7 +482,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function closeMoveDrawerPanel() {
-    moveDrawer.classList.add('hidden');
+    moveDrawer.classList.remove('open');
+    closeSheet();
+    closeDestSheet();
+    closeConfirmSheet();
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
