@@ -250,9 +250,6 @@
       </div>
 
       <!-- Bottom Sheet Overlay & Panel -->
-      <div class="p-4 rounded-xl bg-sky-100 text-sm text-slate-600">
-        Mohon pastikan data sudah sesuai
-      </div>
       <div id="sheetOverlay" class="hidden absolute inset-0 bg-black/20 opacity-0 transition-opacity z-10"></div>
       <div id="bottomSheet" class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform max-h-[80%] h-1/2 z-20 flex flex-col">
         <div class="p-4 border-b">
@@ -330,9 +327,12 @@
         </div>
         <div class="flex-1 overflow-y-auto p-6 space-y-6 text-sm">
           <div>
+            <div class="p-4 rounded-xl bg-sky-100 text-sm text-slate-600">
+              Mohon pastikan data sudah sesuai
+            </div>
             <p class="font-semibold mb-3">Transfer Saldo</p>
-            <div class="bg-slate-50 border rounded-xl divide-y">
-              <div class="flex gap-3 p-4 items-center bg-sky100">
+            <div class="bg-slate-50 border rounded-xl">
+              <div class="flex gap-3 p-6 items-center bg-sky100">
                 <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
                   <span class="text-sm font-medium">O</span>
                 </div>
@@ -341,7 +341,7 @@
                   <p id="sheetSource" class="font-medium truncate"></p>
                 </div>
               </div>
-              <div class="flex gap-3 p-4 items-center bg-sky100">
+              <div class="flex gap-3 p-6 items-center bg-sky100">
                 <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
                   <span class="text-sm font-medium">D</span>
                 </div>
