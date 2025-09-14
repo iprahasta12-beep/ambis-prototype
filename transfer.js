@@ -207,7 +207,13 @@ document.addEventListener('DOMContentLoaded', () => {
   function openMoveDestSheet() {
     currentSheetType = 'moveDest';
     selectedIndex = null;
-    currentData = accounts;
+    // If a source account has been selected, exclude it from destination list
+    if (moveSourceSelected) {
+      const sourceName = moveSourceBtn.textContent.split(' - ')[0];
+      currentData = accounts.filter(acc => acc.name !== sourceName);
+    } else {
+      currentData = accounts;
+    }
     sheetTitle.textContent = 'Rekening Tujuan';
     sheetChoose.textContent = 'Pilih Rekening';
     renderList(currentData);

@@ -101,7 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation(); // don’t toggle
     });
     const lbl = a.querySelector('.sb-label');
-    if (lbl && !a.title) a.title = lbl.textContent.trim();
+    const text = lbl?.textContent.trim();
+    if (text) {
+      if (!a.title) a.title = text;
+      a.setAttribute('data-label', text);
+    }
   });
 
   // expose helper for other scripts
