@@ -15,11 +15,11 @@
 }
 
 /* keep rows steady */
-.sb-item{ height:48px; min-height:48px; align-items:center; }
+.sb-item{ height:48px; min-height:48px; align-items:center; position:relative; }
 .sb-item img{ display:block; } /* no baseline jitter */
 
 /* collapse behavior */
-#sidebar{ transition: width .25s ease; }
+#sidebar{ transition: width .25s ease; overflow:visible; }
 #sidebar.collapsed,
 .sidebar-collapsed #sidebar{ width:84px !important; }
 
@@ -42,6 +42,24 @@
 /* center items when collapsed */
 #sidebar.collapsed .sb-item,
 .sidebar-collapsed #sidebar .sb-item{ justify-content:center; padding-left:0; padding-right:0; gap:.5rem; }
+
+/* Tooltip helper when sidebar is collapsed */
+#sidebar.collapsed .sb-item:hover::after,
+.sidebar-collapsed #sidebar .sb-item:hover::after{
+  content: attr(data-label);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left:8px;
+  background-color: rgba(15,27,37,.9);
+  color:#fff;
+  padding:4px 8px;
+  border-radius:6px;
+  white-space:nowrap;
+  pointer-events:none;
+  z-index:50;
+}
 
 /* Drawer push panel */
 #drawer, #moveDrawer{
