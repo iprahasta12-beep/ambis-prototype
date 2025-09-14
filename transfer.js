@@ -74,6 +74,121 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
 
+  // Pemindahan Saldo drawer elements
+  const moveOpenBtn = document.getElementById('openMoveDrawer');
+  const moveDrawer = document.getElementById('moveDrawer');
+  const moveCloseBtn = document.getElementById('moveDrawerCloseBtn');
+  const moveSourceSelect = document.getElementById('moveSourceAccount');
+  const moveDestAccount = document.getElementById('moveDestAccount');
+  const moveAmountInput = document.getElementById('moveAmount');
+  const moveCategorySelect = document.getElementById('moveCategory');
+  const moveNoteInput = document.getElementById('moveNote');
+  const moveNoteCounter = document.getElementById('moveNoteCounter');
+  const moveContinueBtn = document.getElementById('moveContinue');
+  const moveSourceError = document.getElementById('moveSourceError');
+  const moveDestError = document.getElementById('moveDestError');
+  const moveAmountError = document.getElementById('moveAmountError');
+  const moveNoteError = document.getElementById('moveNoteError');
+
+  let sourceAccount = 0;
+  let destinationAccount = 1;
+  let amount = 0;
+  let category = '';
+  let note = '';
+
+  accounts.forEach((acc, idx) => {
+    const opt = document.createElement('option');
+    opt.value = idx;
+    opt.textContent = `${acc.name} - ${acc.number}`;
+    moveSourceSelect?.appendChild(opt);
+  });
+
+  function updateMoveAccounts() {
+    moveSourceSelect.value = sourceAccount;
+    const dest = accounts[destinationAccount];
+    moveDestAccount.textContent = `${dest.name} - ${dest.number}`;
+  }
+  updateMoveAccounts();
+  validateMove();
+
+  function openMoveDrawer() {
+    moveDrawer.classList.add('open');
+    if (typeof window.sidebarCollapseForDrawer === 'function') {
+      window.sidebarCollapseForDrawer();
+    }
+  }
+
+  function closeMoveDrawer() {
+    moveDrawer.classList.remove('open');
+    if (typeof window.sidebarRestoreForDrawer === 'function') {
+      window.sidebarRestoreForDrawer();
+    }
+  }
+
+  moveOpenBtn?.addEventListener('click', e => {
+    e.preventDefault();
+    openMoveDrawer();
+  });
+  moveCloseBtn?.addEventListener('click', closeMoveDrawer);
+
+  moveSourceSelect?.addEventListener('change', e => {
+    sourceAccount = parseInt(e.target.value);
+    destinationAccount = sourceAccount === 0 ? 1 : 0;
+    updateMoveAccounts();
+    validateMove();
+  });
+
+  moveAmountInput?.addEventListener('input', e => {
+    amount = parseFloat(e.target.value);
+    validateMove();
+  });
+
+  moveCategorySelect?.addEventListener('change', e => {
+    category = e.target.value;
+  });
+
+  moveNoteInput?.addEventListener('input', e => {
+    note = e.target.value;
+    moveNoteCounter.textContent = `${note.length}/50`;
+    validateMove();
+  });
+
+  function validateMove() {
+    let valid = true;
+    if (isNaN(amount) || amount <= 0) {
+      moveAmountError.textContent = 'Nominal harus lebih dari 0';
+      moveAmountError.classList.remove('hidden');
+      valid = false;
+    } else {
+      moveAmountError.classList.add('hidden');
+    }
+
+    if (sourceAccount === destinationAccount) {
+      const msg = 'Sumber dan tujuan tidak boleh sama';
+      moveSourceError.textContent = msg;
+      moveDestError.textContent = msg;
+      moveSourceError.classList.remove('hidden');
+      moveDestError.classList.remove('hidden');
+      valid = false;
+    } else {
+      moveSourceError.classList.add('hidden');
+      moveDestError.classList.add('hidden');
+    }
+
+    if (note.length > 50) {
+      moveNoteError.textContent = 'Maksimal 50 karakter';
+      moveNoteError.classList.remove('hidden');
+      valid = false;
+    } else {
+      moveNoteError.classList.add('hidden');
+    }
+
+    moveContinueBtn.disabled = !valid;
+    moveContinueBtn.classList.toggle('opacity-50', !valid);
+    moveContinueBtn.classList.toggle('cursor-not-allowed', !valid);
+  }
+
+
   function isBusinessDay(date) {
     const day = date.getDay();
     return day >= 1 && day <= 5; // Monday-Friday
