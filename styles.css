@@ -33,6 +33,12 @@
   opacity:0; width:0; margin-left:0; overflow:hidden; display:none;
 }
 
+/* hide category headings when sidebar is collapsed */
+#sidebar.collapsed nav > p,
+.sidebar-collapsed #sidebar nav > p{
+  display:none;
+}
+
 /* center items when collapsed */
 #sidebar.collapsed .sb-item,
 .sidebar-collapsed #sidebar .sb-item{ justify-content:center; padding-left:0; padding-right:0; gap:.5rem; }
