@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const moveDrawer = document.getElementById('moveDrawer');
   const moveCloseBtn = document.getElementById('moveDrawerCloseBtn');
   const moveSourceBtn = document.getElementById('moveSourceBtn');
-  const moveDestInput = document.getElementById('moveDestInput');
+  const moveDestBtn = document.getElementById('moveDestBtn');
   const moveAmountInput = document.getElementById('moveAmountInput');
   const moveCategoryBtn = document.getElementById('moveCategoryBtn');
   const moveCategoryList = document.getElementById('moveCategoryList');
@@ -87,7 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // data
   const accounts = [
     { initial:'O', color:'bg-cyan-100 text-cyan-600', name:'Utama', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp100.000.000,00' },
-    { initial:'D', color:'bg-orange-100 text-orange-600', name:'Operasional', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp50.000.000,00' }
+    { initial:'D', color:'bg-orange-100 text-orange-600', name:'Operasional', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp50.000.000,00' },
+    { initial:'R', color:'bg-pink-100 text-pink-600', name:'Distributor', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp25.000.000,00' }
   ];
 
 
@@ -203,6 +204,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function openMoveDestSheet() {
+    currentSheetType = 'moveDest';
+    selectedIndex = null;
+    currentData = accounts;
+    sheetTitle.textContent = 'Rekening Tujuan';
+    sheetChoose.textContent = 'Pilih Rekening';
+    renderList(currentData);
+    sheetChoose.disabled = true;
+    sheetChoose.classList.add('opacity-50','cursor-not-allowed');
+    sheetOverlay.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      sheetOverlay.classList.add('opacity-100');
+      sheet.classList.remove('translate-y-full');
+    });
+  }
+
   function openMethodSheet() {
     currentSheetType = 'method';
     selectedIndex = null;
@@ -307,10 +324,19 @@ document.addEventListener('DOMContentLoaded', () => {
       moveSourceBtn.textContent = `${acc.name} - ${acc.number}`;
       moveSourceBtn.classList.remove('text-slate-500');
       moveSourceSelected = true;
-      const dest = accounts.find(a => a.name !== acc.name);
-      moveDestination = dest ? `${dest.name} - ${dest.number}` : '';
-      moveDestInput.value = moveDestination;
-      moveDestValid = !!dest && dest.name !== acc.name;
+      moveDestination = '';
+      moveDestBtn.textContent = 'Pilih rekening tujuan';
+      moveDestBtn.classList.add('text-slate-500');
+      moveDestValid = false;
+      moveDestError.classList.add('hidden');
+      updateMoveConfirmState();
+    } else if (currentSheetType === 'moveDest') {
+      const acc = currentData[selectedIndex];
+      moveDestination = `${acc.name} - ${acc.number}`;
+      moveDestBtn.textContent = moveDestination;
+      moveDestBtn.classList.remove('text-slate-500');
+      const sourceName = moveSourceBtn.textContent.split(' - ')[0];
+      moveDestValid = acc.name !== sourceName;
       moveDestError.classList.toggle('hidden', moveDestValid);
       updateMoveConfirmState();
     } else if (currentSheetType === 'method') {
@@ -333,6 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
     openMethodSheet();
   });
   moveSourceBtn?.addEventListener('click', openMoveSourceSheet);
+  moveDestBtn?.addEventListener('click', openMoveDestSheet);
 
   categoryBtn?.addEventListener('click', () => {
     categoryList.classList.toggle('hidden');
@@ -460,7 +487,8 @@ document.addEventListener('DOMContentLoaded', () => {
     moveDrawer.classList.add('open');
     moveSourceBtn.textContent = 'Pilih sumber rekening';
     moveSourceBtn.classList.add('text-slate-500');
-    moveDestInput.value = 'Pilih rekening tujuan';
+    moveDestBtn.textContent = 'Pilih rekening tujuan';
+    moveDestBtn.classList.add('text-slate-500');
     moveDestError.classList.add('hidden');
     moveAmountInput.value = '';
     moveAmountError.classList.add('hidden');
@@ -637,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateStr = now.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
     const timeStr = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
     sheetSource.textContent = moveSourceBtn.textContent;
-    sheetDestination.textContent = moveDestInput.value;
+    sheetDestination.textContent = moveDestBtn.textContent;
     sheetNominal.textContent = 'Rp' + formatter.format(moveAmountValue);
     sheetFee.textContent = 'Rp0';
     sheetTotal.textContent = 'Rp' + formatter.format(moveAmountValue);
