@@ -95,3 +95,73 @@ html, body{
 .text-\[15px\]{
   font-size:16px !important;
 }
+/* Flatpickr custom datepicker styles */
+.flatpickr-calendar{
+  padding:16px !important;
+  border:1px solid #e2e8f0 !important;
+  box-shadow:0 4px 6px rgba(0,0,0,0.05) !important;
+  border-radius:16px !important;
+}
+
+.flatpickr-months{
+  margin-bottom:8px !important;
+}
+
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month{
+  top:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  border:1px solid #e2e8f0;
+  border-radius:6px;
+  color:#1f2937;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover{
+  background:#f1f5f9;
+}
+
+.flatpickr-current-month{
+  font-size:16px !important;
+}
+
+.flatpickr-weekdaycontainer span{
+  color:#64748b;
+  font-weight:500;
+  margin:4px 0;
+}
+
+.flatpickr-day{
+  width:36px;
+  height:36px;
+  line-height:36px;
+  margin:2px;
+  border-radius:8px;
+  color:#1f2937;
+}
+
+.flatpickr-day:hover{
+  background:#f1f5f9;
+}
+
+.flatpickr-day.today{
+  border-color:#06b6d4;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus{
+  background:#f3f4f6;
+  border-color:#f3f4f6;
+  color:#1f2937;
+}
