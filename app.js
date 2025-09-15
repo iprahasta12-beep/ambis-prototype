@@ -772,24 +772,19 @@ setTimeout(() => {
       set("succTotal",   payload.total);
     }
 
-    // Slide out input drawer, slide in success drawer
-    const split = document.getElementById("deskSplit");
-    paneInput?.classList.replace("w-[520px]", "w-0");
-    split?.classList.remove("gap-6"); split?.classList.add("gap-0");
-
-    paneSucc?.classList.replace("w-0", "w-[520px]");
-    requestAnimationFrame(() => {
-      innerSucc?.classList.remove("opacity-0","translate-x-2");
-      innerSucc?.classList.add("opacity-100","translate-x-0");
-    });
+    // Swap input and success content without sliding the drawer
+    paneInput?.classList.add('hidden');
+    paneSucc?.classList.remove('hidden');
+    innerSucc?.classList.remove('opacity-0','translate-x-2');
+    innerSucc?.classList.add('opacity-100','translate-x-0');
 
     // Close handlers
     const closeSuccess = () => {
-      innerSucc?.classList.add("opacity-0","translate-x-2");
-      innerSucc?.classList.remove("opacity-100","translate-x-0");
+      innerSucc?.classList.add('opacity-0','translate-x-2');
+      innerSucc?.classList.remove('opacity-100','translate-x-0');
       setTimeout(() => {
-        paneSucc?.classList.replace("w-[520px]", "w-0");
-        split?.classList.remove("gap-0"); split?.classList.add("gap-6");
+        paneSucc?.classList.add('hidden');
+        paneInput?.classList.remove('hidden');
       }, 200);
     };
     document.getElementById("closeSuccessPane")?.addEventListener("click", closeSuccess, { once:true });
@@ -803,17 +798,16 @@ setTimeout(() => {
 
 /* ---------- RESET ACTIVE BUTTON ---------- */
 function closeSuccessDrawer() {
-  const split     = document.getElementById('deskSplit');
   const paneSucc  = document.getElementById('plnSuccessPane');
+  const paneInput = document.getElementById('plnPane');
   const innerSucc = document.getElementById('plnSuccessInner');
   const billTile  = document.getElementById('tilePlnBill');
 
   innerSucc.classList.add('opacity-0','translate-x-2');
   innerSucc.classList.remove('opacity-100','translate-x-0');
   setTimeout(() => {
-    paneSucc?.classList.replace('w-[520px]', 'w-0');
-    split?.classList.remove('gap-0'); 
-    split?.classList.add('gap-6');
+    paneSucc?.classList.add('hidden');
+    paneInput?.classList.remove('hidden');
 
     // reset Tagihan Listrik tile to inactive
     billTile?.classList.remove('ring-2','ring-cyan-400','border-cyan-300','bg-cyan-50');

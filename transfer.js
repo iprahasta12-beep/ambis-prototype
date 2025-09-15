@@ -3,6 +3,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   const openBtn  = document.getElementById('openTransferDrawer');
   const drawer   = document.getElementById('drawer');
+  const transferPane = document.getElementById('transferPane');
+  const movePane = document.getElementById('movePane');
   const closeBtn = document.getElementById('drawerCloseBtn');
   const cardGrid = document.getElementById('cardGrid');
 
@@ -70,7 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // move drawer elements
   const openMoveBtn = document.getElementById('openMoveDrawer');
-  const moveDrawer = document.getElementById('moveDrawer');
   const moveCloseBtn = document.getElementById('moveDrawerCloseBtn');
   const moveSourceBtn = document.getElementById('moveSourceBtn');
   const moveDestBtn = document.getElementById('moveDestBtn');
@@ -472,7 +473,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function openDrawer() {
-    closeMoveDrawerPanel();
+    movePane.classList.add('hidden');
+    transferPane.classList.remove('hidden');
     drawer.classList.add('open');
     cardGrid?.classList.remove('md:grid-cols-3');
     cardGrid?.classList.add('md:grid-cols-2');
@@ -482,6 +484,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function closeDrawer() {
+    transferPane.classList.add('hidden');
+    movePane.classList.add('hidden');
     drawer.classList.remove('open');
     closeSheet();
     closeDestSheet();
@@ -494,8 +498,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function openMoveDrawerPanel() {
-    closeDrawer();
-    moveDrawer.classList.add('open');
+    transferPane.classList.add('hidden');
+    movePane.classList.remove('hidden');
+    drawer.classList.add('open');
     cardGrid?.classList.remove('md:grid-cols-3');
     cardGrid?.classList.add('md:grid-cols-2');
     moveSourceBtn.textContent = 'Pilih sumber rekening';
@@ -522,18 +527,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function closeMoveDrawerPanel() {
-    moveDrawer.classList.remove('open');
-    closeSheet();
-    closeDestSheet();
-    closeConfirmSheet();
-    cardGrid?.classList.remove('md:grid-cols-2');
-    cardGrid?.classList.add('md:grid-cols-3');
-    if (typeof window.sidebarRestoreForDrawer === 'function') {
-      window.sidebarRestoreForDrawer();
-    }
-  }
-
   openBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     openDrawer();
@@ -543,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     openMoveDrawerPanel();
   });
-  moveCloseBtn?.addEventListener('click', closeMoveDrawerPanel);
+  moveCloseBtn?.addEventListener('click', closeDrawer);
 
   // helpers
   const formatter = new Intl.NumberFormat('id-ID');
