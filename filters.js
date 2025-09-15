@@ -32,6 +32,17 @@
       cancelBtn.textContent = anyApplied ? 'Reset Ulang' : 'Batalkan';
     }
 
+    if (customInputs && typeof flatpickr !== 'undefined') {
+      customInputs.forEach(inp => {
+        flatpickr(inp, {
+          dateFormat: 'd/m/Y',
+          locale: flatpickr.l10ns.id,
+          onChange: updateButtons
+        });
+        inp.addEventListener('input', updateButtons);
+      });
+    }
+
     function open() {
       if (openPanel && openPanel !== panel) openPanel.classList.add('hidden');
       const applied = filter.dataset.applied;
@@ -44,12 +55,14 @@
         });
         if (customInputs) {
           customRange.classList.remove('hidden');
-          customRange.querySelector('[data-field="start-day"]').value = sd;
-          customRange.querySelector('[data-field="start-month"]').value = sm;
-          customRange.querySelector('[data-field="start-year"]').value = sy;
-          customRange.querySelector('[data-field="end-day"]').value = ed;
-          customRange.querySelector('[data-field="end-month"]').value = em;
-          customRange.querySelector('[data-field="end-year"]').value = ey;
+          const startStr = `${sd}/${sm}/${sy}`;
+          const endStr = `${ed}/${em}/${ey}`;
+          const startInput = customRange.querySelector('[data-field="start"]');
+          const endInput = customRange.querySelector('[data-field="end"]');
+          startInput.value = startStr;
+          endInput.value = endStr;
+          if (startInput._flatpickr) startInput._flatpickr.setDate(startStr, false, 'd/m/Y');
+          if (endInput._flatpickr) endInput._flatpickr.setDate(endStr, false, 'd/m/Y');
         }
       } else {
         const appliedArr = applied ? applied.split(',') : [];
@@ -58,7 +71,10 @@
         });
         if (customRange) {
           customRange.classList.add('hidden');
-          (customInputs || []).forEach(i => i.value = '');
+          (customInputs || []).forEach(i => {
+            i.value = '';
+            if (i._flatpickr) i._flatpickr.clear();
+          });
         }
       }
       updateButtons();
@@ -77,32 +93,39 @@
 
     options.forEach(o => o.addEventListener('change', () => {
       if (isDate) {
-        if (o.value === 'custom' && o.checked) {
-          customRange.classList.remove('hidden');
-        } else if (o.value === 'custom' && !o.checked) {
-          customRange.classList.add('hidden');
-          (customInputs || []).forEach(i => i.value = '');
-        } else if (o.value !== 'custom') {
-          customRange.classList.add('hidden');
-          const customOption = Array.from(options).find(opt => opt.value === 'custom');
-          if (customOption) customOption.checked = false;
-          (customInputs || []).forEach(i => i.value = '');
+          if (o.value === 'custom' && o.checked) {
+            customRange.classList.remove('hidden');
+            if (customInputs && customInputs[0]._flatpickr) {
+              customInputs[0]._flatpickr.open();
+            }
+          } else if (o.value === 'custom' && !o.checked) {
+            customRange.classList.add('hidden');
+            (customInputs || []).forEach(i => {
+              i.value = '';
+              if (i._flatpickr) i._flatpickr.clear();
+            });
+          } else if (o.value !== 'custom') {
+            customRange.classList.add('hidden');
+            const customOption = Array.from(options).find(opt => opt.value === 'custom');
+            if (customOption) customOption.checked = false;
+            (customInputs || []).forEach(i => {
+              i.value = '';
+              if (i._flatpickr) i._flatpickr.clear();
+            });
+          }
         }
-      }
-      updateButtons();
-    }));
+        updateButtons();
+      }));
 
     applyBtn.addEventListener('click', () => {
       const selected = getSelected();
       if (isDate && selected[0] === 'custom') {
-        const sd = customRange.querySelector('[data-field="start-day"]').value.padStart(2, '0');
-        const sm = customRange.querySelector('[data-field="start-month"]').value.padStart(2, '0');
-        const sy = customRange.querySelector('[data-field="start-year"]').value;
-        const ed = customRange.querySelector('[data-field="end-day"]').value.padStart(2, '0');
-        const em = customRange.querySelector('[data-field="end-month"]').value.padStart(2, '0');
-        const ey = customRange.querySelector('[data-field="end-year"]').value;
-        const startISO = `${sy}-${sm}-${sd}`;
-        const endISO = `${ey}-${em}-${ed}`;
+        const startVal = customRange.querySelector('[data-field="start"]').value;
+        const endVal = customRange.querySelector('[data-field="end"]').value;
+        const [sd, sm, sy] = startVal.split('/');
+        const [ed, em, ey] = endVal.split('/');
+        const startISO = `${sy}-${sm.padStart(2, '0')}-${sd.padStart(2, '0')}`;
+        const endISO = `${ey}-${em.padStart(2, '0')}-${ed.padStart(2, '0')}`;
         filter.dataset.applied = `custom:${startISO}|${endISO}`;
         labelSpan.textContent = `${sd}/${sm}/${sy} – ${ed}/${em}/${ey}`;
       } else {
@@ -133,7 +156,10 @@
           span.textContent = f.dataset.default;
           f.querySelectorAll('input').forEach(inp => {
             if (inp.type === 'radio' || inp.type === 'checkbox') inp.checked = false;
-            else inp.value = '';
+            else {
+              inp.value = '';
+              if (inp._flatpickr) inp._flatpickr.clear();
+            }
           });
           const cr = f.querySelector('.custom-range');
           if (cr) cr.classList.add('hidden');
