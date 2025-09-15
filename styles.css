@@ -110,11 +110,13 @@ html, body{
 }
 
 .flatpickr-prev-month {
-  left:20px;
+  left:20px !important;
+  background:white !important;
 }
 
 .flatpickr-next-month {
-  right:20px;
+  right:20px !important;
+  background:white !important;
 }
 
 .flatpickr-months .flatpickr-prev-month,
