@@ -187,16 +187,34 @@
                   <input type="radio" name="date" value="custom">
                   <span>Custom Rentang Tanggal</span>
                 </label>
-                <div class="custom-range hidden mt-2 space-y-2">
-                  <div class="flex items-center gap-2">
-                    <span class="w-24">Tanggal Awal</span>
-                    <input type="text" class="w-32 h-9 border border-slate-300 rounded-lg text-center" placeholder="DD/MM/YYYY" data-field="start">
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="w-24">Tanggal Akhir</span>
-                    <input type="text" class="w-32 h-9 border border-slate-300 rounded-lg text-center" placeholder="DD/MM/YYYY" data-field="end">
+                <div class="custom-range mt-2">
+                  <div class="flex gap-6">
+                    <!-- Start Date -->
+                    <div class="flex flex-col">
+                      <span class="mb-1">Tanggal Awal</span>
+                      <input
+                        type="text"
+                        class="h-9 w-32 border border-slate-300 rounded-lg text-center flatpickr-input"
+                        placeholder="DD/MM/YYYY"
+                        data-field="start"
+                        readonly
+                      />
+                    </div>
+                
+                    <!-- End Date -->
+                    <div class="flex flex-col">
+                      <span class="mb-1">Tanggal Akhir</span>
+                      <input
+                        type="text"
+                        class="h-9 w-32 border border-slate-300 rounded-lg text-center flatpickr-input"
+                        placeholder="DD/MM/YYYY"
+                        data-field="end"
+                        readonly
+                      />
+                    </div>
                   </div>
                 </div>
+
               </div>
               <div class="flex justify-end gap-2 mt-4">
                 <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
