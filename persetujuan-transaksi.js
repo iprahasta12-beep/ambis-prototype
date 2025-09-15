@@ -59,16 +59,23 @@ function render(tab) {
     const now = new Date();
     list = list.filter(item => {
       const d = parseDate(item.time);
-      if (filters.date === 'hari-ini') {
-        return d.toDateString() === now.toDateString();
-      }
-      if (filters.date === 'minggu-ini') {
+      if (filters.date === '7 Hari Terakhir') {
         const weekAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
         return d >= weekAgo;
       }
-      if (filters.date === 'bulan-ini') {
+      if (filters.date === '30 Hari Terakhir') {
         const monthAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
         return d >= monthAgo;
+      }
+      if (filters.date === '1 Tahun Terakhir') {
+        const yearAgo = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 365);
+        return d >= yearAgo;
+      }
+      if (filters.date.startsWith('custom:')) {
+        const [startStr, endStr] = filters.date.slice(7).split('|');
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        return d >= start && d <= end;
       }
       return true;
     });
