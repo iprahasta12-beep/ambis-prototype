@@ -163,25 +163,47 @@
         <!-- Filter Bar -->
         <div class="flex items-center gap-3 mb-4" id="filterBar">
           <!-- Date Filter -->
-          <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Semua Tanggal">
+          <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Tanggal">
             <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
               <img src="img/icon/date-picker.svg" class="w-5 h-5"/>
-              <span class="filter-label max-w-[120px] truncate">Semua Tanggal</span>
+              <span class="filter-label max-w-[120px] truncate">Tanggal</span>
             </button>
             <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-80">
               <div class="flex flex-col gap-4">
                 <label class="flex items-center gap-2">
-                  <input type="radio" name="date" value="hari-ini">
-                  <span>Hari Ini</span>
+                  <input type="radio" name="date" value="7 Hari Terakhir">
+                  <span>7 Hari Terakhir</span>
                 </label>
                 <label class="flex items-center gap-2">
-                  <input type="radio" name="date" value="minggu-ini">
-                  <span>Minggu Ini</span>
+                  <input type="radio" name="date" value="30 Hari Terakhir">
+                  <span>30 Hari Terakhir</span>
                 </label>
                 <label class="flex items-center gap-2">
-                  <input type="radio" name="date" value="bulan-ini">
-                  <span>Bulan Ini</span>
+                  <input type="radio" name="date" value="1 Tahun Terakhir">
+                  <span>1 Tahun Terakhir</span>
                 </label>
+                <label class="flex items-center gap-2">
+                  <input type="radio" name="date" value="custom">
+                  <span>Custom Rentang Tanggal</span>
+                </label>
+                <div class="custom-range hidden mt-2 space-y-2">
+                  <div class="flex items-center gap-2">
+                    <span class="w-24">Tanggal Awal</span>
+                    <input type="text" maxlength="2" class="w-10 h-9 border border-slate-300 rounded-lg text-center" placeholder="dd" data-field="start-day">
+                    <span>/</span>
+                    <input type="text" maxlength="2" class="w-10 h-9 border border-slate-300 rounded-lg text-center" placeholder="mm" data-field="start-month">
+                    <span>/</span>
+                    <input type="text" maxlength="4" class="w-14 h-9 border border-slate-300 rounded-lg text-center" placeholder="yyyy" data-field="start-year">
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="w-24">Tanggal Akhir</span>
+                    <input type="text" maxlength="2" class="w-10 h-9 border border-slate-300 rounded-lg text-center" placeholder="dd" data-field="end-day">
+                    <span>/</span>
+                    <input type="text" maxlength="2" class="w-10 h-9 border border-slate-300 rounded-lg text-center" placeholder="mm" data-field="end-month">
+                    <span>/</span>
+                    <input type="text" maxlength="4" class="w-14 h-9 border border-slate-300 rounded-lg text-center" placeholder="yyyy" data-field="end-year">
+                  </div>
+                </div>
               </div>
               <div class="flex justify-end gap-2 mt-4">
                 <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
