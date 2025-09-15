@@ -143,13 +143,21 @@
 
         <!-- Tabs -->
         <div class="flex items-center gap-6 border-b border-slate-200 mb-6">
-          <button class="relative py-3 font-medium text-slate-900">
+          <button type="button" data-tab="butuh" class="tab-btn relative py-3 font-medium text-slate-900">
             Butuh Persetujuan Anda
-            <span class="ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">5</span>
-            <span class="absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
+            <span class="tab-count ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
+            <span class="tab-indicator absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
-          <button class="py-3 text-slate-600 hover:text-slate-900">Menunggu Persetujuan</button>
-          <button class="py-3 text-slate-600 hover:text-slate-900">Selesai</button>
+          <button type="button" data-tab="menunggu" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
+            Menunggu Persetujuan
+            <span class="tab-count ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
+            <span class="tab-indicator hidden absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
+          </button>
+          <button type="button" data-tab="selesai" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
+            Selesai
+            <span class="tab-count ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
+            <span class="tab-indicator hidden absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
+          </button>
         </div>
 
         <!-- Filter Bar -->
@@ -185,48 +193,7 @@
                 <th class="px-4 py-3"></th>
               </tr>
             </thead>
-            <tbody class="divide-y">
-              <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3">17 Agu 2024 • 20:10</td>
-                <td class="px-4 py-3">Transaksi</td>
-                <td class="px-4 py-3">Transfer Saldo - Ke BCA PT Queen Japan - Rp50.000.000</td>
-                <td class="px-4 py-3">
-                  <button class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50">Detail</button>
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3">18 Agu 2024 • 20:10</td>
-                <td class="px-4 py-3">Manajemen Pengguna</td>
-                <td class="px-4 py-3">Penambahan Pengguna Baru - Fajar Satria - Finance &amp; Accounting</td>
-                <td class="px-4 py-3">
-                  <button class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50">Detail</button>
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3">19 Agu 2024 • 20:10</td>
-                <td class="px-4 py-3">Batas Transaksi</td>
-                <td class="px-4 py-3">Ubah Batas Transaksi - Dari Rp500.000.000 ke Rp250.000.000 - Oleh Bimo Purwoko</td>
-                <td class="px-4 py-3">
-                  <button class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50">Detail</button>
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3">20 Agu 2024 • 20:10</td>
-                <td class="px-4 py-3">Atur Persetujuan</td>
-                <td class="px-4 py-3">Buat Persetujuan Transaksi - Persetujuan Transfer - Oleh Fajar Satria</td>
-                <td class="px-4 py-3">
-                  <button class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50">Detail</button>
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3">21 Agu 2024 • 20:10</td>
-                <td class="px-4 py-3">Pengaturan Rekening</td>
-                <td class="px-4 py-3">Hapus Rekening - Operasional - Oleh Fajar Satria</td>
-                <td class="px-4 py-3">
-                  <button class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50">Detail</button>
-                </td>
-              </tr>
-            </tbody>
+            <tbody id="approvalBody" class="divide-y"></tbody>
           </table>
         </div>
       </div>
@@ -234,6 +201,7 @@
     <!-- ============ /MAIN ============ -->
   </div>
 
+  <script src="persetujuan-transaksi.js"></script>
   <script src="sidebar.js"></script>
 </body>
 </html>
