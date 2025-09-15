@@ -161,24 +161,91 @@
         </div>
 
         <!-- Filter Bar -->
-        <div class="flex items-center gap-3 mb-4">
-          <div class="relative">
-            <select class="appearance-none h-11 rounded-xl border border-slate-300 pl-10 pr-8 text-slate-700 bg-white w-[200px]">
-              <option>Semua Tanggal</option>
-              <option>Hari Ini</option>
-              <option>Minggu Ini</option>
-              <option>Bulan Ini</option>
-            </select>
-            <img src="img/icon/date-picker.svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500"/>
+        <div class="flex items-center gap-3 mb-4" id="filterBar">
+          <!-- Date Filter -->
+          <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Semua Tanggal">
+            <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2">
+              <img src="img/icon/date-picker.svg" class="w-5 h-5"/>
+              <span class="filter-label max-w-[120px] truncate">Semua Tanggal</span>
+            </button>
+            <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-52">
+              <div class="flex flex-col gap-2">
+                <label class="flex items-center gap-2">
+                  <input type="radio" name="date" value="hari-ini">
+                  <span>Hari Ini</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="radio" name="date" value="minggu-ini">
+                  <span>Minggu Ini</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="radio" name="date" value="bulan-ini">
+                  <span>Bulan Ini</span>
+                </label>
+              </div>
+              <div class="flex justify-end gap-2 mt-4">
+                <button class="cancel px-3 py-1 rounded-lg border text-slate-600">Batalkan</button>
+                <button class="apply px-3 py-1 rounded-lg bg-cyan-600 text-white disabled:opacity-50" disabled>Terapkan</button>
+              </div>
+            </div>
           </div>
-          <div class="relative">
-            <select class="appearance-none h-11 rounded-xl border border-slate-300 pl-10 pr-8 text-slate-700 bg-white w-[200px]">
-              <option>Transaksi</option>
-              <option>Manajemen Pengguna</option>
-              <option>Batas Transaksi</option>
-              <option>Atur Persetujuan</option>
-            </select>
-            <img src="img/icon/filter.svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500"/>
+          <!-- Jenis Transaksi -->
+          <div class="filter relative" data-filter="jenis" data-name="Jenis Transaksi" data-default="Semua Jenis">
+            <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2">
+              <img src="img/icon/filter.svg" class="w-5 h-5"/>
+              <span class="filter-label max-w-[120px] truncate">Semua Jenis</span>
+            </button>
+            <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-52">
+              <div class="flex flex-col gap-2">
+                <label class="flex items-center gap-2">
+                  <input type="radio" name="jenis" value="kredit">
+                  <span>Kredit</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="radio" name="jenis" value="debit">
+                  <span>Debit</span>
+                </label>
+              </div>
+              <div class="flex justify-end gap-2 mt-4">
+                <button class="cancel px-3 py-1 rounded-lg border text-slate-600">Batalkan</button>
+                <button class="apply px-3 py-1 rounded-lg bg-cyan-600 text-white disabled:opacity-50" disabled>Terapkan</button>
+              </div>
+            </div>
+          </div>
+          <!-- Kategori -->
+          <div class="filter relative" data-filter="kategori" data-name="Kategori" data-default="Kategori">
+            <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2">
+              <img src="img/icon/filter.svg" class="w-5 h-5"/>
+              <span class="filter-label max-w-[120px] truncate">Kategori</span>
+            </button>
+            <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-52">
+              <div class="flex flex-col gap-2">
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" value="Transaksi">
+                  <span>Transaksi</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" value="Manajemen Pengguna">
+                  <span>Manajemen Pengguna</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" value="Batas Transaksi">
+                  <span>Batas Transaksi</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" value="Atur Persetujuan">
+                  <span>Atur Persetujuan</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" value="Pengaturan Rekening">
+                  <span>Pengaturan Rekening</span>
+                </label>
+              </div>
+              <div class="flex justify-end gap-2 mt-4">
+                <button class="cancel px-3 py-1 rounded-lg border text-slate-600">Batalkan</button>
+                <button class="apply px-3 py-1 rounded-lg bg-cyan-600 text-white disabled:opacity-50" disabled>Terapkan</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -201,6 +268,7 @@
     <!-- ============ /MAIN ============ -->
   </div>
 
+  <script src="filters.js"></script>
   <script src="persetujuan-transaksi.js"></script>
   <script src="sidebar.js"></script>
 </body>
