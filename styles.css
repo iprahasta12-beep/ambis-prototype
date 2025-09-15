@@ -105,12 +105,20 @@ html, body{
 
 .flatpickr-months{
   margin-bottom:8px !important;
-  background-color:red;
+  background-color:#eaeaea;
+}
+
+.flatpickr-prev-month {
+  left:20px
+}
+
+.flatpickr-next-month {
+  right:20px
 }
 
 .flatpickr-months .flatpickr-prev-month,
 .flatpickr-months .flatpickr-next-month{
-  top:16px;
+  top:19px;
   display:flex;
   align-items:center;
   justify-content:center;
