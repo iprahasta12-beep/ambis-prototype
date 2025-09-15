@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const openBtn  = document.getElementById('openTransferDrawer');
   const drawer   = document.getElementById('drawer');
   const closeBtn = document.getElementById('drawerCloseBtn');
+  const cardGrid = document.getElementById('cardGrid');
 
   // buttons & inputs in form
   const sourceBtn = document.getElementById('sourceAccountBtn');
@@ -473,6 +474,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function openDrawer() {
     closeMoveDrawerPanel();
     drawer.classList.add('open');
+    cardGrid?.classList.remove('md:grid-cols-3');
+    cardGrid?.classList.add('md:grid-cols-2');
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
     }
@@ -483,6 +486,8 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSheet();
     closeDestSheet();
     closeConfirmSheet();
+    cardGrid?.classList.remove('md:grid-cols-2');
+    cardGrid?.classList.add('md:grid-cols-3');
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
@@ -491,6 +496,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function openMoveDrawerPanel() {
     closeDrawer();
     moveDrawer.classList.add('open');
+    cardGrid?.classList.remove('md:grid-cols-3');
+    cardGrid?.classList.add('md:grid-cols-2');
     moveSourceBtn.textContent = 'Pilih sumber rekening';
     moveSourceBtn.classList.add('text-slate-500');
     moveDestBtn.textContent = 'Pilih rekening tujuan';
@@ -520,6 +527,8 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSheet();
     closeDestSheet();
     closeConfirmSheet();
+    cardGrid?.classList.remove('md:grid-cols-2');
+    cardGrid?.classList.add('md:grid-cols-3');
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
