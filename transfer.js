@@ -476,8 +476,6 @@ document.addEventListener('DOMContentLoaded', () => {
     movePane.classList.add('hidden');
     transferPane.classList.remove('hidden');
     drawer.classList.add('open');
-    cardGrid?.classList.remove('md:grid-cols-3');
-    cardGrid?.classList.add('md:grid-cols-2');
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
     }
@@ -490,8 +488,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closeSheet();
     closeDestSheet();
     closeConfirmSheet();
-    cardGrid?.classList.remove('md:grid-cols-2');
-    cardGrid?.classList.add('md:grid-cols-3');
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
@@ -501,8 +497,6 @@ document.addEventListener('DOMContentLoaded', () => {
     transferPane.classList.add('hidden');
     movePane.classList.remove('hidden');
     drawer.classList.add('open');
-    cardGrid?.classList.remove('md:grid-cols-3');
-    cardGrid?.classList.add('md:grid-cols-2');
     moveSourceBtn.textContent = 'Pilih sumber rekening';
     moveSourceBtn.classList.add('text-slate-500');
     moveDestBtn.textContent = 'Pilih rekening tujuan';
