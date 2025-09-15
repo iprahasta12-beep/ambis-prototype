@@ -1,9 +1,6 @@
-/* Sidebar glossy gradients + arc */
+/* Sidebar default background */
 .sb-bg{
-  background:
-    radial-gradient(1100px 700px at 120% 40%, rgba(9,31,44,.55), transparent 60%),
-    radial-gradient(900px 600px at -20% 90%, rgba(24,46,60,.6), transparent 60%),
-    linear-gradient(180deg, #0f1b25 0%, #0d1620 40%, #10202a 100%);
+  background-color:#232D34;
 }
 .sb-item[aria-current="page"]{padding-left:.75rem;}
 .sb-item[aria-current="page"] .sb-label{color:#fff;font-weight:600;}
@@ -11,7 +8,8 @@
 .sb-item:hover{
   outline:none;
   border-color:transparent !important;
-  background-color:transparent !important;
+  background-color:#000000 !important;
+  box-shadow:0 0 0 4px rgba(0,0,0,.2);
 }
 
 /* keep rows steady */
@@ -52,7 +50,7 @@
   top: 50%;
   transform: translateY(-50%);
   margin-left:8px;
-  background-color: rgba(15,27,37,.9);
+  background-color:#000;
   color:#fff;
   padding:4px 8px;
   border-radius:6px;
