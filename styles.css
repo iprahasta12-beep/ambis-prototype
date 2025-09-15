@@ -105,7 +105,7 @@ html, body{
 
 .flatpickr-months{
   margin-bottom:8px !important;
-  background-color:#f7f7f7;
+  background-color:red;
 }
 
 .flatpickr-months .flatpickr-prev-month,
