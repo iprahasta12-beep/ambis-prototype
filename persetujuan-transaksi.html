@@ -30,6 +30,7 @@
 
   <!-- Global styles -->
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body class="font-[Mulish] bg-gray-50 text-slate-900">
   <div class="h-screen overflow-hidden flex">
@@ -189,19 +190,11 @@
                 <div class="custom-range hidden mt-2 space-y-2">
                   <div class="flex items-center gap-2">
                     <span class="w-24">Tanggal Awal</span>
-                    <input type="text" maxlength="2" class="w-10 h-9 border border-slate-300 rounded-lg text-center" placeholder="dd" data-field="start-day">
-                    <span>/</span>
-                    <input type="text" maxlength="2" class="w-10 h-9 border border-slate-300 rounded-lg text-center" placeholder="mm" data-field="start-month">
-                    <span>/</span>
-                    <input type="text" maxlength="4" class="w-14 h-9 border border-slate-300 rounded-lg text-center" placeholder="yyyy" data-field="start-year">
+                    <input type="text" class="w-32 h-9 border border-slate-300 rounded-lg text-center" placeholder="DD/MM/YYYY" data-field="start">
                   </div>
                   <div class="flex items-center gap-2">
                     <span class="w-24">Tanggal Akhir</span>
-                    <input type="text" maxlength="2" class="w-10 h-9 border border-slate-300 rounded-lg text-center" placeholder="dd" data-field="end-day">
-                    <span>/</span>
-                    <input type="text" maxlength="2" class="w-10 h-9 border border-slate-300 rounded-lg text-center" placeholder="mm" data-field="end-month">
-                    <span>/</span>
-                    <input type="text" maxlength="4" class="w-14 h-9 border border-slate-300 rounded-lg text-center" placeholder="yyyy" data-field="end-year">
+                    <input type="text" class="w-32 h-9 border border-slate-300 rounded-lg text-center" placeholder="DD/MM/YYYY" data-field="end">
                   </div>
                 </div>
               </div>
@@ -267,6 +260,8 @@
     <!-- ============ /MAIN ============ -->
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
   <script src="filters.js"></script>
   <script src="persetujuan-transaksi.js"></script>
   <script src="sidebar.js"></script>
