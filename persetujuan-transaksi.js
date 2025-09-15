@@ -12,12 +12,12 @@ const approvalsData = {
     { time: '26 Agu 2024 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BRI PT Nusantara - Rp75.000.000' }
   ],
   menunggu: [
-    { time: '27 Agu 2024 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BCA PT Queen Japan - Rp60.000.000' },
-    { time: '28 Agu 2024 • 20:10', category: 'Manajemen Pengguna', jenis: 'debit', description: 'Penambahan Pengguna Baru - Siti Aisyah - Marketing' },
-    { time: '29 Agu 2024 • 20:10', category: 'Batas Transaksi', jenis: 'debit', description: 'Ubah Batas Transaksi - Dari Rp300.000.000 ke Rp350.000.000 - Oleh Bimo Purwoko' },
-    { time: '30 Agu 2024 • 20:10', category: 'Atur Persetujuan', jenis: 'debit', description: 'Buat Persetujuan - Persetujuan Transfer - Oleh Fajar Satria' },
-    { time: '31 Agu 2024 • 20:10', category: 'Pengaturan Rekening', jenis: 'debit', description: 'Tambah Rekening - Operasional - Oleh Fajar Satria' },
-    { time: '01 Sep 2024 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BNI PT Sejahtera - Rp90.000.000' }
+    { time: '01 Agu 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BCA PT Queen Japan - Rp60.000.000' },
+    { time: '10 Agu 2025 • 20:10', category: 'Manajemen Pengguna', jenis: 'debit', description: 'Penambahan Pengguna Baru - Siti Aisyah - Marketing' },
+    { time: '20 Agu 2025 • 20:10', category: 'Batas Transaksi', jenis: 'debit', description: 'Ubah Batas Transaksi - Dari Rp300.000.000 ke Rp350.000.000 - Oleh Bimo Purwoko' },
+    { time: '05 Sep 2025 • 20:10', category: 'Atur Persetujuan', jenis: 'debit', description: 'Buat Persetujuan - Persetujuan Transfer - Oleh Fajar Satria' },
+    { time: '15 Sep 2025 • 20:10', category: 'Pengaturan Rekening', jenis: 'debit', description: 'Tambah Rekening - Operasional - Oleh Fajar Satria' },
+    { time: '30 Sep 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BNI PT Sejahtera - Rp90.000.000' }
   ],
   selesai: [
     { time: '02 Sep 2024 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BCA PT Queen Japan - Rp50.000.000' },
