@@ -185,7 +185,7 @@ function renderDrawer() {
       label.innerHTML = `
         <input type="checkbox" data-id="${item.id}" class="sr-only peer" ${tempSelectedAkses.includes(item.id) ? 'checked' : ''}>
 
-        <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-slate-300 hover:shadow-sm peer-checked:bg-cyan-50 peer-checked:[&_img]:opacity-100 peer-focus-visible:ring-2 peer-focus-visible:ring-cyan-400">
+        <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-slate-300 hover:shadow-sm peer-checked:[&_img]:opacity-100 peer-focus-visible:ring-2 peer-focus-visible:ring-cyan-400">
           <span class="text-base font-medium text-slate-900">${item.label}</span>
           <span aria-hidden="true" class="flex-shrink-0 w-7 h-7 grid place-items-center">
             <img src="img/dashboard/akses-cepat/aktif.svg" alt="" class="w-5 h-5 opacity-0">
