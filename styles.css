@@ -119,6 +119,10 @@ html, body{
   background:white !important;
 }
 
+.flatpicker-current-month select {
+  text-align:right !important;
+}
+
 .flatpickr-months .flatpickr-prev-month,
 .flatpickr-months .flatpickr-next-month{
   top:19px;
