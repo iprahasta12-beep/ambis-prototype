@@ -162,10 +162,10 @@
                 </svg>
               </div>
 
-              <!-- Balance Card — fixed 260px, saldo at bottom -->
+              <!-- Balance Card — now includes limit info -->
               <div class="relative rounded-[22px] bg-black text-white border border-white/20
                           p-5 mb-4 shadow-lg overflow-hidden
-                          h-[260px] flex flex-col">
+                          h-[320px] flex flex-col">
                 <!-- top row -->
                 <div class="flex items-center justify-between">
                   <img src="img/dashboard/card-bank.png" alt="Bank Logo" class="h-6">
@@ -177,24 +177,23 @@
                   </button>
                 </div>
 
-                <!-- bottom block -->
-                <div class="mt-auto pb-1">
+                <!-- saldo block -->
+                <div class="mt-auto pb-4">
                   <p class="text-white/90 text-[18px]">Total Saldo Aktif</p>
                   <p id="dashBalanceValue" class="text-white text-[24px] tracking-wide">
                     Rp100.000.000,00
                   </p>
                 </div>
-              </div>
 
-
-              <!-- Limit harian (stick to bottom) -->
-              <div class="mt-auto">
-                <p class="font-semibold pb-4">Sisa Limit Transaksi Harian</p>
-                <p class="text-[18px] text-slate-900">Rp450.000.000</p>
-                <div class="mt-2 h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div id="dashLimitBar" class="h-full bg-cyan-600" style="width:90%;"></div>
+                <!-- Limit harian -->
+                <div>
+                  <p class="font-semibold pb-2">Sisa Limit Transaksi Harian</p>
+                  <p class="text-[18px] text-white">Rp450.000.000</p>
+                  <div class="mt-2 h-2 bg-white/20 rounded-full overflow-hidden">
+                    <div id="dashLimitBar" class="h-full bg-cyan-600" style="width:90%;"></div>
+                  </div>
+                  <p class="text-white/70 mt-1">dari total Rp500.000.000</p>
                 </div>
-                <p class="text-slate-500 mt-1">dari total Rp500.000.000</p>
               </div>
             </div>
           </section>
