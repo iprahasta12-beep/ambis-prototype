@@ -144,133 +144,305 @@
 
         <!-- Tabs -->
         <div class="flex items-center gap-6 border-b border-slate-200 mb-6">
-          <button type="button" data-tab="butuh" class="tab-btn relative py-3 font-medium text-slate-900">
-            Butuh Persetujuan Anda
+          <button type="button" data-tab="transaksi" class="tab-btn relative py-3 font-semibold text-slate-900">
+            Transaksi
             <span class="tab-count ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
             <span class="tab-indicator absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
-          <button type="button" data-tab="menunggu" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
-            Menunggu Persetujuan
+          <button type="button" data-tab="batas" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
+            Batas Transaksi
+            <span class="tab-count hidden ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
             <span class="tab-indicator hidden absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
-          <button type="button" data-tab="selesai" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
-            Selesai
+          <button type="button" data-tab="persetujuan" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
+            Atur Persetujuan
+            <span class="tab-count hidden ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
             <span class="tab-indicator hidden absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
         </div>
 
-        <!-- Filter Bar -->
-        <div class="flex items-center gap-3 mb-4" id="filterBar">
-          <!-- Date Filter -->
-          <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Tanggal">
-            <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
-              <img src="img/icon/date-picker.svg" class="w-5 h-5"/>
-              <span class="filter-label max-w-[120px] truncate">Tanggal</span>
-            </button>
-            <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[400px]">
-              <div class="flex flex-col gap-4">
-                <label class="flex items-center gap-2">
-                  <input type="radio" name="date" value="7 Hari Terakhir">
-                  <span>7 Hari Terakhir</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="radio" name="date" value="30 Hari Terakhir">
-                  <span>30 Hari Terakhir</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="radio" name="date" value="1 Tahun Terakhir">
-                  <span>1 Tahun Terakhir</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="radio" name="date" value="custom">
-                  <span>Custom Rentang Tanggal</span>
-                </label>
-                <div class="custom-range">
-                  <div class="flex gap-2">
-                    <!-- Start Date -->
-                    <div class="flex flex-col w-[50%]">
-                      <span class="mb-1">Tanggal Awal</span>
-                      <input
-                        type="text"
-                        class="h-9 border border-slate-300 rounded-lg text-center flatpickr-input"
-                        placeholder="DD/MM/YYYY"
-                        data-field="start"
-                        readonly
-                      />
-                    </div>
-                
-                    <!-- End Date -->
-                    <div class="flex flex-col w-[50%]">
-                      <span class="mb-1">Tanggal Akhir</span>
-                      <input
-                        type="text"
-                        class="h-9 border border-slate-300 rounded-lg text-center flatpickr-input"
-                        placeholder="DD/MM/YYYY"
-                        data-field="end"
-                        readonly
-                      />
+        <!-- Tab Panels -->
+        <section class="tab-panel space-y-4" data-tab-panel="transaksi">
+          <div class="flex items-center gap-3" data-filter-group="transaksi">
+            <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Tanggal">
+              <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
+                <img src="img/icon/date-picker.svg" class="w-5 h-5"/>
+                <span class="filter-label max-w-[120px] truncate">Tanggal</span>
+              </button>
+              <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[400px]">
+                <div class="flex flex-col gap-4">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="transaksi-date" value="7 Hari Terakhir">
+                    <span>7 Hari Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="transaksi-date" value="30 Hari Terakhir">
+                    <span>30 Hari Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="transaksi-date" value="1 Tahun Terakhir">
+                    <span>1 Tahun Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="transaksi-date" value="custom">
+                    <span>Custom Rentang Tanggal</span>
+                  </label>
+                  <div class="custom-range hidden">
+                    <div class="flex gap-2">
+                      <div class="flex flex-col w-[50%]">
+                        <span class="mb-1">Tanggal Awal</span>
+                        <input
+                          type="text"
+                          class="h-9 border border-slate-300 rounded-lg text-center flatpickr-input"
+                          placeholder="DD/MM/YYYY"
+                          data-field="start"
+                          readonly
+                        />
+                      </div>
+                      <div class="flex flex-col w-[50%]">
+                        <span class="mb-1">Tanggal Akhir</span>
+                        <input
+                          type="text"
+                          class="h-9 border border-slate-300 rounded-lg text-center flatpickr-input"
+                          placeholder="DD/MM/YYYY"
+                          data-field="end"
+                          readonly
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-
+                <div class="flex justify-end gap-2 mt-4">
+                  <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
+                  <button class="apply px-3 py-1 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-full" disabled>Terapkan</button>
+                </div>
               </div>
-              <div class="flex justify-end gap-2 mt-4">
-                <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
-                <button class="apply px-3 py-1 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-full" disabled>Terapkan</button>
+            </div>
+            <div class="filter relative" data-filter="jenis" data-name="Jenis" data-default="Jenis">
+              <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
+                <img src="img/icon/filter.svg" class="w-5 h-5"/>
+                <span class="filter-label max-w-[120px] truncate">Jenis</span>
+              </button>
+              <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-64">
+                <div class="flex flex-col gap-2">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="transaksi-jenis" value="kredit">
+                    <span>Kredit</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="transaksi-jenis" value="debit">
+                    <span>Debit</span>
+                  </label>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                  <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
+                  <button class="apply px-3 py-1 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-full" disabled>Terapkan</button>
+                </div>
               </div>
             </div>
           </div>
-          <!-- Kategori -->
-          <div class="filter relative" data-filter="kategori" data-name="Kategori" data-default="Kategori">
-            <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
-              <img src="img/icon/filter.svg" class="w-5 h-5"/>
-              <span class="filter-label max-w-[120px] truncate">Kategori</span>
-            </button>
-            <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-80">
-              <div class="flex flex-col gap-2">
-                <label class="flex items-center gap-4">
-                  <input type="checkbox" value="Transaksi">
-                  <span>Transaksi</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Manajemen Pengguna">
-                  <span>Manajemen Pengguna</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Batas Transaksi">
-                  <span>Batas Transaksi</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Atur Persetujuan">
-                  <span>Atur Persetujuan</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Pengaturan Rekening">
-                  <span>Pengaturan Rekening</span>
-                </label>
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="min-w-full">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="text-left px-4 py-3 font-medium">Waktu Permintaan</th>
+                  <th class="text-left px-4 py-3 font-medium">Aktivitas</th>
+                  <th class="text-left px-4 py-3 font-medium">Deskripsi</th>
+                  <th class="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y" data-role="table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="tab-panel space-y-4 hidden" data-tab-panel="batas">
+          <div class="flex items-center gap-3" data-filter-group="batas">
+            <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Tanggal">
+              <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
+                <img src="img/icon/date-picker.svg" class="w-5 h-5"/>
+                <span class="filter-label max-w-[120px] truncate">Tanggal</span>
+              </button>
+              <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[400px]">
+                <div class="flex flex-col gap-4">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="batas-date" value="7 Hari Terakhir">
+                    <span>7 Hari Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="batas-date" value="30 Hari Terakhir">
+                    <span>30 Hari Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="batas-date" value="1 Tahun Terakhir">
+                    <span>1 Tahun Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="batas-date" value="custom">
+                    <span>Custom Rentang Tanggal</span>
+                  </label>
+                  <div class="custom-range hidden">
+                    <div class="flex gap-2">
+                      <div class="flex flex-col w-[50%]">
+                        <span class="mb-1">Tanggal Awal</span>
+                        <input
+                          type="text"
+                          class="h-9 border border-slate-300 rounded-lg text-center flatpickr-input"
+                          placeholder="DD/MM/YYYY"
+                          data-field="start"
+                          readonly
+                        />
+                      </div>
+                      <div class="flex flex-col w-[50%]">
+                        <span class="mb-1">Tanggal Akhir</span>
+                        <input
+                          type="text"
+                          class="h-9 border border-slate-300 rounded-lg text-center flatpickr-input"
+                          placeholder="DD/MM/YYYY"
+                          data-field="end"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                  <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
+                  <button class="apply px-3 py-1 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-full" disabled>Terapkan</button>
+                </div>
               </div>
-              <div class="flex justify-end gap-2 mt-4">
-                <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
-                <button class="apply px-3 py-1 rounded-lg bg-cyan-600 text-white disabled:opacity-50  w-full" disabled>Terapkan</button>
+            </div>
+            <div class="filter relative" data-filter="jenis" data-name="Jenis" data-default="Jenis">
+              <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
+                <img src="img/icon/filter.svg" class="w-5 h-5"/>
+                <span class="filter-label max-w-[120px] truncate">Jenis</span>
+              </button>
+              <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-64">
+                <div class="flex flex-col gap-2">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="batas-jenis" value="kredit">
+                    <span>Kredit</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="batas-jenis" value="debit">
+                    <span>Debit</span>
+                  </label>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                  <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
+                  <button class="apply px-3 py-1 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-full" disabled>Terapkan</button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="min-w-full">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="text-left px-4 py-3 font-medium">Waktu Permintaan</th>
+                  <th class="text-left px-4 py-3 font-medium">Aktivitas</th>
+                  <th class="text-left px-4 py-3 font-medium">Deskripsi</th>
+                  <th class="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y" data-role="table-body"></tbody>
+            </table>
+          </div>
+        </section>
 
-        <!-- Tabel -->
-        <div class="overflow-x-auto rounded-xl border border-slate-200">
-          <table class="min-w-full  ">
-            <thead class="bg-slate-50 text-slate-600">
-              <tr>
-                <th class="text-left px-4 py-3 font-medium">Waktu Permintaan</th>
-                <th class="text-left px-4 py-3 font-medium">Kategori</th>
-                <th class="text-left px-4 py-3 font-medium">Deskripsi</th>
-                <th class="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody id="approvalBody" class="divide-y"></tbody>
-          </table>
-        </div>
+        <section class="tab-panel space-y-4 hidden" data-tab-panel="persetujuan">
+          <div class="flex items-center gap-3" data-filter-group="persetujuan">
+            <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Tanggal">
+              <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
+                <img src="img/icon/date-picker.svg" class="w-5 h-5"/>
+                <span class="filter-label max-w-[120px] truncate">Tanggal</span>
+              </button>
+              <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[400px]">
+                <div class="flex flex-col gap-4">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="persetujuan-date" value="7 Hari Terakhir">
+                    <span>7 Hari Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="persetujuan-date" value="30 Hari Terakhir">
+                    <span>30 Hari Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="persetujuan-date" value="1 Tahun Terakhir">
+                    <span>1 Tahun Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="persetujuan-date" value="custom">
+                    <span>Custom Rentang Tanggal</span>
+                  </label>
+                  <div class="custom-range hidden">
+                    <div class="flex gap-2">
+                      <div class="flex flex-col w-[50%]">
+                        <span class="mb-1">Tanggal Awal</span>
+                        <input
+                          type="text"
+                          class="h-9 border border-slate-300 rounded-lg text-center flatpickr-input"
+                          placeholder="DD/MM/YYYY"
+                          data-field="start"
+                          readonly
+                        />
+                      </div>
+                      <div class="flex flex-col w-[50%]">
+                        <span class="mb-1">Tanggal Akhir</span>
+                        <input
+                          type="text"
+                          class="h-9 border border-slate-300 rounded-lg text-center flatpickr-input"
+                          placeholder="DD/MM/YYYY"
+                          data-field="end"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                  <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
+                  <button class="apply px-3 py-1 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-full" disabled>Terapkan</button>
+                </div>
+              </div>
+            </div>
+            <div class="filter relative" data-filter="jenis" data-name="Jenis" data-default="Jenis">
+              <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
+                <img src="img/icon/filter.svg" class="w-5 h-5"/>
+                <span class="filter-label max-w-[120px] truncate">Jenis</span>
+              </button>
+              <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-64">
+                <div class="flex flex-col gap-2">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="persetujuan-jenis" value="kredit">
+                    <span>Kredit</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="persetujuan-jenis" value="debit">
+                    <span>Debit</span>
+                  </label>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                  <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
+                  <button class="apply px-3 py-1 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-full" disabled>Terapkan</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="min-w-full">
+              <thead class="bg-slate-50 text-slate-600">
+                <tr>
+                  <th class="text-left px-4 py-3 font-medium">Waktu Permintaan</th>
+                  <th class="text-left px-4 py-3 font-medium">Aktivitas</th>
+                  <th class="text-left px-4 py-3 font-medium">Deskripsi</th>
+                  <th class="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y" data-role="table-body"></tbody>
+            </table>
+          </div>
+        </section>
       </div>
     </main>
     <!-- ============ /MAIN ============ -->
