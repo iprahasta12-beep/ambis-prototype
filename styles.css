@@ -56,7 +56,7 @@
   border-radius:6px;
   white-space:nowrap;
   pointer-events:none;
-  z-index:9999;
+  z-index:999999;
 }
 
 /* Drawer panel that pushes main content instead of overlaying */
