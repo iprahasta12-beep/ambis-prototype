@@ -40,13 +40,15 @@ function updateView() {
   account.transactions.forEach((tx) => {
     const tr = document.createElement('tr');
     tr.className = 'hover:bg-slate-50';
-    const iconSrc = tx.amount < 0
+    const isTransferOut = tx.amount < 0;
+    const iconSrc = isTransferOut
       ? 'img/dashboard/akses-cepat/transfer-out.svg'
       : 'img/dashboard/akses-cepat/transfer-in.svg';
+    const iconBgClass = isTransferOut ? 'bg-red-100' : 'bg-green-100';
     tr.innerHTML = `
       <td class="px-4 py-3">
         <div class="flex items-center gap-2">
-          <span class="w-10 h-10 rounded-full bg-red-100 border grid place-items-center">
+          <span class="w-10 h-10 rounded-full ${iconBgClass} border grid place-items-center">
             <img src="${iconSrc}" alt="" class="w-6 h-6 object-contain">
           </span>
           <span>${tx.description}</span>
