@@ -1,8 +1,8 @@
 (function() {
-  const filters = document.querySelectorAll('.filter');
+  const allFilters = document.querySelectorAll('.filter');
   let openPanel = null;
 
-  filters.forEach(filter => {
+  allFilters.forEach(filter => {
     const trigger = filter.querySelector('.filter-trigger');
     const panel = filter.querySelector('.filter-panel');
     const options = panel.querySelectorAll('input[type="radio"], input[type="checkbox"]');
@@ -15,6 +15,13 @@
     const isDate = filter.dataset.filter === 'date';
     const customRange = isDate ? panel.querySelector('.custom-range') : null;
     const customInputs = customRange ? customRange.querySelectorAll('input') : null;
+    const groupEl = filter.closest('[data-filter-group]');
+    const groupId = groupEl ? groupEl.dataset.filterGroup || null : null;
+    const groupFilters = groupEl ? groupEl.querySelectorAll('.filter') : allFilters;
+
+    function emitChange() {
+      document.dispatchEvent(new CustomEvent('filter-change', { detail: { groupId } }));
+    }
 
     function getSelected() {
       return Array.from(options).filter(o => o.checked).map(o => o.value);
@@ -28,7 +35,7 @@
       } else {
         applyBtn.disabled = selected.length === 0;
       }
-      const anyApplied = selected.length > 0 || Array.from(document.querySelectorAll('.filter')).some(f => f.dataset.applied);
+      const anyApplied = selected.length > 0 || Array.from(groupFilters).some(f => f.dataset.applied);
       cancelBtn.textContent = anyApplied ? 'Reset Ulang' : 'Batalkan';
     }
 
@@ -98,29 +105,29 @@
 
     options.forEach(o => o.addEventListener('change', () => {
       if (isDate) {
-          if (o.value === 'custom' && o.checked) {
-            customRange.classList.remove('hidden');
-            if (customInputs && customInputs[0]._flatpickr) {
-              customInputs[0]._flatpickr.open();
-            }
-          } else if (o.value === 'custom' && !o.checked) {
-            customRange.classList.add('hidden');
-            (customInputs || []).forEach(i => {
-              i.value = '';
-              if (i._flatpickr) i._flatpickr.clear();
-            });
-          } else if (o.value !== 'custom') {
-            customRange.classList.add('hidden');
-            const customOption = Array.from(options).find(opt => opt.value === 'custom');
-            if (customOption) customOption.checked = false;
-            (customInputs || []).forEach(i => {
-              i.value = '';
-              if (i._flatpickr) i._flatpickr.clear();
-            });
+        if (o.value === 'custom' && o.checked) {
+          customRange.classList.remove('hidden');
+          if (customInputs && customInputs[0]._flatpickr) {
+            customInputs[0]._flatpickr.open();
           }
+        } else if (o.value === 'custom' && !o.checked) {
+          customRange.classList.add('hidden');
+          (customInputs || []).forEach(i => {
+            i.value = '';
+            if (i._flatpickr) i._flatpickr.clear();
+          });
+        } else if (o.value !== 'custom') {
+          customRange.classList.add('hidden');
+          const customOption = Array.from(options).find(opt => opt.value === 'custom');
+          if (customOption) customOption.checked = false;
+          (customInputs || []).forEach(i => {
+            i.value = '';
+            if (i._flatpickr) i._flatpickr.clear();
+          });
         }
-        updateButtons();
-      }));
+      }
+      updateButtons();
+    }));
 
     applyBtn.addEventListener('click', () => {
       const selected = getSelected();
@@ -147,7 +154,7 @@
           labelSpan.textContent = selected[0] || defaultLabel;
         }
       }
-      document.dispatchEvent(new CustomEvent('filter-change'));
+      emitChange();
       close();
     });
 
@@ -155,7 +162,7 @@
       if (cancelBtn.textContent === 'Batalkan') {
         close();
       } else {
-        document.querySelectorAll('.filter').forEach(f => {
+        Array.from(groupFilters).forEach(f => {
           f.dataset.applied = '';
           const span = f.querySelector('.filter-label');
           span.textContent = f.dataset.default;
@@ -169,7 +176,7 @@
           const cr = f.querySelector('.custom-range');
           if (cr) cr.classList.add('hidden');
         });
-        document.dispatchEvent(new CustomEvent('filter-change'));
+        emitChange();
         close();
       }
     });
