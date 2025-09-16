@@ -119,7 +119,7 @@ html, body{
   background:white !important;
 }
 
-.flatpicker-current-month select {
+.flatpickr-current-month select {
   text-align:right !important;
 }
 
