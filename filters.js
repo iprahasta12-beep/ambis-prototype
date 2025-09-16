@@ -84,6 +84,11 @@
 
     function close() {
       panel.classList.add('hidden');
+      if (isDate && customInputs) {
+        Array.from(customInputs).forEach(inp => {
+          if (inp._flatpickr) inp._flatpickr.close();
+        });
+      }
       openPanel = null;
     }
 
@@ -170,7 +175,11 @@
     });
 
     document.addEventListener('click', e => {
-      if (!filter.contains(e.target) && !panel.classList.contains('hidden')) {
+      const interactedWithCalendar = isDate && customInputs && Array.from(customInputs).some(inp => {
+        const fp = inp._flatpickr;
+        return fp && fp.calendarContainer && fp.calendarContainer.contains(e.target);
+      });
+      if (!filter.contains(e.target) && !interactedWithCalendar && !panel.classList.contains('hidden')) {
         close();
       }
     });
