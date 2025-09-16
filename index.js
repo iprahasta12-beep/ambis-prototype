@@ -185,12 +185,10 @@ function renderDrawer() {
       label.innerHTML = `
         <input type="checkbox" data-id="${item.id}" class="sr-only peer" ${tempSelectedAkses.includes(item.id) ? 'checked' : ''}>
 
-        <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-slate-300 hover:shadow-sm peer-checked:border-cyan-500 peer-checked:bg-cyan-50 peer-focus-visible:ring-2 peer-focus-visible:ring-cyan-400">
+        <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-slate-300 hover:shadow-sm peer-checked:bg-cyan-50 peer-focus-visible:ring-2 peer-focus-visible:ring-cyan-400">
           <span class="text-base font-medium text-slate-900">${item.label}</span>
           <span aria-hidden="true" class="flex-shrink-0 w-7 h-7 rounded-full border border-slate-300 grid place-items-center text-transparent transition peer-checked:border-cyan-500 peer-checked:bg-cyan-500 peer-checked:text-white">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-              <path d="M5 13l4 4L19 7" />
-            </svg>
+            <img src="img/dashboard/akses-cepat/aktif.svg" alt="" class="w-4 h-4 object-contain">
           </span>
         </div>`;
       list.appendChild(label);
