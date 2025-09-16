@@ -1,24 +1,31 @@
 const approvalsData = {
-  transaksi: 
+  butuh: 
   [
-    {time: '17 Agu 2025 • 20:10',category: 'Transaksi',jenis: 'kredit',activity: 'Transfer Saldo',description: 'Ke BCA PT Queen Japan - Rp50.000.000'},
-    {time: '19 Agu 2025 • 20:10',category: 'Batas Transaksi',jenis: 'debit',activity: 'Ubah Batas Transaksi',description: 'Dari Rp500.000.000 ke Rp250.000.000 - Oleh Bimo Purwoko'},
-    {time: '20 Agu 2025 • 20:10',category: 'Atur Persetujuan',jenis: 'debit',activity: 'Buat Persetujuan Transaksi',description: 'Persetujuan Transfer - Oleh Fajar Satria'},
-    {time: '21 Agu 2025 • 20:10',category: 'Pengaturan Rekening',jenis: 'debit',activity: 'Hapus Rekening',description: 'Rekening Operasional - Oleh Fajar Satria'},
-    {time: '22 Agu 2025 • 20:10',category: 'Transaksi',jenis: 'kredit',activity: 'Transfer Saldo',description: 'Ke Mandiri PT Aman Jaya - Rp100.000.000'}
+    { time: '17 Agu 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BCA PT Queen Japan - Rp50.000.000' },
+    { time: '18 Agu 2025 • 20:10', category: 'Manajemen Pengguna', jenis: 'debit', description: 'Penambahan Pengguna Baru - Fajar Satria - Finance & Accounting' },
+    { time: '19 Agu 2025 • 20:10', category: 'Batas Transaksi', jenis: 'debit', description: 'Ubah Batas Transaksi - Dari Rp500.000.000 ke Rp250.000.000 - Oleh Bimo Purwoko' },
+    { time: '20 Agu 2025 • 20:10', category: 'Atur Persetujuan', jenis: 'debit', description: 'Buat Persetujuan Transaksi - Persetujuan Transfer - Oleh Fajar Satria' },
+    { time: '21 Agu 2025 • 20:10', category: 'Pengaturan Rekening', jenis: 'debit', description: 'Hapus Rekening - Operasional - Oleh Fajar Satria' },
+    { time: '22 Agu 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke Mandiri PT Aman Jaya - Rp100.000.000' },
+    { time: '23 Agu 2025 • 20:10', category: 'Manajemen Pengguna', jenis: 'debit', description: 'Nonaktifkan Pengguna - Budi Santoso - Admin' },
+    { time: '24 Agu 2025 • 20:10', category: 'Batas Transaksi', jenis: 'debit', description: 'Tambah Batas Transaksi - Dari Rp250.000.000 ke Rp300.000.000 - Oleh Bimo Purwoko' },
+    { time: '25 Agu 2025 • 20:10', category: 'Atur Persetujuan', jenis: 'debit', description: 'Edit Persetujuan - Persetujuan Transfer - Oleh Fajar Satria' },
+    { time: '26 Agu 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BRI PT Nusantara - Rp75.000.000' }
   ],
-  batas: 
+  menunggu: 
   [
-    {time: '19 Agu 2025 • 20:10',jenis: 'debit',activity: 'Ubah Batas Transaksi',description: 'Dari Rp500.000.000 ke Rp250.000.000 - Oleh Bimo Purwoko'},
-    {time: '24 Agu 2025 • 20:10',jenis: 'debit',activity: 'Tambah Batas Transaksi',description: 'Dari Rp250.000.000 ke Rp300.000.000 - Oleh Bimo Purwoko'},
-    {time: '20 Agu 2025 • 20:10',jenis: 'debit',activity: 'Ubah Batas Transaksi',description: 'Dari Rp300.000.000 ke Rp350.000.000 - Oleh Bimo Purwoko'},
-    {time: '04 Sep 2025 • 20:10',jenis: 'debit',activity: 'Ubah Batas Transaksi',description: 'Dari Rp350.000.000 ke Rp400.000.000 - Oleh Bimo Purwoko'}
+    { time: '01 Agu 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BCA PT Queen Japan - Rp60.000.000' },
+    { time: '10 Agu 2025 • 20:10', category: 'Manajemen Pengguna', jenis: 'debit', description: 'Penambahan Pengguna Baru - Siti Aisyah - Marketing' },
+    { time: '20 Agu 2025 • 20:10', category: 'Batas Transaksi', jenis: 'debit', description: 'Ubah Batas Transaksi - Dari Rp300.000.000 ke Rp350.000.000 - Oleh Bimo Purwoko' },
+    { time: '05 Sep 2025 • 20:10', category: 'Atur Persetujuan', jenis: 'debit', description: 'Buat Persetujuan - Persetujuan Transfer - Oleh Fajar Satria' },
+    { time: '15 Sep 2025 • 20:10', category: 'Pengaturan Rekening', jenis: 'debit', description: 'Tambah Rekening - Operasional - Oleh Fajar Satria' },
+    { time: '30 Sep 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BNI PT Sejahtera - Rp90.000.000' }
   ],
-  persetujuan: 
+  Selesai: 
   [
-    {time: '20 Agu 2025 • 20:10',jenis: 'debit',activity: 'Buat Persetujuan Transfer',description: 'Persetujuan Transfer - Oleh Fajar Satria'},
-    {time: '25 Agu 2025 • 20:10',jenis: 'debit',activity: 'Edit Persetujuan Transfer',description: 'Persetujuan Transfer - Oleh Fajar Satria'},
-    {time: '05 Sep 2025 • 20:10',jenis: 'debit',activity: 'Buat Persetujuan Transfer',description: 'Persetujuan Transfer - Oleh Fajar Satria'}
+    { time: '02 Sep 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BCA PT Queen Japan - Rp50.000.000' },
+    { time: '03 Sep 2025 • 20:10', category: 'Manajemen Pengguna', jenis: 'debit', description: 'Penambahan Pengguna Baru - Fajar Satria - Finance' },
+    { time: '04 Sep 2025 • 20:10', category: 'Batas Transaksi', jenis: 'debit', description: 'Ubah Batas Transaksi - Dari Rp350.000.000 ke Rp400.000.000
   ]
 };
 
