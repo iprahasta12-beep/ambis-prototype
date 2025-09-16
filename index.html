@@ -20,6 +20,7 @@
     tailwind.config = {
       safelist: [
         "opacity-0","opacity-100","peer-checked:opacity-100","peer-checked:[&_img]:opacity-100",
+        "peer-checked:border-cyan-300","peer-checked:bg-cyan-50",
         "translate-y-0","translate-y-1",
         "ring-2","ring-cyan-400","bg-cyan-50","border-cyan-300",
         "text-slate-900","text-slate-400"
@@ -319,8 +320,11 @@
 
     <!-- Drawer -->
     <div id="drawer" class="h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-200">
-      <div class="flex items-center justify-between p-4 border-b">
-        <h2 class="text-lg font-semibold">Akses Cepat</h2>
+      <div class="flex items-start justify-between p-4 border-b gap-4">
+        <div>
+          <h2 class="text-lg font-semibold">Akses Cepat</h2>
+          <p class="mt-1 text-sm text-slate-500">Sesuaikan urutan tampilan akses cepat sesuai dengan yang Anda butuhkan.</p>
+        </div>
         <button id="drawerCloseBtn" class="text-2xl leading-none">&times;</button>
       </div>
       <div class="flex-1 overflow-y-auto">
