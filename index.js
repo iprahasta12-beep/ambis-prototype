@@ -1,8 +1,12 @@
 const accountSelect = document.getElementById('accountSelect');
 const balanceEl = document.getElementById('dashBalanceValue');
 const transactionListEl = document.getElementById('transactionList');
+const balanceToggleBtn = document.getElementById('dashBalanceToggle');
+const balanceToggleLabel = balanceToggleBtn?.querySelector('[data-balance-toggle-label]');
+const balanceSensitiveEls = Array.from(document.querySelectorAll('[data-balance-sensitive]'));
 
 let accounts = [];
+let isBalanceHidden = false;
 
 fetch('data/account.json')
   .then((res) => res.json())
@@ -34,7 +38,7 @@ function updateView() {
   const account = accounts.find((a) => a.id === selectedId);
   if (!account) return;
 
-  balanceEl.textContent = formatCurrency(account.balance);
+  setBalanceValue(balanceEl, formatCurrency(account.balance));
 
   transactionListEl.innerHTML = '';
   account.transactions.forEach((tx) => {
@@ -71,6 +75,56 @@ function formatCurrency(num) {
     maximumFractionDigits: 2,
   }).format(num);
 }
+
+function maskCurrencyText(text) {
+  if (!text) {
+    return '••••••';
+  }
+  const match = text.match(/^(\s*Rp\s*)/i);
+  const prefix = match ? match[0] : '';
+  const rest = match ? text.slice(prefix.length) : text;
+  const maskedRest = rest.replace(/\S/g, '•');
+  return `${prefix}${maskedRest || '••••'}`;
+}
+
+function setBalanceValue(el, value) {
+  if (!el) return;
+  el.dataset.balanceValue = value;
+  el.textContent = isBalanceHidden ? maskCurrencyText(value) : value;
+}
+
+function registerBalanceElement(el) {
+  if (!el) return;
+  if (!el.dataset.balanceValue) {
+    el.dataset.balanceValue = el.textContent.trim();
+  }
+  el.textContent = isBalanceHidden
+    ? maskCurrencyText(el.dataset.balanceValue)
+    : el.dataset.balanceValue;
+}
+
+function updateBalanceVisibility() {
+  balanceSensitiveEls.forEach((el) => {
+    const original = el.dataset.balanceValue ?? '';
+    el.textContent = isBalanceHidden ? maskCurrencyText(original) : original;
+  });
+
+  if (balanceToggleLabel) {
+    balanceToggleLabel.textContent = isBalanceHidden ? 'Tampilkan' : 'Sembunyikan';
+  }
+
+  if (balanceToggleBtn) {
+    balanceToggleBtn.setAttribute('aria-pressed', isBalanceHidden ? 'true' : 'false');
+  }
+}
+
+balanceSensitiveEls.forEach(registerBalanceElement);
+updateBalanceVisibility();
+
+balanceToggleBtn?.addEventListener('click', () => {
+  isBalanceHidden = !isBalanceHidden;
+  updateBalanceVisibility();
+});
 
 // Drawer logic for "Ubah Akses"
 const drawer = document.getElementById('drawer');

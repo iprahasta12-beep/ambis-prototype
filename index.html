@@ -162,38 +162,42 @@
                 </svg>
               </div>
 
-              <!-- Balance Card — now includes limit info -->
-              <div class="rounded-[22px] bg-black text-white border border-white/20
-                          p-5 shadow-lg overflow-hidden
-                          h-[100%] flex flex-col">
+              <!-- Balance Card -->
+              <div class="rounded-[22px] bg-black text-white border border-white/20 p-5 shadow-lg flex flex-col min-h-[180px]">
                 <!-- top row -->
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between gap-3">
                   <img src="img/dashboard/card-bank.png" alt="Bank Logo" class="h-6">
                   <button id="dashBalanceToggle"
                           class="h-8 px-3 rounded-xl border border-slate-300/60 bg-white/90 text-slate-800
-                                 text-base leading-none flex items-center gap-2 hover:bg-white">
+                                 text-base leading-none flex items-center gap-2 hover:bg-white"
+                          type="button">
                     <img src="img/dashboard/eye-off-fill.svg" alt="" class="w-4 h-4 object-contain">
-                    Sembunyikan
+                    <span data-balance-toggle-label>Sembunyikan</span>
                   </button>
                 </div>
 
                 <!-- saldo block -->
-                <div class="mt-auto pb-4">
+                <div class="mt-auto pt-6">
                   <p class="text-white/90 text-[18px]">Total Saldo Aktif</p>
-                  <p id="dashBalanceValue" class="text-white text-[24px] tracking-wide">
+                  <p id="dashBalanceValue" class="text-white text-[24px] tracking-wide" data-balance-sensitive>
                     Rp100.000.000,00
                   </p>
                 </div>
+              </div>
 
-                <!-- Limit harian -->
-                <div>
-                  <p class="font-semibold pb-2">Sisa Limit Transaksi Harian</p>
-                  <p class="text-[18px] text-white">Rp450.000.000</p>
-                  <div class="mt-2 h-2 bg-white/20 rounded-full overflow-hidden">
-                    <div id="dashLimitBar" class="h-full bg-cyan-600" style="width:90%;"></div>
-                  </div>
-                  <p class="text-white/70 mt-1">dari total Rp500.000.000</p>
+              <!-- Limit harian -->
+              <div class="mt-6">
+                <p class="font-semibold text-[16px] text-slate-900">Sisa Limit Transaksi Harian</p>
+                <p id="dashLimitRemaining" class="text-[20px] font-semibold text-slate-900 mt-2" data-balance-sensitive>
+                  Rp450.000.000
+                </p>
+                <div class="mt-3 h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div id="dashLimitBar" class="h-full bg-cyan-500" style="width:90%;"></div>
                 </div>
+                <p class="text-slate-500 mt-2">
+                  dari total
+                  <span id="dashLimitTotal" class="font-medium text-slate-700" data-balance-sensitive>Rp500.000.000</span>
+                </p>
               </div>
             </div>
           </section>
