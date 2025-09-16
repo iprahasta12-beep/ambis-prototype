@@ -1,6 +1,5 @@
 const approvalsData = {
-  butuh: 
-  [
+  butuh: [
     { time: '17 Agu 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BCA PT Queen Japan - Rp50.000.000' },
     { time: '18 Agu 2025 • 20:10', category: 'Manajemen Pengguna', jenis: 'debit', description: 'Penambahan Pengguna Baru - Fajar Satria - Finance & Accounting' },
     { time: '19 Agu 2025 • 20:10', category: 'Batas Transaksi', jenis: 'debit', description: 'Ubah Batas Transaksi - Dari Rp500.000.000 ke Rp250.000.000 - Oleh Bimo Purwoko' },
@@ -12,8 +11,7 @@ const approvalsData = {
     { time: '25 Agu 2025 • 20:10', category: 'Atur Persetujuan', jenis: 'debit', description: 'Edit Persetujuan - Persetujuan Transfer - Oleh Fajar Satria' },
     { time: '26 Agu 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BRI PT Nusantara - Rp75.000.000' }
   ],
-  menunggu: 
-  [
+  menunggu: [
     { time: '01 Agu 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BCA PT Queen Japan - Rp60.000.000' },
     { time: '10 Agu 2025 • 20:10', category: 'Manajemen Pengguna', jenis: 'debit', description: 'Penambahan Pengguna Baru - Siti Aisyah - Marketing' },
     { time: '20 Agu 2025 • 20:10', category: 'Batas Transaksi', jenis: 'debit', description: 'Ubah Batas Transaksi - Dari Rp300.000.000 ke Rp350.000.000 - Oleh Bimo Purwoko' },
@@ -21,17 +19,16 @@ const approvalsData = {
     { time: '15 Sep 2025 • 20:10', category: 'Pengaturan Rekening', jenis: 'debit', description: 'Tambah Rekening - Operasional - Oleh Fajar Satria' },
     { time: '30 Sep 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BNI PT Sejahtera - Rp90.000.000' }
   ],
-  Selesai: 
-  [
+  selesai: [
     { time: '02 Sep 2025 • 20:10', category: 'Transaksi', jenis: 'kredit', description: 'Transfer Saldo - Ke BCA PT Queen Japan - Rp50.000.000' },
     { time: '03 Sep 2025 • 20:10', category: 'Manajemen Pengguna', jenis: 'debit', description: 'Penambahan Pengguna Baru - Fajar Satria - Finance' },
-    { time: '04 Sep 2025 • 20:10', category: 'Batas Transaksi', jenis: 'debit', description: 'Ubah Batas Transaksi - Dari Rp350.000.000 ke Rp400.000.000
+    { time: '04 Sep 2025 • 20:10', category: 'Batas Transaksi', jenis: 'debit', description: 'Ubah Batas Transaksi - Dari Rp350.000.000 ke Rp400.000.000 - Oleh Bimo Purwoko' }
   ]
 };
 
 const tabButtons = document.querySelectorAll('.tab-btn');
 const tabPanels = document.querySelectorAll('[data-tab-panel]');
-let activeTab = 'transaksi';
+let activeTab = 'butuh';
 
 const monthMap = {
   Jan: 0,

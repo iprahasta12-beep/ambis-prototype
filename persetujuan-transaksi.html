@@ -144,24 +144,26 @@
 
         <!-- Tabs -->
         <div class="flex items-center gap-6 border-b border-slate-200 mb-6">
-          <button type="button" data-tab="transaksi" class="tab-btn relative py-3 font-semibold text-slate-900">
+          <button type="button" data-tab="butuh" class="tab-btn relative py-3 font-semibold text-slate-900">
             Butuh Persetujuan
             <span class="tab-count ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
             <span class="tab-indicator absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
-          <button type="button" data-tab="batas" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
+          <button type="button" data-tab="menunggu" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
             Menunggu Persetujuan
+            <span class="tab-count hidden ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
             <span class="tab-indicator hidden absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
-          <button type="button" data-tab="persetujuan" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
+          <button type="button" data-tab="selesai" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
             Selesai
+            <span class="tab-count hidden ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
             <span class="tab-indicator hidden absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
         </div>
 
         <!-- Tab Panels -->
-        <section class="tab-panel space-y-4" data-tab-panel="transaksi">
-          <div class="flex items-center gap-3" data-filter-group="transaksi">
+        <section class="tab-panel space-y-4" data-tab-panel="butuh">
+          <div class="flex items-center gap-3" data-filter-group="butuh">
             <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Tanggal">
               <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
                 <img src="img/icon/date-picker.svg" class="w-5 h-5"/>
@@ -170,19 +172,19 @@
               <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[400px]">
                 <div class="flex flex-col gap-4">
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="transaksi-date" value="7 Hari Terakhir">
+                    <input type="radio" name="butuh-date" value="7 Hari Terakhir">
                     <span>7 Hari Terakhir</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="transaksi-date" value="30 Hari Terakhir">
+                    <input type="radio" name="butuh-date" value="30 Hari Terakhir">
                     <span>30 Hari Terakhir</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="transaksi-date" value="1 Tahun Terakhir">
+                    <input type="radio" name="butuh-date" value="1 Tahun Terakhir">
                     <span>1 Tahun Terakhir</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="transaksi-date" value="custom">
+                    <input type="radio" name="butuh-date" value="custom">
                     <span>Custom Rentang Tanggal</span>
                   </label>
                   <div class="custom-range hidden">
@@ -266,8 +268,8 @@
           </div>
         </section>
 
-        <section class="tab-panel space-y-4 hidden" data-tab-panel="batas">
-          <div class="flex items-center gap-3" data-filter-group="batas">
+        <section class="tab-panel space-y-4 hidden" data-tab-panel="menunggu">
+          <div class="flex items-center gap-3" data-filter-group="menunggu">
             <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Tanggal">
               <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
                 <img src="img/icon/date-picker.svg" class="w-5 h-5"/>
@@ -276,19 +278,19 @@
               <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[400px]">
                 <div class="flex flex-col gap-4">
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="batas-date" value="7 Hari Terakhir">
+                    <input type="radio" name="menunggu-date" value="7 Hari Terakhir">
                     <span>7 Hari Terakhir</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="batas-date" value="30 Hari Terakhir">
+                    <input type="radio" name="menunggu-date" value="30 Hari Terakhir">
                     <span>30 Hari Terakhir</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="batas-date" value="1 Tahun Terakhir">
+                    <input type="radio" name="menunggu-date" value="1 Tahun Terakhir">
                     <span>1 Tahun Terakhir</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="batas-date" value="custom">
+                    <input type="radio" name="menunggu-date" value="custom">
                     <span>Custom Rentang Tanggal</span>
                   </label>
                   <div class="custom-range hidden">
@@ -330,11 +332,11 @@
               <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-64">
                 <div class="flex flex-col gap-2">
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="batas-Kategori" value="kredit">
+                    <input type="radio" name="menunggu-Kategori" value="kredit">
                     <span>Kredit</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="batas-Kategori" value="debit">
+                    <input type="radio" name="menunggu-Kategori" value="debit">
                     <span>Debit</span>
                   </label>
                 </div>
@@ -360,8 +362,8 @@
           </div>
         </section>
 
-        <section class="tab-panel space-y-4 hidden" data-tab-panel="persetujuan">
-          <div class="flex items-center gap-3" data-filter-group="persetujuan">
+        <section class="tab-panel space-y-4 hidden" data-tab-panel="selesai">
+          <div class="flex items-center gap-3" data-filter-group="selesai">
             <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Tanggal">
               <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2 w-64">
                 <img src="img/icon/date-picker.svg" class="w-5 h-5"/>
@@ -370,19 +372,19 @@
               <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[400px]">
                 <div class="flex flex-col gap-4">
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="persetujuan-date" value="7 Hari Terakhir">
+                    <input type="radio" name="selesai-date" value="7 Hari Terakhir">
                     <span>7 Hari Terakhir</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="persetujuan-date" value="30 Hari Terakhir">
+                    <input type="radio" name="selesai-date" value="30 Hari Terakhir">
                     <span>30 Hari Terakhir</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="persetujuan-date" value="1 Tahun Terakhir">
+                    <input type="radio" name="selesai-date" value="1 Tahun Terakhir">
                     <span>1 Tahun Terakhir</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="persetujuan-date" value="custom">
+                    <input type="radio" name="selesai-date" value="custom">
                     <span>Custom Rentang Tanggal</span>
                   </label>
                   <div class="custom-range hidden">
@@ -424,11 +426,11 @@
               <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-64">
                 <div class="flex flex-col gap-2">
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="persetujuan-Kategori" value="kredit">
+                    <input type="radio" name="selesai-Kategori" value="kredit">
                     <span>Kredit</span>
                   </label>
                   <label class="flex items-center gap-2">
-                    <input type="radio" name="persetujuan-Kategori" value="debit">
+                    <input type="radio" name="selesai-Kategori" value="debit">
                     <span>Debit</span>
                   </label>
                 </div>
