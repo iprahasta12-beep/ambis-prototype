@@ -133,25 +133,13 @@ function render(tab) {
   list.forEach(item => {
     const tr = document.createElement('tr');
     tr.className = 'hover:bg-slate-50';
-    const jenisLabel = item.jenis === 'kredit' ? 'Kredit' : item.jenis === 'debit' ? 'Debit' : '';
-    const badgeClass = item.jenis === 'kredit'
-      ? 'bg-emerald-100 text-emerald-700'
-      : item.jenis === 'debit'
-        ? 'bg-rose-100 text-rose-700'
-        : '';
-    const badge = jenisLabel
-      ? `<span class="text-xs font-semibold rounded-full px-2 py-0.5 ${badgeClass}">${jenisLabel}</span>`
-      : '';
-    const activity = item.activity || item.category || '-';
+    const category = item.category || item.activity || '-';
     const description = item.description || '';
 
     tr.innerHTML = `
       <td class="px-4 py-3">${item.time || '-'}</td>
       <td class="px-4 py-3">
-        <div class="flex items-center gap-2">
-          <span class="font-medium">${activity}</span>
-          ${badge}
-        </div>
+        <span class="font-medium">${category}</span>
       </td>
       <td class="px-4 py-3">${description}</td>
       <td class="px-4 py-3 text-right">
