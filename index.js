@@ -46,7 +46,7 @@ function updateView() {
     tr.innerHTML = `
       <td class="px-4 py-3">
         <div class="flex items-center gap-2">
-          <span class="w-10 h-10 rounded-full bg-emerald-100 border border-emerald-300 grid place-items-center">
+          <span class="w-10 h-10 rounded-full bg-red-100 border grid place-items-center">
             <img src="${iconSrc}" alt="" class="w-6 h-6 object-contain">
           </span>
           <span>${tx.description}</span>
