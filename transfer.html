@@ -484,11 +484,6 @@
                 </div>
               </div>
               <div class="border-t border-sky-200"></div>
-              <div class="flex flex-col items-center gap-2 text-slate-300">
-                <span class="h-8 border-l border-dashed"></span>
-                <span class="inline-flex w-8 h-8 items-center justify-center rounded-full border border-dashed text-slate-400">↓</span>
-                <span class="h-8 border-l border-dashed"></span>
-              </div>
               <div class="flex items-start gap-4">
                 <div id="confirmDestinationBadge" class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 grid place-items-center font-semibold text-base">D</div>
                 <div class="min-w-0 space-y-1">
@@ -501,14 +496,18 @@
             </div>
           </section>
 
-          <section class="rounded-2xl border border-slate-200 overflow-hidden">
+          <section class="overflow-hidden">
             <div class="px-6 py-3 bg-slate-50">
-              <p class="text-xs font-semibold tracking-[.2em] text-slate-500">TOTAL TRANSAKSI</p>
+              <p class=" font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 p-2">TOTAL TRANSAKSI</p>
             </div>
-            <div class="px-6 py-4 space-y-3">
+            <div class="space-y-4 mt-4">
               <div class="flex justify-between text-sm text-slate-600">
                 <span>Nominal</span>
                 <span id="sheetNominal" class="text-right text-slate-900 font-medium">Rp0</span>
+              </div>
+              <div class="flex justify-between text-sm text-slate-600">
+                <span>Biaya</span>
+                <span id="sheetBiaya" class="text-right text-slate-900 font-medium">Rp0</span>
               </div>
               <div class="flex justify-between text-sm text-slate-600">
                 <span>Total</span>
