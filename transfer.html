@@ -367,7 +367,9 @@
           <label class="block text-sm mb-1">Nama Alias</label>
           <input id="aliasInput" type="text" maxlength="15" placeholder="Tulis nama alias" class="w-full border rounded-xl px-3 py-3" />
           <div class="text-right text-xs text-slate-400" id="aliasCounter">0/15</div>
-          <p class="text-xs text-slate-500 mt-1">Daftar Rekening tujuan tersimpan pada saat transaksi selesai</p>
+         <div id="accountInfo" class="flex hidden p-3 rounded-xl bg-sky-100 border border-slate-200 text-sm text-slate-600">
+        <img class="w-6 h-6 mr-2" src="img/icon/info-2.svg" alt="">
+        <span>Pastikan pemilik rekening sesuai</span></div>
         </div>
       </div>
       <div class="p-4 flex gap-3 border-t">
@@ -383,8 +385,9 @@
       </div>
       <div class="flex-1 overflow-y-auto p-6 space-y-6">
         <div>
-          <div class="p-4 rounded-xl bg-sky-100 text-sm text-slate-600 mb-4">
-            Mohon pastikan data sudah sesuai
+           <div id="accountInfo" class="flex hidden p-3 rounded-xl bg-sky-100 border border-slate-200 text-sm text-slate-600">
+            <img class="w-6 h-6 mr-2" src="img/icon/info-2.svg" alt="">
+            <span>Mohon pastikan data sudah sesuai</span>
           </div>
           <p class="font-semibold mb-3">Transfer Saldo</p>
           <div class="bg-slate-50 border rounded-xl">
