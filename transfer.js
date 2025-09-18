@@ -74,8 +74,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const otpSection = document.getElementById('otpSection');
   const otpInputs = otpSection ? Array.from(otpSection.querySelectorAll('.otp-input')) : [];
   const otpCountdown = document.getElementById('otpCountdown');
+  const otpCountdownMessage = document.getElementById('otpCountdownMessage');
   const otpTimerEl = document.getElementById('otpTimer');
   const otpResendBtn = document.getElementById('otpResendBtn');
+  const otpCountdownDefaultMessage = otpCountdownMessage?.textContent?.trim() || 'Sesi akan berakhir dalam';
+  const OTP_EXPIRED_MESSAGE = 'Sesi Anda telah berakhir.';
 
   // move drawer elements
   const openMoveBtn = document.getElementById('openMoveDrawer');
@@ -320,6 +323,24 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${mins}:${secs}`;
   }
 
+  function showOtpCountdownDefaultMessage() {
+    if (otpCountdownMessage) {
+      otpCountdownMessage.textContent = otpCountdownDefaultMessage;
+    }
+    if (otpTimerEl) {
+      otpTimerEl.classList.remove('hidden');
+    }
+  }
+
+  function showOtpExpiredMessage() {
+    if (otpCountdownMessage) {
+      otpCountdownMessage.textContent = OTP_EXPIRED_MESSAGE;
+    }
+    if (otpTimerEl) {
+      otpTimerEl.classList.add('hidden');
+    }
+  }
+
   function updateOtpCountdownDisplay() {
     if (!otpTimerEl) return;
     otpTimerEl.textContent = formatOtpTime(otpTimeLeft);
@@ -350,6 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function startOtpTimer() {
     otpCountdown?.classList.remove('hidden');
+    showOtpCountdownDefaultMessage();
     otpResendBtn?.classList.add('hidden');
     otpTimeLeft = 30;
     updateOtpCountdownDisplay();
@@ -360,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         otpTimeLeft = 0;
         updateOtpCountdownDisplay();
         clearOtpTimer();
-        otpCountdown?.classList.add('hidden');
+        showOtpExpiredMessage();
         otpResendBtn?.classList.remove('hidden');
         setConfirmProceedEnabled(false);
         return;
@@ -380,6 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (otpCountdown) {
       otpCountdown.classList.remove('hidden');
     }
+    showOtpCountdownDefaultMessage();
     if (otpResendBtn) {
       otpResendBtn.classList.add('hidden');
     }
