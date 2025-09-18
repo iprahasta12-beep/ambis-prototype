@@ -71,6 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const sheetMethod = document.getElementById('sheetMethod');
   const sheetRef = document.getElementById('sheetRef');
   const sheetDate = document.getElementById('sheetDate');
+  const otpSection = document.getElementById('otpSection');
+  const otpInputs = otpSection ? Array.from(otpSection.querySelectorAll('.otp-input')) : [];
+  const otpCountdown = document.getElementById('otpCountdown');
+  const otpTimerEl = document.getElementById('otpTimer');
+  const otpResendBtn = document.getElementById('otpResendBtn');
 
   // move drawer elements
   const openMoveBtn = document.getElementById('openMoveDrawer');
@@ -131,6 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedFee = 0;
   let availableMethods = [];
   let currentSheetType = 'source';
+  let otpActive = false;
+  let otpIntervalId = null;
+  let otpTimeLeft = 30;
 
   // move drawer state
   let moveSourceSelected = false;
@@ -292,7 +300,100 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 200);
   }
 
+  function setConfirmProceedEnabled(enabled) {
+    if (!confirmProceed) return;
+    confirmProceed.disabled = !enabled;
+    confirmProceed.classList.toggle('opacity-50', !enabled);
+    confirmProceed.classList.toggle('cursor-not-allowed', !enabled);
+  }
+
+  function clearOtpTimer() {
+    if (otpIntervalId) {
+      clearInterval(otpIntervalId);
+      otpIntervalId = null;
+    }
+  }
+
+  function formatOtpTime(seconds) {
+    const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const secs = String(seconds % 60).padStart(2, '0');
+    return `${mins}:${secs}`;
+  }
+
+  function updateOtpCountdownDisplay() {
+    if (!otpTimerEl) return;
+    otpTimerEl.textContent = formatOtpTime(otpTimeLeft);
+  }
+
+  function resetOtpInputs() {
+    otpInputs.forEach(input => {
+      input.value = '';
+    });
+  }
+
+  function updateOtpVerifyState() {
+    if (!otpActive) return;
+    const filled = otpInputs.every(input => input.value.trim() !== '');
+    setConfirmProceedEnabled(filled);
+  }
+
+  function showOtpSection() {
+    if (!otpSection) return;
+    otpActive = true;
+    otpSection.classList.remove('hidden');
+    confirmProceed.textContent = 'Verifikasi';
+    resetOtpInputs();
+    otpInputs[0]?.focus();
+    startOtpTimer();
+    setConfirmProceedEnabled(false);
+  }
+
+  function startOtpTimer() {
+    otpCountdown?.classList.remove('hidden');
+    otpResendBtn?.classList.add('hidden');
+    otpTimeLeft = 30;
+    updateOtpCountdownDisplay();
+    clearOtpTimer();
+    otpIntervalId = setInterval(() => {
+      otpTimeLeft -= 1;
+      if (otpTimeLeft <= 0) {
+        otpTimeLeft = 0;
+        updateOtpCountdownDisplay();
+        clearOtpTimer();
+        otpCountdown?.classList.add('hidden');
+        otpResendBtn?.classList.remove('hidden');
+        setConfirmProceedEnabled(false);
+        return;
+      }
+      updateOtpCountdownDisplay();
+    }, 1000);
+  }
+
+  function resetOtpState() {
+    otpActive = false;
+    clearOtpTimer();
+    otpTimeLeft = 30;
+    if (otpSection) {
+      otpSection.classList.add('hidden');
+    }
+    resetOtpInputs();
+    if (otpCountdown) {
+      otpCountdown.classList.remove('hidden');
+    }
+    if (otpResendBtn) {
+      otpResendBtn.classList.add('hidden');
+    }
+    if (otpTimerEl) {
+      otpTimerEl.textContent = '00:30';
+    }
+    if (confirmProceed) {
+      confirmProceed.textContent = 'Lanjut Transfer Saldo';
+    }
+    setConfirmProceedEnabled(true);
+  }
+
   function closeConfirmSheet() {
+    resetOtpState();
     confirmSheet.classList.add('translate-y-full');
     sheetOverlay.classList.remove('opacity-100');
     setTimeout(() => {
@@ -640,8 +741,69 @@ document.addEventListener('DOMContentLoaded', () => {
     moveNoteCounter.textContent = `${e.target.value.length}/50`;
   });
 
+  otpInputs.forEach((input, idx) => {
+    input.addEventListener('input', (e) => {
+      const value = e.target.value.replace(/\D/g, '');
+      e.target.value = value ? value[0] : '';
+      if (value && idx < otpInputs.length - 1) {
+        otpInputs[idx + 1].focus();
+      }
+      updateOtpVerifyState();
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace') {
+        if (input.value) {
+          input.value = '';
+          updateOtpVerifyState();
+          e.preventDefault();
+        } else if (idx > 0) {
+          otpInputs[idx - 1].focus();
+          otpInputs[idx - 1].value = '';
+          updateOtpVerifyState();
+          e.preventDefault();
+        }
+      } else if (e.key === 'ArrowLeft' && idx > 0) {
+        otpInputs[idx - 1].focus();
+        e.preventDefault();
+      } else if (e.key === 'ArrowRight' && idx < otpInputs.length - 1) {
+        otpInputs[idx + 1].focus();
+        e.preventDefault();
+      }
+    });
+
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData)?.getData('text')?.replace(/\D/g, '') || '';
+      if (!text) {
+        updateOtpVerifyState();
+        return;
+      }
+      let currentIndex = idx;
+      for (const char of text) {
+        if (currentIndex >= otpInputs.length) break;
+        otpInputs[currentIndex].value = char;
+        currentIndex += 1;
+      }
+      if (currentIndex < otpInputs.length) {
+        otpInputs[currentIndex].focus();
+      } else {
+        otpInputs[otpInputs.length - 1].focus();
+      }
+      updateOtpVerifyState();
+    });
+  });
+
+  otpResendBtn?.addEventListener('click', () => {
+    resetOtpInputs();
+    otpInputs[0]?.focus();
+    startOtpTimer();
+    setConfirmProceedEnabled(false);
+  });
+
 
   confirmBtn?.addEventListener('click', () => {
+    resetOtpState();
     const ref = Math.floor(100000000 + Math.random()*900000000);
     const now = new Date();
     const dateStr = now.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
@@ -656,8 +818,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sheetRef.textContent = ref;
     sheetDate.textContent = `${dateStr} ${timeStr}`;
     sheetMethod.textContent = selectedMethod;
-    confirmProceed.disabled = false;
-    confirmProceed.classList.remove('opacity-50','cursor-not-allowed');
+    setConfirmProceedEnabled(true);
     sheetOverlay.classList.remove('hidden');
     requestAnimationFrame(() => {
       sheetOverlay.classList.add('opacity-100');
@@ -666,6 +827,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   moveConfirmBtn?.addEventListener('click', () => {
+    resetOtpState();
     const ref = Math.floor(100000000 + Math.random()*900000000);
     const now = new Date();
     const dateStr = now.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
@@ -680,8 +842,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sheetMethod.textContent = 'Pindah Buku';
     sheetRef.textContent = ref;
     sheetDate.textContent = `${dateStr} ${timeStr}`;
-    confirmProceed.disabled = false;
-    confirmProceed.classList.remove('opacity-50','cursor-not-allowed');
+    setConfirmProceedEnabled(true);
     sheetOverlay.classList.remove('hidden');
     requestAnimationFrame(() => {
       sheetOverlay.classList.add('opacity-100');
@@ -691,7 +852,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   confirmBack?.addEventListener('click', closeConfirmSheet);
   confirmClose?.addEventListener('click', closeConfirmSheet);
-  confirmProceed?.addEventListener('click', () => {
+  confirmProceed?.addEventListener('click', (e) => {
+    if (!otpActive) {
+      e.preventDefault();
+      showOtpSection();
+      return;
+    }
+    if (confirmProceed.disabled) return;
+    const otpValue = otpInputs.map(input => input.value).join('');
+    console.log('OTP submitted:', otpValue);
     alert('Transfer diproses (dummy).');
     closeConfirmSheet();
   });
