@@ -72,30 +72,6 @@
   border-left-width:1px;
 }
 
-/* Drawer overlays & sheets stay scoped within the drawer */
-#drawer .drawer-overlay,
-#drawer .drawer-sheet{
-  position:absolute;
-}
-
-#drawer .drawer-overlay{
-  inset:0;
-}
-
-#drawer .drawer-sheet{
-  left:0;
-  right:0;
-}
-
-#drawer .drawer-sheet--bottom{
-  bottom:0;
-}
-
-#drawer .drawer-sheet--full{
-  top:0;
-  bottom:0;
-}
-
 /* Disabled button appearance */
 button:disabled{
   background-color:#f5f5f5 !important;
