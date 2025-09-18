@@ -79,14 +79,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const confirmBack = document.getElementById('confirmBack');
   const confirmProceed = document.getElementById('confirmProceed');
   const confirmClose = document.getElementById('confirmClose');
+  const confirmSourceBadge = document.getElementById('confirmSourceBadge');
+  const confirmDestinationBadge = document.getElementById('confirmDestinationBadge');
   const sheetSource = document.getElementById('sheetSource');
+  const sheetSourceCompany = document.getElementById('sheetSourceCompany');
+  const sheetSourceDetail = document.getElementById('sheetSourceDetail');
   const sheetDestination = document.getElementById('sheetDestination');
+  const sheetDestinationCompany = document.getElementById('sheetDestinationCompany');
+  const sheetDestinationDetail = document.getElementById('sheetDestinationDetail');
   const sheetNominal = document.getElementById('sheetNominal');
-  const sheetFee = document.getElementById('sheetFee');
   const sheetTotal = document.getElementById('sheetTotal');
   const sheetCategory = document.getElementById('sheetCategory');
   const sheetNote = document.getElementById('sheetNote');
-  const sheetMethod = document.getElementById('sheetMethod');
   const sheetRef = document.getElementById('sheetRef');
   const sheetDate = document.getElementById('sheetDate');
   const otpSection = document.getElementById('otpSection');
@@ -273,8 +277,70 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyBadgeStyles(element, colorClass) {
     if (!element) return;
-    const baseClasses = 'w-10 h-10 rounded-full flex items-center justify-center font-semibold';
+    const baseClasses = 'w-10 h-10 rounded-full flex items-center justify-center font-semibold text-base';
     element.className = `${baseClasses} ${colorClass || 'bg-cyan-100 text-cyan-600'}`;
+  }
+
+  function setTextOrFallback(element, value, fallback = '-') {
+    if (!element) return;
+    element.textContent = value || fallback;
+  }
+
+  function setOptionalText(element, value) {
+    if (!element) return;
+    if (value) {
+      element.textContent = value;
+      element.classList.remove('hidden');
+    } else {
+      element.textContent = '';
+      element.classList.add('hidden');
+    }
+  }
+
+  function deriveDetailText(display) {
+    if (!display) return '';
+    const bankParts = [];
+    if (display.bank) {
+      bankParts.push(display.bank);
+    }
+    if (display.number) {
+      bankParts.push(display.number);
+    }
+    if (bankParts.length) {
+      return bankParts.join(' - ');
+    }
+    if (display.subtitle && display.subtitle !== display.title && display.subtitle !== display.company) {
+      return display.subtitle;
+    }
+    return '';
+  }
+
+  function deriveCompanyText(display) {
+    if (!display) return '';
+    const company = display.company || '';
+    if (!company) {
+      return '';
+    }
+    if (company === display.title) {
+      const detail = deriveDetailText(display);
+      return detail ? '' : company;
+    }
+    return company;
+  }
+
+  function populateConfirmAccount(badgeEl, nameEl, companyEl, detailEl, display, fallbackColor) {
+    if (!display) {
+      display = createFallbackAccountDisplay('-', fallbackColor);
+    }
+    applyBadgeStyles(badgeEl, display.color || fallbackColor);
+    if (badgeEl) {
+      badgeEl.textContent = display.initial || '';
+    }
+    setTextOrFallback(nameEl, display.title || '-');
+    const companyText = deriveCompanyText(display);
+    setOptionalText(companyEl, companyText);
+    const detailText = deriveDetailText(display);
+    setOptionalText(detailEl, detailText);
   }
 
   function populateSuccessView(details) {
@@ -566,7 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
       otpTimerEl.textContent = '00:30';
     }
     if (confirmProceed) {
-      confirmProceed.textContent = 'Lanjut Transfer Saldo';
+      confirmProceed.textContent = 'Lanjut Pemindahan Saldo';
     }
     setConfirmProceedEnabled(true);
   }
@@ -1008,20 +1074,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const ref = Math.floor(100000000 + Math.random()*900000000);
     const now = new Date();
     const dateStr = now.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
-    const timeStr = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const timeStr = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
     const noteValue = noteInput?.value?.trim() || '';
     const sourceDisplay = selectedSourceAccountData || createFallbackAccountDisplay(sourceBtn.textContent || '-', 'bg-cyan-100 text-cyan-600');
     const destinationDisplay = selectedDestinationAccountData || createFallbackAccountDisplay(destBtn.textContent || '-', 'bg-amber-100 text-amber-600');
-    sheetSource.textContent = sourceBtn.textContent;
-    sheetDestination.textContent = destBtn.textContent;
-    sheetNominal.textContent = 'Rp' + formatter.format(amountValue);
-    sheetFee.textContent = 'Rp' + formatter.format(selectedFee);
-    sheetTotal.textContent = 'Rp' + formatter.format(amountValue + selectedFee);
-    sheetCategory.textContent = selectedCategory;
-    sheetNote.textContent = noteInput.value || '-';
-    sheetRef.textContent = ref;
-    sheetDate.textContent = `${dateStr} ${timeStr}`;
-    sheetMethod.textContent = selectedMethod;
+    populateConfirmAccount(confirmSourceBadge, sheetSource, sheetSourceCompany, sheetSourceDetail, sourceDisplay, 'bg-cyan-100 text-cyan-600');
+    populateConfirmAccount(confirmDestinationBadge, sheetDestination, sheetDestinationCompany, sheetDestinationDetail, destinationDisplay, 'bg-amber-100 text-amber-600');
+    if (sheetNominal) {
+      sheetNominal.textContent = 'Rp' + formatter.format(amountValue);
+    }
+    if (sheetTotal) {
+      sheetTotal.textContent = 'Rp' + formatter.format(amountValue + selectedFee);
+    }
+    setTextOrFallback(sheetCategory, selectedCategory, '-');
+    setTextOrFallback(sheetNote, noteValue, '-');
+    setTextOrFallback(sheetRef, String(ref), '-');
+    setTextOrFallback(sheetDate, `${dateStr}, ${timeStr}`, '-');
     lastTransactionDetails = {
       type: 'transfer',
       source: sourceDisplay,
@@ -1031,7 +1099,7 @@ document.addEventListener('DOMContentLoaded', () => {
       total: amountValue + selectedFee,
       method: selectedMethod || '-',
       reference: String(ref),
-      datetime: `${dateStr} ${timeStr}`,
+      datetime: `${dateStr}, ${timeStr}`,
       category: selectedCategory || '-',
       note: noteValue || '-',
       createdBy: currentUserFullName
@@ -1049,20 +1117,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const ref = Math.floor(100000000 + Math.random()*900000000);
     const now = new Date();
     const dateStr = now.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
-    const timeStr = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const timeStr = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
     const noteValue = moveNoteInput?.value?.trim() || '';
     const sourceDisplay = moveSourceAccountData || createFallbackAccountDisplay(moveSourceBtn.textContent || '-', 'bg-cyan-100 text-cyan-600');
     const destDisplay = moveDestAccountData || createFallbackAccountDisplay(moveDestBtn.textContent || '-', 'bg-amber-100 text-amber-600');
-    sheetSource.textContent = moveSourceBtn.textContent;
-    sheetDestination.textContent = moveDestBtn.textContent;
-    sheetNominal.textContent = 'Rp' + formatter.format(moveAmountValue);
-    sheetFee.textContent = 'Rp0';
-    sheetTotal.textContent = 'Rp' + formatter.format(moveAmountValue);
-    sheetCategory.textContent = moveSelectedCategory;
-    sheetNote.textContent = moveNoteInput.value || '-';
-    sheetMethod.textContent = 'Pindah Buku';
-    sheetRef.textContent = ref;
-    sheetDate.textContent = `${dateStr} ${timeStr}`;
+    populateConfirmAccount(confirmSourceBadge, sheetSource, sheetSourceCompany, sheetSourceDetail, sourceDisplay, 'bg-cyan-100 text-cyan-600');
+    populateConfirmAccount(confirmDestinationBadge, sheetDestination, sheetDestinationCompany, sheetDestinationDetail, destDisplay, 'bg-amber-100 text-amber-600');
+    if (sheetNominal) {
+      sheetNominal.textContent = 'Rp' + formatter.format(moveAmountValue);
+    }
+    if (sheetTotal) {
+      sheetTotal.textContent = 'Rp' + formatter.format(moveAmountValue);
+    }
+    setTextOrFallback(sheetCategory, moveSelectedCategory, '-');
+    setTextOrFallback(sheetNote, noteValue, '-');
+    setTextOrFallback(sheetRef, String(ref), '-');
+    setTextOrFallback(sheetDate, `${dateStr}, ${timeStr}`, '-');
     lastTransactionDetails = {
       type: 'move',
       source: sourceDisplay,
@@ -1072,7 +1142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       total: moveAmountValue,
       method: 'Pindah Buku',
       reference: String(ref),
-      datetime: `${dateStr} ${timeStr}`,
+      datetime: `${dateStr}, ${timeStr}`,
       category: moveSelectedCategory || '-',
       note: noteValue || '-',
       createdBy: currentUserFullName
