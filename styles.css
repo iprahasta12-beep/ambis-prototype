@@ -69,7 +69,7 @@
 }
 #drawer.open{
   width:100%;
-  border-left-width:1px;
+  border-left-width:24px;
 }
 
 /* Disabled button appearance */
