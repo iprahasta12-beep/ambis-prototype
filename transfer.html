@@ -435,6 +435,28 @@
             <div class="flex justify-between py-3"><span>Catatan</span><span id="sheetNote"></span></div>
           </div>
         </div>
+        <div id="otpSection" class="hidden mx-4 mt-6 p-6 rounded-2xl border border-slate-200 bg-white">
+          <h4 class="text-lg font-semibold mb-6">Masukkan kode verifikasi</h4>
+          <div class="flex justify-between gap-2 mb-5">
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+            <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+          </div>
+          <p class="text-sm text-slate-500 text-center mb-4">
+            Silakan login &amp; cek aplikasi Amar Bank Bisnis pada handphone Anda untuk mendapatkan kode verifikasi.
+          </p>
+          <p id="otpCountdown" class="text-sm text-slate-500 text-center">
+            Sesi akan berakhir dalam <span id="otpTimer" class="text-cyan-500 font-semibold">00:30</span>
+          </p>
+          <button id="otpResendBtn" type="button" class="hidden mt-2 mx-auto px-4 py-2 rounded-xl border border-cyan-500 text-cyan-600 text-sm font-medium">
+            Kirim Ulang Kode Verifikasi
+          </button>
+        </div>
       </div>
       <div class="p-4 flex gap-3 border-t">
         <button id="confirmBack" class="flex-1 rounded-xl border py-3">Batalkan</button>
