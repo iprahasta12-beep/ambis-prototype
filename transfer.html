@@ -302,6 +302,89 @@
       </div>
     </div>
 
+      <!-- Success Pane -->
+      <div id="successPane" class="hidden h-full flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b">
+          <h2 class="text-lg font-semibold">Transfer Saldo</h2>
+          <button id="successHeaderClose" class="text-2xl leading-none">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-8">
+          <div class="max-w-xl mx-auto text-center">
+            <img src="img/illustration-1.png" alt="Transaksi berhasil" class="mx-auto w-48 h-auto mb-6">
+            <h3 class="text-2xl font-semibold mb-6">Transaksi Berhasil</h3>
+
+            <div class="bg-[#F2F9FF] border border-sky-200 rounded-2xl p-6 text-left space-y-6">
+              <div class="flex items-start gap-3">
+                <div id="successSourceBadge" class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center font-semibold"></div>
+                <div class="min-w-0">
+                  <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-[.18em] mb-1">Sumber Rekening</p>
+                  <p id="successSourceName" class="font-semibold text-base text-slate-900 truncate">-</p>
+                  <p id="successSourceSubtitle" class="text-sm text-slate-600">-</p>
+                </div>
+              </div>
+              <div class="border-t border-sky-200"></div>
+              <div class="flex items-start gap-3">
+                <div id="successDestBadge" class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-semibold"></div>
+                <div class="min-w-0">
+                  <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-[.18em] mb-1">Rekening Tujuan</p>
+                  <p id="successDestName" class="font-semibold text-base text-slate-900 truncate">-</p>
+                  <p id="successDestSubtitle" class="text-sm text-slate-600">-</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 text-left space-y-6">
+              <div>
+                <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-[.18em] mb-3">Total Transaksi</p>
+                <div class="rounded-2xl border border-slate-200 p-6 space-y-4">
+                  <div class="flex justify-between text-sm text-slate-600">
+                    <span>Nominal</span>
+                    <span id="successNominal">Rp0</span>
+                  </div>
+                  <div class="flex justify-between items-baseline">
+                    <span class="text-sm text-slate-600">Total</span>
+                    <span id="successTotal" class="text-2xl font-semibold text-slate-900">Rp0</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-[.18em] mb-3">Detail Transaksi</p>
+                <div class="rounded-2xl border border-slate-200 divide-y">
+                  <div class="flex justify-between gap-4 px-6 py-4">
+                    <span class="text-sm text-slate-500">Dibuat Oleh</span>
+                    <span id="successCreatedBy" class="text-sm text-slate-900 text-right font-medium max-w-[60%] break-words">-</span>
+                  </div>
+                  <div class="flex justify-between gap-4 px-6 py-4">
+                    <span class="text-sm text-slate-500">Nomor Referensi</span>
+                    <span id="successReference" class="text-sm text-slate-900 text-right font-medium max-w-[60%] break-words">-</span>
+                  </div>
+                  <div class="flex justify-between gap-4 px-6 py-4">
+                    <span class="text-sm text-slate-500">Tanggal &amp; Waktu</span>
+                    <span id="successDate" class="text-sm text-slate-900 text-right font-medium max-w-[60%] break-words">-</span>
+                  </div>
+                  <div class="flex justify-between gap-4 px-6 py-4">
+                    <span class="text-sm text-slate-500">Kategori</span>
+                    <span id="successCategory" class="text-sm text-slate-900 text-right font-medium max-w-[60%] break-words">-</span>
+                  </div>
+                  <div class="flex justify-between gap-4 px-6 py-4">
+                    <span class="text-sm text-slate-500">Catatan</span>
+                    <span id="successNote" class="text-sm text-slate-900 text-right font-medium max-w-[60%] break-words">-</span>
+                  </div>
+                  <div class="flex justify-between gap-4 px-6 py-4">
+                    <span class="text-sm text-slate-500">Metode Transfer</span>
+                    <span id="successMethod" class="text-sm text-slate-900 text-right font-medium max-w-[60%] break-words">-</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="p-4 border-t">
+          <button id="successCloseBtn" class="w-full rounded-xl border border-cyan-500 text-cyan-600 font-semibold py-3 hover:bg-cyan-50">Keluar</button>
+        </div>
+      </div>
+
     <!-- Bottom Sheet Overlay & Panel -->
     <div id="sheetOverlay" class="hidden absolute inset-0 bg-black/20 opacity-0 transition-opacity duration-200 z-10"></div>
     <div id="bottomSheet" class="absolute inset-x-0 bottom-0 w-full bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform duration-200 h-3/4 z-20 flex flex-col">

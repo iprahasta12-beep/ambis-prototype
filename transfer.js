@@ -5,8 +5,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const drawer   = document.getElementById('drawer');
   const transferPane = document.getElementById('transferPane');
   const movePane = document.getElementById('movePane');
+  const successPane = document.getElementById('successPane');
   const closeBtn = document.getElementById('drawerCloseBtn');
   const cardGrid = document.getElementById('cardGrid');
+
+  const successHeaderClose = document.getElementById('successHeaderClose');
+  const successCloseBtn = document.getElementById('successCloseBtn');
+  const successSourceBadge = document.getElementById('successSourceBadge');
+  const successSourceName = document.getElementById('successSourceName');
+  const successSourceSubtitle = document.getElementById('successSourceSubtitle');
+  const successDestBadge = document.getElementById('successDestBadge');
+  const successDestName = document.getElementById('successDestName');
+  const successDestSubtitle = document.getElementById('successDestSubtitle');
+  const successNominal = document.getElementById('successNominal');
+  const successTotal = document.getElementById('successTotal');
+  const successCreatedBy = document.getElementById('successCreatedBy');
+  const successReference = document.getElementById('successReference');
+  const successDate = document.getElementById('successDate');
+  const successCategory = document.getElementById('successCategory');
+  const successNote = document.getElementById('successNote');
+  const successMethod = document.getElementById('successMethod');
 
   // buttons & inputs in form
   const sourceBtn = document.getElementById('sourceAccountBtn');
@@ -121,6 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
     { name:'RTGS', fee:25000, min:100000000, max:1000000000, desc:'Dana sampai dalam 1 jam', check: now => isBusinessDay(now) && isWithinHours(now,8,16) }
   ];
 
+  const currentUserFullName = 'Bambang Triadmodjo';
+
   // state
   let currentData = [];
   let selectedIndex = null;
@@ -142,6 +162,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let otpActive = false;
   let otpIntervalId = null;
   let otpTimeLeft = 30;
+  let selectedSourceAccountData = null;
+  let selectedDestinationAccountData = null;
+  let lastTransactionDetails = null;
 
   // move drawer state
   let moveSourceSelected = false;
@@ -151,6 +174,67 @@ document.addEventListener('DOMContentLoaded', () => {
   let moveAmountValid = false;
   let moveCategorySelected = false;
   let moveSelectedCategory = '';
+  let moveSourceAccountData = null;
+  let moveDestAccountData = null;
+
+  function formatAccountSubtitle(company, bank, number) {
+    const segments = [];
+    if (company) {
+      segments.push(company);
+    }
+    const bankParts = [];
+    if (bank) {
+      bankParts.push(bank);
+    }
+    if (number) {
+      bankParts.push(number);
+    }
+    if (bankParts.length) {
+      segments.push(bankParts.join(' - '));
+    }
+    return segments.join(' • ');
+  }
+
+  function mapAccountToDisplay(acc) {
+    if (!acc) return null;
+    const title = acc.name || '';
+    const subtitle = formatAccountSubtitle(acc.company || '', acc.bank || '', acc.number || '');
+    return {
+      title,
+      company: acc.company || '',
+      bank: acc.bank || '',
+      number: acc.number || '',
+      initial: acc.initial || (title ? title.charAt(0).toUpperCase() : ''),
+      color: acc.color || 'bg-cyan-100 text-cyan-600',
+      subtitle
+    };
+  }
+
+  function createManualAccountDisplay({ title, company, bank, number, color }) {
+    const safeTitle = title || company || bank || '';
+    const safeCompany = company || '';
+    const subtitle = formatAccountSubtitle(safeCompany || safeTitle, bank || '', number || '');
+    return {
+      title: safeTitle,
+      company: safeCompany,
+      bank: bank || '',
+      number: number || '',
+      initial: safeTitle ? safeTitle.charAt(0).toUpperCase() : '',
+      color: color || 'bg-amber-100 text-amber-600',
+      subtitle
+    };
+  }
+
+  function createFallbackAccountDisplay(label, color) {
+    const safeLabel = label || '-';
+    const trimmed = safeLabel.trim();
+    return {
+      title: safeLabel,
+      subtitle: safeLabel,
+      initial: trimmed ? trimmed.charAt(0).toUpperCase() : '',
+      color: color || 'bg-cyan-100 text-cyan-600'
+    };
+  }
 
   function renderList(data) {
     sheetList.innerHTML = data.map((acc, idx) => `
@@ -185,6 +269,77 @@ document.addEventListener('DOMContentLoaded', () => {
           </span>
         </button>
       </li>`).join('');
+  }
+
+  function applyBadgeStyles(element, colorClass) {
+    if (!element) return;
+    const baseClasses = 'w-10 h-10 rounded-full flex items-center justify-center font-semibold';
+    element.className = `${baseClasses} ${colorClass || 'bg-cyan-100 text-cyan-600'}`;
+  }
+
+  function populateSuccessView(details) {
+    if (!details || !successPane) return;
+    const source = details.source || {};
+    const destination = details.destination || {};
+
+    applyBadgeStyles(successSourceBadge, source.color || 'bg-cyan-100 text-cyan-600');
+    if (successSourceBadge) {
+      successSourceBadge.textContent = source.initial || '';
+    }
+    if (successSourceName) {
+      successSourceName.textContent = source.title || '-';
+    }
+    if (successSourceSubtitle) {
+      successSourceSubtitle.textContent = source.subtitle || '-';
+    }
+
+    applyBadgeStyles(successDestBadge, destination.color || 'bg-amber-100 text-amber-600');
+    if (successDestBadge) {
+      successDestBadge.textContent = destination.initial || '';
+    }
+    if (successDestName) {
+      successDestName.textContent = destination.title || '-';
+    }
+    if (successDestSubtitle) {
+      successDestSubtitle.textContent = destination.subtitle || '-';
+    }
+
+    const nominal = typeof details.amount === 'number' ? details.amount : 0;
+    const total = typeof details.total === 'number' ? details.total : nominal;
+    if (successNominal) {
+      successNominal.textContent = 'Rp' + formatter.format(nominal);
+    }
+    if (successTotal) {
+      successTotal.textContent = 'Rp' + formatter.format(total);
+    }
+    if (successCreatedBy) {
+      successCreatedBy.textContent = details.createdBy || '-';
+    }
+    if (successReference) {
+      successReference.textContent = details.reference || '-';
+    }
+    if (successDate) {
+      successDate.textContent = details.datetime || '-';
+    }
+    if (successCategory) {
+      successCategory.textContent = details.category || '-';
+    }
+    if (successNote) {
+      successNote.textContent = details.note || '-';
+    }
+    if (successMethod) {
+      successMethod.textContent = details.method || '-';
+    }
+  }
+
+  function openSuccessPane() {
+    if (!lastTransactionDetails) return;
+    populateSuccessView(lastTransactionDetails);
+    transferPane?.classList.add('hidden');
+    movePane?.classList.add('hidden');
+    successPane?.classList.remove('hidden');
+    drawer.classList.add('open');
+    successCloseBtn?.focus();
   }
 
   function openSheet() {
@@ -284,6 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
     accountNumber = '';
     accountOwner = '';
     saveBeneficiary = false;
+    selectedDestinationAccountData = null;
   }
 
   function openDestSheet() {
@@ -453,16 +609,19 @@ document.addEventListener('DOMContentLoaded', () => {
       sourceBtn.textContent = `${acc.name} - ${acc.number}`;
       sourceBtn.classList.remove('text-slate-500');
       sourceSelected = true;
+      selectedSourceAccountData = mapAccountToDisplay(acc);
       updateMethodVisibility();
     } else if (currentSheetType === 'moveSource') {
       const acc = currentData[selectedIndex];
       moveSourceBtn.textContent = `${acc.name} - ${acc.number}`;
       moveSourceBtn.classList.remove('text-slate-500');
       moveSourceSelected = true;
+      moveSourceAccountData = mapAccountToDisplay(acc);
       moveDestination = '';
       moveDestBtn.textContent = 'Pilih rekening tujuan';
       moveDestBtn.classList.add('text-slate-500');
       moveDestValid = false;
+      moveDestAccountData = null;
       moveDestError.classList.add('hidden');
       updateMoveConfirmState();
     } else if (currentSheetType === 'moveDest') {
@@ -472,6 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
       moveDestBtn.classList.remove('text-slate-500');
       const sourceName = moveSourceBtn.textContent.split(' - ')[0];
       moveDestValid = acc.name !== sourceName;
+      moveDestAccountData = moveDestValid ? mapAccountToDisplay(acc) : null;
       moveDestError.classList.toggle('hidden', moveDestValid);
       updateMoveConfirmState();
     } else if (currentSheetType === 'method') {
@@ -593,7 +753,17 @@ document.addEventListener('DOMContentLoaded', () => {
   destBack?.addEventListener('click', closeDestSheet);
   destClose?.addEventListener('click', closeDestSheet);
   destProceed?.addEventListener('click', () => {
-    destBtn.textContent = `${selectedBank} - ${accountNumber} - ${accountOwner}`;
+    const alias = aliasInput?.value?.trim() || '';
+    const title = alias || accountOwner || selectedBank;
+    selectedDestinationAccountData = createManualAccountDisplay({
+      title,
+      company: accountOwner || '',
+      bank: selectedBank,
+      number: accountNumber,
+      color: 'bg-amber-100 text-amber-600'
+    });
+    const destLabelParts = [selectedBank, accountNumber, accountOwner].filter(Boolean);
+    destBtn.textContent = destLabelParts.join(' - ');
     destBtn.classList.remove('text-slate-500');
     destSelected = true;
     closeDestSheet();
@@ -603,6 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function openDrawer() {
     movePane.classList.add('hidden');
     transferPane.classList.remove('hidden');
+    successPane?.classList.add('hidden');
     drawer.classList.add('open');
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
@@ -612,10 +783,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function closeDrawer() {
     transferPane.classList.add('hidden');
     movePane.classList.add('hidden');
+    successPane?.classList.add('hidden');
     drawer.classList.remove('open');
     closeSheet();
     closeDestSheet();
     closeConfirmSheet();
+    lastTransactionDetails = null;
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
@@ -624,6 +797,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function openMoveDrawerPanel() {
     transferPane.classList.add('hidden');
     movePane.classList.remove('hidden');
+    successPane?.classList.add('hidden');
     drawer.classList.add('open');
     moveSourceBtn.textContent = 'Pilih sumber rekening';
     moveSourceBtn.classList.add('text-slate-500');
@@ -643,6 +817,8 @@ document.addEventListener('DOMContentLoaded', () => {
     moveDestValid = false;
     moveAmountValue = 0;
     moveAmountValid = false;
+    moveSourceAccountData = null;
+    moveDestAccountData = null;
     updateMoveConfirmState();
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
@@ -654,6 +830,8 @@ document.addEventListener('DOMContentLoaded', () => {
     openDrawer();
   });
   closeBtn?.addEventListener('click', closeDrawer);
+  successCloseBtn?.addEventListener('click', closeDrawer);
+  successHeaderClose?.addEventListener('click', closeDrawer);
   openMoveBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     openMoveDrawerPanel();
@@ -831,6 +1009,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const now = new Date();
     const dateStr = now.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
     const timeStr = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const noteValue = noteInput?.value?.trim() || '';
+    const sourceDisplay = selectedSourceAccountData || createFallbackAccountDisplay(sourceBtn.textContent || '-', 'bg-cyan-100 text-cyan-600');
+    const destinationDisplay = selectedDestinationAccountData || createFallbackAccountDisplay(destBtn.textContent || '-', 'bg-amber-100 text-amber-600');
     sheetSource.textContent = sourceBtn.textContent;
     sheetDestination.textContent = destBtn.textContent;
     sheetNominal.textContent = 'Rp' + formatter.format(amountValue);
@@ -841,6 +1022,20 @@ document.addEventListener('DOMContentLoaded', () => {
     sheetRef.textContent = ref;
     sheetDate.textContent = `${dateStr} ${timeStr}`;
     sheetMethod.textContent = selectedMethod;
+    lastTransactionDetails = {
+      type: 'transfer',
+      source: sourceDisplay,
+      destination: destinationDisplay,
+      amount: amountValue,
+      fee: selectedFee,
+      total: amountValue + selectedFee,
+      method: selectedMethod || '-',
+      reference: String(ref),
+      datetime: `${dateStr} ${timeStr}`,
+      category: selectedCategory || '-',
+      note: noteValue || '-',
+      createdBy: currentUserFullName
+    };
     setConfirmProceedEnabled(true);
     sheetOverlay.classList.remove('hidden');
     requestAnimationFrame(() => {
@@ -855,6 +1050,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const now = new Date();
     const dateStr = now.toLocaleDateString('id-ID', {day:'numeric', month:'long', year:'numeric'});
     const timeStr = now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const noteValue = moveNoteInput?.value?.trim() || '';
+    const sourceDisplay = moveSourceAccountData || createFallbackAccountDisplay(moveSourceBtn.textContent || '-', 'bg-cyan-100 text-cyan-600');
+    const destDisplay = moveDestAccountData || createFallbackAccountDisplay(moveDestBtn.textContent || '-', 'bg-amber-100 text-amber-600');
     sheetSource.textContent = moveSourceBtn.textContent;
     sheetDestination.textContent = moveDestBtn.textContent;
     sheetNominal.textContent = 'Rp' + formatter.format(moveAmountValue);
@@ -865,6 +1063,20 @@ document.addEventListener('DOMContentLoaded', () => {
     sheetMethod.textContent = 'Pindah Buku';
     sheetRef.textContent = ref;
     sheetDate.textContent = `${dateStr} ${timeStr}`;
+    lastTransactionDetails = {
+      type: 'move',
+      source: sourceDisplay,
+      destination: destDisplay,
+      amount: moveAmountValue,
+      fee: 0,
+      total: moveAmountValue,
+      method: 'Pindah Buku',
+      reference: String(ref),
+      datetime: `${dateStr} ${timeStr}`,
+      category: moveSelectedCategory || '-',
+      note: noteValue || '-',
+      createdBy: currentUserFullName
+    };
     setConfirmProceedEnabled(true);
     sheetOverlay.classList.remove('hidden');
     requestAnimationFrame(() => {
@@ -882,10 +1094,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     if (confirmProceed.disabled) return;
+    e.preventDefault();
     const otpValue = otpInputs.map(input => input.value).join('');
     console.log('OTP submitted:', otpValue);
-    alert('Transfer diproses (dummy).');
     closeConfirmSheet();
+    openSuccessPane();
   });
 });
 
