@@ -301,13 +301,13 @@
         <button id="moveConfirmBtn" class="w-full rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Konfirmasi Pemindahan Saldo</button>
       </div>
     </div>
-  </div>
 
-  <!-- Bottom Sheet Overlay & Panel -->
-    <div id="sheetOverlay" class="hidden fixed inset-0 bg-black/20 opacity-0 transition-opacity z-10"></div>
-    <div id="bottomSheet" class="fixed bottom-0 right-0 w-full max-w-[480px] bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform  h-3/4 z-20 flex flex-col">
-      <div class="p-4 border-b">
+    <!-- Bottom Sheet Overlay & Panel -->
+    <div id="sheetOverlay" class="hidden absolute inset-0 bg-black/20 opacity-0 transition-opacity duration-200 z-10"></div>
+    <div id="bottomSheet" class="absolute inset-x-0 bottom-0 w-full bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform duration-200 h-3/4 z-20 flex flex-col">
+      <div class="relative p-4 border-b">
         <h3 id="sheetTitle" class="text-base font-semibold">Sumber Rekening</h3>
+        <button id="sheetClose" type="button" class="absolute top-4 right-4 text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup lembar bawah">&times;</button>
       </div>
       <div class="flex-1 overflow-y-auto">
         <ul id="sheetList" class="divide-y"></ul>
@@ -319,9 +319,10 @@
     </div>
 
     <!-- Destination Account Bottom Sheet -->
-    <div id="destSheet" class="drawer-sheet drawer-sheet--full fixed bottom-0 right-0 w-full max-w-[480px] h-3/4 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform z-20 flex flex-col">
-      <div class="p-4 border-b">
+    <div id="destSheet" class="absolute inset-x-0 bottom-0 w-full h-3/4 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform duration-200 z-20 flex flex-col">
+      <div class="relative p-4 border-b">
         <h3 class="text-base font-semibold">Daftar Rekening Tujuan</h3>
+        <button id="destClose" type="button" class="absolute top-4 right-4 text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup lembar bawah">&times;</button>
       </div>
       <div class="p-4 flex-1 overflow-y-auto space-y-4">
         <div id="bankDropdown" class="relative">
@@ -379,9 +380,10 @@
     </div>
 
     <!-- Confirmation Bottom Sheet -->
-    <div id="confirmSheet" class="drawer-sheet drawer-sheet--full fixed bottom-0 right-0 w-full max-w-[480px] h-3/4 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform z-20 flex flex-col">
-      <div class="p-6 text-center border-b relative">
+    <div id="confirmSheet" class="absolute inset-x-0 bottom-0 w-full h-3/4 bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform duration-200 z-20 flex flex-col">
+      <div class="relative p-6 text-center border-b">
         <h3 class="text-base font-semibold">Konfirmasi Transfer Saldo</h3>
+        <button id="confirmClose" type="button" class="absolute top-6 right-6 text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup lembar bawah">&times;</button>
       </div>
       <div class="flex-1 overflow-y-auto">
         <div>
@@ -435,7 +437,8 @@
         <button id="confirmProceed" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 opacity-50 cursor-not-allowed" disabled>Lanjut Transfer Saldo</button>
       </div>
     </div>
-  </div>
+  </div> <!-- /drawer -->
+</div> <!-- /layout container -->
 
   <script src="transfer.js"></script>
   <script src="sidebar.js"></script>
