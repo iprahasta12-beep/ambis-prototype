@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sheetList   = document.getElementById('sheetList');
   const sheetCancel = document.getElementById('sheetCancel');
   const sheetChoose = document.getElementById('sheetChoose');
+  const sheetClose  = document.getElementById('sheetClose');
 
   // destination sheet elements
   const destSheet   = document.getElementById('destSheet');
@@ -53,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const aliasCounter = document.getElementById('aliasCounter');
   const destBack    = document.getElementById('destBack');
   const destProceed = document.getElementById('destProceed');
+  const destClose   = document.getElementById('destClose');
 
   // confirmation sheet
   const confirmSheet = document.getElementById('confirmSheet');
@@ -313,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   sheetCancel?.addEventListener('click', closeSheet);
+  sheetClose?.addEventListener('click', closeSheet);
   sheetOverlay?.addEventListener('click', () => {
     closeSheet();
     closeDestSheet();
@@ -464,6 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   destBack?.addEventListener('click', closeDestSheet);
+  destClose?.addEventListener('click', closeDestSheet);
   destProceed?.addEventListener('click', () => {
     destBtn.textContent = `${selectedBank} - ${accountNumber} - ${accountOwner}`;
     destBtn.classList.remove('text-slate-500');
