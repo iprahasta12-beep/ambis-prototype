@@ -181,16 +181,16 @@
         </div>
         <div class="flex-1 overflow-y-auto p-4 space-y-4">
         <div>
-          <label class="block text-sm mb-1">Sumber Rekening</label>
+          <label class="block   mb-1">Sumber Rekening</label>
           <button id="sourceAccountBtn" class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih sumber rekening</button>
         </div>
         <div>
-          <label class="block text-sm mb-1">Rekening Tujuan</label>
+          <label class="block   mb-1">Rekening Tujuan</label>
           <button id="destinationAccountBtn" class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih rekening tujuan</button>
         </div>
         <div>
           <div class="flex items-center justify-between mb-1">
-            <span class="text-sm">Sisa Batas Transaksi Harian</span>
+            <span class=" ">Sisa Batas Transaksi Harian</span>
             <img src="img/icon/info.svg" alt="" class="w-4 h-4">
           </div>
           <div class="border rounded-xl px-3 py-3 bg-slate-50">
@@ -198,7 +198,7 @@
           </div>
         </div>
         <div>
-          <label class="block text-sm mb-1">Nominal</label>
+          <label class="block   mb-1">Nominal</label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">Rp</span>
             <input id="amountInput" type="text" placeholder="Masukkan nominal transfer" class="w-full border rounded-xl pl-10 pr-3 py-3" />
@@ -206,12 +206,12 @@
         </div>
 
       <p class="text-[11px] text-slate-400 pt-4">DETAIL</p>
-      <div class="flex p-3 rounded-xl bg-sky-100 text-sm text-slate-600">
+      <div class="flex p-3 rounded-xl bg-sky-100   text-slate-600">
         <img class="w-6 h-6 mr-2" src="img/icon/info-2.svg" alt="">
         Pilih kategori untuk memudahkan Anda mencari riwayat transaksi yang Anda butuhkan
       </div>
       <div id="categoryDropdown" class="relative">
-          <label class="block text-sm mb-1">Kategori</label>
+          <label class="block   mb-1">Kategori</label>
           <button id="categoryBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between">
             <span id="categoryText" class="text-slate-500">Pilih kategori</span>
             <span class="text-slate-400">▾</span>
@@ -226,21 +226,21 @@
           </ul>
         </div>
         <div>
-          <label class="block text-sm mb-1">Catatan (Opsional)</label>
+          <label class="block   mb-1">Catatan (Opsional)</label>
           <textarea id="noteInput" class="w-full border rounded-xl px-3 py-3" placeholder="Tulis catatan" maxlength="50"></textarea>
           <div id="noteCounter" class="text-right text-xs text-slate-400">0/50</div>
         </div>
         <div id="methodSection" class="hidden">
           <p class="text-[16px] tracking-[.05em] text-slate-400 p-3 bg-slate-100 mb-4">METODE</p>
           <div>
-            <label class="block text-sm mb-1">Metode Transfer</label>
+            <label class="block   mb-1">Metode Transfer</label>
             <button id="methodBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between opacity-50 cursor-not-allowed" disabled>
               <span id="methodText" class="text-slate-500">Pilih metode transfer</span>
               <span class="text-slate-400">▾</span>
             </button>
           </div>
         </div>
-        <div id="summarySection" class="hidden text-sm space-y-2 pt-2 border-slate-200">
+        <div id="summarySection" class="hidden   space-y-2 pt-2 border-slate-200">
           <div class="justify-between pb-2"><p class="text-base text-slate-400">Nominal</p><p class="text-base" id="summaryNominal">Rp0</p></div>
           <div class="justify-between pb-2"><p class="text-base text-slate-400">Biaya Transfer</p><p class="text-base" id="summaryFee">Rp0</p></div>
           <hr class="border-slate-200 py-1"/>
@@ -260,24 +260,24 @@
         </div>
         <div class="flex-1 overflow-y-auto p-4 space-y-4">
         <div>
-          <label class="block text-sm mb-1">Sumber Rekening</label>
+          <label class="block   mb-1">Sumber Rekening</label>
           <button id="moveSourceBtn" class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih sumber rekening</button>
         </div>
         <div>
-          <label class="block text-sm mb-1">Rekening Tujuan</label>
+          <label class="block   mb-1">Rekening Tujuan</label>
           <button id="moveDestBtn" class="w-full text-left border rounded-xl px-3 py-3 text-slate-500">Pilih rekening tujuan</button>
-          <p id="moveDestError" class="text-sm text-red-500 mt-1 hidden">Sumber dan tujuan tidak boleh sama</p>
+          <p id="moveDestError" class="  text-red-500 mt-1 hidden">Sumber dan tujuan tidak boleh sama</p>
         </div>
         <div>
-          <label class="block text-sm mb-1">Nominal</label>
+          <label class="block   mb-1">Nominal</label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">Rp</span>
             <input id="moveAmountInput" type="text" placeholder="Masukkan nominal pemindahan" class="w-full border rounded-xl pl-10 pr-3 py-3" />
           </div>
-          <p id="moveAmountError" class="text-sm text-red-500 mt-1 hidden">Masukkan nominal yang valid</p>
+          <p id="moveAmountError" class="  text-red-500 mt-1 hidden">Masukkan nominal yang valid</p>
         </div>
         <div id="moveCategoryDropdown" class="relative">
-          <label class="block text-sm mb-1">Kategori</label>
+          <label class="block   mb-1">Kategori</label>
           <button id="moveCategoryBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between">
             <span id="moveCategoryText" class="text-slate-500">Pilih kategori</span>
             <span class="text-slate-400">▾</span>
@@ -292,7 +292,7 @@
           </ul>
         </div>
         <div>
-          <label class="block text-sm mb-1">Catatan (Opsional)</label>
+          <label class="block   mb-1">Catatan (Opsional)</label>
           <textarea id="moveNoteInput" class="w-full border rounded-xl px-3 py-3" placeholder="Tulis catatan" maxlength="50"></textarea>
           <div id="moveNoteCounter" class="text-right text-xs text-slate-400">0/50</div>
         </div>
@@ -325,7 +325,7 @@
       </div>
       <div class="p-4 flex-1 overflow-y-auto space-y-4">
         <div id="bankDropdown" class="relative">
-          <label class="block text-sm mb-1">Nama Bank</label>
+          <label class="block   mb-1">Nama Bank</label>
           <button id="bankBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between">
             <span id="bankText" class="text-slate-500">Pilih bank</span>
             <span class="text-slate-400">▾</span>
@@ -344,30 +344,30 @@
           </ul>
         </div>
         <div>
-          <label class="block text-sm mb-1">Nomor Rekening</label>
+          <label class="block   mb-1">Nomor Rekening</label>
           <div class="flex gap-2">
             <input id="destNumber" type="text" placeholder="Masukkan nomor rekening" class="flex-1 border rounded-xl px-3 py-3" />
             <button id="checkAccount" class="whitespace-nowrap border border-cyan-500 text-cyan-600 rounded-xl px-4 py-3">Periksa Rekening</button>
           </div>
         </div>
-        <div id="accountInfo" class="flex hidden p-3 rounded-xl bg-sky-100 border border-slate-200 text-sm text-slate-600">
+        <div id="accountInfo" class="flex hidden p-3 rounded-xl bg-sky-100 border border-slate-200   text-slate-600">
         <img class="w-6 h-6 mr-2" src="img/icon/info-2.svg" alt="">
         <span>Pastikan pemilik rekening sesuai</span></div>
         <div id="ownerField" class="hidden">
-          <label class="block text-sm mb-1">Pemilik Rekening</label>
+          <label class="block   mb-1">Pemilik Rekening</label>
           <input id="accountOwnerField" type="text" readonly class="w-full border rounded-xl px-3 py-3 bg-slate-50" />
         </div>
         <div id="saveContainer" class="hidden">
-          <label class="flex items-start gap-2 text-sm">
+          <label class="flex items-start gap-2  ">
             <input id="saveCheckbox" type="checkbox" class="mt-1" />
             <span>Simpan Daftar Rekening Tujuan</span>
           </label>
         </div>
         <div id="aliasContainer" class="hidden">
-          <label class="block text-sm mb-1">Nama Alias</label>
+          <label class="block mb-1">Nama Alias</label>
           <input id="aliasInput" type="text" maxlength="15" placeholder="Tulis nama alias" class="w-full border rounded-xl px-3 py-3" />
           <div class="text-right text-xs text-slate-400" id="aliasCounter">0/15</div>
-         <div id="accountInfo" class="flex hidden p-3 rounded-xl bg-sky-100 border border-slate-200 text-sm text-slate-600">
+         <div id="accountInfo" class="flex p-3 rounded-xl bg-sky-100 border border-slate-200 text-slate-600">
             <img class="w-6 h-6 mr-2" src="img/icon/info-2.svg" alt="">
             <span>Daftar Rekening tujuan tersimpan pada saat transaksi selesai</span></div>
         </div>
@@ -385,7 +385,7 @@
       </div>
       <div class="flex-1 overflow-y-auto p-6 space-y-6">
         <div>
-           <div id="accountInfo" class="flex hidden p-3 rounded-xl bg-sky-100 border border-slate-200 text-sm text-slate-600">
+           <div id="accountInfo" class="flex hidden p-3 rounded-xl bg-sky-100 border border-slate-200   text-slate-600">
             <img class="w-6 h-6 mr-2" src="img/icon/info-2.svg" alt="">
             <span>Mohon pastikan data sudah sesuai</span>
           </div>
@@ -393,7 +393,7 @@
           <div class="bg-slate-50 border rounded-xl">
             <div class="flex gap-3 p-6 items-center bg-sky100">
               <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
-                <span class="text-sm font-medium">O</span>
+                <span class="font-medium">O</span>
               </div>
               <div class="min-w-0">
                 <p class="text-xs text-slate-500 mb-1">Sumber</p>
@@ -402,7 +402,7 @@
             </div>
             <div class="flex gap-3 p-6 items-center bg-sky100">
               <div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
-                <span class="text-sm font-medium">D</span>
+                <span class="font-medium">D</span>
               </div>
               <div class="min-w-0">
                 <p class="text-xs text-slate-500 mb-1">Tujuan</p>
