@@ -9,13 +9,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.getElementById('drawerCloseBtn');
   const cardGrid = document.getElementById('cardGrid');
 
-  function updateCardGridLayout(isDrawerOpen) {
+  function updateCardGridLayout() {
+    // Maintain a consistent card layout regardless of drawer state so cards
+    // stay in place when the column configuration would previously change.
     if (!cardGrid) return;
-    cardGrid.classList.toggle('md:grid-cols-3', !isDrawerOpen);
-    cardGrid.classList.toggle('md:grid-cols-2', isDrawerOpen);
+    cardGrid.classList.add('md:grid-cols-3');
+    cardGrid.classList.remove('md:grid-cols-2');
   }
 
-  updateCardGridLayout(drawer?.classList.contains('open'));
+  updateCardGridLayout();
 
   const successHeaderClose = document.getElementById('successHeaderClose');
   const successTitle = document.getElementById('successTitle');
@@ -470,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
     movePane?.classList.add('hidden');
     successPane?.classList.remove('hidden');
     drawer.classList.add('open');
-    updateCardGridLayout(true);
+    updateCardGridLayout();
     successCloseBtn?.focus();
     const activeType = lastTransactionDetails.type === 'move' ? 'move' : 'transfer';
     setActiveActivityCard(activeType);
@@ -908,7 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
     transferPane.classList.remove('hidden');
     successPane?.classList.add('hidden');
     drawer.classList.add('open');
-    updateCardGridLayout(true);
+    updateCardGridLayout();
     activePaneType = 'transfer';
     updateConfirmSheetContent(activePaneType);
     if (typeof window.sidebarCollapseForDrawer === 'function') {
@@ -922,7 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
     movePane.classList.add('hidden');
     successPane?.classList.add('hidden');
     drawer.classList.remove('open');
-    updateCardGridLayout(false);
+    updateCardGridLayout();
     closeSheet();
     closeDestSheet();
     closeConfirmSheet();
@@ -940,7 +942,7 @@ document.addEventListener('DOMContentLoaded', () => {
     movePane.classList.remove('hidden');
     successPane?.classList.add('hidden');
     drawer.classList.add('open');
-    updateCardGridLayout(true);
+    updateCardGridLayout();
     moveSourceBtn.textContent = 'Pilih sumber rekening';
     moveSourceBtn.classList.add('text-slate-500');
     moveDestBtn.textContent = 'Pilih rekening tujuan';
