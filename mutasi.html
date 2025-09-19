@@ -153,7 +153,7 @@
 
     <!-- ============ DRAWER ============ -->
     <div id="drawer" class="h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100">
-      <div class="flex flex-col h-full" id="mutasiDrawerInner">
+      <div class="flex flex-col h-full relative" id="mutasiDrawerInner">
         <div class="flex items-center justify-between px-6 py-5 border-b border-slate-200">
           <h2 id="mutasiDrawerTitle" class="text-lg font-semibold">Mutasi Rekening</h2>
           <button id="mutasiDrawerClose" class="text-2xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
@@ -292,107 +292,111 @@
 
           <div id="mutasiSuccess" class="hidden px-6 pb-10 space-y-6">
             <div id="mutasiTransactionList" class="space-y-8"></div>
+          </div>
+        </div>
+      </div>
 
-            <div id="mutasiDetailView" class="hidden">
-              <button
-                type="button"
-                data-mutasi-detail-close
-                class="mb-4 flex items-center gap-2 text-sm font-semibold text-cyan-600 hover:text-cyan-700"
-              >
-                <span aria-hidden="true">&larr;</span>
-                <span>Kembali ke daftar transaksi</span>
-              </button>
+      <div id="mutasiDetailOverlay" class="hidden absolute inset-0 bg-black/20 opacity-0 transition-opacity duration-200 z-10"></div>
 
-              <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
-                <div class="px-6 pt-4 pb-2 border-b border-slate-200">
-                  <div class="mx-auto h-1.5 w-12 rounded-full bg-slate-200"></div>
-                </div>
-                <div class="px-6 pb-6">
-                  <div class="flex flex-col items-center text-center gap-4 pt-4">
-                    <div class="w-20 h-20 rounded-full bg-cyan-50 border border-cyan-100 grid place-items-center">
-                      <img src="img/icon/transfer-mutasi.svg" alt="Detail Transaksi" class="w-10 h-10" />
-                    </div>
-                    <h3 class="text-xl font-semibold text-slate-900">Detail Transaksi</h3>
-                  </div>
+      <div
+        id="mutasiDetailSheet"
+        class="absolute inset-x-0 bottom-0 w-full bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform duration-200 h-3/4 max-h-[90%] z-20 flex flex-col overflow-hidden"
+      >
+        <div class="px-6 pt-4 pb-2 border-b border-slate-200">
+          <div class="mx-auto h-1.5 w-12 rounded-full bg-slate-200"></div>
+        </div>
+        <div id="mutasiDetailView" class="flex-1 overflow-y-auto px-6 pb-6">
+          <button
+            type="button"
+            data-mutasi-detail-close
+            class="mb-4 flex items-center gap-2 text-sm font-semibold text-cyan-600 hover:text-cyan-700"
+          >
+            <span aria-hidden="true">&larr;</span>
+            <span>Kembali ke daftar transaksi</span>
+          </button>
 
-                  <section class="mt-8 space-y-3">
-                    <p class="text-xs font-semibold tracking-[.18em] text-slate-500 uppercase">Aktivitas</p>
-                    <p id="mutasiDetailActivity" class="text-base font-semibold text-slate-900">Transfer Saldo</p>
-                  </section>
+          <div class="flex flex-col items-center text-center gap-4 pt-4">
+            <div class="w-20 h-20 rounded-full bg-cyan-50 border border-cyan-100 grid place-items-center">
+              <img src="img/icon/transfer-mutasi.svg" alt="Detail Transaksi" class="w-10 h-10" />
+            </div>
+            <h3 class="text-xl font-semibold text-slate-900">Detail Transaksi</h3>
+          </div>
 
-                  <section class="mt-6 bg-[#F2F9FF] border border-sky-200 rounded-2xl p-4 space-y-6">
-                    <div class="flex items-start gap-4">
-                      <div id="mutasiDetailSourceBadge" class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 grid place-items-center font-semibold text-base">O</div>
-                      <div class="min-w-0 space-y-1">
-                        <p class="text-xs font-semibold tracking-[.16em] text-slate-500 uppercase">Sumber</p>
-                        <p id="mutasiDetailSourceName" class="text-base font-semibold text-slate-900 leading-snug truncate">Operasional</p>
-                        <p id="mutasiDetailSourceSubtitle" class="text-sm text-slate-500 leading-snug truncate">PT ABC Indonesia</p>
-                        <p id="mutasiDetailSourceAccount" class="text-sm text-slate-500 leading-snug break-words">Amar Indonesia - 000967895483</p>
-                      </div>
-                    </div>
-                    <div class="border-t border-sky-200"></div>
-                    <div class="flex items-start gap-4">
-                      <div id="mutasiDetailDestinationBadge" class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 grid place-items-center font-semibold text-base">S</div>
-                      <div class="min-w-0 space-y-1">
-                        <p class="text-xs font-semibold tracking-[.16em] text-slate-500 uppercase">Tujuan</p>
-                        <p id="mutasiDetailDestinationName" class="text-base font-semibold text-slate-900 leading-snug truncate">Supplier Baja</p>
-                        <p id="mutasiDetailDestinationSubtitle" class="text-sm text-slate-500 leading-snug truncate">PT XYZ Indonesia</p>
-                        <p id="mutasiDetailDestinationAccount" class="text-sm text-slate-500 leading-snug break-words">BCA - 4750278562</p>
-                      </div>
-                    </div>
-                  </section>
+          <section class="mt-8 space-y-3">
+            <p class="text-xs font-semibold tracking-[.18em] text-slate-500 uppercase">Aktivitas</p>
+            <p id="mutasiDetailActivity" class="text-base font-semibold text-slate-900">Transfer Saldo</p>
+          </section>
 
-                  <section class="mt-8">
-                    <p class="font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 p-2">TOTAL TRANSAKSI</p>
-                    <div class="flex items-center justify-between text-sm text-slate-600">
-                      <span>Nominal</span>
-                      <span id="mutasiDetailTotal" class="text-right text-slate-900 font-semibold text-xl">Rp250.000.000</span>
-                    </div>
-                  </section>
-
-                  <section class="mt-8">
-                    <p class="font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 p-2">DETAIL TRANSAKSI</p>
-                    <dl class="space-y-4">
-                      <div class="flex justify-between gap-6 text-sm text-slate-600">
-                        <dt>Metode Transfer</dt>
-                        <dd id="mutasiDetailMethod" class="text-right text-slate-900 font-medium break-words">BI Fast</dd>
-                      </div>
-                      <div class="flex justify-between gap-6 text-sm text-slate-600">
-                        <dt>Nomor Referensi</dt>
-                        <dd id="mutasiDetailReference" class="text-right text-slate-900 font-medium break-words">1234567890</dd>
-                      </div>
-                      <div class="flex justify-between gap-6 text-sm text-slate-600">
-                        <dt>Tanggal dan Waktu</dt>
-                        <dd id="mutasiDetailDate" class="text-right text-slate-900 font-medium break-words">3 Januari 2024, 20.56</dd>
-                      </div>
-                      <div class="flex justify-between gap-6 text-sm text-slate-600">
-                        <dt>Kategori</dt>
-                        <dd id="mutasiDetailCategory" class="text-right text-slate-900 font-medium break-words">Pemindahan Dana</dd>
-                      </div>
-                      <div class="flex justify-between gap-6 text-sm text-slate-600">
-                        <dt>Catatan</dt>
-                        <dd id="mutasiDetailNote" class="text-right text-slate-900 font-medium break-words">Kesalahan Transfer</dd>
-                      </div>
-                    </dl>
-                  </section>
-                </div>
-                <div class="p-4 border-t border-slate-200 bg-white">
-                  <button
-                    type="button"
-                    data-mutasi-detail-close
-                    class="w-full rounded-xl border border-cyan-500 text-cyan-600 font-semibold py-3 hover:bg-cyan-50"
-                  >
-                    Tutup
-                  </button>
-                </div>
+          <section class="mt-6 bg-[#F2F9FF] border border-sky-200 rounded-2xl p-4 space-y-6">
+            <div class="flex items-start gap-4">
+              <div id="mutasiDetailSourceBadge" class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 grid place-items-center font-semibold text-base">O</div>
+              <div class="min-w-0 space-y-1">
+                <p class="text-xs font-semibold tracking-[.16em] text-slate-500 uppercase">Sumber</p>
+                <p id="mutasiDetailSourceName" class="text-base font-semibold text-slate-900 leading-snug truncate">Operasional</p>
+                <p id="mutasiDetailSourceSubtitle" class="text-sm text-slate-500 leading-snug truncate">PT ABC Indonesia</p>
+                <p id="mutasiDetailSourceAccount" class="text-sm text-slate-500 leading-snug break-words">Amar Indonesia - 000967895483</p>
               </div>
             </div>
-          </div>
+            <div class="border-t border-sky-200"></div>
+            <div class="flex items-start gap-4">
+              <div id="mutasiDetailDestinationBadge" class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 grid place-items-center font-semibold text-base">S</div>
+              <div class="min-w-0 space-y-1">
+                <p class="text-xs font-semibold tracking-[.16em] text-slate-500 uppercase">Tujuan</p>
+                <p id="mutasiDetailDestinationName" class="text-base font-semibold text-slate-900 leading-snug truncate">Supplier Baja</p>
+                <p id="mutasiDetailDestinationSubtitle" class="text-sm text-slate-500 leading-snug truncate">PT XYZ Indonesia</p>
+                <p id="mutasiDetailDestinationAccount" class="text-sm text-slate-500 leading-snug break-words">BCA - 4750278562</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="mt-8">
+            <p class="font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 p-2">TOTAL TRANSAKSI</p>
+            <div class="flex items-center justify-between text-sm text-slate-600">
+              <span>Nominal</span>
+              <span id="mutasiDetailTotal" class="text-right text-slate-900 font-semibold text-xl">Rp250.000.000</span>
+            </div>
+          </section>
+
+          <section class="mt-8 mb-6">
+            <p class="font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 p-2">DETAIL TRANSAKSI</p>
+            <dl class="space-y-4">
+              <div class="flex justify-between gap-6 text-sm text-slate-600">
+                <dt>Metode Transfer</dt>
+                <dd id="mutasiDetailMethod" class="text-right text-slate-900 font-medium break-words">BI Fast</dd>
+              </div>
+              <div class="flex justify-between gap-6 text-sm text-slate-600">
+                <dt>Nomor Referensi</dt>
+                <dd id="mutasiDetailReference" class="text-right text-slate-900 font-medium break-words">1234567890</dd>
+              </div>
+              <div class="flex justify-between gap-6 text-sm text-slate-600">
+                <dt>Tanggal dan Waktu</dt>
+                <dd id="mutasiDetailDate" class="text-right text-slate-900 font-medium break-words">3 Januari 2024, 20.56</dd>
+              </div>
+              <div class="flex justify-between gap-6 text-sm text-slate-600">
+                <dt>Kategori</dt>
+                <dd id="mutasiDetailCategory" class="text-right text-slate-900 font-medium break-words">Pemindahan Dana</dd>
+              </div>
+              <div class="flex justify-between gap-6 text-sm text-slate-600">
+                <dt>Catatan</dt>
+                <dd id="mutasiDetailNote" class="text-right text-slate-900 font-medium break-words">Kesalahan Transfer</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+        <div class="p-4 border-t border-slate-200 bg-white">
+          <button
+            type="button"
+            data-mutasi-detail-close
+            class="w-full rounded-xl border border-cyan-500 text-cyan-600 font-semibold py-3 hover:bg-cyan-50"
+          >
+            Tutup
+          </button>
         </div>
       </div>
     </div>
     <!-- ============ /DRAWER ============ -->
   </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
