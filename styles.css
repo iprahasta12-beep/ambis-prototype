@@ -61,8 +61,9 @@
 
 /* Drawer panel that pushes main content instead of overlaying */
 #drawer{
+  --drawer-max-width:550px;
   width:0;
-  max-width:550px;
+  max-width:var(--drawer-max-width);
   overflow:hidden;
   transition:width .3s ease;
   border-left-width:0;
@@ -70,6 +71,13 @@
 #drawer.open{
   width:100%;
   border-left-width:24px;
+}
+
+#drawer #mutasiDetailSheet{
+  width:100%;
+  max-width:var(--drawer-max-width);
+  left:auto;
+  right:0;
 }
 
 /* Disabled button appearance */
