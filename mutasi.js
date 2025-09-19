@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
       wrapper.className = index === 0 ? 'space-y-3' : 'space-y-3 mt-6';
 
       const heading = document.createElement('p');
-      heading.className = 'text-xl font-bold text-slate-900';
+      heading.className = 'text-base font-normal text-slate-900';
       heading.textContent = group.label || '-';
       wrapper.appendChild(heading);
 
