@@ -20,9 +20,9 @@
     const groupFilters = groupEl ? groupEl.querySelectorAll('.filter') : allFilters;
 
     function setTriggerState(applied) {
-      trigger.classList.toggle('border-cyan-600', applied);
+      trigger.classList.toggle('border-cyan-400', applied);
       trigger.classList.toggle('bg-[#E6F5F7]', applied);
-      trigger.classList.toggle('text-cyan-600', applied);
+      trigger.classList.toggle('text-cyan-500', applied);
       trigger.classList.toggle('border-slate-300', !applied);
       trigger.classList.toggle('bg-white', !applied);
       trigger.classList.toggle('text-slate-600', !applied);
