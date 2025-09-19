@@ -29,6 +29,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Global styles -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="font-[Mulish] bg-gray-50 text-slate-900">
@@ -149,9 +150,147 @@
       </div>
     </main>
     <!-- ============ /MAIN ============ -->
+
+    <!-- ============ DRAWER ============ -->
+    <div id="drawer" class="h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100">
+      <div class="flex flex-col h-full" id="mutasiDrawerInner">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-slate-200">
+          <h2 id="mutasiDrawerTitle" class="text-lg font-semibold">Mutasi Rekening</h2>
+          <button id="mutasiDrawerClose" class="text-2xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
+        </div>
+
+        <div class="border-b border-slate-200 px-6">
+          <div class="flex items-center gap-6">
+            <button type="button" class="py-4 font-semibold text-slate-900 border-b-2 border-cyan-500" aria-current="true">Mutasi Rekening</button>
+            <button type="button" class="py-4 text-slate-400 cursor-not-allowed" disabled>e-Statement</button>
+          </div>
+        </div>
+
+        <div class="px-6 pt-4 pb-3 border-b border-slate-100">
+          <p id="mutasiDrawerAccountLabel" class="text-lg font-semibold mb-4">-</p>
+          <div class="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-slate-700">
+            <span class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 grid place-items-center text-lg">ℹ️</span>
+            <p class="text-sm">Dapat menampilkan periode mutasi hingga 3 tahun terakhir</p>
+          </div>
+        </div>
+
+        <div class="px-6 py-4 border-b border-slate-100" data-filter-group="mutasi">
+          <div class="flex flex-wrap gap-3">
+            <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Rentang Tanggal">
+              <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2">
+                <img src="img/icon/date-picker.svg" class="w-5 h-5" alt="Rentang Tanggal" />
+                <span class="filter-label max-w-[140px] truncate">Rentang Tanggal</span>
+              </button>
+              <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[360px]">
+                <div class="flex flex-col gap-3">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="mutasi-date" value="7 Hari Terakhir">
+                    <span>7 Hari Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="mutasi-date" value="30 Hari Terakhir">
+                    <span>30 Hari Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="mutasi-date" value="1 Tahun Terakhir">
+                    <span>1 Tahun Terakhir</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="mutasi-date" value="custom">
+                    <span>Custom Rentang Tanggal</span>
+                  </label>
+                  <div class="custom-range hidden">
+                    <div class="flex gap-2">
+                      <div class="flex flex-col w-1/2">
+                        <span class="mb-1 text-sm">Tanggal Awal</span>
+                        <input
+                          type="text"
+                          class="h-10 border border-slate-300 rounded-lg text-center flatpickr-input"
+                          placeholder="DD/MM/YYYY"
+                          data-field="start"
+                          readonly
+                        />
+                      </div>
+                      <div class="flex flex-col w-1/2">
+                        <span class="mb-1 text-sm">Tanggal Akhir</span>
+                        <input
+                          type="text"
+                          class="h-10 border border-slate-300 rounded-lg text-center flatpickr-input"
+                          placeholder="DD/MM/YYYY"
+                          data-field="end"
+                          readonly
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                  <button class="cancel px-3 py-2 rounded-lg border text-slate-600 w-1/2">Batalkan</button>
+                  <button class="apply px-3 py-2 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-1/2" disabled>Terapkan</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter relative" data-filter="type" data-name="Jenis Transaksi" data-default="Jenis Transaksi">
+              <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2">
+                <img src="img/icon/filter.svg" class="w-5 h-5" alt="Jenis Transaksi" />
+                <span class="filter-label max-w-[140px] truncate">Jenis Transaksi</span>
+              </button>
+              <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[280px]">
+                <div class="flex flex-col gap-3">
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Masuk">
+                    <span>Masuk</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Keluar">
+                    <span>Keluar</span>
+                  </label>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                  <button class="cancel px-3 py-2 rounded-lg border text-slate-600 w-1/2">Batalkan</button>
+                  <button class="apply px-3 py-2 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-1/2" disabled>Terapkan</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto" id="mutasiDrawerContent">
+          <div id="mutasiLoading" class="h-full flex items-center justify-center">
+            <div class="flex flex-col items-center gap-3 text-slate-500">
+              <span class="w-10 h-10 border-4 border-cyan-200 border-t-cyan-600 rounded-full animate-spin"></span>
+              <span>Memuat data mutasi...</span>
+            </div>
+          </div>
+
+          <div id="mutasiError" class="hidden px-6 py-8 space-y-4">
+            <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">Gagal memuat data, coba lagi</div>
+            <button id="mutasiRetry" class="px-4 py-3 rounded-xl border border-cyan-500 text-cyan-600 hover:bg-cyan-50 w-full">Muat Ulang</button>
+          </div>
+
+          <div id="mutasiEmpty" class="hidden px-6 py-12 flex flex-col items-center text-center gap-4 text-slate-500">
+            <div class="w-20 h-20 rounded-full bg-slate-100 grid place-items-center text-3xl">📄</div>
+            <div>
+              <p class="font-semibold text-slate-700">Tidak ada transaksi pada periode ini</p>
+              <p class="text-sm">Silakan ubah filter atau rentang tanggal untuk melihat transaksi lainnya.</p>
+            </div>
+          </div>
+
+          <div id="mutasiSuccess" class="hidden px-6 pb-10 space-y-6">
+            <div id="mutasiTransactionList" class="space-y-8"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ============ /DRAWER ============ -->
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+  <script src="filters.js"></script>
   <script src="data/rekening-data.js"></script>
+  <script src="data/mutasi-data.js"></script>
   <script src="mutasi.js"></script>
   <script src="sidebar.js"></script>
 </body>
