@@ -5,75 +5,107 @@ const balanceToggleBtn = document.getElementById('dashBalanceToggle');
 const balanceToggleLabel = balanceToggleBtn?.querySelector('[data-balance-toggle-label]');
 const balanceSensitiveEls = Array.from(document.querySelectorAll('[data-balance-sensitive]'));
 
-let accounts = [];
+const ambis = window.AMBIS || {};
+const sharedAccounts = typeof ambis.getAccounts === 'function'
+  ? ambis.getAccounts({ clone: false })
+  : null;
+const accounts = Array.isArray(sharedAccounts)
+  ? sharedAccounts
+  : Array.isArray(ambis.accounts)
+    ? ambis.accounts
+    : [];
+
 let isBalanceHidden = false;
 
-fetch('data/account.json')
-  .then((res) => res.json())
-  .then((data) => {
-    accounts = data;
-    populateSelect();
-    accountSelect.addEventListener('change', updateView);
-    updateView();
-  })
-  .catch((err) => {
-    console.error('Failed to load accounts', err);
-  });
-
 function populateSelect() {
+  if (!accountSelect) return;
   accountSelect.innerHTML = '';
-  accounts.forEach((acc) => {
+  accounts.forEach((acc, index) => {
     const opt = document.createElement('option');
-    opt.value = acc.id;
-    opt.textContent = acc.name;
-    if (acc.name === 'Rekening Utama') {
+    opt.value = acc.id ?? String(index);
+    opt.textContent = acc.displayName || acc.name || `Rekening ${index + 1}`;
+    if ((acc.id && acc.id === 'utama') || (!acc.id && index === 0)) {
       opt.selected = true;
     }
     accountSelect.appendChild(opt);
   });
 }
 
+function findAccountById(id) {
+  if (!id && id !== 0) {
+    return accounts[0] || null;
+  }
+  if (typeof ambis.findAccountById === 'function') {
+    const found = ambis.findAccountById(id);
+    if (found) return found;
+  }
+  return accounts.find((acc) => String(acc.id) === String(id)) || accounts[0] || null;
+}
+
+function getTransactionsForAccount(account) {
+  if (!account) return [];
+  if (typeof ambis.getTransactionsForAccount === 'function') {
+    return ambis.getTransactionsForAccount(account);
+  }
+  return Array.isArray(account.transactions) ? account.transactions : [];
+}
+
 function updateView() {
-  const selectedId = parseInt(accountSelect.value, 10);
-  const account = accounts.find((a) => a.id === selectedId);
+  if (!accountSelect) return;
+  const selectedId = accountSelect.value || (accounts[0]?.id ?? '');
+  const account = findAccountById(selectedId);
   if (!account) return;
 
   setBalanceValue(balanceEl, formatCurrency(account.balance));
 
+  if (!transactionListEl) return;
   transactionListEl.innerHTML = '';
-  account.transactions.forEach((tx) => {
+  const transactions = getTransactionsForAccount(account);
+  transactions.forEach((tx) => {
     const tr = document.createElement('tr');
     tr.className = 'hover:bg-slate-50';
-    const isTransferOut = tx.amount < 0;
+    const isTransferOut = (tx.amount ?? 0) < 0;
     const iconSrc = isTransferOut
       ? 'img/dashboard/akses-cepat/transfer-out.svg'
       : 'img/dashboard/akses-cepat/transfer-in.svg';
     const iconBgClass = isTransferOut ? 'bg-red-100' : 'bg-green-100';
+    const accountLabel = account.displayName || account.name || 'Rekening';
+    const accountNumber = account.number || ambis.formatAccountNumber?.(account.numberRaw) || '';
     tr.innerHTML = `
       <td class="px-4 py-3">
         <div class="flex items-center gap-2">
           <span class="w-10 h-10 rounded-full ${iconBgClass} border grid place-items-center">
             <img src="${iconSrc}" alt="" class="w-6 h-6 object-contain">
           </span>
-          <span>${tx.description}</span>
+          <span>${tx.description || '-'}</span>
         </div>
       </td>
-      <td class="px-4 py-3"><span class="text-xs rounded border px-2 py-0.5">${account.name}</span></td>
-      <td class="px-4 py-3">${tx.date}</td>
-      <td class="px-4 py-3">${formatCurrency(tx.amount)}</td>
+      <td class="px-4 py-3">
+        <span class="text-xs rounded border px-2 py-0.5">${accountLabel}</span>
+        ${accountNumber ? `<div class="text-xs text-slate-500 mt-1">${accountNumber}</div>` : ''}
+      </td>
+      <td class="px-4 py-3">${tx.date || '-'}</td>
+      <td class="px-4 py-3">${formatCurrency(tx.amount ?? 0)}</td>
       <td class="px-4 py-3"></td>
     `;
     transactionListEl.appendChild(tr);
   });
 }
 
+if (accountSelect && accounts.length) {
+  populateSelect();
+  accountSelect.addEventListener('change', updateView);
+  updateView();
+}
+
 function formatCurrency(num) {
+  const safeValue = typeof num === 'number' && Number.isFinite(num) ? num : 0;
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(num);
+  }).format(safeValue);
 }
 
 function maskCurrencyText(text) {
