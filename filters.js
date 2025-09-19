@@ -19,6 +19,22 @@
     const groupId = groupEl ? groupEl.dataset.filterGroup || null : null;
     const groupFilters = groupEl ? groupEl.querySelectorAll('.filter') : allFilters;
 
+    function setTriggerState(applied) {
+      trigger.classList.toggle('border-cyan-400', applied);
+      trigger.classList.toggle('bg-cyan-100', applied);
+      trigger.classList.toggle('text-slate-900', applied);
+      trigger.classList.toggle('hover:bg-cyan-100', applied);
+      trigger.classList.toggle('hover:border-cyan-400', applied);
+      trigger.classList.toggle('border-slate-300', !applied);
+      trigger.classList.toggle('bg-white', !applied);
+      trigger.classList.toggle('text-slate-600', !applied);
+      trigger.classList.toggle('hover:bg-slate-50', !applied);
+      trigger.classList.toggle('hover:border-slate-300', !applied);
+    }
+
+    filter._setTriggerState = setTriggerState;
+    setTriggerState(Boolean(filter.dataset.applied));
+
     function emitChange() {
       document.dispatchEvent(new CustomEvent('filter-change', { detail: { groupId } }));
     }
@@ -140,6 +156,7 @@
         const endISO = `${ey}-${em.padStart(2, '0')}-${ed.padStart(2, '0')}`;
         filter.dataset.applied = `custom:${startISO}|${endISO}`;
         labelSpan.textContent = `${sd}/${sm}/${sy} – ${ed}/${em}/${ey}`;
+        setTriggerState(true);
       } else {
         filter.dataset.applied = selected.join(',');
         if (isMulti) {
@@ -153,6 +170,7 @@
         } else {
           labelSpan.textContent = selected[0] || defaultLabel;
         }
+        setTriggerState(selected.length > 0);
       }
       emitChange();
       close();
@@ -175,7 +193,9 @@
           });
           const cr = f.querySelector('.custom-range');
           if (cr) cr.classList.add('hidden');
+          if (typeof f._setTriggerState === 'function') f._setTriggerState(false);
         });
+        updateButtons();
         emitChange();
         close();
       }
