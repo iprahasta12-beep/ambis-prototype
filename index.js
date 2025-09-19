@@ -80,10 +80,9 @@ function updateView() {
           <span>${tx.description || '-'}</span>
         </div>
       </td>
-      <td class="px-4 py-3">
-        <span class="text-xs rounded border px-2 py-0.5">${accountLabel}</span>
-        ${accountNumber ? `<div class="text-xs text-slate-500 mt-1">${accountNumber}</div>` : ''}
-      </td>
+     <td class="px-4 py-3">
+      <span class="text-xs rounded border px-2 py-0.5">${accountLabel}</span>
+    </td>
       <td class="px-4 py-3">${tx.date || '-'}</td>
       <td class="px-4 py-3">${formatCurrency(tx.amount ?? 0)}</td>
       <td class="px-4 py-3"></td>
