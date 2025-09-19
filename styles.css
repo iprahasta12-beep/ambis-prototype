@@ -62,7 +62,7 @@
 /* Drawer panel that pushes main content instead of overlaying */
 #drawer{
   width:0;
-  max-width:480px;
+  max-width:550px;
   overflow:hidden;
   transition:width .3s ease;
   border-left-width:0;
