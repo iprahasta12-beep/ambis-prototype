@@ -118,6 +118,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const moveDestError = document.getElementById('moveDestError');
   const moveAmountError = document.getElementById('moveAmountError');
 
+  const transferActivityCard = cardGrid?.querySelector('[data-activity-card="transfer"]')
+    || openBtn?.closest('[data-activity-card="transfer"]');
+  const moveActivityCard = cardGrid?.querySelector('[data-activity-card="move"]')
+    || openMoveBtn?.closest('[data-activity-card="move"]');
+  const DEFAULT_CARD_BORDER = 'border-slate-200';
+  const ACTIVE_CARD_BORDER = 'border-cyan-300';
+
+  function setActivityCardState(card, active) {
+    if (!card) return;
+    card.classList.toggle(ACTIVE_CARD_BORDER, active);
+    card.classList.toggle(DEFAULT_CARD_BORDER, !active);
+  }
+
+  function setActiveActivityCard(type) {
+    setActivityCardState(transferActivityCard, type === 'transfer');
+    setActivityCardState(moveActivityCard, type === 'move');
+  }
+
+  function clearActiveActivityCard() {
+    setActiveActivityCard(null);
+  }
+
   // data
   const accounts = [
     { initial:'O', color:'bg-cyan-100 text-cyan-600', name:'Utama', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp100.000.000,00' },
@@ -406,6 +428,8 @@ document.addEventListener('DOMContentLoaded', () => {
     successPane?.classList.remove('hidden');
     drawer.classList.add('open');
     successCloseBtn?.focus();
+    const activeType = lastTransactionDetails.type === 'move' ? 'move' : 'transfer';
+    setActiveActivityCard(activeType);
   }
 
   function openSheet() {
@@ -844,6 +868,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
     }
+    setActiveActivityCard('transfer');
   }
 
   function closeDrawer() {
@@ -858,6 +883,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
+    clearActiveActivityCard();
   }
 
   function openMoveDrawerPanel() {
@@ -889,6 +915,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
     }
+    setActiveActivityCard('move');
   }
 
   openBtn?.addEventListener('click', (e) => {
