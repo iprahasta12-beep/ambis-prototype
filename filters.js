@@ -9,6 +9,7 @@
     const applyBtn = panel.querySelector('.apply');
     const cancelBtn = panel.querySelector('.cancel');
     const labelSpan = trigger.querySelector('.filter-label');
+    const iconEl = trigger.querySelector('img');
     const name = filter.dataset.name;
     const defaultLabel = filter.dataset.default;
     const isMulti = options[0] && options[0].type === 'checkbox';
@@ -18,6 +19,12 @@
     const groupEl = filter.closest('[data-filter-group]');
     const groupId = groupEl ? groupEl.dataset.filterGroup || null : null;
     const groupFilters = groupEl ? groupEl.querySelectorAll('.filter') : allFilters;
+    const defaultIconSrc = iconEl ? iconEl.getAttribute('src') : null;
+    const isFilterIcon = defaultIconSrc && defaultIconSrc.includes('/filter.svg');
+    const isDateIcon = defaultIconSrc && defaultIconSrc.includes('date-picker');
+    const activeIconSrc = isDateIcon
+      ? 'img/icon/date-picker-active.svg'
+      : (isFilterIcon ? 'img/icon/filter-active.svg' : null);
 
     function setTriggerState(applied) {
       trigger.classList.toggle('border-cyan-600', applied);
@@ -28,6 +35,10 @@
       trigger.classList.toggle('text-slate-600', !applied);
       trigger.classList.toggle('hover:bg-slate-50', !applied);
       trigger.classList.toggle('hover:border-slate-300', !applied);
+
+      if (iconEl && activeIconSrc && defaultIconSrc) {
+        iconEl.setAttribute('src', applied ? activeIconSrc : defaultIconSrc);
+      }
 
     }
 
