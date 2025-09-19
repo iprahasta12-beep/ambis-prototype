@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
       wrapper.appendChild(heading);
 
       const cards = document.createElement('div');
-      cards.className = 'space-y-3';
+      cards.className = 'space-y-3 rounded-xl border border-slate300';
 
       (group.transactions || []).forEach((tx) => {
         const isCredit = (tx.type || '').toLowerCase() === 'masuk';
