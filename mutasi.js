@@ -15,7 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const retryBtn = document.getElementById('mutasiRetry');
   const filterGroup = document.querySelector('[data-filter-group="mutasi"]');
   const sidebar = document.getElementById('sidebar');
-  const detailView = document.getElementById('mutasiDetailView');
+  const detailOverlay = document.getElementById('mutasiDetailOverlay');
+  const detailSheet = document.getElementById('mutasiDetailSheet');
+  const detailContent = document.getElementById('mutasiDetailView');
   const detailCloseButtons = document.querySelectorAll('[data-mutasi-detail-close]');
   const detailElements = {
     activity: document.getElementById('mutasiDetailActivity'),
@@ -131,27 +133,37 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function openDetailSheet(transaction) {
-    if (!detailView) return;
+    if (!detailSheet || !detailOverlay) return;
     fillDetailSheet(transaction || {});
     detailIsOpen = true;
-    if (listEl) {
-      listEl.classList.add('hidden');
+    detailOverlay.classList.remove('hidden');
+    if (detailContent) {
+      detailContent.scrollTo({ top: 0, behavior: 'auto' });
     }
-    detailView.classList.remove('hidden');
-    if (drawerInner) {
-      drawerInner.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    requestAnimationFrame(() => {
+      detailOverlay.classList.add('opacity-100');
+      detailSheet.classList.remove('translate-y-full');
+    });
   }
 
   function closeDetailSheet(immediate = false) {
-    if (!detailView) return;
+    if (!detailSheet || !detailOverlay) return;
     if (!detailIsOpen && !immediate) return;
 
     detailIsOpen = false;
-    detailView.classList.add('hidden');
-    if (listEl) {
-      listEl.classList.remove('hidden');
+    detailSheet.classList.add('translate-y-full');
+    detailOverlay.classList.remove('opacity-100');
+
+    if (immediate) {
+      detailOverlay.classList.add('hidden');
+      return;
     }
+
+    setTimeout(() => {
+      if (!detailIsOpen) {
+        detailOverlay.classList.add('hidden');
+      }
+    }, 200);
   }
 
   function collapseSidebar() {
@@ -180,6 +192,10 @@ document.addEventListener('DOMContentLoaded', () => {
     Object.values(mapping).forEach((el) => {
       if (el) el.classList.add('hidden');
     });
+
+    if (state !== 'success') {
+      closeDetailSheet(true);
+    }
 
     if (state === 'loading') {
       if (loadingEl) loadingEl.classList.remove('hidden');
@@ -504,6 +520,10 @@ document.addEventListener('DOMContentLoaded', () => {
         loadTransactions(activeAccount);
       }, 300);
     });
+  }
+
+  if (detailOverlay) {
+    detailOverlay.addEventListener('click', () => closeDetailSheet());
   }
 
   detailCloseButtons.forEach((button) => {
