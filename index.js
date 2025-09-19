@@ -133,21 +133,27 @@ const closeBtn = document.getElementById('drawerCloseBtn');
 const dashboardGrid = document.getElementById('dashboardGrid');
 const pendingSection = document.getElementById('pendingSection');
 
-function updateDashboardLayout(isDrawerOpen) {
+function updateDashboardLayout() {
+  /*
+   * Keep the dashboard grid layout static so the content doesn't shift when
+   * the drawer opens or closes. Column adjustments previously triggered
+   * noticeable card/text movement, which we now avoid by leaving the grid
+   * configuration untouched.
+   */
   if (!dashboardGrid || !pendingSection) return;
-  dashboardGrid.classList.toggle('lg:grid-cols-3', !isDrawerOpen);
-  dashboardGrid.classList.toggle('lg:grid-cols-2', isDrawerOpen);
-  pendingSection.classList.toggle('lg:col-span-1', !isDrawerOpen);
-  pendingSection.classList.toggle('lg:col-span-2', isDrawerOpen);
+  dashboardGrid.classList.add('lg:grid-cols-3');
+  dashboardGrid.classList.remove('lg:grid-cols-2');
+  pendingSection.classList.add('lg:col-span-1');
+  pendingSection.classList.remove('lg:col-span-2');
 }
 
-updateDashboardLayout(drawer?.classList.contains('open'));
+updateDashboardLayout();
 
 function openDrawer() {
   tempSelectedAkses = [...selectedAkses];
   renderDrawer();
   drawer.classList.add('open');
-  updateDashboardLayout(true);
+  updateDashboardLayout();
   if (typeof window.sidebarCollapseForDrawer === 'function') {
     window.sidebarCollapseForDrawer();
   }
@@ -155,7 +161,7 @@ function openDrawer() {
 
 function closeDrawer() {
   drawer.classList.remove('open');
-  updateDashboardLayout(false);
+  updateDashboardLayout();
   if (typeof window.sidebarRestoreForDrawer === 'function') {
     window.sidebarRestoreForDrawer();
   }
