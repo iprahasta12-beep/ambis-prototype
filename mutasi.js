@@ -140,9 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
       wrapper.appendChild(heading);
 
       const cards = document.createElement('div');
-      cards.className = 'space-y-3 rounded-2xl border border-slate-300';
+      cards.className = 'rounded-2xl border border-slate-300 overflow-hidden bg-white';
 
-      (group.transactions || []).forEach((tx) => {
+      (group.transactions || []).forEach((tx, txIndex, arr) => {
         const isCredit = (tx.type || '').toLowerCase() === 'masuk';
         const badgeClass = isCredit
           ? 'bg-emerald-50 text-emerald-600'
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
           : '<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 3a.75.75 0 0 1 .75.75v10.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.22 3.22V3.75A.75.75 0 0 1 10 3Z" clip-rule="evenodd"/></svg>';
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'w-full rounded-2xl border-b border-slate-300 bg-white p-4 text-left transition';
+        button.className = 'w-full bg-white p-4 text-left transition';
         button.innerHTML = `
           <div class="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
             <div class="flex min-w-0 items-start gap-4">
@@ -174,6 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
           console.info('Open detail for transaction', tx.id || tx.title);
         });
         cards.appendChild(button);
+
+        if (txIndex < arr.length - 1) {
+          const divider = document.createElement('div');
+          divider.className = 'border-t border-slate-300';
+          cards.appendChild(divider);
+        }
       });
 
       wrapper.appendChild(cards);
