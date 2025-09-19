@@ -9,6 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const closeBtn = document.getElementById('drawerCloseBtn');
   const cardGrid = document.getElementById('cardGrid');
 
+  function updateCardGridLayout(isDrawerOpen) {
+    if (!cardGrid) return;
+    cardGrid.classList.toggle('md:grid-cols-3', !isDrawerOpen);
+    cardGrid.classList.toggle('md:grid-cols-2', isDrawerOpen);
+  }
+
+  updateCardGridLayout(drawer?.classList.contains('open'));
+
   const successHeaderClose = document.getElementById('successHeaderClose');
   const successTitle = document.getElementById('successTitle');
   const successCloseBtn = document.getElementById('successCloseBtn');
@@ -462,6 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
     movePane?.classList.add('hidden');
     successPane?.classList.remove('hidden');
     drawer.classList.add('open');
+    updateCardGridLayout(true);
     successCloseBtn?.focus();
     const activeType = lastTransactionDetails.type === 'move' ? 'move' : 'transfer';
     setActiveActivityCard(activeType);
@@ -899,6 +908,7 @@ document.addEventListener('DOMContentLoaded', () => {
     transferPane.classList.remove('hidden');
     successPane?.classList.add('hidden');
     drawer.classList.add('open');
+    updateCardGridLayout(true);
     activePaneType = 'transfer';
     updateConfirmSheetContent(activePaneType);
     if (typeof window.sidebarCollapseForDrawer === 'function') {
@@ -912,6 +922,7 @@ document.addEventListener('DOMContentLoaded', () => {
     movePane.classList.add('hidden');
     successPane?.classList.add('hidden');
     drawer.classList.remove('open');
+    updateCardGridLayout(false);
     closeSheet();
     closeDestSheet();
     closeConfirmSheet();
@@ -929,6 +940,7 @@ document.addEventListener('DOMContentLoaded', () => {
     movePane.classList.remove('hidden');
     successPane?.classList.add('hidden');
     drawer.classList.add('open');
+    updateCardGridLayout(true);
     moveSourceBtn.textContent = 'Pilih sumber rekening';
     moveSourceBtn.classList.add('text-slate-500');
     moveDestBtn.textContent = 'Pilih rekening tujuan';

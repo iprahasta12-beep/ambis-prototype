@@ -130,11 +130,24 @@ balanceToggleBtn?.addEventListener('click', () => {
 const drawer = document.getElementById('drawer');
 const openBtn = document.getElementById('ubahAksesBtn');
 const closeBtn = document.getElementById('drawerCloseBtn');
+const dashboardGrid = document.getElementById('dashboardGrid');
+const pendingSection = document.getElementById('pendingSection');
+
+function updateDashboardLayout(isDrawerOpen) {
+  if (!dashboardGrid || !pendingSection) return;
+  dashboardGrid.classList.toggle('lg:grid-cols-3', !isDrawerOpen);
+  dashboardGrid.classList.toggle('lg:grid-cols-2', isDrawerOpen);
+  pendingSection.classList.toggle('lg:col-span-1', !isDrawerOpen);
+  pendingSection.classList.toggle('lg:col-span-2', isDrawerOpen);
+}
+
+updateDashboardLayout(drawer?.classList.contains('open'));
 
 function openDrawer() {
   tempSelectedAkses = [...selectedAkses];
   renderDrawer();
   drawer.classList.add('open');
+  updateDashboardLayout(true);
   if (typeof window.sidebarCollapseForDrawer === 'function') {
     window.sidebarCollapseForDrawer();
   }
@@ -142,6 +155,7 @@ function openDrawer() {
 
 function closeDrawer() {
   drawer.classList.remove('open');
+  updateDashboardLayout(false);
   if (typeof window.sidebarRestoreForDrawer === 'function') {
     window.sidebarRestoreForDrawer();
   }
