@@ -130,12 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!listEl) return;
     listEl.innerHTML = '';
 
-    groups.forEach((group) => {
+    groups.forEach((group, index) => {
       const wrapper = document.createElement('div');
-      wrapper.className = 'space-y-3';
+      wrapper.className = index === 0 ? 'space-y-3' : 'space-y-3 mt-6';
 
       const heading = document.createElement('p');
-      heading.className = 'font-semibold text-slate-900';
+      heading.className = 'text-xl font-bold text-slate-900';
       heading.textContent = group.label || '-';
       wrapper.appendChild(heading);
 
@@ -143,22 +143,31 @@ document.addEventListener('DOMContentLoaded', () => {
       cards.className = 'space-y-3';
 
       (group.transactions || []).forEach((tx) => {
-        const tone = tx.type === 'masuk' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600';
-        const symbol = tx.type === 'masuk' ? '↑' : '↓';
+        const isCredit = (tx.type || '').toLowerCase() === 'masuk';
+        const badgeClass = isCredit
+          ? 'bg-emerald-50 text-emerald-600'
+          : 'bg-rose-50 text-rose-600';
+        const icon = isCredit
+          ? '<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.56L6.03 8.78a.75.75 0 0 1-1.06-1.06l4.5-4.5a.75.75 0 0 1 1.06 0l4.5 4.5a.75.75 0 0 1-1.06 1.06L10.75 5.56v10.69A.75.75 0 0 1 10 17Z" clip-rule="evenodd"/></svg>'
+          : '<svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 3a.75.75 0 0 1 .75.75v10.69l3.22-3.22a.75.75 0 1 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-1.06 0l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.22 3.22V3.75A.75.75 0 0 1 10 3Z" clip-rule="evenodd"/></svg>';
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'w-full flex items-center justify-between gap-4 p-4 rounded-xl border border-slate-200 bg-white text-left hover:border-cyan-300 hover:shadow-sm transition';
+        button.className = 'w-full rounded-2xl border border-slate-200 bg-white p-5 text-left transition hover:border-cyan-300 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/40';
         button.innerHTML = `
-          <div class="flex items-start gap-4">
-            <span class="flex-none w-10 h-10 rounded-full grid place-items-center ${tone} text-lg font-semibold">${symbol}</span>
-            <div>
-              <p class="font-semibold text-slate-900">${tx.title || '-'}</p>
-              <p class="text-sm text-slate-500">${tx.note || ''}</p>
+          <div class="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+            <div class="flex min-w-0 items-start gap-4">
+              <span class="flex h-11 w-11 flex-none items-center justify-center rounded-full ${badgeClass}">
+                ${icon}
+              </span>
+              <div class="min-w-0 space-y-1">
+                <p class="font-semibold text-slate-900 truncate">${tx.title || '-'}</p>
+                <p class="text-sm text-slate-500 truncate">${tx.note || ''}</p>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="font-semibold text-slate-900">${formatCurrency(tx.amount)}</span>
-            <span class="text-slate-300 text-2xl leading-none">&rsaquo;</span>
+            <div class="flex shrink-0 items-center justify-end gap-3 text-right">
+              <span class="font-semibold text-slate-900 shrink-0 whitespace-nowrap text-right">${formatCurrency(tx.amount)}</span>
+              <span class="hidden text-xl leading-none text-slate-400 opacity-50 sm:block">&rsaquo;</span>
+            </div>
           </div>
         `;
         button.addEventListener('click', () => {
