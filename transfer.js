@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const cardGrid = document.getElementById('cardGrid');
 
   const successHeaderClose = document.getElementById('successHeaderClose');
+  const successTitle = document.getElementById('successTitle');
   const successCloseBtn = document.getElementById('successCloseBtn');
   const successSourceBadge = document.getElementById('successSourceBadge');
   const successSourceName = document.getElementById('successSourceName');
@@ -76,11 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // confirmation sheet
   const confirmSheet = document.getElementById('confirmSheet');
+  const confirmTitle = document.getElementById('confirmTitle');
   const confirmBack = document.getElementById('confirmBack');
   const confirmProceed = document.getElementById('confirmProceed');
   const confirmClose = document.getElementById('confirmClose');
   const confirmSourceBadge = document.getElementById('confirmSourceBadge');
   const confirmDestinationBadge = document.getElementById('confirmDestinationBadge');
+  const confirmActivityLabel = document.getElementById('confirmActivityLabel');
   const sheetSource = document.getElementById('sheetSource');
   const sheetSourceCompany = document.getElementById('sheetSourceCompany');
   const sheetSourceDetail = document.getElementById('sheetSourceDetail');
@@ -88,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sheetDestinationCompany = document.getElementById('sheetDestinationCompany');
   const sheetDestinationDetail = document.getElementById('sheetDestinationDetail');
   const sheetNominal = document.getElementById('sheetNominal');
+  const sheetBiaya = document.getElementById('sheetBiaya');
   const sheetTotal = document.getElementById('sheetTotal');
   const sheetCategory = document.getElementById('sheetCategory');
   const sheetNote = document.getElementById('sheetNote');
@@ -124,6 +128,11 @@ document.addEventListener('DOMContentLoaded', () => {
     || openMoveBtn?.closest('[data-activity-card="move"]');
   const DEFAULT_CARD_BORDER = 'border-slate-200';
   const ACTIVE_CARD_BORDER = 'border-cyan-300';
+  const DEFAULT_ACTIVITY_TYPE = 'transfer';
+  const ACTIVITY_TITLES = {
+    transfer: 'Transfer Saldo',
+    move: 'Pemindahan Saldo'
+  };
 
   function setActivityCardState(card, active) {
     if (!card) return;
@@ -138,6 +147,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function clearActiveActivityCard() {
     setActiveActivityCard(null);
+  }
+
+  function getActivityTitle(type) {
+    return ACTIVITY_TITLES[type] || ACTIVITY_TITLES[DEFAULT_ACTIVITY_TYPE];
+  }
+
+  function updateConfirmProceedLabel(type) {
+    if (!confirmProceed) return;
+    const title = getActivityTitle(type);
+    confirmProceed.textContent = `Lanjut ${title}`;
+  }
+
+  function updateConfirmSheetContent(type) {
+    const title = getActivityTitle(type);
+    if (confirmTitle) {
+      confirmTitle.textContent = title;
+    }
+    if (confirmActivityLabel) {
+      confirmActivityLabel.textContent = title;
+    }
+    updateConfirmProceedLabel(type);
   }
 
   // data
@@ -191,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedSourceAccountData = null;
   let selectedDestinationAccountData = null;
   let lastTransactionDetails = null;
+  let activePaneType = DEFAULT_ACTIVITY_TYPE;
 
   // move drawer state
   let moveSourceSelected = false;
@@ -367,6 +398,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function populateSuccessView(details) {
     if (!details || !successPane) return;
+    const activityTitle = getActivityTitle(details.type);
+    if (successTitle) {
+      successTitle.textContent = activityTitle;
+    }
     const source = details.source || {};
     const destination = details.destination || {};
 
@@ -655,9 +690,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (otpTimerEl) {
       otpTimerEl.textContent = '00:30';
     }
-    if (confirmProceed) {
-      confirmProceed.textContent = 'Lanjut Pemindahan Saldo';
-    }
+    const labelType = lastTransactionDetails?.type || activePaneType || DEFAULT_ACTIVITY_TYPE;
+    updateConfirmProceedLabel(labelType);
     setConfirmProceedEnabled(true);
   }
 
@@ -865,6 +899,8 @@ document.addEventListener('DOMContentLoaded', () => {
     transferPane.classList.remove('hidden');
     successPane?.classList.add('hidden');
     drawer.classList.add('open');
+    activePaneType = 'transfer';
+    updateConfirmSheetContent(activePaneType);
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
     }
@@ -880,6 +916,8 @@ document.addEventListener('DOMContentLoaded', () => {
     closeDestSheet();
     closeConfirmSheet();
     lastTransactionDetails = null;
+    activePaneType = DEFAULT_ACTIVITY_TYPE;
+    updateConfirmSheetContent(activePaneType);
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
@@ -912,6 +950,8 @@ document.addEventListener('DOMContentLoaded', () => {
     moveSourceAccountData = null;
     moveDestAccountData = null;
     updateMoveConfirmState();
+    activePaneType = 'move';
+    updateConfirmSheetContent(activePaneType);
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
     }
@@ -1110,6 +1150,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sheetNominal) {
       sheetNominal.textContent = 'Rp' + formatter.format(amountValue);
     }
+    if (sheetBiaya) {
+      sheetBiaya.textContent = 'Rp' + formatter.format(selectedFee);
+    }
     if (sheetTotal) {
       sheetTotal.textContent = 'Rp' + formatter.format(amountValue + selectedFee);
     }
@@ -1131,6 +1174,7 @@ document.addEventListener('DOMContentLoaded', () => {
       note: noteValue || '-',
       createdBy: currentUserFullName
     };
+    updateConfirmSheetContent('transfer');
     setConfirmProceedEnabled(true);
     sheetOverlay.classList.remove('hidden');
     requestAnimationFrame(() => {
@@ -1153,6 +1197,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (sheetNominal) {
       sheetNominal.textContent = 'Rp' + formatter.format(moveAmountValue);
     }
+    if (sheetBiaya) {
+      sheetBiaya.textContent = 'Rp' + formatter.format(0);
+    }
     if (sheetTotal) {
       sheetTotal.textContent = 'Rp' + formatter.format(moveAmountValue);
     }
@@ -1174,6 +1221,7 @@ document.addEventListener('DOMContentLoaded', () => {
       note: noteValue || '-',
       createdBy: currentUserFullName
     };
+    updateConfirmSheetContent('move');
     setConfirmProceedEnabled(true);
     sheetOverlay.classList.remove('hidden');
     requestAnimationFrame(() => {
