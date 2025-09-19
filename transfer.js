@@ -181,11 +181,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // data
-  const accounts = [
-    { initial:'O', color:'bg-cyan-100 text-cyan-600', name:'Utama', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp100.000.000,00' },
-    { initial:'D', color:'bg-orange-100 text-orange-600', name:'Operasional', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp50.000.000,00' },
-    { initial:'R', color:'bg-pink-100 text-pink-600', name:'Distributor', company:'PT ABC Indonesia', bank:'Amar Indonesia', number:'000967895483', balance:'Rp25.000.000,00' }
-  ];
+  const ambis = window.AMBIS || {};
+  const sharedAccounts = typeof ambis.getAccounts === 'function'
+    ? ambis.getAccounts({ clone: false })
+    : null;
+  const accounts = Array.isArray(sharedAccounts)
+    ? sharedAccounts
+    : Array.isArray(ambis.accounts)
+      ? ambis.accounts
+      : [];
+
+  const formatter = new Intl.NumberFormat('id-ID');
 
 
   function isBusinessDay(date) {
@@ -267,13 +273,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const title = acc.name || '';
     const subtitle = formatAccountSubtitle(acc.company || '', acc.bank || '', acc.number || '');
     return {
+      id: acc.id || '',
       title,
       company: acc.company || '',
       bank: acc.bank || '',
       number: acc.number || '',
       initial: acc.initial || (title ? title.charAt(0).toUpperCase() : ''),
       color: acc.color || 'bg-cyan-100 text-cyan-600',
-      subtitle
+      subtitle,
+      brandName: acc.brandName || acc.company || '',
     };
   }
 
@@ -288,7 +296,8 @@ document.addEventListener('DOMContentLoaded', () => {
       number: number || '',
       initial: safeTitle ? safeTitle.charAt(0).toUpperCase() : '',
       color: color || 'bg-amber-100 text-amber-600',
-      subtitle
+      subtitle,
+      brandName: '',
     };
   }
 
@@ -299,8 +308,37 @@ document.addEventListener('DOMContentLoaded', () => {
       title: safeLabel,
       subtitle: safeLabel,
       initial: trimmed ? trimmed.charAt(0).toUpperCase() : '',
-      color: color || 'bg-cyan-100 text-cyan-600'
+      color: color || 'bg-cyan-100 text-cyan-600',
+      brandName: '',
     };
+  }
+
+  function formatAccountBalance(balance) {
+    if (typeof balance === 'number' && Number.isFinite(balance)) {
+      return 'Rp' + formatter.format(balance);
+    }
+    if (typeof balance === 'string' && balance.trim()) {
+      return balance;
+    }
+    return 'Rp0';
+  }
+
+  function refreshDisplayForBrand(display) {
+    if (!display || !display.brandName) return display;
+    const brandName = typeof ambis.getBrandName === 'function'
+      ? ambis.getBrandName()
+      : (ambis.brandName || display.brandName || display.company || '');
+    if (typeof ambis.findAccountByNumber === 'function') {
+      const matchedAccount = ambis.findAccountByNumber(display.number || display.accountNumberRaw || display.accountNumber || '');
+      if (matchedAccount) {
+        return mapAccountToDisplay(matchedAccount);
+      }
+    }
+    const updated = { ...display };
+    updated.company = brandName;
+    updated.subtitle = formatAccountSubtitle(brandName, display.bank || '', display.number || '');
+    updated.brandName = brandName;
+    return updated;
   }
 
   function renderList(data) {
@@ -313,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="text-slate-500">${acc.company}</p>
             <p class="text-slate-500">${acc.bank} - ${acc.number}</p>
           </div>
-          <div class="text-sm font-medium whitespace-nowrap mr-2">${acc.balance}</div>
+          <div class="text-sm font-medium whitespace-nowrap mr-2">${formatAccountBalance(acc.balance)}</div>
           <span class="ml-2 w-5 h-5 rounded-full border border-slate-300 grid place-items-center">
             <span class="radio-dot w-2 h-2 rounded-full bg-cyan-500 hidden"></span>
           </span>
@@ -986,7 +1024,6 @@ document.addEventListener('DOMContentLoaded', () => {
   moveCloseBtn?.addEventListener('click', closeDrawer);
 
   // helpers
-  const formatter = new Intl.NumberFormat('id-ID');
   const dailyLimit = 200000000;
 
   function updateConfirmState() {
@@ -1243,6 +1280,68 @@ document.addEventListener('DOMContentLoaded', () => {
       confirmSheet.classList.remove('translate-y-full');
     });
   });
+
+  function restoreSheetSelection() {
+    if (selectedIndex === null) return;
+    const activeBtn = sheetList?.querySelector(`button[data-index="${selectedIndex}"]`);
+    if (!activeBtn) return;
+    activeBtn.classList.add('ring-2');
+    activeBtn.querySelector('.radio-dot')?.classList.remove('hidden');
+  }
+
+  function refreshConfirmDisplays() {
+    if (!confirmSheet || confirmSheet.classList.contains('translate-y-full')) return;
+    const effectiveType = lastTransactionDetails?.type || activePaneType || DEFAULT_ACTIVITY_TYPE;
+    const sourceBase = lastTransactionDetails?.source
+      || (effectiveType === 'move' ? moveSourceAccountData : selectedSourceAccountData)
+      || createFallbackAccountDisplay((effectiveType === 'move' ? moveSourceBtn.textContent : sourceBtn.textContent) || '-', 'bg-cyan-100 text-cyan-600');
+    const destBase = lastTransactionDetails?.destination
+      || (effectiveType === 'move' ? moveDestAccountData : selectedDestinationAccountData)
+      || createFallbackAccountDisplay((effectiveType === 'move' ? moveDestBtn.textContent : destBtn.textContent) || '-', 'bg-amber-100 text-amber-600');
+    const sourceDisplay = refreshDisplayForBrand(sourceBase);
+    const destinationDisplay = refreshDisplayForBrand(destBase);
+    populateConfirmAccount(confirmSourceBadge, sheetSource, sheetSourceCompany, sheetSourceDetail, sourceDisplay, 'bg-cyan-100 text-cyan-600');
+    populateConfirmAccount(confirmDestinationBadge, sheetDestination, sheetDestinationCompany, sheetDestinationDetail, destinationDisplay, 'bg-amber-100 text-amber-600');
+  }
+
+  function refreshSuccessDisplays() {
+    if (!successPane || successPane.classList.contains('hidden')) return;
+    if (!lastTransactionDetails) return;
+    populateSuccessView(lastTransactionDetails);
+  }
+
+  function handleBrandChange() {
+    if (selectedSourceAccountData) {
+      selectedSourceAccountData = refreshDisplayForBrand(selectedSourceAccountData);
+    }
+    if (selectedDestinationAccountData) {
+      selectedDestinationAccountData = refreshDisplayForBrand(selectedDestinationAccountData);
+    }
+    if (moveSourceAccountData) {
+      moveSourceAccountData = refreshDisplayForBrand(moveSourceAccountData);
+    }
+    if (moveDestAccountData) {
+      moveDestAccountData = refreshDisplayForBrand(moveDestAccountData);
+    }
+    if (lastTransactionDetails) {
+      if (lastTransactionDetails.source) {
+        lastTransactionDetails.source = refreshDisplayForBrand(lastTransactionDetails.source);
+      }
+      if (lastTransactionDetails.destination) {
+        lastTransactionDetails.destination = refreshDisplayForBrand(lastTransactionDetails.destination);
+      }
+    }
+    if (!sheetOverlay?.classList.contains('hidden') && ['source', 'moveSource', 'moveDest'].includes(currentSheetType)) {
+      renderList(currentData);
+      restoreSheetSelection();
+    }
+    refreshConfirmDisplays();
+    refreshSuccessDisplays();
+  }
+
+  if (typeof ambis.onBrandNameChange === 'function') {
+    ambis.onBrandNameChange(handleBrandChange);
+  }
 
   confirmBack?.addEventListener('click', closeConfirmSheet);
   confirmClose?.addEventListener('click', closeConfirmSheet);

@@ -145,67 +145,14 @@
         <p class="text-lg mb-6">Pilih rekening untuk melihat Mutasi Rekening &amp; e-Statement</p>
 
         <!-- Grid rekening -->
-        <div class="grid md:grid-cols-3 gap-6">
-          <!-- Operasional -->
-          <div class="rounded-2xl border border-slate-200 p-5 bg-white flex flex-col">
-            <div class="flex items-center gap-3 mb-3">
-              <span class="w-8 h-8 rounded-full bg-cyan-100 text-cyan-600 font-semibold grid place-items-center">O</span>
-              <span class="font-medium">Operasional</span>
-            </div>
-            <p class="text-slate-500  ">Nomor Rekening</p>
-            <p class="font-bold text-slate-900 tracking-wide mb-4">0009 6789 5439</p>
-            <button class="mt-auto rounded-lg border border-cyan-500 text-cyan-600 px-4 py-2 hover:bg-cyan-50">Pilih Rekening</button>
-          </div>
-
-          <!-- Distributor -->
-          <div class="rounded-2xl border border-slate-200 p-5 bg-white flex flex-col">
-            <div class="flex items-center gap-3 mb-3">
-              <span class="w-8 h-8 rounded-full bg-yellow-100 text-yellow-600 font-semibold grid place-items-center">D</span>
-              <span class="font-medium">Distributor</span>
-            </div>
-            <p class="text-slate-500  ">Nomor Rekening</p>
-            <p class="font-bold text-slate-900 tracking-wide mb-4">0009 6789 5439</p>
-            <button class="mt-auto rounded-lg border border-cyan-500 text-cyan-600 px-4 py-2 hover:bg-cyan-50">Pilih Rekening</button>
-          </div>
-
-          <!-- Partnership -->
-          <div class="rounded-2xl border border-slate-200 p-5 bg-white flex flex-col">
-            <div class="flex items-center gap-3 mb-3">
-              <span class="w-8 h-8 rounded-full bg-cyan-100 text-cyan-600 font-semibold grid place-items-center">P</span>
-              <span class="font-medium">Partnership</span>
-            </div>
-            <p class="text-slate-500  ">Nomor Rekening</p>
-            <p class="font-bold text-slate-900 tracking-wide mb-4">0009 6789 5439</p>
-            <button class="mt-auto rounded-lg border border-cyan-500 text-cyan-600 px-4 py-2 hover:bg-cyan-50">Pilih Rekening</button>
-          </div>
-
-          <!-- Admin -->
-          <div class="rounded-2xl border border-slate-200 p-5 bg-white flex flex-col">
-            <div class="flex items-center gap-3 mb-3">
-              <span class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 font-semibold grid place-items-center">A</span>
-              <span class="font-medium">Admin</span>
-            </div>
-            <p class="text-slate-500  ">Nomor Rekening</p>
-            <p class="font-bold text-slate-900 tracking-wide mb-4">0009 6789 5439</p>
-            <button class="mt-auto rounded-lg border border-cyan-500 text-cyan-600 px-4 py-2 hover:bg-cyan-50">Pilih Rekening</button>
-          </div>
-
-          <!-- Bill -->
-          <div class="rounded-2xl border border-slate-200 p-5 bg-white flex flex-col">
-            <div class="flex items-center gap-3 mb-3">
-              <span class="w-8 h-8 rounded-full bg-rose-100 text-rose-600 font-semibold grid place-items-center">B</span>
-              <span class="font-medium">Bill</span>
-            </div>
-            <p class="text-slate-500  ">Nomor Rekening</p>
-            <p class="font-bold text-slate-900 tracking-wide mb-4">0009 6789 5439</p>
-            <button class="mt-auto rounded-lg border border-cyan-500 text-cyan-600 px-4 py-2 hover:bg-cyan-50">Pilih Rekening</button>
-          </div>
-        </div>
+        <div id="mutasiAccountGrid" class="grid md:grid-cols-3 gap-6"></div>
       </div>
     </main>
     <!-- ============ /MAIN ============ -->
   </div>
 
+  <script src="data/rekening-data.js"></script>
+  <script src="mutasi.js"></script>
   <script src="sidebar.js"></script>
 </body>
 </html>

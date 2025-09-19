@@ -14,7 +14,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Brand node
   const brandWrap = sidebar.querySelector('.px-6.pt-6 .sb-label');
   const brandP    = brandWrap?.querySelector('p');
-  const brandText = brandP?.textContent?.trim() || '';
+  const brandApi  = window.AMBIS || {};
+  let brandText   = typeof brandApi.getBrandName === 'function'
+    ? brandApi.getBrandName()
+    : (brandApi.brandName || brandP?.textContent?.trim() || '');
+
+  if (brandP) {
+    brandP.textContent = brandText;
+  }
 
   if (brandWrap) {
     brandWrap.style.transition = 'none';
@@ -93,6 +100,15 @@ document.addEventListener('DOMContentLoaded', () => {
   btn.addEventListener('click', () => {
     setCollapsed(!sidebar.classList.contains('collapsed'), { animate: true });
   });
+
+  if (typeof brandApi.onBrandNameChange === 'function') {
+    brandApi.onBrandNameChange((name) => {
+      brandText = name;
+      if (brandWrap && !sidebar.classList.contains('collapsed')) {
+        brandP.textContent = brandText;
+      }
+    });
+  }
 
   // --- Navigation: icons always navigate
   const sbLinks = sidebar.querySelectorAll('a.sb-item');
