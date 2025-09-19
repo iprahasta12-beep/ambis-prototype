@@ -15,8 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const retryBtn = document.getElementById('mutasiRetry');
   const filterGroup = document.querySelector('[data-filter-group="mutasi"]');
   const sidebar = document.getElementById('sidebar');
-  const detailOverlay = document.getElementById('mutasiDetailOverlay');
-  const detailSheet = document.getElementById('mutasiDetailSheet');
+  const detailView = document.getElementById('mutasiDetailView');
   const detailCloseButtons = document.querySelectorAll('[data-mutasi-detail-close]');
   const detailElements = {
     activity: document.getElementById('mutasiDetailActivity'),
@@ -132,62 +131,27 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function openDetailSheet(transaction) {
-    if (!detailOverlay || !detailSheet) return;
+    if (!detailView) return;
     fillDetailSheet(transaction || {});
     detailIsOpen = true;
-    detailOverlay.classList.remove('hidden');
-    detailSheet.classList.remove('hidden');
-    detailOverlay.classList.remove('pointer-events-none');
-    detailSheet.classList.remove('pointer-events-none');
-    requestAnimationFrame(() => {
-      detailOverlay.classList.add('opacity-100');
-      detailOverlay.classList.remove('opacity-0');
-      detailSheet.classList.remove('translate-y-full');
-    });
+    if (listEl) {
+      listEl.classList.add('hidden');
+    }
+    detailView.classList.remove('hidden');
+    if (drawerInner) {
+      drawerInner.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   function closeDetailSheet(immediate = false) {
-    if (!detailOverlay || !detailSheet) return;
+    if (!detailView) return;
     if (!detailIsOpen && !immediate) return;
 
-    const hideImmediately = () => {
-      detailOverlay.classList.add('opacity-0');
-      detailOverlay.classList.remove('opacity-100');
-      detailOverlay.classList.add('pointer-events-none');
-      detailOverlay.classList.add('hidden');
-      detailSheet.classList.add('translate-y-full');
-      detailSheet.classList.add('pointer-events-none');
-      detailSheet.classList.add('hidden');
-    };
-
-    if (immediate) {
-      detailIsOpen = false;
-      hideImmediately();
-      return;
-    }
-
     detailIsOpen = false;
-    detailOverlay.classList.remove('opacity-100');
-    detailOverlay.classList.add('opacity-0');
-    detailOverlay.classList.add('pointer-events-none');
-    detailSheet.classList.add('translate-y-full');
-    detailSheet.classList.add('pointer-events-none');
-
-    const onTransitionEnd = (event) => {
-      if (event.target !== detailSheet) return;
-      detailSheet.removeEventListener('transitionend', onTransitionEnd);
-      detailOverlay.classList.add('hidden');
-      detailSheet.classList.add('hidden');
-    };
-
-    detailSheet.addEventListener('transitionend', onTransitionEnd);
-
-    setTimeout(() => {
-      if (!detailIsOpen) {
-        detailOverlay.classList.add('hidden');
-        detailSheet.classList.add('hidden');
-      }
-    }, 350);
+    detailView.classList.add('hidden');
+    if (listEl) {
+      listEl.classList.remove('hidden');
+    }
   }
 
   function collapseSidebar() {
@@ -540,10 +504,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loadTransactions(activeAccount);
       }, 300);
     });
-  }
-
-  if (detailOverlay) {
-    detailOverlay.addEventListener('click', () => closeDetailSheet());
   }
 
   detailCloseButtons.forEach((button) => {
