@@ -266,6 +266,45 @@
                 </div>
               </div>
             </div>
+
+            <div class="filter relative" data-filter="category" data-name="Kategori" data-default="Kategori">
+              <button class="filter-trigger h-11 px-4 rounded-xl border border-slate-300 bg-white flex items-center gap-2">
+                <img src="img/icon/filter.svg" class="w-5 h-5" alt="Kategori" />
+                <span class="filter-label max-w-[140px] truncate">Kategori</span>
+              </button>
+              <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[280px]">
+                <div class="flex flex-col gap-3">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="mutasi-category" value="Tagihan" />
+                    <span>Tagihan</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="mutasi-category" value="Pembayaran" />
+                    <span>Pembayaran</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="mutasi-category" value="Transportasi" />
+                    <span>Transportasi</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="mutasi-category" value="Pemindahan Dana" />
+                    <span>Pemindahan Dana</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="mutasi-category" value="Investasi" />
+                    <span>Investasi</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="mutasi-category" value="Lainnya" />
+                    <span>Lainnya</span>
+                  </label>
+                </div>
+                <div class="flex justify-end gap-2 mt-4">
+                  <button class="cancel px-3 py-2 rounded-lg border text-slate-600 w-1/2">Batalkan</button>
+                  <button class="apply px-3 py-2 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-1/2" disabled>Terapkan</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

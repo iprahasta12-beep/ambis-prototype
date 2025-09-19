@@ -46,6 +46,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const formatter = new Intl.NumberFormat('id-ID');
   const dataSource = window.MUTASI_DATA || null;
   const ambis = window.AMBIS || {};
+  const CATEGORY_OPTIONS = [
+    'Tagihan',
+    'Pembayaran',
+    'Transportasi',
+    'Pemindahan Dana',
+    'Investasi',
+    'Lainnya',
+  ];
 
   let activeAccount = null;
   let activeData = null;
@@ -101,32 +109,69 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function formatDetailDateTime(value) {
-    if (!value) return '-';
+    if (!value) return '';
     const date = value instanceof Date ? value : new Date(value);
     if (Number.isNaN(date.getTime())) {
-      return typeof value === 'string' && value.trim() ? value : '-';
+      return typeof value === 'string' && value.trim() ? value : '';
     }
     const dateText = date.toLocaleDateString('id-ID', {
+      weekday: 'long',
       day: 'numeric',
       month: 'long',
       year: 'numeric',
     });
-    const timeText = date.toLocaleTimeString('id-ID', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-    return `${dateText}, ${timeText}`;
+    return dateText;
   }
 
-  function fillDetailSheet(transaction) {
+  function generateMockTime() {
+    const hours = String(Math.floor(Math.random() * 24)).padStart(2, '0');
+    const minutes = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+    return `${hours}.${minutes}`;
+  }
+
+  function resolveTransactionCategory(transaction) {
+    if (!transaction) return 'Lainnya';
+    const rawCategory = transaction.detail && transaction.detail.category
+      ? transaction.detail.category.toString().trim()
+      : '';
+    if (rawCategory) {
+      const match = CATEGORY_OPTIONS.find(
+        (label) => label.toLowerCase() === rawCategory.toLowerCase(),
+      );
+      if (match) return match;
+    }
+    const type = (transaction.type || '').toLowerCase();
+    if (type === 'masuk' || type === 'keluar') {
+      return 'Pemindahan Dana';
+    }
+    return 'Lainnya';
+  }
+
+  function fillDetailSheet(transaction, options = {}) {
     const detail = (transaction && transaction.detail) || {};
     setDetailText(detailElements.activity, detail.activity || 'Transfer Saldo');
     const totalAmount = detail.total !== undefined && detail.total !== null ? detail.total : transaction.amount;
     setDetailText(detailElements.total, formatCurrency(totalAmount || 0));
     setDetailText(detailElements.method, detail.method);
     setDetailText(detailElements.reference, detail.reference);
-    setDetailText(detailElements.date, formatDetailDateTime(detail.datetime || detail.date));
-    setDetailText(detailElements.category, detail.category);
+    const groupLabel = transaction ? transaction.__groupLabel : '';
+    const mockTime = options.time || generateMockTime();
+    if (groupLabel) {
+      setDetailText(detailElements.date, `${groupLabel}, ${mockTime}`);
+    } else {
+      const fallbackDate = formatDetailDateTime(detail.datetime || detail.date);
+      if (fallbackDate) {
+        setDetailText(detailElements.date, `${fallbackDate}, ${mockTime}`);
+      } else {
+        setDetailText(detailElements.date, mockTime);
+      }
+    }
+    const categoryLabel = transaction ? transaction.__categoryLabel : null;
+    setDetailText(
+      detailElements.category,
+      categoryLabel || resolveTransactionCategory(transaction),
+      'Lainnya',
+    );
     setDetailText(detailElements.note, detail.note);
     setDetailAccount('source', detail.source || {});
     setDetailAccount('destination', detail.destination || {});
@@ -134,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function openDetailSheet(transaction) {
     if (!detailSheet || !detailOverlay) return;
-    fillDetailSheet(transaction || {});
+    fillDetailSheet(transaction || {}, { time: generateMockTime() });
     detailIsOpen = true;
     detailOverlay.classList.remove('hidden');
     if (detailContent) {
@@ -252,7 +297,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return (groups || []).map((group) => ({
       date: group.date,
       label: group.label,
-      transactions: (group.transactions || []).map((tx) => ({ ...tx })),
+      transactions: (group.transactions || []).map((tx) => {
+        const copy = { ...tx };
+        copy.detail = { ...(tx.detail || {}) };
+        copy.__groupLabel = group.label || '';
+        copy.__groupDate = group.date || '';
+        copy.__categoryLabel = resolveTransactionCategory(copy);
+        return copy;
+      }),
     }));
   }
 
@@ -327,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function getFilters() {
-    if (!filterGroup) return { date: '', type: [] };
+    if (!filterGroup) return { date: '', type: [], category: '' };
 
     const read = (name) => {
       const el = filterGroup.querySelector(`.filter[data-filter="${name}"]`);
@@ -335,10 +387,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const typeRaw = read('type');
+    const categoryRaw = read('category');
 
     return {
       date: read('date'),
       type: typeRaw ? typeRaw.split(',').filter(Boolean) : [],
+      category: categoryRaw,
     };
   }
 
@@ -354,6 +408,20 @@ document.addEventListener('DOMContentLoaded', () => {
           if (type === 'masuk' && wanted.includes('masuk')) return true;
           if (type === 'keluar' && wanted.includes('keluar')) return true;
           return false;
+        }),
+      }))
+      .filter((group) => (group.transactions || []).length > 0);
+  }
+
+  function filterGroupsByCategory(groups, value) {
+    if (!value) return groups;
+    const wanted = value.toLowerCase();
+    return groups
+      .map((group) => ({
+        ...group,
+        transactions: (group.transactions || []).filter((tx) => {
+          const label = (tx.__categoryLabel || '').toLowerCase();
+          return label === wanted;
         }),
       }))
       .filter((group) => (group.transactions || []).length > 0);
@@ -417,6 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     groups = filterGroupsByDate(groups, filters.date);
     groups = filterGroupsByType(groups, filters.type);
+    groups = filterGroupsByCategory(groups, filters.category);
 
     if (!groups.length) {
       showState('empty');
