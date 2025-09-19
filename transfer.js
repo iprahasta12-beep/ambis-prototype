@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const moveActivityCard = cardGrid?.querySelector('[data-activity-card="move"]')
     || openMoveBtn?.closest('[data-activity-card="move"]');
   const DEFAULT_CARD_BORDER = 'border-slate-200';
-  const ACTIVE_CARD_BORDER = 'border-cyan-300';
+  const ACTIVE_CARD_BORDER = 'border-cyan-500';
   const DEFAULT_ACTIVITY_TYPE = 'transfer';
   const ACTIVITY_TITLES = {
     transfer: 'Transfer Saldo',
