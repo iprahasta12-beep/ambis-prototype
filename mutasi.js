@@ -15,6 +15,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const retryBtn = document.getElementById('mutasiRetry');
   const filterGroup = document.querySelector('[data-filter-group="mutasi"]');
   const sidebar = document.getElementById('sidebar');
+  const detailOverlay = document.getElementById('mutasiDetailOverlay');
+  const detailSheet = document.getElementById('mutasiDetailSheet');
+  const detailCloseButtons = document.querySelectorAll('[data-mutasi-detail-close]');
+  const detailElements = {
+    activity: document.getElementById('mutasiDetailActivity'),
+    total: document.getElementById('mutasiDetailTotal'),
+    method: document.getElementById('mutasiDetailMethod'),
+    reference: document.getElementById('mutasiDetailReference'),
+    date: document.getElementById('mutasiDetailDate'),
+    category: document.getElementById('mutasiDetailCategory'),
+    note: document.getElementById('mutasiDetailNote'),
+  };
+  const detailAccounts = {
+    source: {
+      badge: document.getElementById('mutasiDetailSourceBadge'),
+      name: document.getElementById('mutasiDetailSourceName'),
+      subtitle: document.getElementById('mutasiDetailSourceSubtitle'),
+      account: document.getElementById('mutasiDetailSourceAccount'),
+    },
+    destination: {
+      badge: document.getElementById('mutasiDetailDestinationBadge'),
+      name: document.getElementById('mutasiDetailDestinationName'),
+      subtitle: document.getElementById('mutasiDetailDestinationSubtitle'),
+      account: document.getElementById('mutasiDetailDestinationAccount'),
+    },
+  };
 
   const formatter = new Intl.NumberFormat('id-ID');
   const dataSource = window.MUTASI_DATA || null;
@@ -22,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let activeAccount = null;
   let activeData = null;
+  let detailIsOpen = false;
   let sidebarWasCollapsed = false;
   let loadTimer = null;
 
@@ -38,6 +65,129 @@ document.addEventListener('DOMContentLoaded', () => {
   function formatCurrency(amount) {
     const value = Math.abs(Number(amount) || 0);
     return `Rp${formatter.format(value)}`;
+  }
+
+  function normaliseDetailValue(value, fallback = '-') {
+    if (value === undefined || value === null) return fallback;
+    if (typeof value === 'string' && value.trim() === '') return fallback;
+    return value;
+  }
+
+  function setDetailText(element, value, fallback) {
+    if (!element) return;
+    element.textContent = normaliseDetailValue(value, fallback);
+  }
+
+  function getInitial(value) {
+    if (!value) return '-';
+    const str = value.toString().trim();
+    return str ? str.charAt(0).toUpperCase() : '-';
+  }
+
+  function setDetailAccount(section, info) {
+    const target = detailAccounts[section];
+    if (!target) return;
+    const name = info && (info.name || info.label || info.title) ? (info.name || info.label || info.title) : '';
+    const subtitle = info && (info.subtitle || info.company) ? (info.subtitle || info.company) : '';
+    const account = info && (info.account || info.number || info.detail) ? (info.account || info.number || info.detail) : '';
+    if (target.badge) {
+      const badgeSource = info && info.badge ? info.badge : name;
+      target.badge.textContent = getInitial(badgeSource);
+    }
+    setDetailText(target.name, name);
+    setDetailText(target.subtitle, subtitle);
+    setDetailText(target.account, account);
+  }
+
+  function formatDetailDateTime(value) {
+    if (!value) return '-';
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return typeof value === 'string' && value.trim() ? value : '-';
+    }
+    const dateText = date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    const timeText = date.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return `${dateText}, ${timeText}`;
+  }
+
+  function fillDetailSheet(transaction) {
+    const detail = (transaction && transaction.detail) || {};
+    setDetailText(detailElements.activity, detail.activity || 'Transfer Saldo');
+    const totalAmount = detail.total !== undefined && detail.total !== null ? detail.total : transaction.amount;
+    setDetailText(detailElements.total, formatCurrency(totalAmount || 0));
+    setDetailText(detailElements.method, detail.method);
+    setDetailText(detailElements.reference, detail.reference);
+    setDetailText(detailElements.date, formatDetailDateTime(detail.datetime || detail.date));
+    setDetailText(detailElements.category, detail.category);
+    setDetailText(detailElements.note, detail.note);
+    setDetailAccount('source', detail.source || {});
+    setDetailAccount('destination', detail.destination || {});
+  }
+
+  function openDetailSheet(transaction) {
+    if (!detailOverlay || !detailSheet) return;
+    fillDetailSheet(transaction || {});
+    detailIsOpen = true;
+    detailOverlay.classList.remove('hidden');
+    detailSheet.classList.remove('hidden');
+    detailOverlay.classList.remove('pointer-events-none');
+    detailSheet.classList.remove('pointer-events-none');
+    requestAnimationFrame(() => {
+      detailOverlay.classList.add('opacity-100');
+      detailOverlay.classList.remove('opacity-0');
+      detailSheet.classList.remove('translate-y-full');
+    });
+  }
+
+  function closeDetailSheet(immediate = false) {
+    if (!detailOverlay || !detailSheet) return;
+    if (!detailIsOpen && !immediate) return;
+
+    const hideImmediately = () => {
+      detailOverlay.classList.add('opacity-0');
+      detailOverlay.classList.remove('opacity-100');
+      detailOverlay.classList.add('pointer-events-none');
+      detailOverlay.classList.add('hidden');
+      detailSheet.classList.add('translate-y-full');
+      detailSheet.classList.add('pointer-events-none');
+      detailSheet.classList.add('hidden');
+    };
+
+    if (immediate) {
+      detailIsOpen = false;
+      hideImmediately();
+      return;
+    }
+
+    detailIsOpen = false;
+    detailOverlay.classList.remove('opacity-100');
+    detailOverlay.classList.add('opacity-0');
+    detailOverlay.classList.add('pointer-events-none');
+    detailSheet.classList.add('translate-y-full');
+    detailSheet.classList.add('pointer-events-none');
+
+    const onTransitionEnd = (event) => {
+      if (event.target !== detailSheet) return;
+      detailSheet.removeEventListener('transitionend', onTransitionEnd);
+      detailOverlay.classList.add('hidden');
+      detailSheet.classList.add('hidden');
+    };
+
+    detailSheet.addEventListener('transitionend', onTransitionEnd);
+
+    setTimeout(() => {
+      if (!detailIsOpen) {
+        detailOverlay.classList.add('hidden');
+        detailSheet.classList.add('hidden');
+      }
+    }, 350);
   }
 
   function collapseSidebar() {
@@ -128,6 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderTransactions(groups) {
     if (!listEl) return;
+    closeDetailSheet(true);
     listEl.innerHTML = '';
 
     groups.forEach((group, index) => {
@@ -171,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         `;
         button.addEventListener('click', () => {
-          console.info('Open detail for transaction', tx.id || tx.title);
+          openDetailSheet(tx);
         });
         cards.appendChild(button);
 
@@ -326,6 +477,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeDrawer() {
     if (!drawer) return;
+    closeDetailSheet(true);
     drawer.classList.remove('open');
     restoreSidebar();
     activeAccount = null;
@@ -389,6 +541,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 300);
     });
   }
+
+  if (detailOverlay) {
+    detailOverlay.addEventListener('click', () => closeDetailSheet());
+  }
+
+  detailCloseButtons.forEach((button) => {
+    button.addEventListener('click', () => closeDetailSheet());
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeDetailSheet();
+    }
+  });
 
   document.addEventListener('filter-change', (event) => {
     const groupId = event.detail ? event.detail.groupId : null;
