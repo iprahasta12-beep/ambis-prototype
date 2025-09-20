@@ -54,12 +54,272 @@ document.addEventListener('DOMContentLoaded', () => {
     'Investasi',
     'Lainnya',
   ];
+  const tabButtons = {
+    mutasi: document.querySelector('[data-tab-button="mutasi"]'),
+    eStatement: document.querySelector('[data-tab-button="e-statement"]'),
+  };
+  const tabContents = {
+    mutasi: document.querySelector('[data-tab-content="mutasi"]'),
+    eStatement: document.querySelector('[data-tab-content="e-statement"]'),
+  };
+  const eStatementElements = {
+    yearTrigger: document.getElementById('eStatementYearTrigger'),
+    yearLabel: document.getElementById('eStatementYearLabel'),
+    yearPanel: document.getElementById('eStatementYearPanel'),
+    monthTrigger: document.getElementById('eStatementMonthTrigger'),
+    monthLabel: document.getElementById('eStatementMonthLabel'),
+    monthPanel: document.getElementById('eStatementMonthPanel'),
+    downloadBtn: document.getElementById('eStatementDownloadBtn'),
+    alert: document.getElementById('eStatementAlert'),
+  };
+  const DEFAULT_LABELS = {
+    year: 'Pilih Tahun',
+    month: 'Pilih Bulan',
+  };
+  const dropdowns = {
+    year: {
+      trigger: eStatementElements.yearTrigger,
+      panel: eStatementElements.yearPanel,
+      label: eStatementElements.yearLabel,
+      options: [],
+    },
+    month: {
+      trigger: eStatementElements.monthTrigger,
+      panel: eStatementElements.monthPanel,
+      label: eStatementElements.monthLabel,
+      options: [],
+    },
+  };
 
   let activeAccount = null;
   let activeData = null;
   let detailIsOpen = false;
   let sidebarWasCollapsed = false;
   let loadTimer = null;
+  let activeTab = 'e-statement';
+  let eStatementYear = '';
+  let eStatementMonth = '';
+  let openDropdown = null;
+
+  function closeDropdownMenu(target) {
+    if (!target || !target.panel) return;
+    target.panel.classList.add('hidden');
+    if (target.trigger) {
+      target.trigger.setAttribute('aria-expanded', 'false');
+    }
+    if (openDropdown === target) {
+      openDropdown = null;
+    }
+  }
+
+  function openDropdownMenu(target) {
+    if (!target || !target.panel) return;
+    if (openDropdown && openDropdown !== target) {
+      closeDropdownMenu(openDropdown);
+    }
+    target.panel.classList.remove('hidden');
+    if (target.trigger) {
+      target.trigger.setAttribute('aria-expanded', 'true');
+    }
+    openDropdown = target;
+  }
+
+  function updateDropdownSelection(type, value) {
+    const dropdown = dropdowns[type];
+    if (!dropdown || !dropdown.options) return;
+    dropdown.options.forEach((option) => {
+      const isSelected = Boolean(value) && option.dataset.value === value;
+      option.classList.toggle('bg-slate-100', isSelected);
+      option.classList.toggle('text-cyan-600', isSelected);
+      option.classList.toggle('font-semibold', isSelected);
+    });
+  }
+
+  function hideEStatementAlert() {
+    const alertEl = eStatementElements.alert;
+    if (!alertEl) return;
+    alertEl.classList.add('hidden');
+    alertEl.textContent = '';
+  }
+
+  function updateEStatementButtonState() {
+    const btn = eStatementElements.downloadBtn;
+    if (!btn) return;
+    const shouldEnable = Boolean(eStatementYear) && Boolean(eStatementMonth);
+    btn.disabled = !shouldEnable;
+    if (!shouldEnable) {
+      hideEStatementAlert();
+    }
+  }
+
+  function getBrandName() {
+    if (ambis && typeof ambis.getBrandName === 'function') {
+      const result = ambis.getBrandName();
+      if (typeof result === 'string' && result.trim()) {
+        return result.trim();
+      }
+    }
+    if (ambis && typeof ambis.brandName === 'string' && ambis.brandName.trim()) {
+      return ambis.brandName.trim();
+    }
+    const node = document.getElementById('brandName');
+    if (node && node.textContent && node.textContent.trim()) {
+      return node.textContent.trim();
+    }
+    return 'Perusahaan Anda';
+  }
+
+  function getUserEmail() {
+    if (ambis) {
+      if (typeof ambis.getActiveUser === 'function') {
+        const activeUser = ambis.getActiveUser();
+        if (activeUser && typeof activeUser.email === 'string' && activeUser.email.trim()) {
+          return activeUser.email.trim();
+        }
+      }
+      if (typeof ambis.getUser === 'function') {
+        const user = ambis.getUser();
+        if (user && typeof user.email === 'string' && user.email.trim()) {
+          return user.email.trim();
+        }
+      }
+      const candidates = [
+        ambis.userEmail,
+        ambis.email,
+        ambis.user && ambis.user.email,
+        ambis.profile && ambis.profile.email,
+      ];
+      for (let index = 0; index < candidates.length; index += 1) {
+        const candidate = candidates[index];
+        if (typeof candidate === 'string') {
+          const trimmed = candidate.trim();
+          if (trimmed) {
+            return trimmed;
+          }
+        }
+      }
+    }
+    const node = document.querySelector('[data-user-email]');
+    if (node && node.textContent && node.textContent.trim()) {
+      const text = node.textContent.trim();
+      if (text.includes('@')) {
+        return text;
+      }
+    }
+    return 'indra.buana@abc.id';
+  }
+
+  function showEStatementAlert() {
+    const alertEl = eStatementElements.alert;
+    if (!alertEl) return;
+    const email = getUserEmail();
+    const brandName = getBrandName();
+    alertEl.textContent = '';
+    const line1 = document.createElement('p');
+    line1.className = 'font-semibold';
+    line1.textContent = `e-Statement berhasil diunduh dan dikirim ke email ${email}`;
+    const line2 = document.createElement('p');
+    line2.className = 'mt-1';
+    line2.textContent = `dan juga disimpan kedalam fitur Brankas Dokumen pada aplikasi Amar Bank Bisnis milik ${brandName}`;
+    alertEl.appendChild(line1);
+    alertEl.appendChild(line2);
+    alertEl.classList.remove('hidden');
+    alertEl.setAttribute('role', 'alert');
+  }
+
+  function resetEStatement() {
+    eStatementYear = '';
+    eStatementMonth = '';
+    if (dropdowns.year.label) {
+      dropdowns.year.label.textContent = DEFAULT_LABELS.year;
+    }
+    if (dropdowns.month.label) {
+      dropdowns.month.label.textContent = DEFAULT_LABELS.month;
+    }
+    if (openDropdown) {
+      closeDropdownMenu(openDropdown);
+    }
+    updateDropdownSelection('year', '');
+    updateDropdownSelection('month', '');
+    hideEStatementAlert();
+    updateEStatementButtonState();
+  }
+
+  function setupDropdown(type) {
+    const dropdown = dropdowns[type];
+    if (!dropdown) return;
+    const trigger = dropdown.trigger;
+    const panel = dropdown.panel;
+    if (!trigger || !panel) return;
+    const options = Array.from(panel.querySelectorAll('button[data-value]'));
+    dropdown.options = options;
+    trigger.addEventListener('click', () => {
+      if (panel.classList.contains('hidden')) {
+        openDropdownMenu(dropdown);
+      } else {
+        closeDropdownMenu(dropdown);
+      }
+    });
+    options.forEach((option) => {
+      option.addEventListener('click', () => {
+        const value = option.dataset.value || '';
+        const labelText = option.textContent ? option.textContent.trim() : '';
+        if (type === 'year') {
+          eStatementYear = value;
+          if (dropdown.label) {
+            dropdown.label.textContent = labelText || DEFAULT_LABELS.year;
+          }
+        } else if (type === 'month') {
+          eStatementMonth = value;
+          if (dropdown.label) {
+            dropdown.label.textContent = labelText || DEFAULT_LABELS.month;
+          }
+        }
+        updateDropdownSelection(type, value);
+        closeDropdownMenu(dropdown);
+        hideEStatementAlert();
+        updateEStatementButtonState();
+      });
+    });
+  }
+
+  function setActiveTab(name) {
+    if (!tabButtons[name] || !tabContents[name]) return;
+    activeTab = name;
+
+    Object.keys(tabButtons).forEach((key) => {
+      const button = tabButtons[key];
+      if (!button) return;
+      const isActive = key === name;
+      button.classList.toggle('bg-white', isActive);
+      button.classList.toggle('text-slate-900', isActive);
+      button.classList.toggle('shadow-sm', isActive);
+      button.classList.toggle('text-slate-400', !isActive);
+      button.classList.toggle('hover:text-slate-600', !isActive);
+      button.setAttribute('aria-current', isActive ? 'true' : 'false');
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
+
+    Object.keys(tabContents).forEach((key) => {
+      const content = tabContents[key];
+      if (!content) return;
+      if (key === name) {
+        content.classList.remove('hidden');
+      } else {
+        content.classList.add('hidden');
+      }
+    });
+
+    if (name !== 'e-statement' && openDropdown) {
+      closeDropdownMenu(openDropdown);
+    }
+
+    if (name === 'mutasi') {
+      applyFiltersAndRender();
+    } else if (name === 'e-statement') {
+      updateEStatementButtonState();
+    }
+  }
 
   function getAccounts() {
     if (typeof ambis.getAccounts === 'function') {
@@ -514,6 +774,9 @@ document.addEventListener('DOMContentLoaded', () => {
     activeAccount = account;
     activeData = null;
 
+    resetEStatement();
+    setActiveTab('e-statement');
+
     if (drawerTitle) drawerTitle.textContent = account.displayName || account.name || 'Mutasi Rekening';
     if (drawerAccountLabel) drawerAccountLabel.textContent = account.displayName || account.name || 'Mutasi Rekening';
 
@@ -534,6 +797,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeDrawer() {
     if (!drawer) return;
+    if (openDropdown) {
+      closeDropdownMenu(openDropdown);
+    }
     closeDetailSheet(true);
     drawer.classList.remove('open');
     restoreSidebar();
@@ -578,6 +844,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  setupDropdown('year');
+  setupDropdown('month');
+  resetEStatement();
+  setActiveTab(activeTab);
+
+  if (tabButtons.eStatement) {
+    tabButtons.eStatement.addEventListener('click', () => setActiveTab('e-statement'));
+  }
+
+  if (tabButtons.mutasi) {
+    tabButtons.mutasi.addEventListener('click', () => setActiveTab('mutasi'));
+  }
+
+  if (eStatementElements.downloadBtn) {
+    eStatementElements.downloadBtn.addEventListener('click', () => {
+      if (eStatementElements.downloadBtn.disabled) return;
+      showEStatementAlert();
+    });
+  }
+
   renderCards();
 
   if (typeof ambis.onBrandNameChange === 'function') {
@@ -607,8 +893,20 @@ document.addEventListener('DOMContentLoaded', () => {
     button.addEventListener('click', () => closeDetailSheet());
   });
 
+  document.addEventListener('click', (event) => {
+    if (!openDropdown) return;
+    const dropdown = openDropdown;
+    if (dropdown.panel && dropdown.panel.contains(event.target)) return;
+    if (dropdown.trigger && dropdown.trigger.contains(event.target)) return;
+    closeDropdownMenu(dropdown);
+  });
+
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
+      if (openDropdown) {
+        closeDropdownMenu(openDropdown);
+        return;
+      }
       closeDetailSheet();
     }
   });
