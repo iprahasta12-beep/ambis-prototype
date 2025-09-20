@@ -165,111 +165,25 @@
               type="button"
               class="flex-1 rounded-xl bg-white px-4 py-3 text-center font-semibold text-slate-900 shadow-sm"
               aria-current="true"
-              data-tab-button="e-statement"
+              data-tab-button="mutasi"
             >
-              e-Statement
+              Mutasi Rekening
             </button>
             <button
               type="button"
               class="flex-1 rounded-xl px-4 py-3 text-center font-semibold text-slate-400 transition hover:text-slate-600"
-              data-tab-button="mutasi"
+              aria-current="false"
+              data-tab-button="e-statement"
             >
-              Mutasi Rekening
+              e-Statement
             </button>
           </div>
         </div>
 
         <div class="flex-1 flex flex-col overflow-hidden">
           <div
-            data-tab-content="e-statement"
-            class="flex-1 flex flex-col overflow-y-auto px-4 pb-6"
-          >
-            <div class="flex flex-col gap-4">
-              <div class="flex items-start gap-3 px-4 py-3 rounded-xl border border-sky-100 bg-sky-50 text-sky-800">
-                <img class="w-6 h-6" src="img/icon/info-2.svg" alt="Informasi">
-                <p class="text-sm leading-relaxed">
-                  Unduh e-Statement rekening dalam format PDF berdasarkan periode yang Anda pilih.
-                </p>
-              </div>
-
-              <div class="flex flex-wrap gap-3">
-                <div class="relative" data-e-statement-dropdown="year">
-                  <button
-                    type="button"
-                    id="eStatementYearTrigger"
-                    class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[200px] w-[200px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold"
-                    aria-haspopup="listbox"
-                    aria-expanded="false"
-                  >
-                    <img src="img/icon/date-picker.svg" class="w-5 h-5 flex-none" alt="Tahun" />
-                    <span id="eStatementYearLabel" class="flex-1 text-left leading-tight">Pilih Tahun</span>
-                  </button>
-                  <div
-                    id="eStatementYearPanel"
-                    class="filter-panel absolute z-10 mt-2 p-2 rounded-xl border border-slate-200 bg-white shadow hidden w-[200px]"
-                    role="listbox"
-                  >
-                    <div class="flex flex-col gap-1">
-                      <button type="button" class="px-3 py-2 rounded-lg text-left text-sm hover:bg-slate-100" data-value="2023">2023</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left text-sm hover:bg-slate-100" data-value="2024">2024</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left text-sm hover:bg-slate-100" data-value="2025">2025</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="relative" data-e-statement-dropdown="month">
-                  <button
-                    type="button"
-                    id="eStatementMonthTrigger"
-                    class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[200px] w-[200px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold"
-                    aria-haspopup="listbox"
-                    aria-expanded="false"
-                  >
-                    <img src="img/icon/filter.svg" class="w-5 h-5 flex-none" alt="Bulan" />
-                    <span id="eStatementMonthLabel" class="flex-1 text-left leading-tight">Pilih Bulan</span>
-                  </button>
-                  <div
-                    id="eStatementMonthPanel"
-                    class="filter-panel absolute z-10 mt-2 p-2 rounded-xl border border-slate-200 bg-white shadow hidden w-[200px]"
-                    role="listbox"
-                  >
-                    <div class="flex flex-col gap-1 text-sm">
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="01">Januari</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="02">Februari</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="03">Maret</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="04">April</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="05">Mei</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="06">Juni</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="07">Juli</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="08">Agustus</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="09">September</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="10">Oktober</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="11">November</button>
-                      <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="12">Desember</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                id="eStatementAlert"
-                class="hidden rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700 text-sm leading-relaxed"
-              ></div>
-
-              <button
-                type="button"
-                id="eStatementDownloadBtn"
-                class="h-11 rounded-xl bg-cyan-600 text-white font-semibold px-4 transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-cyan-700"
-                disabled
-              >
-                Unduh e-Statement
-              </button>
-            </div>
-          </div>
-
-          <div
             data-tab-content="mutasi"
-            class="hidden flex-1 flex flex-col overflow-hidden"
+            class="flex-1 flex flex-col overflow-hidden"
           >
             <div class="px-4 pb-4">
               <div class="flex items-start gap-3 px-4 py-3 rounded-xl border border-sky-100 bg-sky-50 text-sky-800">
@@ -361,28 +275,120 @@
             </div>
 
             <div class="flex-1 overflow-y-auto" id="mutasiDrawerContent">
-          <div id="mutasiLoading" class="h-full flex items-center justify-center">
-            <div class="flex flex-col items-center gap-3 text-slate-500">
-              <span class="w-10 h-10 border-4 border-cyan-200 border-t-cyan-600 rounded-full animate-spin"></span>
-              <span>Memuat data mutasi...</span>
+              <div id="mutasiLoading" class="h-full flex items-center justify-center">
+                <div class="flex flex-col items-center gap-3 text-slate-500">
+                  <span class="w-10 h-10 border-4 border-cyan-200 border-t-cyan-600 rounded-full animate-spin"></span>
+                  <span>Memuat data mutasi...</span>
+                </div>
+              </div>
+
+              <div id="mutasiError" class="hidden px-6 py-8 space-y-4">
+                <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">Gagal memuat data, coba lagi</div>
+                <button id="mutasiRetry" class="px-4 py-3 rounded-xl border border-cyan-500 text-cyan-600 hover:bg-cyan-50 w-full">Muat Ulang</button>
+              </div>
+
+              <div id="mutasiEmpty" class="hidden px-6 py-12 flex flex-col items-center text-center gap-4 text-slate-500">
+                <div class="w-20 h-20 rounded-full bg-slate-100 grid place-items-center text-3xl">📄</div>
+                <div>
+                  <p class="font-semibold text-slate-700">Tidak ada transaksi pada periode ini</p>
+                  <p class="text-sm">Silakan ubah filter atau rentang tanggal untuk melihat transaksi lainnya.</p>
+                </div>
+              </div>
+
+              <div id="mutasiSuccess" class="hidden px-6 pb-10 space-y-6">
+                <div id="mutasiTransactionList" class="space-y-8"></div>
+              </div>
             </div>
           </div>
 
-          <div id="mutasiError" class="hidden px-6 py-8 space-y-4">
-            <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">Gagal memuat data, coba lagi</div>
-            <button id="mutasiRetry" class="px-4 py-3 rounded-xl border border-cyan-500 text-cyan-600 hover:bg-cyan-50 w-full">Muat Ulang</button>
-          </div>
+          <div
+            data-tab-content="e-statement"
+            class="hidden flex-1 flex flex-col overflow-hidden"
+          >
+            <div class="flex-1 overflow-y-auto px-4 pb-24">
+              <div class="flex flex-col gap-4">
+                <div class="flex items-start gap-3 px-4 py-3 rounded-xl border border-sky-100 bg-sky-50 text-sky-800">
+                  <img class="w-6 h-6" src="img/icon/info-2.svg" alt="Informasi">
+                  <p class="text-sm leading-relaxed">
+                    Unduh e-Statement rekening dalam format PDF berdasarkan periode yang Anda pilih.
+                  </p>
+                </div>
 
-          <div id="mutasiEmpty" class="hidden px-6 py-12 flex flex-col items-center text-center gap-4 text-slate-500">
-            <div class="w-20 h-20 rounded-full bg-slate-100 grid place-items-center text-3xl">📄</div>
-            <div>
-              <p class="font-semibold text-slate-700">Tidak ada transaksi pada periode ini</p>
-              <p class="text-sm">Silakan ubah filter atau rentang tanggal untuk melihat transaksi lainnya.</p>
+                <div class="flex flex-wrap gap-3">
+                  <div class="relative" data-e-statement-dropdown="year">
+                    <button
+                      type="button"
+                      id="eStatementYearTrigger"
+                      class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[200px] w-[200px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold"
+                      aria-haspopup="listbox"
+                      aria-expanded="false"
+                    >
+                      <img src="img/icon/date-picker.svg" class="w-5 h-5 flex-none" alt="Tahun" />
+                      <span id="eStatementYearLabel" class="flex-1 text-left leading-tight">Pilih Tahun</span>
+                    </button>
+                    <div
+                      id="eStatementYearPanel"
+                      class="filter-panel absolute z-10 mt-2 p-2 rounded-xl border border-slate-200 bg-white shadow hidden w-[200px]"
+                      role="listbox"
+                    >
+                      <div class="flex flex-col gap-1">
+                        <button type="button" class="px-3 py-2 rounded-lg text-left text-sm hover:bg-slate-100" data-value="2023">2023</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left text-sm hover:bg-slate-100" data-value="2024">2024</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left text-sm hover:bg-slate-100" data-value="2025">2025</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="relative" data-e-statement-dropdown="month">
+                    <button
+                      type="button"
+                      id="eStatementMonthTrigger"
+                      class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[200px] w-[200px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold"
+                      aria-haspopup="listbox"
+                      aria-expanded="false"
+                    >
+                      <img src="img/icon/filter.svg" class="w-5 h-5 flex-none" alt="Bulan" />
+                      <span id="eStatementMonthLabel" class="flex-1 text-left leading-tight">Pilih Bulan</span>
+                    </button>
+                    <div
+                      id="eStatementMonthPanel"
+                      class="filter-panel absolute z-10 mt-2 p-2 rounded-xl border border-slate-200 bg-white shadow hidden w-[200px]"
+                      role="listbox"
+                    >
+                      <div class="flex flex-col gap-1 text-sm">
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="01">Januari</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="02">Februari</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="03">Maret</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="04">April</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="05">Mei</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="06">Juni</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="07">Juli</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="08">Agustus</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="09">September</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="10">Oktober</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="11">November</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="12">Desember</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  id="eStatementAlert"
+                  class="hidden rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700 text-sm leading-relaxed"
+                ></div>
+              </div>
             </div>
-          </div>
-
-          <div id="mutasiSuccess" class="hidden px-6 pb-10 space-y-6">
-            <div id="mutasiTransactionList" class="space-y-8"></div>
+            <div class="sticky bottom-0 bg-white border-t border-slate-200 px-4 py-4">
+              <button
+                type="button"
+                id="eStatementDownloadBtn"
+                class="h-11 rounded-xl bg-cyan-600 text-white font-semibold px-4 transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-cyan-700"
+                disabled
+              >
+                Unduh e-Statement
+              </button>
+            </div>
           </div>
         </div>
       </div>

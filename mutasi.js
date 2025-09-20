@@ -56,11 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
   const tabButtons = {
     mutasi: document.querySelector('[data-tab-button="mutasi"]'),
-    eStatement: document.querySelector('[data-tab-button="e-statement"]'),
+    'e-statement': document.querySelector('[data-tab-button="e-statement"]'),
   };
   const tabContents = {
     mutasi: document.querySelector('[data-tab-content="mutasi"]'),
-    eStatement: document.querySelector('[data-tab-content="e-statement"]'),
+    'e-statement': document.querySelector('[data-tab-content="e-statement"]'),
   };
   const eStatementElements = {
     yearTrigger: document.getElementById('eStatementYearTrigger'),
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let detailIsOpen = false;
   let sidebarWasCollapsed = false;
   let loadTimer = null;
-  let activeTab = 'e-statement';
+  let activeTab = 'mutasi';
   let eStatementYear = '';
   let eStatementMonth = '';
   let openDropdown = null;
@@ -775,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
     activeData = null;
 
     resetEStatement();
-    setActiveTab('e-statement');
+    setActiveTab('mutasi');
 
     if (drawerTitle) drawerTitle.textContent = account.displayName || account.name || 'Mutasi Rekening';
     if (drawerAccountLabel) drawerAccountLabel.textContent = account.displayName || account.name || 'Mutasi Rekening';
@@ -849,8 +849,8 @@ document.addEventListener('DOMContentLoaded', () => {
   resetEStatement();
   setActiveTab(activeTab);
 
-  if (tabButtons.eStatement) {
-    tabButtons.eStatement.addEventListener('click', () => setActiveTab('e-statement'));
+  if (tabButtons['e-statement']) {
+    tabButtons['e-statement'].addEventListener('click', () => setActiveTab('e-statement'));
   }
 
   if (tabButtons.mutasi) {
