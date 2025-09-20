@@ -336,6 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'w-full bg-white p-4 text-left transition';
+        button.dataset.category = isCredit ? 'masuk' : 'keluar';
         button.innerHTML = `
           <div class="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
             <div class="flex min-w-0 items-start gap-4">
