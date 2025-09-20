@@ -326,7 +326,9 @@ document.addEventListener('DOMContentLoaded', () => {
       cards.className = 'rounded-2xl border border-slate-300 overflow-hidden bg-white';
 
       (group.transactions || []).forEach((tx, txIndex, arr) => {
-        const isCredit = (tx.type || '').toLowerCase() === 'masuk';
+        const typeNormalized = (tx.type || '').toLowerCase();
+        const isCredit = typeNormalized === 'masuk';
+        const isDebit = typeNormalized === 'keluar';
         const badgeClass = isCredit
           ? 'bg-emerald-50 text-emerald-600'
           : 'bg-rose-50 text-rose-600';
@@ -336,7 +338,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'w-full bg-white p-4 text-left transition';
-        button.dataset.category = isCredit ? 'masuk' : 'keluar';
+        const category = isCredit ? 'masuk' : (isDebit ? 'keluar' : '');
+        if (category) {
+          button.setAttribute('data-category', category);
+        } else {
+          button.removeAttribute('data-category');
+        }
         button.innerHTML = `
           <div class="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
             <div class="flex min-w-0 items-start gap-4">
