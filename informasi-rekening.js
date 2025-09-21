@@ -223,36 +223,25 @@
     nameEl.className = 'font-semibold text-slate-900';
     nameEl.textContent = account.name;
     nameWrap.appendChild(nameEl);
-    if (account.displayName && account.displayName !== account.name) {
-      const displayEl = document.createElement('p');
-      displayEl.className = 'text-sm text-slate-500';
-      displayEl.textContent = account.displayName;
-      nameWrap.appendChild(displayEl);
-    }
-    if (account.bank) {
-      const bankEl = document.createElement('p');
-      bankEl.className = 'text-xs text-slate-400';
-      bankEl.textContent = account.bank;
-      nameWrap.appendChild(bankEl);
-    }
     info.appendChild(nameWrap);
 
     header.appendChild(info);
     header.appendChild(createDetailLink(account.name));
 
     const numberRow = document.createElement('div');
-    numberRow.className = 'flex items-start justify-between gap-3';
-    const numberInfo = document.createElement('div');
+    numberRow.className = 'flex flex-col gap-1';
     const numberLabel = document.createElement('p');
     numberLabel.className = 'text-sm text-slate-500';
     numberLabel.textContent = 'Nomor Rekening';
+    const numberValueWrap = document.createElement('div');
+    numberValueWrap.className = 'flex items-center gap-2';
     const numberValue = document.createElement('p');
-    numberValue.className = 'mt-1 font-semibold text-slate-900 tracking-wide';
+    numberValue.className = 'font-semibold text-slate-900 tracking-wide';
     numberValue.textContent = account.number || '-';
-    numberInfo.append(numberLabel, numberValue);
+    numberValueWrap.appendChild(numberValue);
     const copyBtn = document.createElement('button');
     copyBtn.type = 'button';
-    copyBtn.className = 'flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold text-cyan-600 hover:bg-cyan-50';
+    copyBtn.className = 'flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold text-cyan-600 hover:bg-cyan-50 shrink-0';
     copyBtn.innerHTML = '<img src="img/icon/copy.svg" alt="" class="w-5 h-5"/>Salin';
     copyBtn.setAttribute('aria-label', `Salin nomor rekening ${account.number || account.displayName}`);
     copyBtn.addEventListener('click', () => {
@@ -264,7 +253,8 @@
           showToast('Tidak dapat menyalin nomor rekening');
         });
     });
-    numberRow.append(numberInfo, copyBtn);
+    numberValueWrap.appendChild(copyBtn);
+    numberRow.append(numberLabel, numberValueWrap);
 
     const balanceWrap = document.createElement('div');
     const balanceLabel = document.createElement('p');
