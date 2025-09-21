@@ -34,10 +34,19 @@
   let confirmSheetPurposeNode = null;
   let confirmSheetGiroToggleNode = null;
   let confirmSheetGiroContentNode = null;
+  let otpSectionNode = null;
+  let otpInputs = [];
+  let otpCountdownNode = null;
+  let otpCountdownMessageNode = null;
+  let otpTimerNode = null;
+  let otpResendButtonNode = null;
 
   const MAX_ACCOUNT_NAME_LENGTH = 15;
   const PURPOSE_OPTION_ACTIVE_CLASSES = ['bg-cyan-50', 'border-l-2', 'border-dashed', 'border-cyan-500'];
   const CONFIRM_SHEET_TRANSITION_MS = 300;
+  const OTP_DURATION_SECONDS = 30;
+  const OTP_DEFAULT_COUNTDOWN_MESSAGE = 'Sesi akan berakhir dalam';
+  const OTP_EXPIRED_MESSAGE = 'Sesi Anda telah berakhir.';
 
   const touchedState = {
     name: false,
@@ -49,6 +58,10 @@
   let isSubmittingForm = false;
   let isConfirmingBottomSheet = false;
   let pendingConfirmationPayload = null;
+  let otpCountdownDefaultMessage = OTP_DEFAULT_COUNTDOWN_MESSAGE;
+  let otpActive = false;
+  let otpIntervalId = null;
+  let otpTimeLeft = OTP_DURATION_SECONDS;
 
   const SUPPRESSED_ERROR_MESSAGES = new Set([
     'Nama rekening wajib diisi.',
@@ -237,10 +250,132 @@
     setConfirmSheetAccordionExpanded(!expanded);
   }
 
+  function formatOtpTime(value) {
+    const numeric = Number.isFinite(Number(value)) ? Number(value) : 0;
+    const clamped = Math.max(0, Math.floor(numeric));
+    const minutes = String(Math.floor(clamped / 60)).padStart(2, '0');
+    const seconds = String(clamped % 60).padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  }
+
+  function isOtpFilled() {
+    if (!otpInputs || !otpInputs.length) {
+      return false;
+    }
+    return otpInputs.every((input) => input.value && input.value.trim() !== '');
+  }
+
+  function clearOtpTimer() {
+    if (otpIntervalId) {
+      clearInterval(otpIntervalId);
+      otpIntervalId = null;
+    }
+  }
+
+  function showOtpCountdownDefaultMessage() {
+    if (otpCountdownMessageNode) {
+      otpCountdownMessageNode.textContent = otpCountdownDefaultMessage;
+    }
+    if (otpTimerNode) {
+      otpTimerNode.classList.remove('hidden');
+    }
+  }
+
+  function showOtpExpiredMessage() {
+    if (otpCountdownMessageNode) {
+      otpCountdownMessageNode.textContent = OTP_EXPIRED_MESSAGE;
+    }
+    if (otpTimerNode) {
+      otpTimerNode.classList.add('hidden');
+    }
+  }
+
+  function updateOtpCountdownDisplay() {
+    if (otpTimerNode) {
+      otpTimerNode.textContent = formatOtpTime(otpTimeLeft);
+    }
+  }
+
+  function resetOtpInputs() {
+    if (!otpInputs || !otpInputs.length) {
+      return;
+    }
+    otpInputs.forEach((input) => {
+      input.value = '';
+    });
+  }
+
+  function startOtpTimer() {
+    if (otpCountdownNode) {
+      otpCountdownNode.classList.remove('hidden');
+    }
+    showOtpCountdownDefaultMessage();
+    if (otpResendButtonNode) {
+      otpResendButtonNode.classList.add('hidden');
+    }
+    otpTimeLeft = OTP_DURATION_SECONDS;
+    updateOtpCountdownDisplay();
+    clearOtpTimer();
+    otpIntervalId = setInterval(() => {
+      otpTimeLeft -= 1;
+      if (otpTimeLeft <= 0) {
+        otpTimeLeft = 0;
+        updateOtpCountdownDisplay();
+        clearOtpTimer();
+        showOtpExpiredMessage();
+        if (otpResendButtonNode) {
+          otpResendButtonNode.classList.remove('hidden');
+        }
+        updateConfirmSheetButtonState();
+        return;
+      }
+      updateOtpCountdownDisplay();
+    }, 1000);
+    updateConfirmSheetButtonState();
+  }
+
+  function showOtpSection() {
+    if (!otpSectionNode) {
+      return;
+    }
+    otpActive = true;
+    otpSectionNode.classList.remove('hidden');
+    resetOtpInputs();
+    otpInputs[0]?.focus();
+    startOtpTimer();
+  }
+
+  function resetOtpState() {
+    otpActive = false;
+    clearOtpTimer();
+    otpTimeLeft = OTP_DURATION_SECONDS;
+    if (otpSectionNode) {
+      otpSectionNode.classList.add('hidden');
+    }
+    resetOtpInputs();
+    if (otpCountdownNode) {
+      otpCountdownNode.classList.remove('hidden');
+    }
+    showOtpCountdownDefaultMessage();
+    if (otpResendButtonNode) {
+      otpResendButtonNode.classList.add('hidden');
+    }
+    if (otpTimerNode) {
+      otpTimerNode.textContent = formatOtpTime(OTP_DURATION_SECONDS);
+    }
+    updateConfirmSheetButtonState();
+  }
+
   function updateConfirmSheetButtonState() {
     if (confirmSheetSubmitButton) {
-      const shouldDisable = isConfirmingBottomSheet || !pendingConfirmationPayload;
+      const shouldDisable =
+        isConfirmingBottomSheet ||
+        !pendingConfirmationPayload ||
+        (otpActive && (!isOtpFilled() || otpTimeLeft <= 0));
       confirmSheetSubmitButton.disabled = shouldDisable;
+      confirmSheetSubmitButton.textContent = otpActive
+        ? 'Verifikasi'
+        : 'Lanjut Tambah Rekening';
     }
     if (confirmSheetCancelButton) {
       confirmSheetCancelButton.disabled = isConfirmingBottomSheet;
@@ -260,9 +395,9 @@
   function openConfirmSheet(payload) {
     pendingConfirmationPayload = { ...payload };
     populateConfirmSheet(pendingConfirmationPayload);
-    setConfirmSheetAccordionExpanded(false);
     isConfirmingBottomSheet = false;
-    updateConfirmSheetButtonState();
+    resetOtpState();
+    setConfirmSheetAccordionExpanded(false);
 
     if (confirmOverlayNode) {
       confirmOverlayNode.classList.remove('hidden');
@@ -290,6 +425,7 @@
   }
 
   function closeConfirmSheet({ resetPending = true, immediate = false } = {}) {
+    resetOtpState();
     if (confirmSheetNode) {
       confirmSheetNode.classList.add('translate-y-full');
     }
@@ -320,6 +456,16 @@
       return;
     }
 
+    if (!otpActive) {
+      showOtpSection();
+      return;
+    }
+
+    if (!isOtpFilled() || otpTimeLeft <= 0) {
+      updateConfirmSheetButtonState();
+      return;
+    }
+
     isConfirmingBottomSheet = true;
     isSubmittingForm = true;
     updateConfirmSheetButtonState();
@@ -327,6 +473,9 @@
       confirmButtonNode.disabled = true;
     }
     validateForm();
+
+    const otpValue = otpInputs.map((input) => input.value).join('');
+    console.log('OTP submitted:', otpValue);
 
     addAccount(pendingConfirmationPayload)
       .then(() => {
@@ -800,6 +949,18 @@
     confirmSheetPurposeNode = document.getElementById('addAccountConfirmPurpose');
     confirmSheetGiroToggleNode = document.getElementById('addAccountConfirmGiroToggle');
     confirmSheetGiroContentNode = document.getElementById('addAccountConfirmGiroContent');
+    otpSectionNode = document.getElementById('addAccountOtpSection');
+    otpInputs = otpSectionNode ? Array.from(otpSectionNode.querySelectorAll('.otp-input')) : [];
+    otpCountdownNode = document.getElementById('addAccountOtpCountdown');
+    otpCountdownMessageNode = document.getElementById('addAccountOtpCountdownMessage');
+    otpTimerNode = document.getElementById('addAccountOtpTimer');
+    otpResendButtonNode = document.getElementById('addAccountOtpResend');
+    if (otpCountdownMessageNode) {
+      const defaultText = otpCountdownMessageNode.textContent ? otpCountdownMessageNode.textContent.trim() : '';
+      if (defaultText) {
+        otpCountdownDefaultMessage = defaultText;
+      }
+    }
 
     const addAccountBtn = document.getElementById('addAccountBtn');
     const drawerCloseBtn = document.getElementById('drawerCloseBtn');
@@ -846,6 +1007,71 @@
     if (confirmOverlayNode) {
       confirmOverlayNode.addEventListener('click', () => {
         closeConfirmSheet({ resetPending: true });
+      });
+    }
+
+    if (otpInputs && otpInputs.length) {
+      otpInputs.forEach((input, idx) => {
+        input.addEventListener('input', (event) => {
+          const value = event.target.value.replace(/\D/g, '');
+          event.target.value = value ? value[0] : '';
+          if (value && idx < otpInputs.length - 1) {
+            otpInputs[idx + 1].focus();
+          }
+          updateConfirmSheetButtonState();
+        });
+
+        input.addEventListener('keydown', (event) => {
+          if (event.key === 'Backspace') {
+            if (input.value) {
+              input.value = '';
+              updateConfirmSheetButtonState();
+              event.preventDefault();
+            } else if (idx > 0) {
+              otpInputs[idx - 1].focus();
+              otpInputs[idx - 1].value = '';
+              updateConfirmSheetButtonState();
+              event.preventDefault();
+            }
+          } else if (event.key === 'ArrowLeft' && idx > 0) {
+            otpInputs[idx - 1].focus();
+            event.preventDefault();
+          } else if (event.key === 'ArrowRight' && idx < otpInputs.length - 1) {
+            otpInputs[idx + 1].focus();
+            event.preventDefault();
+          }
+        });
+
+        input.addEventListener('paste', (event) => {
+          event.preventDefault();
+          const text = (event.clipboardData || window.clipboardData)?.getData('text')?.replace(/\D/g, '') || '';
+          if (!text) {
+            updateConfirmSheetButtonState();
+            return;
+          }
+          let currentIndex = idx;
+          for (const char of text) {
+            if (currentIndex >= otpInputs.length) {
+              break;
+            }
+            otpInputs[currentIndex].value = char;
+            currentIndex += 1;
+          }
+          if (currentIndex < otpInputs.length) {
+            otpInputs[currentIndex].focus();
+          } else {
+            otpInputs[otpInputs.length - 1].focus();
+          }
+          updateConfirmSheetButtonState();
+        });
+      });
+    }
+
+    if (otpResendButtonNode) {
+      otpResendButtonNode.addEventListener('click', () => {
+        resetOtpInputs();
+        otpInputs[0]?.focus();
+        startOtpTimer();
       });
     }
 
