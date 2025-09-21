@@ -26,9 +26,18 @@
   let termsCheckboxNode = null;
   let termsErrorNode = null;
   let confirmButtonNode = null;
+  let confirmOverlayNode = null;
+  let confirmSheetNode = null;
+  let confirmSheetCancelButton = null;
+  let confirmSheetSubmitButton = null;
+  let confirmSheetNameNode = null;
+  let confirmSheetPurposeNode = null;
+  let confirmSheetGiroToggleNode = null;
+  let confirmSheetGiroContentNode = null;
 
   const MAX_ACCOUNT_NAME_LENGTH = 15;
   const PURPOSE_OPTION_ACTIVE_CLASSES = ['bg-cyan-50', 'border-l-2', 'border-dashed', 'border-cyan-500'];
+  const CONFIRM_SHEET_TRANSITION_MS = 300;
 
   const touchedState = {
     name: false,
@@ -38,6 +47,8 @@
 
   let formSubmitted = false;
   let isSubmittingForm = false;
+  let isConfirmingBottomSheet = false;
+  let pendingConfirmationPayload = null;
 
   const SUPPRESSED_ERROR_MESSAGES = new Set([
     'Nama rekening wajib diisi.',
@@ -205,6 +216,136 @@
     setAccordionExpanded(!expanded);
   }
 
+  function isConfirmSheetOpen() {
+    return confirmSheetNode && !confirmSheetNode.classList.contains('translate-y-full');
+  }
+
+  function setConfirmSheetAccordionExpanded(expanded) {
+    if (!confirmSheetGiroToggleNode || !confirmSheetGiroContentNode) return;
+    confirmSheetGiroToggleNode.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    confirmSheetGiroContentNode.classList.toggle('hidden', !expanded);
+    confirmSheetGiroContentNode.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+    const chevron = confirmSheetGiroToggleNode.querySelector('[data-chevron]');
+    if (chevron) {
+      chevron.style.transform = expanded ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+  }
+
+  function toggleConfirmSheetAccordion() {
+    if (!confirmSheetGiroToggleNode) return;
+    const expanded = confirmSheetGiroToggleNode.getAttribute('aria-expanded') === 'true';
+    setConfirmSheetAccordionExpanded(!expanded);
+  }
+
+  function updateConfirmSheetButtonState() {
+    if (confirmSheetSubmitButton) {
+      const shouldDisable = isConfirmingBottomSheet || !pendingConfirmationPayload;
+      confirmSheetSubmitButton.disabled = shouldDisable;
+    }
+    if (confirmSheetCancelButton) {
+      confirmSheetCancelButton.disabled = isConfirmingBottomSheet;
+    }
+  }
+
+  function populateConfirmSheet(payload) {
+    if (!payload) return;
+    if (confirmSheetNameNode) {
+      confirmSheetNameNode.textContent = payload.name || '-';
+    }
+    if (confirmSheetPurposeNode) {
+      confirmSheetPurposeNode.textContent = payload.purpose || '-';
+    }
+  }
+
+  function openConfirmSheet(payload) {
+    pendingConfirmationPayload = { ...payload };
+    populateConfirmSheet(pendingConfirmationPayload);
+    setConfirmSheetAccordionExpanded(false);
+    isConfirmingBottomSheet = false;
+    updateConfirmSheetButtonState();
+
+    if (confirmOverlayNode) {
+      confirmOverlayNode.classList.remove('hidden');
+      confirmOverlayNode.classList.remove('opacity-100');
+      confirmOverlayNode.classList.add('opacity-0');
+      requestAnimationFrame(() => {
+        confirmOverlayNode.classList.remove('opacity-0');
+        confirmOverlayNode.classList.add('opacity-100');
+      });
+    }
+
+    if (confirmSheetNode) {
+      confirmSheetNode.classList.remove('translate-y-full');
+    }
+
+    if (confirmSheetSubmitButton) {
+      requestAnimationFrame(() => {
+        try {
+          confirmSheetSubmitButton.focus({ preventScroll: true });
+        } catch (err) {
+          confirmSheetSubmitButton.focus();
+        }
+      });
+    }
+  }
+
+  function closeConfirmSheet({ resetPending = true, immediate = false } = {}) {
+    if (confirmSheetNode) {
+      confirmSheetNode.classList.add('translate-y-full');
+    }
+
+    if (confirmOverlayNode) {
+      confirmOverlayNode.classList.remove('opacity-100');
+      confirmOverlayNode.classList.add('opacity-0');
+      const hideOverlay = () => {
+        confirmOverlayNode.classList.add('hidden');
+      };
+      if (immediate) {
+        hideOverlay();
+      } else {
+        setTimeout(hideOverlay, CONFIRM_SHEET_TRANSITION_MS);
+      }
+    }
+
+    if (resetPending) {
+      pendingConfirmationPayload = null;
+    }
+    isConfirmingBottomSheet = false;
+    updateConfirmSheetButtonState();
+    validateForm();
+  }
+
+  function handleConfirmSheetSubmit() {
+    if (!pendingConfirmationPayload || isConfirmingBottomSheet) {
+      return;
+    }
+
+    isConfirmingBottomSheet = true;
+    isSubmittingForm = true;
+    updateConfirmSheetButtonState();
+    if (confirmButtonNode) {
+      confirmButtonNode.disabled = true;
+    }
+    validateForm();
+
+    addAccount(pendingConfirmationPayload)
+      .then(() => {
+        renderAccounts();
+        showToast('Rekening berhasil ditambahkan');
+        closeConfirmSheet({ resetPending: true });
+        closeDrawer();
+      })
+      .catch(() => {
+        showToast('Gagal menambahkan rekening. Silakan coba lagi.');
+      })
+      .finally(() => {
+        isConfirmingBottomSheet = false;
+        isSubmittingForm = false;
+        updateConfirmSheetButtonState();
+        validateForm();
+      });
+  }
+
   function updateNameCounter() {
     if (!nameInputNode || !nameCounterNode) return;
     const length = nameInputNode.value.length;
@@ -295,6 +436,9 @@
   function resetFormState({ skipFormReset = false } = {}) {
     formSubmitted = false;
     isSubmittingForm = false;
+    closeConfirmSheet({ resetPending: true, immediate: true });
+    isConfirmingBottomSheet = false;
+    pendingConfirmationPayload = null;
     resetTouchedState();
     if (!skipFormReset && formNode) {
       formNode.reset();
@@ -333,6 +477,7 @@
       confirmButtonNode.disabled = true;
     }
     setAccordionExpanded(true);
+    updateConfirmSheetButtonState();
   }
 
   function ensureToast() {
@@ -612,7 +757,14 @@
   }
 
   function onKeyDown(event) {
-    if (event.key === 'Escape' && drawerNode && drawerNode.classList.contains('open')) {
+    if (event.key !== 'Escape') {
+      return;
+    }
+    if (isConfirmSheetOpen()) {
+      closeConfirmSheet({ resetPending: true });
+      return;
+    }
+    if (drawerNode && drawerNode.classList.contains('open')) {
       closeDrawer();
     }
   }
@@ -640,6 +792,14 @@
     termsCheckboxNode = document.getElementById('termsAgreement');
     termsErrorNode = document.getElementById('termsAgreementError');
     confirmButtonNode = document.getElementById('confirmAddAccountBtn');
+    confirmOverlayNode = document.getElementById('addAccountConfirmOverlay');
+    confirmSheetNode = document.getElementById('addAccountConfirmSheet');
+    confirmSheetCancelButton = document.getElementById('addAccountConfirmCancel');
+    confirmSheetSubmitButton = document.getElementById('addAccountConfirmSubmit');
+    confirmSheetNameNode = document.getElementById('addAccountConfirmName');
+    confirmSheetPurposeNode = document.getElementById('addAccountConfirmPurpose');
+    confirmSheetGiroToggleNode = document.getElementById('addAccountConfirmGiroToggle');
+    confirmSheetGiroContentNode = document.getElementById('addAccountConfirmGiroContent');
 
     const addAccountBtn = document.getElementById('addAccountBtn');
     const drawerCloseBtn = document.getElementById('drawerCloseBtn');
@@ -666,6 +826,27 @@
       }
       giroAccordionButton.addEventListener('click', toggleAccordion);
       setAccordionExpanded(true);
+    }
+
+    if (confirmSheetGiroToggleNode) {
+      confirmSheetGiroToggleNode.addEventListener('click', toggleConfirmSheetAccordion);
+      setConfirmSheetAccordionExpanded(false);
+    }
+
+    if (confirmSheetCancelButton) {
+      confirmSheetCancelButton.addEventListener('click', () => {
+        closeConfirmSheet({ resetPending: true });
+      });
+    }
+
+    if (confirmSheetSubmitButton) {
+      confirmSheetSubmitButton.addEventListener('click', handleConfirmSheetSubmit);
+    }
+
+    if (confirmOverlayNode) {
+      confirmOverlayNode.addEventListener('click', () => {
+        closeConfirmSheet({ resetPending: true });
+      });
     }
 
     if (formNode) {
@@ -745,34 +926,13 @@
           return;
         }
 
-        if (confirmButtonNode) {
-          confirmButtonNode.disabled = true;
-        }
-        isSubmittingForm = true;
-        validateForm();
-
         const payload = {
           name: nameInputNode ? nameInputNode.value.trim() : '',
           purpose: purposeSelectNode ? purposeSelectNode.value : '',
           agreedToTerms: termsCheckboxNode ? termsCheckboxNode.checked : false,
         };
 
-        addAccount(payload)
-          .then(() => {
-            renderAccounts();
-            showToast('Rekening berhasil ditambahkan');
-            closeDrawer();
-          })
-          .catch(() => {
-            showToast('Gagal menambahkan rekening. Silakan coba lagi.');
-          })
-          .finally(() => {
-            isSubmittingForm = false;
-            if (confirmButtonNode) {
-              confirmButtonNode.disabled = true;
-            }
-            validateForm();
-          });
+        openConfirmSheet(payload);
       });
     }
 
