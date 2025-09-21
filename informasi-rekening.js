@@ -189,7 +189,7 @@
   function createDetailLink(label) {
     const link = document.createElement('a');
     link.href = 'mutasi.html';
-    link.className = 'text-sm font-semibold text-cyan-600 hover:text-cyan-700 flex items-center gap-1 whitespace-nowrap';
+    link.className = 'pt-3 font-semibold text-cyan-600 hover:text-cyan-700 flex items-center gap-1 whitespace-nowrap';
     link.setAttribute('aria-label', `Lihat detail ${label}`);
     link.innerHTML = 'Lihat Detail <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6.47 3.97a.75.75 0 0 1 1.06 0l3.5 3.5a.75.75 0 0 1 0 1.06l-3.5 3.5a.75.75 0 1 1-1.06-1.06L9.44 8 6.47 5.03a.75.75 0 0 1 0-1.06Z"/></svg>';
     return link;
@@ -229,9 +229,9 @@
     header.appendChild(createDetailLink(account.name));
 
     const numberRow = document.createElement('div');
-    numberRow.className = 'flex flex-col gap-1';
+    numberRow.className = 'flex flex-col';
     const numberLabel = document.createElement('p');
-    numberLabel.className = 'text-sm text-slate-500';
+    numberLabel.className = 'text-sm text-slate-400';
     numberLabel.textContent = 'Nomor Rekening';
     const numberValueWrap = document.createElement('div');
     numberValueWrap.className = 'flex items-center gap-2';
