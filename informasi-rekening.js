@@ -261,7 +261,7 @@
     balanceLabel.className = 'text-sm text-slate-400';
     balanceLabel.textContent = 'Saldo Aktif';
     const balanceValue = document.createElement('p');
-    balanceValue.className = 'mt-1 text-xl font-semibold text-slate-900';
+    balanceValue.className = 'text-xl font-semibold text-slate-900';
     const formattedBalance = formatCurrency(account.balance);
     registerBalanceElement(balanceValue, formattedBalance);
     balanceWrap.append(balanceLabel, balanceValue);
