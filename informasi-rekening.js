@@ -39,6 +39,12 @@
   let formSubmitted = false;
   let isSubmittingForm = false;
 
+  const SUPPRESSED_ERROR_MESSAGES = new Set([
+    'Nama rekening wajib diisi.',
+    'Pilih tujuan penambahan rekening.',
+    'Anda harus menyetujui syarat dan ketentuan.',
+  ]);
+
   const CURRENCY_FORMATTER = new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
@@ -232,9 +238,15 @@
 
   function updateFieldError(control, errorNode, errorMessage, shouldShow) {
     if (!control || !errorNode) return;
+    const suppressErrorText = SUPPRESSED_ERROR_MESSAGES.has(errorMessage);
     if (errorMessage && shouldShow) {
-      errorNode.textContent = errorMessage;
-      errorNode.classList.remove('hidden');
+      if (suppressErrorText) {
+        errorNode.textContent = '';
+        errorNode.classList.add('hidden');
+      } else {
+        errorNode.textContent = errorMessage;
+        errorNode.classList.remove('hidden');
+      }
       control.setAttribute('aria-invalid', 'true');
       if (control === purposeSelectNode && purposeButtonNode) {
         purposeButtonNode.setAttribute('aria-invalid', 'true');
