@@ -18,11 +18,17 @@
   let nameErrorNode = null;
   let purposeSelectNode = null;
   let purposeErrorNode = null;
+  let purposeDropdownNode = null;
+  let purposeButtonNode = null;
+  let purposeListNode = null;
+  let purposeTextNode = null;
+  let purposeOptionButtons = [];
   let termsCheckboxNode = null;
   let termsErrorNode = null;
   let confirmButtonNode = null;
 
   const MAX_ACCOUNT_NAME_LENGTH = 15;
+  const PURPOSE_OPTION_ACTIVE_CLASSES = ['bg-cyan-50', 'border-l-2', 'border-dashed', 'border-cyan-500'];
 
   const touchedState = {
     name: false,
@@ -104,6 +110,77 @@
     });
   }
 
+  function getPurposePlaceholder() {
+    if (purposeTextNode) {
+      const { placeholder } = purposeTextNode.dataset || {};
+      if (placeholder && placeholder.trim()) {
+        return placeholder;
+      }
+      const text = purposeTextNode.textContent;
+      if (text && text.trim()) {
+        return text.trim();
+      }
+    }
+    return 'Pilih tujuan penambahan rekening';
+  }
+
+  function updatePurposeDropdownDisplay(value) {
+    const trimmedValue = value ? String(value).trim() : '';
+    if (purposeTextNode) {
+      const placeholder = getPurposePlaceholder();
+      if (trimmedValue) {
+        purposeTextNode.textContent = trimmedValue;
+        purposeTextNode.classList.remove('text-slate-500');
+      } else {
+        purposeTextNode.textContent = placeholder;
+        purposeTextNode.classList.add('text-slate-500');
+      }
+    }
+    if (purposeOptionButtons && purposeOptionButtons.length) {
+      purposeOptionButtons.forEach((btn) => {
+        if (!btn) return;
+        btn.classList.remove(...PURPOSE_OPTION_ACTIVE_CLASSES);
+        btn.setAttribute('aria-selected', 'false');
+        if ((btn.dataset.value || '') === trimmedValue) {
+          btn.classList.add(...PURPOSE_OPTION_ACTIVE_CLASSES);
+          btn.setAttribute('aria-selected', 'true');
+        }
+      });
+    }
+  }
+
+  function setPurposeListVisibility(visible) {
+    if (!purposeListNode || !purposeButtonNode) return;
+    if (visible) {
+      purposeListNode.classList.remove('hidden');
+      purposeButtonNode.setAttribute('aria-expanded', 'true');
+    } else {
+      purposeListNode.classList.add('hidden');
+      purposeButtonNode.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function handlePurposeSelection(value) {
+    const selected = value ? String(value).trim() : '';
+    if (purposeSelectNode) {
+      purposeSelectNode.value = selected;
+      const changeEvent = new Event('change', { bubbles: true });
+      purposeSelectNode.dispatchEvent(changeEvent);
+    } else {
+      touchedState.purpose = true;
+      updatePurposeDropdownDisplay(selected);
+      validateForm({ showErrors: true });
+    }
+    setPurposeListVisibility(false);
+  }
+
+  function handlePurposeDropdownOutsideClick(event) {
+    if (!purposeDropdownNode) return;
+    if (!purposeDropdownNode.contains(event.target)) {
+      setPurposeListVisibility(false);
+    }
+  }
+
   function setAccordionExpanded(expanded) {
     if (!giroAccordionButton || !giroAccordionContent) return;
     giroAccordionButton.dataset.expanded = expanded ? 'true' : 'false';
@@ -159,10 +236,16 @@
       errorNode.textContent = errorMessage;
       errorNode.classList.remove('hidden');
       control.setAttribute('aria-invalid', 'true');
+      if (control === purposeSelectNode && purposeButtonNode) {
+        purposeButtonNode.setAttribute('aria-invalid', 'true');
+      }
     } else {
       errorNode.textContent = '';
       errorNode.classList.add('hidden');
       control.setAttribute('aria-invalid', 'false');
+      if (control === purposeSelectNode && purposeButtonNode) {
+        purposeButtonNode.setAttribute('aria-invalid', 'false');
+      }
     }
   }
 
@@ -223,11 +306,17 @@
       nameInputNode.setAttribute('aria-invalid', 'false');
     }
     if (purposeSelectNode) {
+      purposeSelectNode.value = '';
       purposeSelectNode.setAttribute('aria-invalid', 'false');
     }
     if (termsCheckboxNode) {
       termsCheckboxNode.setAttribute('aria-invalid', 'false');
     }
+    updatePurposeDropdownDisplay('');
+    if (purposeButtonNode) {
+      purposeButtonNode.setAttribute('aria-invalid', 'false');
+    }
+    setPurposeListVisibility(false);
     if (confirmButtonNode) {
       confirmButtonNode.disabled = true;
     }
@@ -531,6 +620,11 @@
     nameErrorNode = document.getElementById('accountNameError');
     purposeSelectNode = document.getElementById('accountPurpose');
     purposeErrorNode = document.getElementById('accountPurposeError');
+    purposeDropdownNode = document.getElementById('moveCategoryDropdown');
+    purposeButtonNode = document.getElementById('moveCategoryBtn');
+    purposeListNode = document.getElementById('moveCategoryList');
+    purposeTextNode = document.getElementById('moveCategoryText');
+    purposeOptionButtons = purposeListNode ? Array.from(purposeListNode.querySelectorAll('button[data-value]')) : [];
     termsCheckboxNode = document.getElementById('termsAgreement');
     termsErrorNode = document.getElementById('termsAgreementError');
     confirmButtonNode = document.getElementById('confirmAddAccountBtn');
@@ -540,6 +634,8 @@
 
     renderAccounts();
     updateBalanceVisibility();
+    updatePurposeDropdownDisplay(purposeSelectNode ? purposeSelectNode.value : '');
+    setPurposeListVisibility(false);
 
     if (toggleButtonNode) {
       toggleButtonNode.addEventListener('click', () => {
@@ -582,9 +678,26 @@
       });
     }
 
+    if (purposeButtonNode && purposeListNode) {
+      purposeButtonNode.addEventListener('click', () => {
+        const isVisible = !purposeListNode.classList.contains('hidden');
+        setPurposeListVisibility(!isVisible);
+      });
+    }
+
+    if (purposeListNode) {
+      purposeListNode.addEventListener('click', (event) => {
+        const btn = event.target.closest('button[data-value]');
+        if (!btn) return;
+        event.preventDefault();
+        handlePurposeSelection(btn.dataset.value || '');
+      });
+    }
+
     if (purposeSelectNode) {
       purposeSelectNode.addEventListener('change', () => {
         touchedState.purpose = true;
+        updatePurposeDropdownDisplay(purposeSelectNode.value);
         validateForm({ showErrors: true });
       });
       purposeSelectNode.addEventListener('blur', () => {
@@ -592,6 +705,10 @@
           validateForm();
         }
       });
+    }
+
+    if (purposeDropdownNode) {
+      document.addEventListener('click', handlePurposeDropdownOutsideClick);
     }
 
     if (termsCheckboxNode) {
