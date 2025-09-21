@@ -166,7 +166,7 @@
 
     <!-- ============ DRAWER ============ -->
     <div id="drawer" class="h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100">
-      <div class="sticky top-0 z-20 flex items-center justify-between px-6 py-5 border-b border-slate-200 bg-white">
+      <div class="sticky top-0 z-20 flex items-center justify-between p-4 border-b border-slate-200 bg-white">
         <h2 class="text-lg font-semibold text-slate-900">Tambah Rekening</h2>
         <button type="button" id="drawerCloseBtn" class="p-2 text-slate-500 hover:text-slate-700" aria-label="Tutup drawer">
           &times;
@@ -174,7 +174,7 @@
       </div>
 
       <form id="addAccountForm" class="flex-1 overflow-y-auto px-6 py-6 space-y-6" autocomplete="off" novalidate>
-        <section class="rounded-2xl border border-slate-200 bg-white">
+        <section class="">
           <button type="button" id="giroSpecToggle" class="drawer-accordion-trigger flex w-full items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
             <span class="text-sm font-semibold text-slate-900">Spesifikasi GIRO</span>
             <svg class="drawer-accordion-chevron h-5 w-5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -182,37 +182,37 @@
             </svg>
           </button>
           <div id="giroSpecContent" class="drawer-accordion-content border-t border-slate-200" data-expanded="true" aria-hidden="false">
-            <div class="px-5 py-4">
+            <div class="p-4">
               <dl class="divide-y divide-slate-200">
-                <div class="flex items-start justify-between gap-6 py-3">
+                <div class="flex items-start justify-between gap-6 py-4">
                   <dt class="text-sm text-slate-500">Setoran Awal</dt>
                   <dd class="text-sm font-semibold text-slate-900">Rp1.000.000,-</dd>
                 </div>
-                <div class="flex items-start justify-between gap-6 py-3">
+                <div class="flex items-start justify-between gap-6 py-4">
                   <dt class="text-sm text-slate-500">Saldo Minimum Mengendap</dt>
                   <dd class="text-sm font-semibold text-slate-900">Rp1.000.000,-</dd>
                 </div>
-                <div class="flex items-start justify-between gap-6 py-3">
+                <div class="flex items-start justify-between gap-6 py-4">
                   <dt class="text-sm text-slate-500">Biaya Admin Bulanan</dt>
                   <dd class="text-sm font-semibold text-slate-900">Rp30.000,-</dd>
                 </div>
-                <div class="flex items-start justify-between gap-6 py-3">
+                <div class="flex items-start justify-between gap-6 py-4">
                   <dt class="text-sm text-slate-500">Biaya Setoran Kliring</dt>
                   <dd class="text-sm font-semibold text-slate-900">Rp2.000,-</dd>
                 </div>
-                <div class="flex items-start justify-between gap-6 py-3">
+                <div class="flex items-start justify-between gap-6 py-4">
                   <dt class="text-sm text-slate-500">Biaya Admin Bulanan di Rekening Pasif</dt>
                   <dd class="text-sm font-semibold text-slate-900">Rp500,-</dd>
                 </div>
-                <div class="flex items-start justify-between gap-6 py-3">
+                <div class="flex items-start justify-between gap-6 py-4">
                   <dt class="text-sm text-slate-500">Biaya Admin Bulanan di Rekening di bawah Saldo Minimum</dt>
                   <dd class="text-sm font-semibold text-slate-900">Rp1.000,-</dd>
                 </div>
-                <div class="flex items-start justify-between gap-6 py-3">
+                <div class="flex items-start justify-between gap-6 py-4">
                   <dt class="text-sm text-slate-500">Biaya Admin 3 Bulan di bawah Saldo Minimum</dt>
                   <dd class="text-sm font-semibold text-slate-900">Rp500,-</dd>
                 </div>
-                <div class="flex items-start justify-between gap-6 py-3">
+                <div class="flex items-start justify-between gap-6 py-4">
                   <dt class="text-sm text-slate-500">Biaya Penutupan Rekening</dt>
                   <dd class="text-sm font-semibold text-slate-900">Rp55.000,-</dd>
                 </div>
@@ -263,7 +263,7 @@
         </section>
       </form>
 
-      <div class="sticky bottom-0 border-t border-slate-200 bg-white px-6 py-5">
+      <div class="sticky bottom-0 border-t border-slate-200 bg-white p-4">
         <button type="submit" id="confirmAddAccountBtn" form="addAccountForm" class="w-full rounded-xl bg-cyan-600 py-3 text-center font-semibold text-white transition hover:bg-cyan-700 disabled:opacity-50" disabled>Konfirmasi Tambah Rekening</button>
       </div>
     </div>
