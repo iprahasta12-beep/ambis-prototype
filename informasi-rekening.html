@@ -233,18 +233,20 @@
           </div>
         </section>
 
-        <div class="relative">
+        <div id="moveCategoryDropdown" class="relative">
           <label class="block   mb-1">Tujuan Penambahan Rekening</label>
-          <button id="moveCategoryBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between">
-            <span id="moveCategoryText" class="text-slate-500">Pilih tujuan penambahan rekening</span>
+          <button id="moveCategoryBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between" aria-haspopup="listbox" aria-expanded="false">
+            <span id="moveCategoryText" class="text-slate-500" data-placeholder="Pilih tujuan penambahan rekening">Pilih tujuan penambahan rekening</span>
             <span class="text-slate-400">▾</span>
           </button>
-            <ul id="moveCategoryList" class="absolute left-0 right-0 mt-1 bg-white rounded-xl border shadow divide-y z-10">
-            <li><button type="button"  class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Transaksi Bisnis</button></li>
-            <li><button type="button" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Pencairan Pinjaman</button></li>
-            <li><button type="button" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Sharing Profit (Multi Bisnis)(</button></li>
-            <li><button type="button" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Lainnya</button></li>
+          <ul id="moveCategoryList" class="hidden absolute left-0 right-0 mt-1 bg-white rounded-xl border shadow divide-y z-10" role="listbox">
+            <li><button type="button" data-value="Transaksi Bisnis" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0" role="option">Transaksi Bisnis</button></li>
+            <li><button type="button" data-value="Pencairan Pinjaman" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0" role="option">Pencairan Pinjaman</button></li>
+            <li><button type="button" data-value="Sharing Profit (Multi Bisnis)" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0" role="option">Sharing Profit (Multi Bisnis)</button></li>
+            <li><button type="button" data-value="Lainnya" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0" role="option">Lainnya</button></li>
           </ul>
+          <input type="hidden" id="accountPurpose" name="accountPurpose" value="">
+          <p id="accountPurposeError" class="mt-2 text-xs text-red-500 hidden"></p>
         </div>
 
         <section class="space-y-3">
