@@ -2,6 +2,10 @@
   const balanceElements = new Set();
   let isMasked = false;
   let toastEl = null;
+  let toastInnerNode = null;
+  let toastIconWrapperNode = null;
+  let toastMessageNode = null;
+  let toastCloseButtonNode = null;
   let toastTimer = null;
 
   let toggleButtonNode = null;
@@ -75,6 +79,34 @@
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+
+  const TOAST_BASE_INNER_CLASSES = 'pointer-events-auto flex items-center gap-3 rounded-2xl px-4 py-3 shadow-lg text-sm';
+  const TOAST_BASE_ICON_WRAPPER_CLASSES = 'flex h-9 w-9 items-center justify-center rounded-full';
+  const TOAST_BASE_CLOSE_CLASSES = 'ml-2 inline-flex h-8 w-8 items-center justify-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2';
+  const TOAST_ICONS = {
+    success:
+      '<svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16.6667 5.8335L8.12504 14.1668L4.16671 10.2085" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    error:
+      '<svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6.25 6.25L13.75 13.75M13.75 6.25L6.25 13.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  };
+  const TOAST_VARIANTS = {
+    success: {
+      innerClasses: 'bg-[#F1FAF3] text-slate-900',
+      iconWrapperClasses: 'bg-emerald-500 text-white',
+      icon: TOAST_ICONS.success,
+      messageClasses: 'text-sm text-slate-900 font-medium',
+      closeButtonClasses: 'text-slate-400 hover:text-slate-600 focus-visible:ring-emerald-200',
+      duration: 5000,
+    },
+    error: {
+      innerClasses: 'bg-red-50 text-red-700',
+      iconWrapperClasses: 'bg-red-500 text-white',
+      icon: TOAST_ICONS.error,
+      messageClasses: 'text-sm text-red-700 font-medium',
+      closeButtonClasses: 'text-red-400 hover:text-red-600 focus-visible:ring-red-200',
+      duration: 5000,
+    },
+  };
 
   function getAmbis() {
     return window.AMBIS || {};
@@ -480,12 +512,12 @@
     addAccount(pendingConfirmationPayload)
       .then(() => {
         renderAccounts();
-        showToast('Rekening berhasil ditambahkan');
+        showToast('Rekening baru berhasil dibuat');
         closeConfirmSheet({ resetPending: true });
         closeDrawer();
       })
       .catch(() => {
-        showToast('Gagal menambahkan rekening. Silakan coba lagi.');
+        showToast('Gagal menambahkan rekening. Silakan coba lagi.', { variant: 'error' });
       })
       .finally(() => {
         isConfirmingBottomSheet = false;
@@ -635,27 +667,82 @@
     toastEl.id = 'rekeningToast';
     toastEl.setAttribute('role', 'status');
     toastEl.setAttribute('aria-live', 'polite');
-    toastEl.className = 'fixed top-6 right-6 z-50 pointer-events-none transform transition duration-200 ease-out opacity-0 translate-y-2';
-    const inner = document.createElement('div');
-    inner.className = 'rounded-xl bg-slate-900 text-white px-4 py-3 shadow-lg text-sm font-semibold';
-    toastEl.appendChild(inner);
+    toastEl.className = 'fixed inset-x-0 bottom-16 z-50 flex justify-center opacity-0 translate-y-4 pointer-events-none transition duration-300 ease-out';
+
+    toastInnerNode = document.createElement('div');
+    toastInnerNode.className = TOAST_BASE_INNER_CLASSES;
+
+    toastIconWrapperNode = document.createElement('span');
+    toastIconWrapperNode.className = TOAST_BASE_ICON_WRAPPER_CLASSES;
+    toastIconWrapperNode.setAttribute('aria-hidden', 'true');
+
+    toastMessageNode = document.createElement('p');
+    toastMessageNode.className = 'text-sm font-medium';
+
+    toastCloseButtonNode = document.createElement('button');
+    toastCloseButtonNode.type = 'button';
+    toastCloseButtonNode.className = TOAST_BASE_CLOSE_CLASSES;
+    toastCloseButtonNode.setAttribute('aria-label', 'Tutup notifikasi');
+    toastCloseButtonNode.innerHTML = '<span class="sr-only">Tutup notifikasi</span><span aria-hidden="true" class="text-base leading-none">&times;</span>';
+    toastCloseButtonNode.addEventListener('click', () => {
+      hideToast();
+    });
+
+    toastInnerNode.appendChild(toastIconWrapperNode);
+    toastInnerNode.appendChild(toastMessageNode);
+    toastInnerNode.appendChild(toastCloseButtonNode);
+    toastEl.appendChild(toastInnerNode);
     document.body.appendChild(toastEl);
+
     return toastEl;
   }
 
-  function showToast(message) {
-    const toast = ensureToast();
-    const inner = toast.firstElementChild;
-    if (inner) {
-      inner.textContent = message;
+  function applyToastVariant(variant) {
+    const config = TOAST_VARIANTS[variant] || TOAST_VARIANTS.success;
+    if (toastInnerNode) {
+      toastInnerNode.className = `${TOAST_BASE_INNER_CLASSES} ${config.innerClasses}`;
     }
-    toast.classList.remove('opacity-0', 'translate-y-2');
-    toast.classList.add('opacity-100', 'translate-y-0');
-    if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => {
-      toast.classList.remove('opacity-100', 'translate-y-0');
-      toast.classList.add('opacity-0', 'translate-y-2');
-    }, 2200);
+    if (toastIconWrapperNode) {
+      toastIconWrapperNode.className = `${TOAST_BASE_ICON_WRAPPER_CLASSES} ${config.iconWrapperClasses}`;
+      toastIconWrapperNode.innerHTML = config.icon;
+    }
+    if (toastMessageNode) {
+      toastMessageNode.className = config.messageClasses;
+    }
+    if (toastCloseButtonNode) {
+      toastCloseButtonNode.className = `${TOAST_BASE_CLOSE_CLASSES} ${config.closeButtonClasses}`;
+    }
+    return config;
+  }
+
+  function hideToast() {
+    if (!toastEl) return;
+    if (toastTimer) {
+      clearTimeout(toastTimer);
+      toastTimer = null;
+    }
+    toastEl.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
+    toastEl.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+  }
+
+  function showToast(message, options = {}) {
+    const toast = ensureToast();
+    const config = applyToastVariant(options.variant);
+    if (toastMessageNode) {
+      toastMessageNode.textContent = message;
+    }
+    toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+    toast.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
+    if (toastTimer) {
+      clearTimeout(toastTimer);
+      toastTimer = null;
+    }
+    const duration = typeof options.duration === 'number' ? options.duration : config.duration;
+    if (Number.isFinite(duration) && duration > 0) {
+      toastTimer = setTimeout(() => {
+        hideToast();
+      }, duration);
+    }
   }
 
   function copyAccountNumber(value) {
@@ -812,7 +899,7 @@
           showToast('Nomor rekening berhasil disalin');
         })
         .catch(() => {
-          showToast('Tidak dapat menyalin nomor rekening');
+          showToast('Tidak dapat menyalin nomor rekening', { variant: 'error' });
         });
     });
     numberValueWrap.appendChild(copyBtn);
