@@ -69,6 +69,94 @@
     return raw.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
   }
 
+  const COLOR_PALETTE = [
+    'bg-cyan-100 text-cyan-600',
+    'bg-orange-100 text-orange-600',
+    'bg-pink-100 text-pink-600',
+    'bg-purple-100 text-purple-600',
+    'bg-emerald-100 text-emerald-600',
+  ];
+
+  function pickAccountColor(index) {
+    if (!Number.isFinite(index) || index < 0) {
+      return COLOR_PALETTE[0];
+    }
+    return COLOR_PALETTE[index % COLOR_PALETTE.length];
+  }
+
+  function generateAccountNumber() {
+    let attempt = 0;
+    let candidate = '';
+    do {
+      const randomValue = Math.floor(100_000_000_000 + Math.random() * 900_000_000_000);
+      candidate = String(randomValue);
+      attempt += 1;
+      if (attempt > 25) {
+        break;
+      }
+    } while (state.accounts.some((acc) => acc.numberRaw === candidate));
+
+    if (!candidate) {
+      candidate = String(Date.now()).slice(-12).padStart(12, '0');
+    }
+
+    return {
+      raw: candidate,
+      formatted: formatAccountNumber(candidate),
+    };
+  }
+
+  function generateAccountId(name) {
+    const base = (name || 'rekening')
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-+|-+$)/g, '') || 'rekening';
+
+    let candidate = base;
+    let suffix = 1;
+    while (state.accounts.some((acc) => acc.id === candidate)) {
+      candidate = `${base}-${suffix}`;
+      suffix += 1;
+    }
+    return candidate;
+  }
+
+  function addNewAccount({ name, purpose } = {}) {
+    const normalisedName = typeof name === 'string' ? name.trim() : '';
+    if (!normalisedName) {
+      throw new Error('Nama rekening wajib diisi.');
+    }
+
+    const { raw, formatted } = generateAccountNumber();
+    const id = generateAccountId(normalisedName);
+    const initial = normalisedName.charAt(0).toUpperCase() || 'R';
+    const color = pickAccountColor(state.accounts.length);
+
+    const newAccount = {
+      id,
+      name: normalisedName,
+      displayName: normalisedName,
+      bank: 'PT Bank Amar Indonesia',
+      number: formatted,
+      numberRaw: raw,
+      balance: 0,
+      color,
+      initial,
+      purpose: typeof purpose === 'string' ? purpose : '',
+      brandName: state.brandName,
+      company: state.brandName,
+    };
+
+    state.accounts.push(newAccount);
+    if (!state.transactions.has(raw)) {
+      state.transactions.set(raw, []);
+    }
+
+    return { ...newAccount };
+  }
+
   function ensureAccountBrand(name) {
     state.accounts.forEach((account) => {
       account.company = name;
@@ -170,6 +258,9 @@
       const key = sanitizeNumber(number);
       if (!key) return null;
       return state.accounts.find((acc) => acc.numberRaw === key) || null;
+    },
+    addAccount(accountPayload) {
+      return addNewAccount(accountPayload);
     },
     getTransactionsForAccount(accountOrNumber, { clone = true } = {}) {
       const key = getAccountKey(accountOrNumber);

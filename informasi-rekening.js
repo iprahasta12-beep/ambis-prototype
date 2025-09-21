@@ -11,6 +11,27 @@
   let emptyStateNode = null;
   let drawerNode = null;
   let formNode = null;
+  let giroAccordionButton = null;
+  let giroAccordionContent = null;
+  let nameInputNode = null;
+  let nameCounterNode = null;
+  let nameErrorNode = null;
+  let purposeSelectNode = null;
+  let purposeErrorNode = null;
+  let termsCheckboxNode = null;
+  let termsErrorNode = null;
+  let confirmButtonNode = null;
+
+  const MAX_ACCOUNT_NAME_LENGTH = 15;
+
+  const touchedState = {
+    name: false,
+    purpose: false,
+    terms: false,
+  };
+
+  let formSubmitted = false;
+  let isSubmittingForm = false;
 
   const CURRENCY_FORMATTER = new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -21,6 +42,22 @@
 
   function getAmbis() {
     return window.AMBIS || {};
+  }
+
+  function addAccount(payload) {
+    const ambis = getAmbis();
+    if (typeof ambis.addAccount === 'function') {
+      try {
+        const result = ambis.addAccount(payload);
+        if (result && typeof result.then === 'function') {
+          return result;
+        }
+        return Promise.resolve(result);
+      } catch (err) {
+        return Promise.reject(err);
+      }
+    }
+    return Promise.reject(new Error('API tambah rekening tidak tersedia'));
   }
 
   function formatCurrency(value) {
@@ -65,6 +102,136 @@
       const original = el.dataset.balanceValue ?? '';
       el.textContent = isMasked ? maskCurrencyText(original) : original;
     });
+  }
+
+  function setAccordionExpanded(expanded) {
+    if (!giroAccordionButton || !giroAccordionContent) return;
+    giroAccordionButton.dataset.expanded = expanded ? 'true' : 'false';
+    giroAccordionButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    const chevron = giroAccordionButton.querySelector('[data-chevron]');
+    if (chevron) {
+      chevron.style.transform = expanded ? 'rotate(0deg)' : 'rotate(-90deg)';
+    }
+    giroAccordionContent.dataset.expanded = expanded ? 'true' : 'false';
+    giroAccordionContent.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+  }
+
+  function toggleAccordion() {
+    if (!giroAccordionButton) return;
+    const expanded = giroAccordionButton.getAttribute('aria-expanded') === 'true';
+    setAccordionExpanded(!expanded);
+  }
+
+  function updateNameCounter() {
+    if (!nameInputNode || !nameCounterNode) return;
+    const length = nameInputNode.value.length;
+    nameCounterNode.textContent = `${length}/${MAX_ACCOUNT_NAME_LENGTH}`;
+  }
+
+  function getNameError(value) {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return 'Nama rekening wajib diisi.';
+    }
+    if (trimmed.length > MAX_ACCOUNT_NAME_LENGTH) {
+      return `Maksimum ${MAX_ACCOUNT_NAME_LENGTH} karakter.`;
+    }
+    return '';
+  }
+
+  function getPurposeError(value) {
+    if (!value) {
+      return 'Pilih tujuan penambahan rekening.';
+    }
+    return '';
+  }
+
+  function getTermsError(checked) {
+    if (!checked) {
+      return 'Anda harus menyetujui syarat dan ketentuan.';
+    }
+    return '';
+  }
+
+  function updateFieldError(control, errorNode, errorMessage, shouldShow) {
+    if (!control || !errorNode) return;
+    if (errorMessage && shouldShow) {
+      errorNode.textContent = errorMessage;
+      errorNode.classList.remove('hidden');
+      control.setAttribute('aria-invalid', 'true');
+    } else {
+      errorNode.textContent = '';
+      errorNode.classList.add('hidden');
+      control.setAttribute('aria-invalid', 'false');
+    }
+  }
+
+  function validateForm({ showErrors = false } = {}) {
+    if (!formNode) return false;
+    const nameValue = nameInputNode ? nameInputNode.value : '';
+    const purposeValue = purposeSelectNode ? purposeSelectNode.value : '';
+    const termsChecked = termsCheckboxNode ? termsCheckboxNode.checked : false;
+
+    const nameError = getNameError(nameValue);
+    const purposeError = getPurposeError(purposeValue);
+    const termsError = getTermsError(termsChecked);
+
+    const showNameError = showErrors || touchedState.name || formSubmitted;
+    const showPurposeError = showErrors || touchedState.purpose || formSubmitted;
+    const showTermsError = showErrors || touchedState.terms || formSubmitted;
+
+    updateFieldError(nameInputNode, nameErrorNode, nameError, showNameError);
+    updateFieldError(purposeSelectNode, purposeErrorNode, purposeError, showPurposeError);
+    updateFieldError(termsCheckboxNode, termsErrorNode, termsError, showTermsError);
+
+    const isValid = !nameError && !purposeError && !termsError;
+    if (confirmButtonNode) {
+      confirmButtonNode.disabled = !isValid || isSubmittingForm;
+    }
+    return isValid;
+  }
+
+  function resetTouchedState() {
+    touchedState.name = false;
+    touchedState.purpose = false;
+    touchedState.terms = false;
+  }
+
+  function resetFormState({ skipFormReset = false } = {}) {
+    formSubmitted = false;
+    isSubmittingForm = false;
+    resetTouchedState();
+    if (!skipFormReset && formNode) {
+      formNode.reset();
+    }
+    if (nameCounterNode) {
+      nameCounterNode.textContent = `0/${MAX_ACCOUNT_NAME_LENGTH}`;
+    }
+    if (nameErrorNode) {
+      nameErrorNode.textContent = '';
+      nameErrorNode.classList.add('hidden');
+    }
+    if (purposeErrorNode) {
+      purposeErrorNode.textContent = '';
+      purposeErrorNode.classList.add('hidden');
+    }
+    if (termsErrorNode) {
+      termsErrorNode.textContent = '';
+      termsErrorNode.classList.add('hidden');
+    }
+    if (nameInputNode) {
+      nameInputNode.setAttribute('aria-invalid', 'false');
+    }
+    if (purposeSelectNode) {
+      purposeSelectNode.setAttribute('aria-invalid', 'false');
+    }
+    if (termsCheckboxNode) {
+      termsCheckboxNode.setAttribute('aria-invalid', 'false');
+    }
+    if (confirmButtonNode) {
+      confirmButtonNode.disabled = true;
+    }
+    setAccordionExpanded(true);
   }
 
   function ensureToast() {
@@ -315,6 +482,9 @@
 
   function openDrawer() {
     if (!drawerNode) return;
+    if (!drawerNode.classList.contains('open')) {
+      resetFormState();
+    }
     drawerNode.classList.add('open');
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
@@ -337,9 +507,7 @@
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
-    if (formNode) {
-      formNode.reset();
-    }
+    resetFormState();
   }
 
   function onKeyDown(event) {
@@ -356,10 +524,19 @@
     emptyStateNode = document.getElementById('accountEmptyState');
     drawerNode = document.getElementById('drawer');
     formNode = document.getElementById('addAccountForm');
+    giroAccordionButton = document.getElementById('giroSpecToggle');
+    giroAccordionContent = document.getElementById('giroSpecContent');
+    nameInputNode = document.getElementById('accountName');
+    nameCounterNode = document.getElementById('accountNameCounter');
+    nameErrorNode = document.getElementById('accountNameError');
+    purposeSelectNode = document.getElementById('accountPurpose');
+    purposeErrorNode = document.getElementById('accountPurposeError');
+    termsCheckboxNode = document.getElementById('termsAgreement');
+    termsErrorNode = document.getElementById('termsAgreementError');
+    confirmButtonNode = document.getElementById('confirmAddAccountBtn');
 
     const addAccountBtn = document.getElementById('addAccountBtn');
     const drawerCloseBtn = document.getElementById('drawerCloseBtn');
-    const drawerCancelBtn = document.getElementById('drawerCancelBtn');
 
     renderAccounts();
     updateBalanceVisibility();
@@ -374,21 +551,103 @@
       updateToggleState();
     }
 
+    if (giroAccordionButton) {
+      const chevron = giroAccordionButton.querySelector('svg');
+      if (chevron) {
+        chevron.setAttribute('data-chevron', '');
+      }
+      giroAccordionButton.addEventListener('click', toggleAccordion);
+      setAccordionExpanded(true);
+    }
+
+    if (formNode) {
+      formNode.addEventListener('reset', () => {
+        resetFormState({ skipFormReset: true });
+      });
+    }
+
+    if (nameInputNode) {
+      updateNameCounter();
+      nameInputNode.addEventListener('input', () => {
+        updateNameCounter();
+        if (touchedState.name || formSubmitted) {
+          validateForm();
+        } else if (confirmButtonNode) {
+          validateForm();
+        }
+      });
+      nameInputNode.addEventListener('blur', () => {
+        touchedState.name = true;
+        validateForm({ showErrors: true });
+      });
+    }
+
+    if (purposeSelectNode) {
+      purposeSelectNode.addEventListener('change', () => {
+        touchedState.purpose = true;
+        validateForm({ showErrors: true });
+      });
+      purposeSelectNode.addEventListener('blur', () => {
+        if (purposeSelectNode.value) {
+          validateForm();
+        }
+      });
+    }
+
+    if (termsCheckboxNode) {
+      termsCheckboxNode.addEventListener('change', () => {
+        touchedState.terms = true;
+        validateForm({ showErrors: true });
+      });
+    }
+
     if (addAccountBtn) {
       addAccountBtn.addEventListener('click', openDrawer);
     }
     if (drawerCloseBtn) {
       drawerCloseBtn.addEventListener('click', closeDrawer);
     }
-    if (drawerCancelBtn) {
-      drawerCancelBtn.addEventListener('click', closeDrawer);
-    }
     if (formNode) {
       formNode.addEventListener('submit', (event) => {
         event.preventDefault();
-        showToast('Fitur tambah rekening belum tersedia pada prototipe ini.');
+        formSubmitted = true;
+        const isValid = validateForm({ showErrors: true });
+        if (!isValid) {
+          return;
+        }
+
+        if (confirmButtonNode) {
+          confirmButtonNode.disabled = true;
+        }
+        isSubmittingForm = true;
+        validateForm();
+
+        const payload = {
+          name: nameInputNode ? nameInputNode.value.trim() : '',
+          purpose: purposeSelectNode ? purposeSelectNode.value : '',
+          agreedToTerms: termsCheckboxNode ? termsCheckboxNode.checked : false,
+        };
+
+        addAccount(payload)
+          .then(() => {
+            renderAccounts();
+            showToast('Rekening berhasil ditambahkan');
+            closeDrawer();
+          })
+          .catch(() => {
+            showToast('Gagal menambahkan rekening. Silakan coba lagi.');
+          })
+          .finally(() => {
+            isSubmittingForm = false;
+            if (confirmButtonNode) {
+              confirmButtonNode.disabled = true;
+            }
+            validateForm();
+          });
       });
     }
+
+    resetFormState({ skipFormReset: true });
 
     document.addEventListener('keydown', onKeyDown);
   });

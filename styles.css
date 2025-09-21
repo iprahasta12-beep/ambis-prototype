@@ -80,6 +80,26 @@
   right:0;
 }
 
+.drawer-accordion-trigger .drawer-accordion-chevron{
+  transition:transform .2s ease;
+}
+
+.drawer-accordion-content{
+  overflow:hidden;
+  transition:max-height .25s ease, opacity .2s ease;
+}
+
+.drawer-accordion-content[data-expanded="false"]{
+  max-height:0;
+  opacity:0;
+  pointer-events:none;
+}
+
+.drawer-accordion-content[data-expanded="true"]{
+  max-height:600px;
+  opacity:1;
+}
+
 /* Disabled button appearance */
 button:disabled{
   background-color:#f5f5f5 !important;

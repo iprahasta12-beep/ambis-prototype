@@ -21,7 +21,10 @@
       safelist: [
         "opacity-0","opacity-100","translate-y-0","translate-y-1",
         "ring-2","ring-cyan-400","bg-cyan-50","border-cyan-300",
-        "text-slate-900","text-slate-400"
+        "text-slate-900","text-slate-400",
+        "bg-cyan-100","text-cyan-600","bg-orange-100","text-orange-600",
+        "bg-pink-100","text-pink-600","bg-purple-100","text-purple-600",
+        "bg-emerald-100","text-emerald-600"
       ]
     };
   </script>
@@ -163,36 +166,105 @@
 
     <!-- ============ DRAWER ============ -->
     <div id="drawer" class="h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100">
-      <div class="flex items-start justify-between px-6 py-5 border-b border-slate-200">
-        <div>
-          <h2 class="text-lg font-semibold text-slate-900">Tambah Rekening</h2>
-          <p class="mt-1 text-sm text-slate-500">Lengkapi detail rekening perusahaan Anda.</p>
-        </div>
-        <button type="button" id="drawerCloseBtn" class="text-2xl leading-none text-slate-500 hover:text-slate-700">&times;</button>
+      <div class="sticky top-0 z-20 flex items-center justify-between px-6 py-5 border-b border-slate-200 bg-white">
+        <h2 class="text-lg font-semibold text-slate-900">Tambah Rekening</h2>
+        <button type="button" id="drawerCloseBtn" class="p-2 text-slate-500 hover:text-slate-700" aria-label="Tutup drawer">
+          &times;
+        </button>
       </div>
 
-      <form id="addAccountForm" class="flex-1 overflow-y-auto px-6 py-6 space-y-5" autocomplete="off">
-        <div>
-          <label for="accountName" class="block text-sm font-semibold text-slate-700 mb-1">Nama Rekening</label>
-          <input id="accountName" name="accountName" type="text" class="w-full h-11 rounded-xl border border-slate-300 px-4 text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0" placeholder="Contoh: Rekening Operasional">
-        </div>
-        <div>
-          <label for="accountBank" class="block text-sm font-semibold text-slate-700 mb-1">Bank</label>
-          <input id="accountBank" name="accountBank" type="text" class="w-full h-11 rounded-xl border border-slate-300 px-4 text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0" placeholder="Contoh: PT Bank Amar Indonesia">
-        </div>
-        <div>
-          <label for="accountNumber" class="block text-sm font-semibold text-slate-700 mb-1">Nomor Rekening</label>
-          <input id="accountNumber" name="accountNumber" type="text" inputmode="numeric" class="w-full h-11 rounded-xl border border-slate-300 px-4 text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0" placeholder="0000 0000 0000">
-        </div>
-        <div>
-          <label for="accountNotes" class="block text-sm font-semibold text-slate-700 mb-1">Catatan</label>
-          <textarea id="accountNotes" name="accountNotes" rows="3" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 resize-none" placeholder="Informasi tambahan (opsional)"></textarea>
-        </div>
+      <form id="addAccountForm" class="flex-1 overflow-y-auto px-6 py-6 space-y-6" autocomplete="off" novalidate>
+        <section class="rounded-2xl border border-slate-200 bg-white">
+          <button type="button" id="giroSpecToggle" class="drawer-accordion-trigger flex w-full items-center justify-between gap-3 px-5 py-4 text-left" aria-expanded="true">
+            <span class="text-sm font-semibold text-slate-900">Spesifikasi GIRO</span>
+            <svg class="drawer-accordion-chevron h-5 w-5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m9 18 6-6-6-6"></path>
+            </svg>
+          </button>
+          <div id="giroSpecContent" class="drawer-accordion-content border-t border-slate-200" data-expanded="true" aria-hidden="false">
+            <div class="px-5 py-4">
+              <dl class="divide-y divide-slate-200">
+                <div class="flex items-start justify-between gap-6 py-3">
+                  <dt class="text-sm text-slate-500">Setoran Awal</dt>
+                  <dd class="text-sm font-semibold text-slate-900">Rp1.000.000,-</dd>
+                </div>
+                <div class="flex items-start justify-between gap-6 py-3">
+                  <dt class="text-sm text-slate-500">Saldo Minimum Mengendap</dt>
+                  <dd class="text-sm font-semibold text-slate-900">Rp1.000.000,-</dd>
+                </div>
+                <div class="flex items-start justify-between gap-6 py-3">
+                  <dt class="text-sm text-slate-500">Biaya Admin Bulanan</dt>
+                  <dd class="text-sm font-semibold text-slate-900">Rp30.000,-</dd>
+                </div>
+                <div class="flex items-start justify-between gap-6 py-3">
+                  <dt class="text-sm text-slate-500">Biaya Setoran Kliring</dt>
+                  <dd class="text-sm font-semibold text-slate-900">Rp2.000,-</dd>
+                </div>
+                <div class="flex items-start justify-between gap-6 py-3">
+                  <dt class="text-sm text-slate-500">Biaya Admin Bulanan di Rekening Pasif</dt>
+                  <dd class="text-sm font-semibold text-slate-900">Rp500,-</dd>
+                </div>
+                <div class="flex items-start justify-between gap-6 py-3">
+                  <dt class="text-sm text-slate-500">Biaya Admin Bulanan di Rekening di bawah Saldo Minimum</dt>
+                  <dd class="text-sm font-semibold text-slate-900">Rp1.000,-</dd>
+                </div>
+                <div class="flex items-start justify-between gap-6 py-3">
+                  <dt class="text-sm text-slate-500">Biaya Admin 3 Bulan di bawah Saldo Minimum</dt>
+                  <dd class="text-sm font-semibold text-slate-900">Rp500,-</dd>
+                </div>
+                <div class="flex items-start justify-between gap-6 py-3">
+                  <dt class="text-sm text-slate-500">Biaya Penutupan Rekening</dt>
+                  <dd class="text-sm font-semibold text-slate-900">Rp55.000,-</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        <section class="space-y-3">
+          <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">Detail Rekening</p>
+          <div>
+            <label for="accountName" class="block text-sm font-semibold text-slate-700">Nama Rekening</label>
+            <div class="relative mt-2">
+              <input id="accountName" name="accountName" type="text" maxlength="15" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0" placeholder="Contoh: Rekening Vendor" aria-describedby="accountNameCounter accountNameError" aria-required="true">
+              <span id="accountNameCounter" class="pointer-events-none absolute bottom-3 right-4 text-xs text-slate-400">0/15</span>
+            </div>
+            <p id="accountNameError" class="mt-2 text-xs text-red-500 hidden"></p>
+          </div>
+        </section>
+
+        <section class="space-y-3">
+          <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">Tujuan Penambahan Rekening</p>
+          <div>
+            <label for="accountPurpose" class="block text-sm font-semibold text-slate-700">Tujuan Penambahan Rekening</label>
+            <select id="accountPurpose" name="accountPurpose" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0" aria-required="true" aria-describedby="accountPurposeError">
+              <option value="" disabled selected hidden>Pilih tujuan penambahan rekening</option>
+              <option value="transaksi-bisnis">Transaksi Bisnis</option>
+              <option value="pencairan-pinjaman">Pencairan Pinjaman</option>
+              <option value="sharing-profit">Sharing Profit (Multi Bisnis)</option>
+              <option value="lainnya">Lainnya</option>
+            </select>
+            <p id="accountPurposeError" class="mt-2 text-xs text-red-500 hidden"></p>
+          </div>
+        </section>
+
+        <section class="space-y-3">
+          <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">Syarat dan Ketentuan</p>
+          <div>
+            <div class="flex items-start gap-3">
+              <input id="termsAgreement" name="termsAgreement" type="checkbox" class="mt-1 h-5 w-5 rounded border border-slate-300 text-cyan-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0" aria-required="true" aria-describedby="termsAgreementError">
+              <div>
+                <label for="termsAgreement" class="font-semibold text-slate-900">Syarat dan Ketentuan Pembukaan Rekening</label>
+                <p class="mt-2 text-sm leading-relaxed text-slate-500">Saya menyetujui syarat dan ketentuan yang telah ditetapkan dalam pembuatan rekening Giro Amar Bank di PT Bank Amar Indonesia Tbk. <a href="syarat-dan-ketentuan.html" target="_blank" rel="noopener" class="font-semibold text-cyan-600 hover:text-cyan-700">Lihat Syarat dan Ketentuan</a></p>
+              </div>
+            </div>
+            <p id="termsAgreementError" class="mt-2 text-xs text-red-500 hidden"></p>
+          </div>
+        </section>
       </form>
 
-      <div class="px-6 py-5 border-t border-slate-200 flex items-center justify-end gap-3">
-        <button type="button" id="drawerCancelBtn" class="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-50">Batal</button>
-        <button type="submit" form="addAccountForm" class="px-4 py-2 rounded-xl bg-cyan-600 text-white font-semibold hover:bg-cyan-700">Simpan Rekening</button>
+      <div class="sticky bottom-0 border-t border-slate-200 bg-white px-6 py-5">
+        <button type="submit" id="confirmAddAccountBtn" form="addAccountForm" class="w-full rounded-xl bg-cyan-600 py-3 text-center font-semibold text-white transition hover:bg-cyan-700 disabled:opacity-50" disabled>Konfirmasi Tambah Rekening</button>
       </div>
     </div>
   </div>
