@@ -222,7 +222,7 @@
         </section>
 
         <section class="space-y-3">
-          <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">Detail Rekening</p>
+          <p class="font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 p-2">Detail Rekening</p>
           <div>
             <label for="accountName" class="block text-sm font-semibold text-slate-700">Nama Rekening</label>
             <div class="relative mt-2">
@@ -233,20 +233,19 @@
           </div>
         </section>
 
-        <section class="space-y-3">
-          <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">Tujuan Penambahan Rekening</p>
-          <div>
-            <label for="accountPurpose" class="block text-sm font-semibold text-slate-700">Tujuan Penambahan Rekening</label>
-            <select id="accountPurpose" name="accountPurpose" class="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0" aria-required="true" aria-describedby="accountPurposeError">
-              <option value="" disabled selected hidden>Pilih tujuan penambahan rekening</option>
-              <option value="transaksi-bisnis">Transaksi Bisnis</option>
-              <option value="pencairan-pinjaman">Pencairan Pinjaman</option>
-              <option value="sharing-profit">Sharing Profit (Multi Bisnis)</option>
-              <option value="lainnya">Lainnya</option>
-            </select>
-            <p id="accountPurposeError" class="mt-2 text-xs text-red-500 hidden"></p>
-          </div>
-        </section>
+        <div class="relative">
+          <label class="block   mb-1">Kategori</label>
+          <button id="moveCategoryBtn" type="button" class="w-full border rounded-xl px-3 py-3 flex items-center justify-between">
+            <span id="moveCategoryText" class="text-slate-500">Pilih tujuan penambahan rekening</span>
+            <span class="text-slate-400">▾</span>
+          </button>
+            <ul id="moveCategoryList" class="absolute left-0 right-0 mt-1 bg-white rounded-xl border shadow divide-y z-10">
+            <li><button type="button"  class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Transaksi Bisnis</button></li>
+            <li><button type="button" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Pencairan Pinjaman</button></li>
+            <li><button type="button" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Sharing Profit (Multi Bisnis)(</button></li>
+            <li><button type="button" class="w-full text-left px-4 py-4 hover:bg-slate-50 border-b-0">Lainnya</button></li>
+          </ul>
+        </div>
 
         <section class="space-y-3">
           <p class="text-xs font-semibold uppercase tracking-[0.08em] text-slate-400">Syarat dan Ketentuan</p>
