@@ -1444,28 +1444,31 @@
     if (!account || typeof account !== 'object') {
       return MUTASI_DRAWER_DEFAULT_TITLE;
     }
-    const labelParts = [];
     if (typeof account.name === 'string' && account.name.trim()) {
-      labelParts.push(account.name.trim());
-    } else if (typeof account.displayName === 'string' && account.displayName.trim()) {
-      labelParts.push(account.displayName.trim());
+      return account.name.trim();
     }
-    if (typeof account.number === 'string' && account.number.trim()) {
-      labelParts.push(account.number.trim());
+    if (typeof account.displayName === 'string' && account.displayName.trim()) {
+      return account.displayName.trim();
     }
-    if (!labelParts.length && typeof account.company === 'string' && account.company.trim()) {
-      labelParts.push(account.company.trim());
+    if (typeof account.company === 'string' && account.company.trim()) {
+      return account.company.trim();
     }
-    if (!labelParts.length) {
-      return MUTASI_DRAWER_DEFAULT_TITLE;
+    if (typeof account.brandName === 'string' && account.brandName.trim()) {
+      return account.brandName.trim();
     }
-    return `${MUTASI_DRAWER_DEFAULT_TITLE} — ${labelParts.join(' - ')}`;
+    return MUTASI_DRAWER_DEFAULT_TITLE;
   }
 
   function openMutasiPane(account) {
     const title = getMutasiDrawerTitle(account);
     if (mutasiDrawerTitleNode) {
       mutasiDrawerTitleNode.textContent = title;
+    }
+    if (window.AMBIS_MUTASI && typeof window.AMBIS_MUTASI.prepareAccount === 'function') {
+      window.AMBIS_MUTASI.prepareAccount(account, {
+        updateTitle: false,
+        updateAccountLabel: false,
+      });
     }
     showDrawerPane('mutasi');
     ensureDrawerOpen();
@@ -1516,6 +1519,9 @@
   }
 
   function closeMutasiPane({ restoreFocus = true } = {}) {
+    if (window.AMBIS_MUTASI && typeof window.AMBIS_MUTASI.closeDetailSheet === 'function') {
+      window.AMBIS_MUTASI.closeDetailSheet(true);
+    }
     closeDrawer({ restoreFocus });
   }
 
