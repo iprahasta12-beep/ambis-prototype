@@ -67,6 +67,9 @@
   let activeTransferTriggerNode = null;
   let lastTransferTriggerNode = null;
   let activeDrawerPane = null;
+  const transferTriggerAccountData = new WeakMap();
+  let pendingTransferInitialData = null;
+  let lastTransferAccountPayload = null;
 
   const MAX_ACCOUNT_NAME_LENGTH = 15;
   const PURPOSE_OPTION_ACTIVE_CLASSES = ['bg-cyan-50', 'border-l-2', 'border-dashed', 'border-cyan-500'];
@@ -1109,8 +1112,13 @@
     lastTransferTriggerNode = activeTransferTriggerNode instanceof HTMLElement
       ? activeTransferTriggerNode
       : lastTransferTriggerNode;
+    const trigger = lastTransferTriggerNode instanceof HTMLElement ? lastTransferTriggerNode : null;
+    const accountPayload = trigger ? transferTriggerAccountData.get(trigger) || null : null;
+    if (accountPayload) {
+      lastTransferAccountPayload = accountPayload;
+    }
     closeTransferPopover({ restoreFocus: false });
-    openTransferPane(paneType);
+    openTransferPane(paneType, accountPayload || lastTransferAccountPayload);
   }
 
   function handleTransferPopoverDocumentClick(event) {
@@ -1157,6 +1165,61 @@
     return button;
   }
 
+  function createTransferAccountPayload(account) {
+    if (!account || typeof account !== 'object') {
+      return null;
+    }
+    const ambis = getAmbis();
+    const payload = {
+      id: typeof account.id === 'string' ? account.id : '',
+      name: typeof account.name === 'string' ? account.name : '',
+      displayName: typeof account.displayName === 'string' ? account.displayName : '',
+      number: typeof account.number === 'string' ? account.number : '',
+      numberRaw: account.numberRaw ? sanitizeNumber(account.numberRaw) : sanitizeNumber(account.number),
+      bank: typeof account.bank === 'string' ? account.bank : '',
+      color: typeof account.color === 'string' ? account.color : '',
+      initial: typeof account.initial === 'string' ? account.initial : '',
+    };
+    if (!payload.displayName && payload.name) {
+      payload.displayName = payload.name;
+    }
+    if (typeof account.company === 'string' && account.company.trim()) {
+      payload.company = account.company.trim();
+    } else {
+      const brandName =
+        (typeof account.brandName === 'string' && account.brandName.trim())
+          ? account.brandName.trim()
+          : typeof ambis.getBrandName === 'function'
+            ? ambis.getBrandName()
+            : typeof ambis.brandName === 'string'
+              ? ambis.brandName
+              : '';
+      if (brandName) {
+        payload.company = brandName;
+      }
+    }
+    if (typeof account.brandName === 'string' && account.brandName.trim()) {
+      payload.brandName = account.brandName.trim();
+    } else if (payload.company) {
+      payload.brandName = payload.company;
+    }
+    const labelParts = [];
+    if (payload.name) {
+      labelParts.push(payload.name);
+    }
+    if (payload.number) {
+      labelParts.push(payload.number);
+    }
+    if (labelParts.length) {
+      payload.label = labelParts.join(' - ');
+    } else if (payload.displayName) {
+      payload.label = payload.displayName;
+    } else if (payload.company) {
+      payload.label = payload.company;
+    }
+    return payload;
+  }
+
   function createTransferActionButton(account) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -1167,6 +1230,10 @@
     }
     if (account && typeof account.name === 'string') {
       button.dataset.accountName = account.name;
+    }
+    const accountPayload = createTransferAccountPayload(account);
+    if (accountPayload) {
+      transferTriggerAccountData.set(button, accountPayload);
     }
     button.addEventListener('click', (event) => {
       event.preventDefault();
@@ -1290,6 +1357,31 @@
     if (transferPaneFrameNode) {
       transferPaneFrameNode.src = 'about:blank';
     }
+    pendingTransferInitialData = null;
+  }
+
+  function postTransferInitialPayload() {
+    if (!transferPaneFrameNode || !transferPaneFrameNode.contentWindow) {
+      return;
+    }
+    const paneType = pendingTransferInitialData && pendingTransferInitialData.paneType
+      ? pendingTransferInitialData.paneType
+      : transferPaneNode && transferPaneNode.dataset.transferPaneType
+        ? transferPaneNode.dataset.transferPaneType
+        : 'transfer';
+    const payload = { type: 'ambis-transfer-init', pane: paneType };
+    const accountPayload = pendingTransferInitialData && pendingTransferInitialData.account
+      ? pendingTransferInitialData.account
+      : lastTransferAccountPayload;
+    if (accountPayload && typeof accountPayload === 'object') {
+      payload.account = accountPayload;
+    }
+    try {
+      transferPaneFrameNode.contentWindow.postMessage(payload, '*');
+    } catch (err) {
+      // ignore messaging errors
+    }
+    pendingTransferInitialData = null;
   }
 
   function showDrawerPane(name) {
@@ -1336,8 +1428,13 @@
     return paneType === 'move' ? 'Pemindahan Saldo' : 'Transfer Saldo';
   }
 
-  function openTransferPane(pane) {
+  function openTransferPane(pane, accountPayload = null) {
     const paneType = pane === 'move' ? 'move' : 'transfer';
+    const resolvedAccountPayload = accountPayload || lastTransferAccountPayload || null;
+    if (resolvedAccountPayload) {
+      lastTransferAccountPayload = resolvedAccountPayload;
+    }
+    pendingTransferInitialData = { paneType, account: resolvedAccountPayload };
     const title = getTransferPaneTitle(paneType);
     if (transferPaneTitleNode) {
       transferPaneTitleNode.textContent = title;
@@ -1489,6 +1586,11 @@
     transferPaneNode = document.getElementById('transferPane');
     transferPaneTitleNode = document.getElementById('transferPaneTitle');
     transferPaneFrameNode = document.getElementById('transferPaneFrame');
+    if (transferPaneFrameNode) {
+      transferPaneFrameNode.addEventListener('load', () => {
+        postTransferInitialPayload();
+      });
+    }
     if (otpCountdownMessageNode) {
       const defaultText = otpCountdownMessageNode.textContent ? otpCountdownMessageNode.textContent.trim() : '';
       if (defaultText) {

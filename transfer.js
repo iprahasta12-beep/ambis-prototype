@@ -242,6 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedDestinationAccountData = null;
   let lastTransactionDetails = null;
   let activePaneType = DEFAULT_ACTIVITY_TYPE;
+  let sourceLocked = false;
 
   // move drawer state
   let moveSourceSelected = false;
@@ -253,6 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let moveSelectedCategory = '';
   let moveSourceAccountData = null;
   let moveDestAccountData = null;
+  let moveSourceLocked = false;
 
   function formatAccountSubtitle(company, bank, number) {
     const segments = [];
@@ -315,6 +317,144 @@ document.addEventListener('DOMContentLoaded', () => {
       color: color || 'bg-cyan-100 text-cyan-600',
       brandName: '',
     };
+  }
+
+  function sanitizeAccountNumber(value) {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    return String(value).replace(/\D+/g, '');
+  }
+
+  function setButtonLocked(button, locked) {
+    if (!button) return;
+    if (locked) {
+      button.setAttribute('disabled', 'disabled');
+      button.setAttribute('aria-disabled', 'true');
+    } else {
+      button.removeAttribute('disabled');
+      button.removeAttribute('aria-disabled');
+    }
+    button.classList.toggle('opacity-50', locked);
+    button.classList.toggle('cursor-not-allowed', locked);
+  }
+
+  function normaliseIncomingAccountPayload(payload) {
+    if (!payload || typeof payload !== 'object') {
+      return null;
+    }
+    const copy = { ...payload };
+    if (typeof copy.name === 'string') copy.name = copy.name.trim();
+    if (typeof copy.displayName === 'string') copy.displayName = copy.displayName.trim();
+    if (typeof copy.label === 'string') copy.label = copy.label.trim();
+    if (typeof copy.number === 'string') copy.number = copy.number.trim();
+    if (typeof copy.bank === 'string') copy.bank = copy.bank.trim();
+    if (typeof copy.company === 'string') copy.company = copy.company.trim();
+    if (typeof copy.brandName === 'string') copy.brandName = copy.brandName.trim();
+    const raw = copy.numberRaw ? sanitizeAccountNumber(copy.numberRaw) : sanitizeAccountNumber(copy.number);
+    if (raw) {
+      copy.numberRaw = raw;
+    }
+    if (!copy.displayName && copy.name) {
+      copy.displayName = copy.name;
+    }
+    if (!copy.name && copy.displayName) {
+      copy.name = copy.displayName;
+    }
+    return copy;
+  }
+
+  function findAccountMatchByPayload(payload) {
+    if (!payload) return null;
+    if (payload.id) {
+      const byId = accounts.find((acc) => acc.id === payload.id);
+      if (byId) return byId;
+    }
+    const rawNumber = payload.numberRaw ? sanitizeAccountNumber(payload.numberRaw) : '';
+    if (rawNumber) {
+      const byRaw = accounts.find((acc) => sanitizeAccountNumber(acc.numberRaw || acc.number) === rawNumber);
+      if (byRaw) return byRaw;
+    }
+    const formattedRaw = payload.number ? sanitizeAccountNumber(payload.number) : '';
+    if (formattedRaw) {
+      const byFormatted = accounts.find((acc) => sanitizeAccountNumber(acc.number || acc.numberRaw) === formattedRaw);
+      if (byFormatted) return byFormatted;
+    }
+    const name = payload.name ? payload.name.toLowerCase() : '';
+    if (name) {
+      const byName = accounts.find((acc) => (acc.name || '').toLowerCase() === name);
+      if (byName) return byName;
+    }
+    return null;
+  }
+
+  function createSourceLabelFromPayload(payload, fallback = '') {
+    if (!payload) return fallback;
+    if (payload.label) return payload.label;
+    const name = payload.name || payload.displayName || payload.title || payload.company || '';
+    const number = payload.number || '';
+    if (name && number) {
+      return `${name} - ${number}`;
+    }
+    if (name) {
+      return name;
+    }
+    if (number) {
+      return number;
+    }
+    return fallback;
+  }
+
+  function resolveDisplayDataFromAccount(account, fallbackLabel, fallbackColor) {
+    if (account) {
+      const mapped = mapAccountToDisplay(account);
+      if (mapped) {
+        return mapped;
+      }
+    }
+    const title = (account && (account.name || account.displayName || account.title)) || fallbackLabel || '';
+    return createManualAccountDisplay({
+      title,
+      company: (account && (account.company || account.brandName || account.displayName)) || '',
+      bank: (account && account.bank) || '',
+      number: (account && (account.number || account.numberRaw)) || '',
+      color: (account && account.color) || fallbackColor || 'bg-cyan-100 text-cyan-600',
+    });
+  }
+
+  function applyPreselectedSourceAccount(paneType, payload) {
+    const normalised = normaliseIncomingAccountPayload(payload);
+    if (!normalised) {
+      return;
+    }
+    const matchedAccount = findAccountMatchByPayload(normalised);
+    const effectiveAccount = matchedAccount || normalised;
+    const label = createSourceLabelFromPayload(normalised, createSourceLabelFromPayload(effectiveAccount, '')) || 'Sumber rekening';
+    if (paneType === 'move') {
+      if (!moveSourceBtn) {
+        return;
+      }
+      moveSourceBtn.textContent = label;
+      moveSourceBtn.classList.remove('text-slate-500');
+      moveSourceSelected = true;
+      moveSourceAccountData = resolveDisplayDataFromAccount(effectiveAccount, label, 'bg-cyan-100 text-cyan-600');
+      moveSourceLocked = true;
+      setButtonLocked(moveSourceBtn, true);
+      moveDestError?.classList.add('hidden');
+      updateMoveConfirmState();
+    } else {
+      if (!sourceBtn) {
+        return;
+      }
+      sourceBtn.textContent = label;
+      sourceBtn.classList.remove('text-slate-500');
+      sourceSelected = true;
+      selectedSourceAccountData = resolveDisplayDataFromAccount(effectiveAccount, label, 'bg-cyan-100 text-cyan-600');
+      sourceLocked = true;
+      setButtonLocked(sourceBtn, true);
+      updateMethodVisibility();
+      updateConfirmState();
+    }
   }
 
   function formatAccountBalance(balance) {
@@ -757,6 +897,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 200);
   }
 
+  function handleParentMessage(event) {
+    if (!isEmbedded) {
+      return;
+    }
+    const data = event?.data;
+    if (!data || typeof data !== 'object') {
+      return;
+    }
+    if (data.type !== 'ambis-transfer-init') {
+      return;
+    }
+    const pane = data.pane === 'move' ? 'move' : 'transfer';
+    if (pane === 'move') {
+      if (activePaneType !== 'move') {
+        openMoveDrawerPanel();
+      }
+    } else if (pane === 'transfer') {
+      if (activePaneType !== 'transfer') {
+        openDrawer();
+      }
+    }
+    if (data.account) {
+      applyPreselectedSourceAccount(pane, data.account);
+    }
+  }
+
   sheetList.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-index]');
     if (!btn) return;
@@ -787,6 +953,8 @@ document.addEventListener('DOMContentLoaded', () => {
       sourceBtn.classList.remove('text-slate-500');
       sourceSelected = true;
       selectedSourceAccountData = mapAccountToDisplay(acc);
+      sourceLocked = false;
+      setButtonLocked(sourceBtn, false);
       updateMethodVisibility();
     } else if (currentSheetType === 'moveSource') {
       const acc = currentData[selectedIndex];
@@ -794,6 +962,8 @@ document.addEventListener('DOMContentLoaded', () => {
       moveSourceBtn.classList.remove('text-slate-500');
       moveSourceSelected = true;
       moveSourceAccountData = mapAccountToDisplay(acc);
+      moveSourceLocked = false;
+      setButtonLocked(moveSourceBtn, false);
       moveDestination = '';
       moveDestBtn.textContent = 'Pilih rekening tujuan';
       moveDestBtn.classList.add('text-slate-500');
@@ -953,6 +1123,8 @@ document.addEventListener('DOMContentLoaded', () => {
     successPane?.classList.add('hidden');
     drawer.classList.add('open');
     updateCardGridLayout();
+    sourceLocked = false;
+    setButtonLocked(sourceBtn, false);
     activePaneType = 'transfer';
     updateConfirmSheetContent(activePaneType);
     if (typeof window.sidebarCollapseForDrawer === 'function') {
@@ -992,6 +1164,8 @@ document.addEventListener('DOMContentLoaded', () => {
     successPane?.classList.add('hidden');
     drawer.classList.add('open');
     updateCardGridLayout();
+    moveSourceLocked = false;
+    setButtonLocked(moveSourceBtn, false);
     moveSourceBtn.textContent = 'Pilih sumber rekening';
     moveSourceBtn.classList.add('text-slate-500');
     moveDestBtn.textContent = 'Pilih rekening tujuan';
@@ -1377,5 +1551,7 @@ document.addEventListener('DOMContentLoaded', () => {
     closeConfirmSheet();
     openSuccessPane();
   });
+
+  window.addEventListener('message', handleParentMessage);
 });
 
