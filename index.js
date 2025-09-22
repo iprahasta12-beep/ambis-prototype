@@ -5,6 +5,8 @@ const balanceToggleBtn = document.getElementById('dashBalanceToggle');
 const balanceToggleLabel = balanceToggleBtn?.querySelector('[data-balance-toggle-label]');
 const balanceSensitiveEls = Array.from(document.querySelectorAll('[data-balance-sensitive]'));
 
+const MASKED_BALANCE_TEXT = '••••';
+
 const ambis = window.AMBIS || {};
 const sharedAccounts = typeof ambis.getAccounts === 'function'
   ? ambis.getAccounts({ clone: false })
@@ -107,15 +109,8 @@ function formatCurrency(num) {
   }).format(safeValue);
 }
 
-function maskCurrencyText(text) {
-  if (!text) {
-    return '••••••';
-  }
-  const match = text.match(/^(\s*Rp\s*)/i);
-  const prefix = match ? match[0] : '';
-  const rest = match ? text.slice(prefix.length) : text;
-  const maskedRest = rest.replace(/\S/g, '•');
-  return `${prefix}${maskedRest || '••••'}`;
+function maskCurrencyText() {
+  return MASKED_BALANCE_TEXT;
 }
 
 function setBalanceValue(el, value) {

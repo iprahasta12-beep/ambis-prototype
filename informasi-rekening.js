@@ -1,5 +1,6 @@
 (function () {
   const balanceElements = new Set();
+  const MASKED_BALANCE_TEXT = '••••';
   let isMasked = false;
   let toastEl = null;
   let toastInnerNode = null;
@@ -155,17 +156,8 @@
     return String(value).replace(/\D+/g, '');
   }
 
-  function maskCurrencyText(text) {
-    if (!text) {
-      return '********';
-    }
-    const str = String(text);
-    const match = str.match(/^(\s*Rp\s*)/i);
-    const prefix = match ? match[0] : '';
-    const rest = match ? str.slice(prefix.length) : str;
-    const core = rest.replace(/\s+/g, '');
-    const starCount = Math.max(core.length, 8);
-    return `${prefix}${'*'.repeat(starCount)}`;
+  function maskCurrencyText() {
+    return MASKED_BALANCE_TEXT;
   }
 
   function registerBalanceElement(el, value) {
