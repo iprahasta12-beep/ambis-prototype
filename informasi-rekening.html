@@ -140,14 +140,26 @@
             <p class="mt-1 text-sm text-slate-500">dari semua rekening</p>
             <p id="totalBalanceValue" data-total-balance class="mt-3 text-3xl font-bold text-slate-900 tracking-tight">Rp0,00</p>
           </div>
-          <div class="flex items-center gap-3">
-            <button type="button" id="balanceToggle" class="flex items-center gap-2 text-cyan-600 hover:text-cyan-700 font-semibold">
-              <img src="img/icon/tampilkan-saldo.svg" alt="Tampilkan semua saldo" class="w-5 h-5"/>
-              <span data-toggle-label>Tampilkan Semua Saldo</span>
+          <div class="flex flex-col items-end gap-2 py-4 pr-4">
+            <button
+              type="button"
+              id="balanceToggle"
+              class="inline-flex items-center gap-2 text-cyan-600 hover:text-cyan-700 font-semibold"
+            >
+              <span data-toggle-label class="text-right">Tampilkan Semua Saldo</span>
+              <img
+                src="img/icon/tampilkan-saldo.svg"
+                alt="Tampilkan semua saldo"
+                class="w-5 h-5"
+              />
             </button>
-            <button type="button" id="addAccountBtn" class="px-4 py-2 rounded-xl border border-cyan-500 text-cyan-600 hover:bg-cyan-50 flex items-center gap-2 font-semibold">
-              <span class="text-lg leading-none">+</span>
+            <button
+              type="button"
+              id="addAccountBtn"
+              class="inline-flex items-center gap-2 rounded-full border border-cyan-500 px-4 py-2 text-cyan-600 hover:bg-cyan-50 font-semibold"
+            >
               <span>Tambah Rekening</span>
+              <span aria-hidden="true" class="text-lg leading-none">+</span>
             </button>
           </div>
         </section>
