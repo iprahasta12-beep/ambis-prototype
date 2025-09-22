@@ -209,3 +209,31 @@ html, body{
   border-color:#f3f4f6;
   color:#1f2937;
 }
+
+.transfer-embedded,
+.transfer-embedded body{
+  height:100%;
+}
+
+.transfer-embedded body{
+  overflow:hidden;
+}
+
+.transfer-embedded body > .h-screen{
+  overflow:visible;
+}
+
+.transfer-embedded #sidebar,
+.transfer-embedded main{
+  display:none !important;
+}
+
+.transfer-embedded #drawer{
+  width:100% !important;
+  border-left-width:0 !important;
+  box-shadow:none;
+}
+
+.transfer-embedded #drawer.open{
+  width:100% !important;
+}

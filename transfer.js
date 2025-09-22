@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const successPane = document.getElementById('successPane');
   const closeBtn = document.getElementById('drawerCloseBtn');
   const cardGrid = document.getElementById('cardGrid');
+  const searchParams = new URLSearchParams(window.location.search);
+  const isEmbedded = document.documentElement.classList.contains('transfer-embedded');
+  const initialPaneParam = (document.documentElement.dataset.transferInitialPane || searchParams.get('pane') || '').toLowerCase();
+  const embeddedInitialPane = initialPaneParam === 'move' ? 'move' : 'transfer';
 
   function updateCardGridLayout() {
     // Maintain a consistent card layout regardless of drawer state so cards
@@ -973,6 +977,13 @@ document.addEventListener('DOMContentLoaded', () => {
       window.sidebarRestoreForDrawer();
     }
     clearActiveActivityCard();
+    if (isEmbedded && window.parent && window.parent !== window) {
+      try {
+        window.parent.postMessage({ type: 'ambis-transfer-close' }, '*');
+      } catch (err) {
+        // ignore messaging errors
+      }
+    }
   }
 
   function openMoveDrawerPanel() {
@@ -1022,6 +1033,14 @@ document.addEventListener('DOMContentLoaded', () => {
     openMoveDrawerPanel();
   });
   moveCloseBtn?.addEventListener('click', closeDrawer);
+
+  if (isEmbedded) {
+    if (embeddedInitialPane === 'move') {
+      openMoveDrawerPanel();
+    } else {
+      openDrawer();
+    }
+  }
 
   // helpers
   const dailyLimit = 200000000;
