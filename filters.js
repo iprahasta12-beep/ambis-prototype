@@ -1,4 +1,384 @@
 (function() {
+  const MONTH_NAMES = [
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember'
+  ];
+
+  const monthYearPicker = (() => {
+    const state = {
+      overlay: null,
+      modal: null,
+      headerMonth: null,
+      headerYear: null,
+      prevBtn: null,
+      nextBtn: null,
+      monthGrid: null,
+      yearGrid: null,
+      cancelBtn: null,
+      applyBtn: null,
+      monthButtons: [],
+      yearButtons: [],
+      activeView: 'month',
+      activeInstance: null,
+      viewMonth: 0,
+      viewYear: 0,
+      selectedMonth: 0,
+      selectedYear: 0,
+      pendingMonth: null,
+      pendingYear: null,
+      selectionMade: false,
+      yearRangeStart: 0
+    };
+
+    function createButton(label, className) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = className;
+      btn.textContent = label;
+      return btn;
+    }
+
+    function ensureElements() {
+      if (state.overlay) return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'month-year-picker-overlay hidden';
+
+      const modal = document.createElement('div');
+      modal.className = 'month-year-picker-modal';
+
+      const header = document.createElement('div');
+      header.className = 'month-year-picker-header';
+
+      const prevBtn = createButton('<', 'month-year-picker-nav');
+      prevBtn.setAttribute('aria-label', 'Sebelumnya');
+
+      const title = document.createElement('div');
+      title.className = 'month-year-picker-title';
+
+      const monthSpan = document.createElement('button');
+      monthSpan.type = 'button';
+      monthSpan.className = 'month-year-picker-title-part';
+      monthSpan.setAttribute('data-view', 'month');
+
+      const yearSpan = document.createElement('button');
+      yearSpan.type = 'button';
+      yearSpan.className = 'month-year-picker-title-part';
+      yearSpan.setAttribute('data-view', 'year');
+
+      title.appendChild(monthSpan);
+      title.appendChild(document.createTextNode(' '));
+      title.appendChild(yearSpan);
+
+      const nextBtn = createButton('>', 'month-year-picker-nav');
+      nextBtn.setAttribute('aria-label', 'Berikutnya');
+
+      header.appendChild(prevBtn);
+      header.appendChild(title);
+      header.appendChild(nextBtn);
+
+      const content = document.createElement('div');
+      content.className = 'month-year-picker-content';
+
+      const monthGrid = document.createElement('div');
+      monthGrid.className = 'month-year-picker-grid month-year-picker-months';
+
+      MONTH_NAMES.forEach((name, index) => {
+        const monthBtn = createButton(name, 'month-year-picker-option');
+        monthBtn.dataset.month = String(index);
+        monthGrid.appendChild(monthBtn);
+        state.monthButtons.push(monthBtn);
+      });
+
+      const yearGrid = document.createElement('div');
+      yearGrid.className = 'month-year-picker-grid month-year-picker-years hidden';
+
+      for (let index = 0; index < 9; index += 1) {
+        const yearBtn = createButton('', 'month-year-picker-option');
+        yearBtn.dataset.year = '';
+        yearGrid.appendChild(yearBtn);
+        state.yearButtons.push(yearBtn);
+      }
+
+      content.appendChild(monthGrid);
+      content.appendChild(yearGrid);
+
+      const footer = document.createElement('div');
+      footer.className = 'month-year-picker-footer';
+
+      const cancelBtn = createButton('Batalkan', 'month-year-picker-cancel');
+      const applyBtn = createButton('Terapkan', 'month-year-picker-apply');
+      applyBtn.disabled = true;
+
+      footer.appendChild(cancelBtn);
+      footer.appendChild(applyBtn);
+
+      modal.appendChild(header);
+      modal.appendChild(content);
+      modal.appendChild(footer);
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      state.overlay = overlay;
+      state.modal = modal;
+      state.headerMonth = monthSpan;
+      state.headerYear = yearSpan;
+      state.prevBtn = prevBtn;
+      state.nextBtn = nextBtn;
+      state.monthGrid = monthGrid;
+      state.yearGrid = yearGrid;
+      state.cancelBtn = cancelBtn;
+      state.applyBtn = applyBtn;
+
+      overlay.addEventListener('click', (event) => {
+        if (event.target === overlay) {
+          closePicker();
+        }
+      });
+
+      cancelBtn.addEventListener('click', () => {
+        closePicker();
+      });
+
+      applyBtn.addEventListener('click', () => {
+        applySelection();
+      });
+
+      prevBtn.addEventListener('click', () => {
+        if (state.activeView === 'month') {
+          state.viewYear -= 1;
+        } else {
+          state.yearRangeStart -= 9;
+          state.viewYear -= 9;
+        }
+        render();
+      });
+
+      nextBtn.addEventListener('click', () => {
+        if (state.activeView === 'month') {
+          state.viewYear += 1;
+        } else {
+          state.yearRangeStart += 9;
+          state.viewYear += 9;
+        }
+        render();
+      });
+
+      monthSpan.addEventListener('click', () => {
+        state.activeView = 'month';
+        render();
+      });
+
+      yearSpan.addEventListener('click', () => {
+        state.activeView = 'year';
+        state.yearRangeStart = computeYearRangeStart(state.viewYear);
+        render();
+      });
+
+      state.monthButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const monthIndex = Number(btn.dataset.month || '0');
+          state.pendingMonth = monthIndex;
+          state.pendingYear = state.viewYear;
+          state.viewMonth = monthIndex;
+          state.selectionMade = true;
+          render();
+        });
+      });
+
+      state.yearButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const yearValue = Number(btn.dataset.year || '0');
+          state.pendingYear = yearValue;
+          state.viewYear = yearValue;
+          state.selectionMade = true;
+          state.yearRangeStart = computeYearRangeStart(state.viewYear);
+          render();
+        });
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && state.overlay && !state.overlay.classList.contains('hidden')) {
+          closePicker();
+        }
+      });
+    }
+
+    function computeYearRangeStart(year) {
+      return year - 4;
+    }
+
+    function updateApplyState() {
+      if (!state.applyBtn) return;
+      state.applyBtn.disabled = !state.selectionMade;
+    }
+
+    function renderMonthView() {
+      state.monthGrid.classList.remove('hidden');
+      state.yearGrid.classList.add('hidden');
+
+      const highlightYear = state.pendingYear != null ? state.pendingYear : state.selectedYear;
+      const highlightMonth = state.pendingMonth != null ? state.pendingMonth : state.selectedMonth;
+
+      state.monthButtons.forEach((btn) => {
+        const monthIndex = Number(btn.dataset.month || '0');
+        const isSelected = state.viewYear === highlightYear && monthIndex === highlightMonth;
+        btn.classList.toggle('month-year-picker-option-active', isSelected);
+      });
+    }
+
+    function renderYearView() {
+      state.monthGrid.classList.add('hidden');
+      state.yearGrid.classList.remove('hidden');
+
+      const start = state.yearRangeStart;
+      const highlightYear = state.pendingYear != null ? state.pendingYear : state.selectedYear;
+
+      state.yearButtons.forEach((btn, index) => {
+        const yearValue = start + index;
+        btn.dataset.year = String(yearValue);
+        btn.textContent = String(yearValue);
+        const isSelected = yearValue === highlightYear;
+        btn.classList.toggle('month-year-picker-option-active', isSelected);
+      });
+    }
+
+    function renderHeader() {
+      if (!state.headerMonth || !state.headerYear) return;
+      const displayMonth = state.pendingMonth != null ? state.pendingMonth : state.viewMonth;
+      const displayYear = state.pendingYear != null ? state.pendingYear : state.viewYear;
+      state.headerMonth.textContent = MONTH_NAMES[displayMonth] || '';
+      state.headerYear.textContent = String(displayYear);
+      state.headerMonth.classList.toggle('month-year-picker-title-active', state.activeView === 'month');
+      state.headerYear.classList.toggle('month-year-picker-title-active', state.activeView === 'year');
+    }
+
+    function render() {
+      if (!state.overlay) return;
+      renderHeader();
+      if (state.activeView === 'month') {
+        renderMonthView();
+      } else {
+        renderYearView();
+      }
+      updateApplyState();
+    }
+
+    function resetState() {
+      state.activeInstance = null;
+      state.viewMonth = 0;
+      state.viewYear = 0;
+      state.selectedMonth = 0;
+      state.selectedYear = 0;
+      state.pendingMonth = null;
+      state.pendingYear = null;
+      state.selectionMade = false;
+      state.activeView = 'month';
+      state.yearRangeStart = 0;
+      updateApplyState();
+    }
+
+    function openPicker(instance, view) {
+      if (!instance) return;
+      ensureElements();
+
+      state.activeInstance = instance;
+      state.selectedMonth = instance.currentMonth;
+      state.selectedYear = instance.currentYear;
+      state.viewMonth = instance.currentMonth;
+      state.viewYear = instance.currentYear;
+      state.pendingMonth = null;
+      state.pendingYear = null;
+      state.selectionMade = false;
+      state.activeView = view === 'year' ? 'year' : 'month';
+      state.yearRangeStart = computeYearRangeStart(state.viewYear);
+
+      state.overlay.classList.remove('hidden');
+      document.body.classList.add('month-year-picker-open');
+      render();
+    }
+
+    function closePicker() {
+      if (!state.overlay) return;
+      state.overlay.classList.add('hidden');
+      document.body.classList.remove('month-year-picker-open');
+      resetState();
+    }
+
+    function applySelection() {
+      const instance = state.activeInstance;
+      if (!instance) return;
+
+      const targetYear = state.pendingYear != null ? state.pendingYear : state.viewYear;
+      const targetMonth = state.pendingMonth != null ? state.pendingMonth : state.viewMonth;
+
+      instance.changeYear(targetYear);
+      const monthDelta = targetMonth - instance.currentMonth;
+      if (monthDelta !== 0) {
+        instance.changeMonth(monthDelta, true);
+      } else {
+        instance.redraw();
+      }
+      instance.jumpToDate(new Date(targetYear, targetMonth, 1));
+      closePicker();
+    }
+
+    function bindInstance(instance) {
+      if (!instance || !instance.calendarContainer) return;
+      const container = instance.calendarContainer;
+      if (container.dataset.monthYearPickerBound === 'true') return;
+
+      container.dataset.monthYearPickerBound = 'true';
+
+      const header = container.querySelector('.flatpickr-current-month');
+      if (!header) return;
+
+      const monthTrigger = header.querySelector('.cur-month');
+      const yearInput = header.querySelector('.cur-year');
+
+      if (monthTrigger) {
+        monthTrigger.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openPicker(instance, 'month');
+        });
+      }
+
+      if (yearInput) {
+        yearInput.setAttribute('readonly', 'readonly');
+        yearInput.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openPicker(instance, 'year');
+        });
+        yearInput.addEventListener('focus', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openPicker(instance, 'year');
+        });
+        yearInput.addEventListener('keydown', (event) => {
+          event.preventDefault();
+        });
+      }
+    }
+
+    return {
+      open: openPicker,
+      bindInstance
+    };
+  })();
+
   const allFilters = document.querySelectorAll('.filter');
   let openPanel = null;
 
@@ -70,6 +450,13 @@
         flatpickr(inp, {
           dateFormat: 'd/m/Y',
           locale: flatpickr.l10ns.id,
+          monthSelectorType: 'static',
+          onReady: (selectedDates, dateStr, instance) => {
+            monthYearPicker.bindInstance(instance);
+          },
+          onOpen: (selectedDates, dateStr, instance) => {
+            monthYearPicker.bindInstance(instance);
+          },
           onChange: updateButtons
         });
         inp.addEventListener('input', updateButtons);
