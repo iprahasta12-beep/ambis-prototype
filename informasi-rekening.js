@@ -61,15 +61,12 @@
   let transferPopoverPanelNode = null;
   let transferPopoverCloseNode = null;
   let transferPopoverOptions = [];
-  let transferPopoverBackdropNode = null;
-  let transferDrawerHostNode = null;
-  let transferDrawerOverlayNode = null;
-  let transferDrawerSheetNode = null;
-  let transferDrawerFrameNode = null;
+  let transferPaneNode = null;
+  let transferPaneTitleNode = null;
+  let transferPaneFrameNode = null;
   let activeTransferTriggerNode = null;
   let lastTransferTriggerNode = null;
-  let transferDrawerCloseTimerId = null;
-  let previousBodyOverflow = '';
+  let activeDrawerPane = null;
 
   const MAX_ACCOUNT_NAME_LENGTH = 15;
   const PURPOSE_OPTION_ACTIVE_CLASSES = ['bg-cyan-50', 'border-l-2', 'border-dashed', 'border-cyan-500'];
@@ -624,18 +621,8 @@
     setPendingSpecExpanded(false);
     pendingPaneLastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
-    if (addAccountPaneNode) {
-      addAccountPaneNode.classList.add('hidden');
-      addAccountPaneNode.setAttribute('aria-hidden', 'true');
-    }
-    pendingPaneNode.classList.remove('hidden');
-    pendingPaneNode.setAttribute('aria-hidden', 'false');
-    if (drawerNode && !drawerNode.classList.contains('open')) {
-      drawerNode.classList.add('open');
-      if (typeof window.sidebarCollapseForDrawer === 'function') {
-        window.sidebarCollapseForDrawer();
-      }
-    }
+    showDrawerPane('pendingApproval');
+    ensureDrawerOpen();
 
     const focusTarget = pendingPaneNode.querySelector('[data-pending-focus]');
     if (focusTarget && typeof focusTarget.focus === 'function') {
@@ -651,12 +638,7 @@
     if (!pendingPaneNode || pendingPaneNode.classList.contains('hidden')) {
       return;
     }
-    pendingPaneNode.classList.add('hidden');
-    pendingPaneNode.setAttribute('aria-hidden', 'true');
-    if (addAccountPaneNode) {
-      addAccountPaneNode.classList.remove('hidden');
-      addAccountPaneNode.setAttribute('aria-hidden', 'false');
-    }
+    showDrawerPane('addAccount');
     if (drawerNode) {
       drawerNode.classList.remove('open');
       if (typeof window.sidebarRestoreForDrawer === 'function') {
@@ -1073,7 +1055,7 @@
     if (!transferPopoverNode || !transferPopoverPanelNode) {
       return;
     }
-    if (transferDrawerHostNode && !transferDrawerHostNode.classList.contains('hidden')) {
+    if (isTransferPaneOpen()) {
       return;
     }
     activeTransferTriggerNode = trigger instanceof HTMLElement ? trigger : null;
@@ -1122,101 +1104,31 @@
     return `transfer.html?embedded=1&pane=${paneType}&ts=${timestamp}`;
   }
 
-  function isEmbeddedTransferDrawerOpen() {
-    return Boolean(transferDrawerHostNode && !transferDrawerHostNode.classList.contains('hidden'));
-  }
-
-  function openEmbeddedTransferDrawer(pane) {
-    if (!transferDrawerHostNode || !transferDrawerSheetNode || !transferDrawerFrameNode) {
-      return;
-    }
-    if (transferDrawerCloseTimerId) {
-      window.clearTimeout(transferDrawerCloseTimerId);
-      transferDrawerCloseTimerId = null;
-    }
-    const url = buildEmbeddedTransferUrl(pane);
-    transferDrawerFrameNode.src = url;
-    transferDrawerHostNode.classList.remove('hidden');
-    transferDrawerSheetNode.classList.remove('translate-y-full');
-    transferDrawerSheetNode.classList.add('translate-y-0');
-    if (transferDrawerOverlayNode) {
-      transferDrawerOverlayNode.classList.remove('opacity-0');
-      transferDrawerOverlayNode.classList.add('opacity-100');
-    }
-    previousBodyOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeEmbeddedTransferDrawer({ restoreFocus = true, immediate = false } = {}) {
-    if (!isEmbeddedTransferDrawerOpen()) {
-      if (restoreFocus && lastTransferTriggerNode && document.body.contains(lastTransferTriggerNode)) {
-        try {
-          lastTransferTriggerNode.focus({ preventScroll: true });
-        } catch (err) {
-          lastTransferTriggerNode.focus();
-        }
-      }
-      lastTransferTriggerNode = null;
-      return;
-    }
-
-    if (transferDrawerCloseTimerId) {
-      window.clearTimeout(transferDrawerCloseTimerId);
-      transferDrawerCloseTimerId = null;
-    }
-
-    const finalizeClose = () => {
-      transferDrawerHostNode.classList.add('hidden');
-      transferDrawerSheetNode.classList.remove('translate-y-0');
-      transferDrawerSheetNode.classList.add('translate-y-full');
-      if (transferDrawerOverlayNode) {
-        transferDrawerOverlayNode.classList.remove('opacity-100');
-        transferDrawerOverlayNode.classList.add('opacity-0');
-      }
-      if (transferDrawerFrameNode) {
-        transferDrawerFrameNode.src = 'about:blank';
-      }
-      document.body.style.overflow = previousBodyOverflow || '';
-      previousBodyOverflow = '';
-      if (restoreFocus && lastTransferTriggerNode && document.body.contains(lastTransferTriggerNode)) {
-        try {
-          lastTransferTriggerNode.focus({ preventScroll: true });
-        } catch (err) {
-          lastTransferTriggerNode.focus();
-        }
-      }
-      lastTransferTriggerNode = null;
-    };
-
-    if (immediate) {
-      finalizeClose();
-      return;
-    }
-
-    transferDrawerSheetNode.classList.remove('translate-y-0');
-    transferDrawerSheetNode.classList.add('translate-y-full');
-    if (transferDrawerOverlayNode) {
-      transferDrawerOverlayNode.classList.remove('opacity-100');
-      transferDrawerOverlayNode.classList.add('opacity-0');
-    }
-
-    transferDrawerCloseTimerId = window.setTimeout(() => {
-      finalizeClose();
-      transferDrawerCloseTimerId = null;
-    }, 300);
-  }
-
   function handleTransferOptionSelection(option) {
     const paneType = option === 'move' ? 'move' : 'transfer';
     lastTransferTriggerNode = activeTransferTriggerNode instanceof HTMLElement
       ? activeTransferTriggerNode
       : lastTransferTriggerNode;
     closeTransferPopover({ restoreFocus: false });
-    openEmbeddedTransferDrawer(paneType);
+    openTransferPane(paneType);
   }
 
-  function handleEmbeddedTransferMessage(event) {
-    if (!transferDrawerFrameNode || event.source !== transferDrawerFrameNode.contentWindow) {
+  function handleTransferPopoverDocumentClick(event) {
+    if (!isTransferPopoverOpen() || !transferPopoverPanelNode) {
+      return;
+    }
+    const target = event.target;
+    if (transferPopoverPanelNode.contains(target)) {
+      return;
+    }
+    if (activeTransferTriggerNode && activeTransferTriggerNode.contains(target)) {
+      return;
+    }
+    closeTransferPopover({ restoreFocus: false });
+  }
+
+  function handleTransferPaneMessage(event) {
+    if (!transferPaneFrameNode || event.source !== transferPaneFrameNode.contentWindow) {
       return;
     }
     const data = event.data;
@@ -1224,7 +1136,7 @@
       return;
     }
     if (data.type === 'ambis-transfer-close') {
-      closeEmbeddedTransferDrawer({ restoreFocus: true });
+      closeTransferPane({ restoreFocus: true });
     }
   }
 
@@ -1374,23 +1286,93 @@
     updateToggleState();
   }
 
+  function cleanupTransferPane() {
+    if (transferPaneFrameNode) {
+      transferPaneFrameNode.src = 'about:blank';
+    }
+  }
+
+  function showDrawerPane(name) {
+    const paneMap = {
+      addAccount: addAccountPaneNode,
+      pendingApproval: pendingPaneNode,
+      transfer: transferPaneNode,
+    };
+
+    let resolvedName = null;
+    Object.entries(paneMap).forEach(([paneName, node]) => {
+      if (!node) {
+        return;
+      }
+      const isActive = paneName === name;
+      if (isActive) {
+        resolvedName = paneName;
+      }
+      node.classList.toggle('hidden', !isActive);
+      node.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+    });
+
+    activeDrawerPane = resolvedName;
+    if (activeDrawerPane !== 'transfer') {
+      cleanupTransferPane();
+    }
+  }
+
+  function ensureDrawerOpen() {
+    if (!drawerNode) return;
+    if (!drawerNode.classList.contains('open')) {
+      drawerNode.classList.add('open');
+      if (typeof window.sidebarCollapseForDrawer === 'function') {
+        window.sidebarCollapseForDrawer();
+      }
+    }
+  }
+
+  function isTransferPaneOpen() {
+    return Boolean(drawerNode && drawerNode.classList.contains('open') && activeDrawerPane === 'transfer');
+  }
+
+  function getTransferPaneTitle(paneType) {
+    return paneType === 'move' ? 'Pemindahan Saldo' : 'Transfer Saldo';
+  }
+
+  function openTransferPane(pane) {
+    const paneType = pane === 'move' ? 'move' : 'transfer';
+    const title = getTransferPaneTitle(paneType);
+    if (transferPaneTitleNode) {
+      transferPaneTitleNode.textContent = title;
+    }
+    if (transferPaneNode) {
+      transferPaneNode.dataset.transferPaneType = paneType;
+    }
+    if (transferPaneFrameNode) {
+      transferPaneFrameNode.title = title;
+      transferPaneFrameNode.src = buildEmbeddedTransferUrl(paneType);
+    }
+    showDrawerPane('transfer');
+    ensureDrawerOpen();
+    const focusTarget =
+      (transferPaneNode && transferPaneNode.querySelector('[data-transfer-focus]')) || transferPaneFrameNode;
+    if (focusTarget && typeof focusTarget.focus === 'function') {
+      try {
+        focusTarget.focus({ preventScroll: true });
+      } catch (err) {
+        focusTarget.focus();
+      }
+    }
+  }
+
+  function closeTransferPane({ restoreFocus = true } = {}) {
+    closeDrawer({ restoreFocus });
+  }
+
   function openDrawer() {
     if (!drawerNode) return;
     if (!drawerNode.classList.contains('open')) {
       resetFormState();
     }
-    if (addAccountPaneNode) {
-      addAccountPaneNode.classList.remove('hidden');
-      addAccountPaneNode.setAttribute('aria-hidden', 'false');
-    }
-    if (pendingPaneNode) {
-      pendingPaneNode.classList.add('hidden');
-      pendingPaneNode.setAttribute('aria-hidden', 'true');
-    }
-    drawerNode.classList.add('open');
-    if (typeof window.sidebarCollapseForDrawer === 'function') {
-      window.sidebarCollapseForDrawer();
-    }
+    showDrawerPane('addAccount');
+    ensureDrawerOpen();
     if (formNode) {
       const focusTarget = formNode.querySelector('input, textarea, select');
       if (focusTarget) {
@@ -1403,21 +1385,24 @@
     }
   }
 
-  function closeDrawer() {
+  function closeDrawer({ restoreFocus = false } = {}) {
     if (!drawerNode) return;
-    if (addAccountPaneNode) {
-      addAccountPaneNode.classList.remove('hidden');
-      addAccountPaneNode.setAttribute('aria-hidden', 'false');
-    }
-    if (pendingPaneNode) {
-      pendingPaneNode.classList.add('hidden');
-      pendingPaneNode.setAttribute('aria-hidden', 'true');
-    }
+    const wasTransferActive = activeDrawerPane === 'transfer';
+    showDrawerPane('addAccount');
     drawerNode.classList.remove('open');
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
     resetFormState();
+
+    if (wasTransferActive && restoreFocus && lastTransferTriggerNode && document.body.contains(lastTransferTriggerNode)) {
+      try {
+        lastTransferTriggerNode.focus({ preventScroll: true });
+      } catch (err) {
+        lastTransferTriggerNode.focus();
+      }
+    }
+    lastTransferTriggerNode = null;
   }
 
   function onKeyDown(event) {
@@ -1428,8 +1413,8 @@
       closeTransferPopover({ restoreFocus: true });
       return;
     }
-    if (isEmbeddedTransferDrawerOpen()) {
-      closeEmbeddedTransferDrawer({ restoreFocus: true });
+    if (isTransferPaneOpen()) {
+      closeTransferPane({ restoreFocus: true });
       return;
     }
     if (isPendingPaneOpen()) {
@@ -1498,18 +1483,12 @@
     transferPopoverNode = document.getElementById('transferPopover');
     transferPopoverPanelNode = document.getElementById('transferPopoverPanel');
     transferPopoverCloseNode = document.getElementById('transferPopoverClose');
-    transferPopoverBackdropNode = transferPopoverNode
-      ? transferPopoverNode.querySelector('[data-transfer-popover-dismiss]')
-      : null;
     transferPopoverOptions = transferPopoverPanelNode
       ? Array.from(transferPopoverPanelNode.querySelectorAll('[data-transfer-option]'))
       : [];
-    transferDrawerHostNode = document.getElementById('embeddedTransferDrawer');
-    transferDrawerOverlayNode = transferDrawerHostNode
-      ? transferDrawerHostNode.querySelector('[data-transfer-drawer-overlay]')
-      : null;
-    transferDrawerSheetNode = document.getElementById('embeddedTransferSheet');
-    transferDrawerFrameNode = document.getElementById('embeddedTransferFrame');
+    transferPaneNode = document.getElementById('transferPane');
+    transferPaneTitleNode = document.getElementById('transferPaneTitle');
+    transferPaneFrameNode = document.getElementById('transferPaneFrame');
     if (otpCountdownMessageNode) {
       const defaultText = otpCountdownMessageNode.textContent ? otpCountdownMessageNode.textContent.trim() : '';
       if (defaultText) {
@@ -1518,15 +1497,10 @@
     }
 
     const addAccountBtn = document.getElementById('addAccountBtn');
-    const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+    const drawerCloseButtons = Array.from(document.querySelectorAll('[data-drawer-close]'));
 
     if (transferPopoverCloseNode) {
       transferPopoverCloseNode.addEventListener('click', () => {
-        closeTransferPopover({ restoreFocus: true });
-      });
-    }
-    if (transferPopoverBackdropNode) {
-      transferPopoverBackdropNode.addEventListener('click', () => {
         closeTransferPopover({ restoreFocus: true });
       });
     }
@@ -1538,11 +1512,7 @@
         });
       });
     }
-    if (transferDrawerOverlayNode) {
-      transferDrawerOverlayNode.addEventListener('click', () => {
-        closeEmbeddedTransferDrawer({ restoreFocus: true });
-      });
-    }
+    document.addEventListener('click', handleTransferPopoverDocumentClick);
 
     renderAccounts();
     updateBalanceVisibility();
@@ -1732,8 +1702,16 @@
     if (addAccountBtn) {
       addAccountBtn.addEventListener('click', openDrawer);
     }
-    if (drawerCloseBtn) {
-      drawerCloseBtn.addEventListener('click', closeDrawer);
+    if (drawerCloseButtons.length) {
+      drawerCloseButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (activeDrawerPane === 'transfer') {
+            closeTransferPane({ restoreFocus: true });
+          } else {
+            closeDrawer();
+          }
+        });
+      });
     }
     if (formNode) {
       formNode.addEventListener('submit', (event) => {
@@ -1757,7 +1735,7 @@
     resetFormState({ skipFormReset: true });
 
     document.addEventListener('keydown', onKeyDown);
-    window.addEventListener('message', handleEmbeddedTransferMessage);
+    window.addEventListener('message', handleTransferPaneMessage);
     window.addEventListener('resize', handleTransferViewportChange, { passive: true });
     window.addEventListener('scroll', handleTransferViewportChange, true);
   });
