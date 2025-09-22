@@ -165,7 +165,9 @@
     <!-- ============ /MAIN ============ -->
 
     <!-- ============ DRAWER ============ -->
-    <div id="drawer" class="h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100 relative">
+  
+  <div id="drawer" class="h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100 relative">
+    <div id="addAccountPane" class="h-full flex flex-col relative" aria-hidden="false">
       <div class="sticky top-0 z-20 flex items-center justify-between p-4 border-b border-slate-200 bg-white">
         <h2 class="text-lg font-semibold text-slate-900">Tambah Rekening</h2>
         <button type="button" id="drawerCloseBtn" class="p-2 text-slate-500 hover:text-slate-700" aria-label="Tutup drawer">
@@ -370,19 +372,14 @@
         </div>
       </div>
     </div>
-  </div>
 
-  <div
-    id="pendingApprovalPane"
-    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-6"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="pendingApprovalTitle"
-    aria-hidden="true"
-  >
     <div
-      data-pending-dialog
-      class="relative flex w-full max-w-lg max-h-full flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
+      id="pendingApprovalPane"
+      class="hidden h-full flex flex-col bg-white"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pendingApprovalTitle"
+      aria-hidden="true"
     >
       <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
         <h2 id="pendingApprovalTitle" class="text-lg font-semibold text-slate-900">Detail Persetujuan</h2>
@@ -495,7 +492,6 @@
       </div>
     </div>
   </div>
-
   <script src="data/rekening-data.js"></script>
   <script src="informasi-rekening.js"></script>
   <script src="sidebar.js"></script>

@@ -14,6 +14,7 @@
   let accountGridNode = null;
   let emptyStateNode = null;
   let drawerNode = null;
+  let addAccountPaneNode = null;
   let formNode = null;
   let giroAccordionButton = null;
   let giroAccordionContent = null;
@@ -606,10 +607,17 @@
     setPendingSpecExpanded(false);
     pendingPaneLastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
+    if (addAccountPaneNode) {
+      addAccountPaneNode.classList.add('hidden');
+      addAccountPaneNode.setAttribute('aria-hidden', 'true');
+    }
     pendingPaneNode.classList.remove('hidden');
     pendingPaneNode.setAttribute('aria-hidden', 'false');
-    if (document.body) {
-      document.body.classList.add('overflow-hidden');
+    if (drawerNode && !drawerNode.classList.contains('open')) {
+      drawerNode.classList.add('open');
+      if (typeof window.sidebarCollapseForDrawer === 'function') {
+        window.sidebarCollapseForDrawer();
+      }
     }
 
     const focusTarget = pendingPaneNode.querySelector('[data-pending-focus]');
@@ -628,8 +636,15 @@
     }
     pendingPaneNode.classList.add('hidden');
     pendingPaneNode.setAttribute('aria-hidden', 'true');
-    if (document.body) {
-      document.body.classList.remove('overflow-hidden');
+    if (addAccountPaneNode) {
+      addAccountPaneNode.classList.remove('hidden');
+      addAccountPaneNode.setAttribute('aria-hidden', 'false');
+    }
+    if (drawerNode) {
+      drawerNode.classList.remove('open');
+      if (typeof window.sidebarRestoreForDrawer === 'function') {
+        window.sidebarRestoreForDrawer();
+      }
     }
     if (pendingPaneLastFocusedElement && typeof pendingPaneLastFocusedElement.focus === 'function') {
       try {
@@ -676,7 +691,7 @@
         renderAccounts();
         showToast('Rekening baru berhasil dibuat');
         closeConfirmSheet({ resetPending: true });
-        closeDrawer();
+        resetFormState();
         openPendingApprovalPane({ account: newAccount, payload: confirmationSnapshot });
       })
       .catch(() => {
@@ -1130,6 +1145,14 @@
     if (!drawerNode.classList.contains('open')) {
       resetFormState();
     }
+    if (addAccountPaneNode) {
+      addAccountPaneNode.classList.remove('hidden');
+      addAccountPaneNode.setAttribute('aria-hidden', 'false');
+    }
+    if (pendingPaneNode) {
+      pendingPaneNode.classList.add('hidden');
+      pendingPaneNode.setAttribute('aria-hidden', 'true');
+    }
     drawerNode.classList.add('open');
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
@@ -1148,6 +1171,14 @@
 
   function closeDrawer() {
     if (!drawerNode) return;
+    if (addAccountPaneNode) {
+      addAccountPaneNode.classList.remove('hidden');
+      addAccountPaneNode.setAttribute('aria-hidden', 'false');
+    }
+    if (pendingPaneNode) {
+      pendingPaneNode.classList.add('hidden');
+      pendingPaneNode.setAttribute('aria-hidden', 'true');
+    }
     drawerNode.classList.remove('open');
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
@@ -1179,6 +1210,7 @@
     accountGridNode = document.getElementById('accountGrid');
     emptyStateNode = document.getElementById('accountEmptyState');
     drawerNode = document.getElementById('drawer');
+    addAccountPaneNode = document.getElementById('addAccountPane');
     formNode = document.getElementById('addAccountForm');
     giroAccordionButton = document.getElementById('giroSpecToggle');
     giroAccordionContent = document.getElementById('giroSpecContent');
@@ -1286,14 +1318,6 @@
         btn.addEventListener('click', () => {
           closePendingApprovalPane();
         });
-      });
-    }
-
-    if (pendingPaneNode) {
-      pendingPaneNode.addEventListener('click', (event) => {
-        if (event.target === pendingPaneNode) {
-          closePendingApprovalPane();
-        }
       });
     }
 
