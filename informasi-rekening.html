@@ -503,6 +503,352 @@
       </div>
     </div>
     <div
+      id="mutasiPane"
+      class="hidden h-full flex flex-col bg-white"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mutasiDrawerTitle"
+      aria-hidden="true"
+    >
+      <div class="flex flex-col h-full relative" id="mutasiDrawerInner">
+        <div class="flex items-center justify-between px-6 py-5 border-b border-slate-200">
+          <h2 id="mutasiDrawerTitle" class="text-lg font-semibold">Mutasi Rekening</h2>
+          <button
+            type="button"
+            id="mutasiDrawerClose"
+            class="text-2xl leading-none text-slate-500 hover:text-slate-700"
+            aria-label="Tutup drawer"
+          >&times;</button>
+        </div>
+
+        <div class="p-4">
+          <div class="bg-slate-50 rounded-2xl p-1 flex items-center gap-2">
+            <button
+              type="button"
+              class="flex-1 rounded-xl bg-white px-4 py-3 text-center font-semibold text-slate-900 shadow-sm"
+              aria-current="true"
+              data-tab-button="mutasi"
+              data-mutasi-focus
+            >
+              Mutasi Rekening
+            </button>
+            <button
+              type="button"
+              class="flex-1 rounded-xl px-4 py-3 text-center font-semibold text-slate-400 transition hover:text-slate-600"
+              aria-current="false"
+              data-tab-button="e-statement"
+            >
+              e-Statement
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+          <div
+            data-tab-content="mutasi"
+            class="flex-1 flex flex-col overflow-hidden"
+          >
+            <div class="px-4 pb-4">
+              <div class="flex items-start gap-3 px-4 py-3 rounded-xl border border-sky-100 bg-sky-50 text-sky-800">
+                <img class="w-6 h-6" src="img/icon/info-2.svg" alt="Informasi">
+                <p class="text-sm leading-relaxed">Dapat menampilkan periode mutasi hingga 3 tahun terakhir</p>
+              </div>
+            </div>
+
+            <div class="px-4 pb-4" data-filter-group="mutasi">
+              <div class="flex flex-wrap gap-3">
+                <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Rentang Tanggal">
+                  <button class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[200px] w-[200px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold">
+                    <img src="img/icon/date-picker.svg" class="w-5 h-5 flex-none" alt="Rentang Tanggal" />
+                    <span class="filter-label flex-1 text-left leading-tight">Rentang Tanggal</span>
+                  </button>
+                  <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[360px]">
+                    <div class="flex flex-col gap-3">
+                      <label class="flex items-center gap-2">
+                        <input type="radio" name="mutasi-date" value="7 Hari Terakhir">
+                        <span>7 Hari Terakhir</span>
+                      </label>
+                      <label class="flex items-center gap-2">
+                        <input type="radio" name="mutasi-date" value="30 Hari Terakhir">
+                        <span>30 Hari Terakhir</span>
+                      </label>
+                      <label class="flex items-center gap-2">
+                        <input type="radio" name="mutasi-date" value="1 Tahun Terakhir">
+                        <span>1 Tahun Terakhir</span>
+                      </label>
+                      <label class="flex items-center gap-2">
+                        <input type="radio" name="mutasi-date" value="custom">
+                        <span>Custom Rentang Tanggal</span>
+                      </label>
+                      <div class="custom-range hidden">
+                        <div class="flex gap-2">
+                          <div class="flex flex-col w-1/2">
+                            <span class="mb-1 text-sm">Tanggal Awal</span>
+                            <input
+                              type="text"
+                              class="h-10 border border-slate-300 rounded-lg text-center flatpickr-input"
+                              placeholder="DD/MM/YYYY"
+                              data-field="start"
+                              readonly
+                            />
+                          </div>
+                          <div class="flex flex-col w-1/2">
+                            <span class="mb-1 text-sm">Tanggal Akhir</span>
+                            <input
+                              type="text"
+                              class="h-10 border border-slate-300 rounded-lg text-center flatpickr-input"
+                              placeholder="DD/MM/YYYY"
+                              data-field="end"
+                              readonly
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-4">
+                      <button class="cancel px-3 py-2 rounded-lg border text-slate-600 w-1/2">Batalkan</button>
+                      <button class="apply px-3 py-2 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-1/2" disabled>Terapkan</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="filter relative" data-filter="type" data-name="Jenis Transaksi" data-default="Jenis Transaksi">
+                  <button class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[200px] w-[200px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold">
+                    <img src="img/icon/filter.svg" class="w-5 h-5 flex-none" alt="Jenis Transaksi" />
+                    <span class="filter-label flex-1 text-left leading-tight">Jenis Transaksi</span>
+                  </button>
+                  <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[280px]">
+                    <div class="flex flex-col gap-3">
+                      <label class="flex items-center gap-2">
+                        <input type="checkbox" value="Masuk">
+                        <span>Masuk</span>
+                      </label>
+                      <label class="flex items-center gap-2">
+                        <input type="checkbox" value="Keluar">
+                        <span>Keluar</span>
+                      </label>
+                    </div>
+                    <div class="flex justify-end gap-2 mt-4">
+                      <button class="cancel px-3 py-2 rounded-lg border text-slate-600 w-1/2">Batalkan</button>
+                      <button class="apply px-3 py-2 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-1/2" disabled>Terapkan</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto" id="mutasiDrawerContent">
+              <div id="mutasiLoading" class="h-full flex items-center justify-center">
+                <div class="flex flex-col items-center gap-3 text-slate-500">
+                  <span class="w-10 h-10 border-4 border-cyan-200 border-t-cyan-600 rounded-full animate-spin"></span>
+                  <span>Memuat data mutasi...</span>
+                </div>
+              </div>
+
+              <div id="mutasiError" class="hidden px-6 py-8 space-y-4">
+                <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">Gagal memuat data, coba lagi</div>
+                <button id="mutasiRetry" class="px-4 py-3 rounded-xl border border-cyan-500 text-cyan-600 hover:bg-cyan-50 w-full">Muat Ulang</button>
+              </div>
+
+              <div id="mutasiEmpty" class="hidden px-6 py-12 flex flex-col items-center text-center gap-4 text-slate-500">
+                <div class="w-20 h-20 rounded-full bg-slate-100 grid place-items-center text-3xl">📄</div>
+                <div>
+                  <p class="font-semibold text-slate-700">Tidak ada transaksi pada periode ini</p>
+                  <p class="text-sm">Silakan ubah filter atau rentang tanggal untuk melihat transaksi lainnya.</p>
+                </div>
+              </div>
+
+              <div id="mutasiSuccess" class="hidden px-6 pb-10 space-y-6">
+                <div id="mutasiTransactionList" class="space-y-8"></div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            data-tab-content="e-statement"
+            class="hidden flex-1 flex flex-col overflow-hidden"
+          >
+            <div class="flex-1 overflow-y-auto px-4 pb-24">
+              <div class="flex flex-col gap-4">
+                <div class="flex items-start gap-3 px-4 py-3 rounded-xl border border-sky-100 bg-sky-50 text-sky-800">
+                  <img class="w-6 h-6" src="img/icon/info-2.svg" alt="Informasi">
+                  <p class="text-sm leading-relaxed">
+                    Unduh e-Statement rekening dalam format PDF berdasarkan periode yang Anda pilih.
+                  </p>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                  <div class="relative w-[240px]" data-e-statement-dropdown="year">
+                    <button
+                      type="button"
+                      id="eStatementYearTrigger"
+                      class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[200px] w-[240px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold"
+                      aria-haspopup="listbox"
+                      aria-expanded="false"
+                    >
+                      <img src="img/icon/date-picker.svg" class="w-5 h-5 flex-none" alt="Tahun" />
+                      <span id="eStatementYearLabel" class="flex-1 text-left leading-tight">Pilih Tahun</span>
+                    </button>
+                    <div
+                      id="eStatementYearPanel"
+                      class="filter-panel absolute z-10 mt-2 p-2 rounded-xl border border-slate-200 bg-white shadow hidden w-[240px]"
+                      role="listbox"
+                    >
+                      <div class="flex flex-col gap-1">
+                        <button type="button" class="px-3 py-2 rounded-lg text-left text-sm hover:bg-slate-100" data-value="2023">2023</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left text-sm hover:bg-slate-100" data-value="2024">2024</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left text-sm hover:bg-slate-100" data-value="2025">2025</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="relative w-[240px]" data-e-statement-dropdown="month">
+                    <button
+                      type="button"
+                      id="eStatementMonthTrigger"
+                      class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[200px] w-[240px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold"
+                      aria-haspopup="listbox"
+                      aria-expanded="false"
+                    >
+                      <img src="img/icon/filter.svg" class="w-5 h-5 flex-none" alt="Bulan" />
+                      <span id="eStatementMonthLabel" class="flex-1 text-left leading-tight">Pilih Bulan</span>
+                    </button>
+                    <div
+                      id="eStatementMonthPanel"
+                      class="filter-panel absolute z-10 mt-2 p-2 rounded-xl border border-slate-200 bg-white shadow hidden w-[240px]"
+                      role="listbox"
+                    >
+                      <div class="flex flex-col gap-1 text-sm">
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="01">Januari</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="02">Februari</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="03">Maret</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="04">April</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="05">Mei</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="06">Juni</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="07">Juli</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="08">Agustus</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="09">September</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="10">Oktober</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="11">November</button>
+                        <button type="button" class="px-3 py-2 rounded-lg text-left hover:bg-slate-100" data-value="12">Desember</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  id="eStatementAlert"
+                  class="hidden rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700 text-sm leading-relaxed"
+                ></div>
+              </div>
+            </div>
+            <div class="sticky bottom-0 bg-white border-t border-slate-200 p-4">
+              <button
+                type="button"
+                id="eStatementDownloadBtn"
+                class="w-full h-11 rounded-xl bg-cyan-600 text-white font-semibold px-4 transition disabled:cursor-not-allowed disabled:opacity-50 hover:bg-cyan-700"
+                disabled
+              >
+                Unduh e-Statement
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="mutasiDetailOverlay" class="hidden absolute inset-0 bg-black/20 opacity-0 transition-opacity duration-200 z-10"></div>
+
+        <div
+          id="mutasiDetailSheet"
+          class="absolute inset-x-0 bottom-0 w-full h-full bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform duration-200 z-20 flex flex-col overflow-hidden"
+        >
+          <div class="relative px-4 pt-6 pb-4 border-b border-slate-200">
+            <h3 class="text-lg font-semibold text-slate-900">Detail Mutasi Rekening</h3>
+            <button
+              type="button"
+              data-mutasi-detail-close
+              class="absolute top-6 right-6 text-2xl leading-none text-slate-500 transition hover:text-slate-700"
+              aria-label="Tutup detail transaksi"
+            >&times;</button>
+          </div>
+          <div id="mutasiDetailView" class="flex-1 overflow-y-auto px-6 pb-6">
+            <div class="flex flex-col items-center text-center gap-4 py-4">
+              <div class="w-20 h-20 grid place-items-center">
+                <img src="img/illustration-1.png" alt="Detail Transaksi" class="w-20 h-20" />
+              </div>
+              <p class="text-sm font-semibold tracking-[.18em] text-slate-900 uppercase">Rincian Transaksi</p>
+            </div>
+
+            <section class="mt-4 space-y-3">
+              <p id="mutasiDetailActivity" class="text-base font-semibold text-slate-900">Transfer Saldo</p>
+            </section>
+
+            <section class="mt-4 bg-[#F2F9FF] border border-sky-200 rounded-2xl p-4 space-y-6">
+              <div class="flex items-start gap-4">
+                <div id="mutasiDetailSourceBadge" class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 grid place-items-center font-semibold text-base">O</div>
+                <div class="min-w-0 space-y-1">
+                  <p id="mutasiDetailSourceName" class="text-base font-semibold text-slate-900 leading-snug truncate">Operasional</p>
+                  <p id="mutasiDetailSourceSubtitle" class="text-sm text-slate-500 leading-snug truncate">PT ABC Indonesia</p>
+                  <p id="mutasiDetailSourceAccount" class="text-sm text-slate-500 leading-snug break-words">Amar Indonesia - 000967895483</p>
+                </div>
+              </div>
+              <div class="border-t border-sky-200"></div>
+              <div class="flex items-start gap-4">
+                <div id="mutasiDetailDestinationBadge" class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 grid place-items-center font-semibold text-base">S</div>
+                <div class="min-w-0 space-y-1">
+                  <p id="mutasiDetailDestinationName" class="text-base font-semibold text-slate-900 leading-snug truncate">Supplier Baja</p>
+                  <p id="mutasiDetailDestinationSubtitle" class="text-sm text-slate-500 leading-snug truncate">PT XYZ Indonesia</p>
+                  <p id="mutasiDetailDestinationAccount" class="text-sm text-slate-500 leading-snug break-words">BCA - 4750278562</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="mt-4">
+              <p class="font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 p-2">TOTAL TRANSAKSI</p>
+              <div class="flex items-center justify-between text-sm text-slate-600">
+                <span>Nominal</span>
+                <span id="mutasiDetailTotal" class="text-right text-slate-900 font-bold text-[18px]">Rp250.000.000</span>
+              </div>
+            </section>
+
+            <section class="mt-4 mb-4">
+              <p class="font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 p-2">DETAIL TRANSAKSI</p>
+              <dl class="space-y-4">
+                <div class="flex justify-between gap-6 text-sm text-slate-600">
+                  <dt>Metode Transfer</dt>
+                  <dd id="mutasiDetailMethod" class="text-right text-slate-900 font-medium break-words">BI Fast</dd>
+                </div>
+                <div class="flex justify-between gap-6 text-sm text-slate-600">
+                  <dt>Nomor Referensi</dt>
+                  <dd id="mutasiDetailReference" class="text-right text-slate-900 font-medium break-words">1234567890</dd>
+                </div>
+                <div class="flex justify-between gap-6 text-sm text-slate-600">
+                  <dt>Tanggal dan Waktu</dt>
+                  <dd id="mutasiDetailDate" class="text-right text-slate-900 font-medium break-words">3 Januari 2024, 20.56</dd>
+                </div>
+                <div class="flex justify-between gap-6 text-sm text-slate-600">
+                  <dt>Kategori</dt>
+                  <dd id="mutasiDetailCategory" class="text-right text-slate-900 font-medium break-words">Pemindahan Dana</dd>
+                </div>
+                <div class="flex justify-between gap-6 text-sm text-slate-600">
+                  <dt>Catatan</dt>
+                  <dd id="mutasiDetailNote" class="text-right text-slate-900 font-medium break-words">Kesalahan Transfer</dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+          <div class="p-4 border-t border-slate-200 bg-white">
+            <button
+              type="button"
+              data-mutasi-detail-close
+              class="w-full rounded-xl border border-cyan-500 text-cyan-600 font-semibold py-3 hover:bg-cyan-50"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
       id="transferPane"
       class="hidden h-full flex flex-col bg-white"
       role="dialog"
