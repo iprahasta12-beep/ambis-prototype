@@ -503,6 +503,75 @@
       </div>
     </div>
   </div>
+
+  <div
+    id="transferPopover"
+    class="hidden fixed inset-0 z-40"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="transferPopoverTitle"
+  >
+    <div class="absolute inset-0 bg-slate-900/10" data-transfer-popover-dismiss></div>
+    <div
+      id="transferPopoverPanel"
+      class="absolute w-[320px] max-w-[calc(100vw-32px)] rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden"
+    >
+      <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+        <h3 id="transferPopoverTitle" class="text-base font-semibold text-slate-900">Transfer</h3>
+        <button
+          type="button"
+          id="transferPopoverClose"
+          class="text-slate-400 transition hover:text-slate-600"
+          aria-label="Tutup"
+        >&times;</button>
+      </div>
+      <div class="divide-y divide-slate-200">
+        <button
+          type="button"
+          class="w-full flex items-start gap-3 px-4 py-4 text-left transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+          data-transfer-option="transfer"
+        >
+          <span class="mt-0.5 text-xl text-cyan-600" aria-hidden="true">↔</span>
+          <span class="flex-1 min-w-0">
+            <span class="block text-sm font-semibold text-cyan-600">Transfer Saldo</span>
+            <span class="mt-1 block text-xs text-slate-500 leading-snug">ke rekening bank lainnya ataupun sesama Amar Bank</span>
+          </span>
+        </button>
+        <button
+          type="button"
+          class="w-full flex items-start gap-3 px-4 py-4 text-left transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+          data-transfer-option="move"
+        >
+          <span class="mt-0.5 text-xl text-cyan-600" aria-hidden="true">⇅</span>
+          <span class="flex-1 min-w-0">
+            <span class="block text-sm font-semibold text-cyan-600">Pemindahan Saldo</span>
+            <span class="mt-1 block text-xs text-slate-500 leading-snug">Antar rekening GIRO Anda yang didaftarkan di Amar Bank Bisnis</span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="embeddedTransferDrawer" class="hidden fixed inset-0 z-40">
+    <div
+      class="absolute inset-0 bg-slate-900/30 opacity-0 transition-opacity duration-300"
+      data-transfer-drawer-overlay
+    ></div>
+    <div class="absolute inset-x-0 bottom-0 h-full pointer-events-none flex flex-col justify-end">
+      <div
+        id="embeddedTransferSheet"
+        class="pointer-events-auto h-full w-full max-h-full transform translate-y-full transition-transform duration-300"
+      >
+        <iframe
+          id="embeddedTransferFrame"
+          title="Transfer"
+          class="w-full h-full border-0 rounded-t-3xl shadow-2xl bg-white"
+          allow="clipboard-write"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+
   <script src="data/rekening-data.js"></script>
   <script src="informasi-rekening.js"></script>
   <script src="sidebar.js"></script>

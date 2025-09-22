@@ -25,6 +25,22 @@
       ]
     };
   </script>
+  <script>
+    (function () {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('embedded') === '1') {
+          document.documentElement.classList.add('transfer-embedded');
+          const pane = params.get('pane');
+          if (pane) {
+            document.documentElement.dataset.transferInitialPane = pane;
+          }
+        }
+      } catch (err) {
+        // ignore URL parsing errors
+      }
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
