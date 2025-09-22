@@ -66,6 +66,11 @@
   let transferPaneFrameNode = null;
   let activeTransferTriggerNode = null;
   let lastTransferTriggerNode = null;
+  let mutasiPaneNode = null;
+  let mutasiDrawerTitleNode = null;
+  let mutasiDrawerCloseButton = null;
+  let mutasiInitialFocusNode = null;
+  let lastMutasiTriggerNode = null;
   let activeDrawerPane = null;
   const transferTriggerAccountData = new WeakMap();
   let pendingTransferInitialData = null;
@@ -77,6 +82,7 @@
   const OTP_DURATION_SECONDS = 30;
   const OTP_DEFAULT_COUNTDOWN_MESSAGE = 'Sesi akan berakhir dalam';
   const OTP_EXPIRED_MESSAGE = 'Sesi Anda telah berakhir.';
+  const MUTASI_DRAWER_DEFAULT_TITLE = 'Mutasi Rekening';
 
   const touchedState = {
     name: false,
@@ -1157,11 +1163,16 @@
     return link;
   }
 
-  function createActionButton(href, icon, text) {
-    const button = document.createElement('a');
-    button.href = href;
+  function createMutasiActionButton(account) {
+    const button = document.createElement('button');
+    button.type = 'button';
     button.className = 'flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-cyan-500 text-cyan-600 hover:bg-cyan-50 text-sm font-semibold';
-    button.innerHTML = `<img src="${icon}" alt="" class="w-5 h-5"/>${text}`;
+    button.innerHTML = '<img src="img/icon/transfer-mutasi.svg" alt="" class="w-5 h-5"/>Mutasi Rekening';
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      lastMutasiTriggerNode = button;
+      openMutasiPane(account);
+    });
     return button;
   }
 
@@ -1307,7 +1318,7 @@
 
     const actions = document.createElement('div');
     actions.className = 'grid grid-cols-2 gap-3 pt-2';
-    const mutasiBtn = createActionButton('mutasi.html', 'img/icon/transfer-mutasi.svg', 'Mutasi Rekening');
+    const mutasiBtn = createMutasiActionButton(account);
     const transferBtn = createTransferActionButton(account);
     actions.append(mutasiBtn, transferBtn);
 
@@ -1388,6 +1399,7 @@
     const paneMap = {
       addAccount: addAccountPaneNode,
       pendingApproval: pendingPaneNode,
+      mutasi: mutasiPaneNode,
       transfer: transferPaneNode,
     };
 
@@ -1420,8 +1432,52 @@
     }
   }
 
+  function isMutasiPaneOpen() {
+    return Boolean(drawerNode && drawerNode.classList.contains('open') && activeDrawerPane === 'mutasi');
+  }
+
   function isTransferPaneOpen() {
     return Boolean(drawerNode && drawerNode.classList.contains('open') && activeDrawerPane === 'transfer');
+  }
+
+  function getMutasiDrawerTitle(account) {
+    if (!account || typeof account !== 'object') {
+      return MUTASI_DRAWER_DEFAULT_TITLE;
+    }
+    const labelParts = [];
+    if (typeof account.name === 'string' && account.name.trim()) {
+      labelParts.push(account.name.trim());
+    } else if (typeof account.displayName === 'string' && account.displayName.trim()) {
+      labelParts.push(account.displayName.trim());
+    }
+    if (typeof account.number === 'string' && account.number.trim()) {
+      labelParts.push(account.number.trim());
+    }
+    if (!labelParts.length && typeof account.company === 'string' && account.company.trim()) {
+      labelParts.push(account.company.trim());
+    }
+    if (!labelParts.length) {
+      return MUTASI_DRAWER_DEFAULT_TITLE;
+    }
+    return `${MUTASI_DRAWER_DEFAULT_TITLE} — ${labelParts.join(' - ')}`;
+  }
+
+  function openMutasiPane(account) {
+    const title = getMutasiDrawerTitle(account);
+    if (mutasiDrawerTitleNode) {
+      mutasiDrawerTitleNode.textContent = title;
+    }
+    showDrawerPane('mutasi');
+    ensureDrawerOpen();
+    const focusTarget =
+      mutasiInitialFocusNode || (mutasiPaneNode && mutasiPaneNode.querySelector('[data-mutasi-focus]')) || mutasiDrawerCloseButton;
+    if (focusTarget && typeof focusTarget.focus === 'function') {
+      try {
+        focusTarget.focus({ preventScroll: true });
+      } catch (err) {
+        focusTarget.focus();
+      }
+    }
   }
 
   function getTransferPaneTitle(paneType) {
@@ -1459,6 +1515,10 @@
     }
   }
 
+  function closeMutasiPane({ restoreFocus = true } = {}) {
+    closeDrawer({ restoreFocus });
+  }
+
   function closeTransferPane({ restoreFocus = true } = {}) {
     closeDrawer({ restoreFocus });
   }
@@ -1485,6 +1545,7 @@
   function closeDrawer({ restoreFocus = false } = {}) {
     if (!drawerNode) return;
     const wasTransferActive = activeDrawerPane === 'transfer';
+    const wasMutasiActive = activeDrawerPane === 'mutasi';
     showDrawerPane('addAccount');
     drawerNode.classList.remove('open');
     if (typeof window.sidebarRestoreForDrawer === 'function') {
@@ -1492,14 +1553,27 @@
     }
     resetFormState();
 
-    if (wasTransferActive && restoreFocus && lastTransferTriggerNode && document.body.contains(lastTransferTriggerNode)) {
-      try {
-        lastTransferTriggerNode.focus({ preventScroll: true });
-      } catch (err) {
-        lastTransferTriggerNode.focus();
+    let focusTarget = null;
+    if (restoreFocus) {
+      if (wasTransferActive && lastTransferTriggerNode && document.body.contains(lastTransferTriggerNode)) {
+        focusTarget = lastTransferTriggerNode;
+      } else if (wasMutasiActive && lastMutasiTriggerNode && document.body.contains(lastMutasiTriggerNode)) {
+        focusTarget = lastMutasiTriggerNode;
       }
     }
-    lastTransferTriggerNode = null;
+    if (focusTarget) {
+      try {
+        focusTarget.focus({ preventScroll: true });
+      } catch (err) {
+        focusTarget.focus();
+      }
+    }
+    if (wasTransferActive) {
+      lastTransferTriggerNode = null;
+    }
+    if (wasMutasiActive) {
+      lastMutasiTriggerNode = null;
+    }
   }
 
   function onKeyDown(event) {
@@ -1508,6 +1582,10 @@
     }
     if (isTransferPopoverOpen()) {
       closeTransferPopover({ restoreFocus: true });
+      return;
+    }
+    if (isMutasiPaneOpen()) {
+      closeMutasiPane({ restoreFocus: true });
       return;
     }
     if (isTransferPaneOpen()) {
@@ -1586,6 +1664,10 @@
     transferPaneNode = document.getElementById('transferPane');
     transferPaneTitleNode = document.getElementById('transferPaneTitle');
     transferPaneFrameNode = document.getElementById('transferPaneFrame');
+    mutasiPaneNode = document.getElementById('mutasiPane');
+    mutasiDrawerTitleNode = document.getElementById('mutasiDrawerTitle');
+    mutasiDrawerCloseButton = document.getElementById('mutasiDrawerClose');
+    mutasiInitialFocusNode = mutasiPaneNode ? mutasiPaneNode.querySelector('[data-mutasi-focus]') : null;
     if (transferPaneFrameNode) {
       transferPaneFrameNode.addEventListener('load', () => {
         postTransferInitialPayload();
@@ -1604,6 +1686,11 @@
     if (transferPopoverCloseNode) {
       transferPopoverCloseNode.addEventListener('click', () => {
         closeTransferPopover({ restoreFocus: true });
+      });
+    }
+    if (mutasiDrawerCloseButton) {
+      mutasiDrawerCloseButton.addEventListener('click', () => {
+        closeMutasiPane({ restoreFocus: true });
       });
     }
     if (transferPopoverOptions.length) {
@@ -1809,6 +1896,8 @@
         btn.addEventListener('click', () => {
           if (activeDrawerPane === 'transfer') {
             closeTransferPane({ restoreFocus: true });
+          } else if (activeDrawerPane === 'mutasi') {
+            closeMutasiPane({ restoreFocus: true });
           } else {
             closeDrawer();
           }
