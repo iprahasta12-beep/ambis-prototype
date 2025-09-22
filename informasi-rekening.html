@@ -372,6 +372,130 @@
     </div>
   </div>
 
+  <div
+    id="pendingApprovalPane"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 py-6"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="pendingApprovalTitle"
+    aria-hidden="true"
+  >
+    <div
+      data-pending-dialog
+      class="relative flex w-full max-w-lg max-h-full flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
+    >
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <h2 id="pendingApprovalTitle" class="text-lg font-semibold text-slate-900">Detail Persetujuan</h2>
+        <button
+          type="button"
+          id="pendingPaneCloseHeader"
+          class="text-2xl leading-none text-slate-500 transition hover:text-slate-700"
+          aria-label="Tutup"
+          data-pending-focus
+        >&times;</button>
+      </div>
+      <div class="flex-1 overflow-y-auto px-6 py-6 space-y-8">
+        <section class="text-center space-y-4">
+          <img src="img/illustration-2.svg" alt="Menunggu persetujuan" class="mx-auto w-28 h-auto" />
+          <h3 class="text-2xl font-semibold text-slate-900">
+            Pengaturan Rekening Butuh Persetujuan
+          </h3>
+          <div class="space-y-3">
+            <p class="text-sm font-semibold text-slate-900">Tambah Rekening</p>
+            <div class="max-w-md mx-auto text-left">
+              <button
+                type="button"
+                id="pendingSpecToggle"
+                class="flex w-full items-center justify-between gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-left text-sm font-semibold text-slate-900 transition hover:border-slate-300"
+                aria-expanded="false"
+              >
+                <span class="font-normal text-slate-600">Spesifikasi GIRO</span>
+                <svg data-chevron class="h-5 w-5 text-slate-500 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6"></path>
+                </svg>
+              </button>
+              <div id="pendingSpecContent" class="hidden mt-3 rounded-2xl border border-slate-200">
+                <dl class="divide-y divide-slate-200">
+                  <div class="flex items-start justify-between gap-6 px-4 py-4">
+                    <dt class="text-sm text-slate-500">Setoran Awal</dt>
+                    <dd class="text-sm font-semibold text-slate-900">Rp1.000.000,-</dd>
+                  </div>
+                  <div class="flex items-start justify-between gap-6 px-4 py-4">
+                    <dt class="text-sm text-slate-500">Saldo Minimum Mengendap</dt>
+                    <dd class="text-sm font-semibold text-slate-900">Rp1.000.000,-</dd>
+                  </div>
+                  <div class="flex items-start justify-between gap-6 px-4 py-4">
+                    <dt class="text-sm text-slate-500">Biaya Admin Bulanan</dt>
+                    <dd class="text-sm font-semibold text-slate-900">Rp30.000,-</dd>
+                  </div>
+                  <div class="flex items-start justify-between gap-6 px-4 py-4">
+                    <dt class="text-sm text-slate-500">Biaya Setoran Kliring</dt>
+                    <dd class="text-sm font-semibold text-slate-900">Rp2.000,-</dd>
+                  </div>
+                  <div class="flex items-start justify-between gap-6 px-4 py-4">
+                    <dt class="text-sm text-slate-500">Biaya Admin Bulanan di Rekening Pasif</dt>
+                    <dd class="text-sm font-semibold text-slate-900">Rp500,-</dd>
+                  </div>
+                  <div class="flex items-start justify-between gap-6 px-4 py-4">
+                    <dt class="text-sm text-slate-500">Biaya Admin Bulanan di Rekening di bawah Saldo Minimum</dt>
+                    <dd class="text-sm font-semibold text-slate-900">Rp1.000,-</dd>
+                  </div>
+                  <div class="flex items-start justify-between gap-6 px-4 py-4">
+                    <dt class="text-sm text-slate-500">Biaya Admin 3 Bulan di bawah Saldo Minimum</dt>
+                    <dd class="text-sm font-semibold text-slate-900">Rp500,-</dd>
+                  </div>
+                  <div class="flex items-start justify-between gap-6 px-4 py-4">
+                    <dt class="text-sm text-slate-500">Biaya Penutupan Rekening</dt>
+                    <dd class="text-sm font-semibold text-slate-900">Rp55.000,-</dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="space-y-4">
+          <div class="rounded-2xl border border-slate-200 p-6 space-y-6">
+            <p class="text-xs font-semibold uppercase tracking-[.18em] text-slate-500">Detail Rekening</p>
+            <dl class="space-y-4">
+              <div class="flex items-start justify-between gap-6">
+                <dt class="text-sm text-slate-500">Nama Rekening</dt>
+                <dd id="pendingAccountName" class="text-sm font-semibold text-slate-900 text-right max-w-[60%] break-words">-</dd>
+              </div>
+              <div class="flex items-start justify-between gap-6">
+                <dt class="text-sm text-slate-500">Tujuan Penambahan Rekening</dt>
+                <dd id="pendingAccountPurpose" class="text-sm font-semibold text-slate-900 text-right max-w-[60%] break-words">-</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 p-6 space-y-6">
+            <p class="text-xs font-semibold uppercase tracking-[.18em] text-slate-500">Pembuat Permintaan</p>
+            <dl class="space-y-4">
+              <div class="flex items-start justify-between gap-6">
+                <dt class="text-sm text-slate-500">Dibuat oleh</dt>
+                <dd id="pendingRequestCreator" class="text-sm font-semibold text-slate-900 text-right max-w-[60%] break-words">-</dd>
+              </div>
+              <div class="flex items-start justify-between gap-6">
+                <dt class="text-sm text-slate-500">Tanggal &amp; Waktu</dt>
+                <dd id="pendingRequestDatetime" class="text-sm font-semibold text-slate-900 text-right max-w-[60%] break-words">-</dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+      </div>
+      <div class="border-t border-slate-200 px-6 py-4">
+        <button
+          type="button"
+          id="pendingPaneCloseBtn"
+          class="w-full rounded-xl border border-cyan-500 py-3 text-sm font-semibold text-slate-900 transition hover:bg-cyan-50"
+        >
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="data/rekening-data.js"></script>
   <script src="informasi-rekening.js"></script>
   <script src="sidebar.js"></script>
