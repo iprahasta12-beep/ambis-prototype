@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('mutasiAccountGrid');
-  if (!container) return;
 
   const drawer = document.getElementById('drawer');
   const drawerInner = document.getElementById('mutasiDrawerInner');
@@ -769,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
     applyFiltersAndRender();
   }
 
-  function openDrawer(account) {
+  function prepareDrawerForAccount(account, { autoOpen = true, titleOverride } = {}) {
     if (!drawer) return;
     activeAccount = account;
     activeData = null;
@@ -777,13 +776,23 @@ document.addEventListener('DOMContentLoaded', () => {
     resetEStatement();
     setActiveTab('mutasi');
 
-    if (drawerTitle) drawerTitle.textContent = account.displayName || account.name || 'Mutasi Rekening';
-    if (drawerAccountLabel) drawerAccountLabel.textContent = account.displayName || account.name || 'Mutasi Rekening';
+    const defaultTitle = account && (account.displayName || account.name)
+      ? (account.displayName || account.name)
+      : 'Mutasi Rekening';
+    const resolvedTitle = typeof titleOverride === 'string' && titleOverride.trim()
+      ? titleOverride.trim()
+      : defaultTitle;
+
+    if (drawerTitle) drawerTitle.textContent = resolvedTitle;
+    if (drawerAccountLabel) drawerAccountLabel.textContent = defaultTitle;
 
     resetFilters();
     showState('loading');
-    drawer.classList.add('open');
-    collapseSidebar();
+
+    if (autoOpen) {
+      drawer.classList.add('open');
+      collapseSidebar();
+    }
 
     if (drawerInner) {
       drawerInner.classList.remove('opacity-0');
@@ -793,6 +802,10 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTimer = setTimeout(() => {
       loadTransactions(account);
     }, 300);
+  }
+
+  function openDrawer(account) {
+    prepareDrawerForAccount(account, { autoOpen: true });
   }
 
   function closeDrawer() {
@@ -812,6 +825,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderCards() {
+    if (!container) return;
     const accounts = getAccounts();
     container.innerHTML = '';
     accounts.forEach((account, index) => {
@@ -917,4 +931,12 @@ document.addEventListener('DOMContentLoaded', () => {
       applyFiltersAndRender();
     }
   });
+
+  const mutasiApi = window.AMBIS_MUTASI || {};
+  mutasiApi.prepareDrawerForAccount = (account, options = {}) => {
+    prepareDrawerForAccount(account, { autoOpen: false, ...options });
+  };
+  mutasiApi.setActiveTab = setActiveTab;
+  mutasiApi.showState = showState;
+  window.AMBIS_MUTASI = mutasiApi;
 });
