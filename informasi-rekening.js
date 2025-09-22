@@ -688,11 +688,14 @@
 
     addAccount(pendingConfirmationPayload)
       .then((newAccount) => {
-        renderAccounts();
-        showToast('Rekening baru berhasil dibuat');
+        const pendingDetails = {
+          account: newAccount,
+          payload: confirmationSnapshot,
+        };
+
         closeConfirmSheet({ resetPending: true });
-        resetFormState();
-        openPendingApprovalPane({ account: newAccount, payload: confirmationSnapshot });
+        closeDrawer();
+        openPendingApprovalPane(pendingDetails);
       })
       .catch(() => {
         showToast('Gagal menambahkan rekening. Silakan coba lagi.', { variant: 'error' });
