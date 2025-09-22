@@ -44,6 +44,16 @@
   let otpCountdownMessageNode = null;
   let otpTimerNode = null;
   let otpResendButtonNode = null;
+  let pendingPaneNode = null;
+  let pendingPaneCloseButtons = [];
+  let pendingSpecToggleNode = null;
+  let pendingSpecContentNode = null;
+  let pendingSpecChevronNode = null;
+  let pendingAccountNameNode = null;
+  let pendingAccountPurposeNode = null;
+  let pendingRequestCreatorNode = null;
+  let pendingRequestDatetimeNode = null;
+  let pendingPaneLastFocusedElement = null;
 
   const MAX_ACCOUNT_NAME_LENGTH = 15;
   const PURPOSE_OPTION_ACTIVE_CLASSES = ['bg-cyan-50', 'border-l-2', 'border-dashed', 'border-cyan-500'];
@@ -483,6 +493,154 @@
     validateForm();
   }
 
+  function isPendingPaneOpen() {
+    return pendingPaneNode ? !pendingPaneNode.classList.contains('hidden') : false;
+  }
+
+  function setPendingSpecExpanded(expanded) {
+    if (!pendingSpecToggleNode || !pendingSpecContentNode) {
+      return;
+    }
+    pendingSpecToggleNode.setAttribute('aria-expanded', String(Boolean(expanded)));
+    if (expanded) {
+      pendingSpecContentNode.classList.remove('hidden');
+    } else {
+      pendingSpecContentNode.classList.add('hidden');
+    }
+    if (pendingSpecChevronNode) {
+      pendingSpecChevronNode.classList.toggle('rotate-180', Boolean(expanded));
+    }
+  }
+
+  function togglePendingSpec() {
+    if (!pendingSpecContentNode) return;
+    const expanded = pendingSpecContentNode.classList.contains('hidden');
+    setPendingSpecExpanded(expanded);
+  }
+
+  function getCurrentUserName() {
+    const selectors = [
+      '[data-user-name]',
+      '[data-username]',
+      '[data-user-display-name]',
+      '#dashboardUserName',
+      '#userDisplayName',
+      '.user-name',
+      '.dashboard-user-name',
+    ];
+    for (const selector of selectors) {
+      const node = document.querySelector(selector);
+      if (node && node.textContent && node.textContent.trim()) {
+        return node.textContent.trim();
+      }
+    }
+
+    const ambis = getAmbis();
+    if (ambis) {
+      try {
+        if (typeof ambis.getCurrentUser === 'function') {
+          const currentUser = ambis.getCurrentUser();
+          if (currentUser && typeof currentUser.name === 'string' && currentUser.name.trim()) {
+            return currentUser.name.trim();
+          }
+        }
+      } catch (err) {
+        console.error('AMBIS getCurrentUser failed', err);
+      }
+      if (typeof ambis.currentUserName === 'string' && ambis.currentUserName.trim()) {
+        return ambis.currentUserName.trim();
+      }
+    }
+
+    try {
+      const storedName = localStorage.getItem('ambis:user-name');
+      if (storedName && storedName.trim()) {
+        return storedName.trim();
+      }
+    } catch (err) {
+      // Ignore storage errors
+    }
+
+    return 'Ramero Carlo';
+  }
+
+  function formatCurrentDatetime(date = new Date()) {
+    const validDate = date instanceof Date && !Number.isNaN(date.getTime()) ? date : new Date();
+    const dateFormatter = new Intl.DateTimeFormat('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+    const timeFormatter = new Intl.DateTimeFormat('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+
+    const datePart = dateFormatter.format(validDate);
+    let timePart = timeFormatter.format(validDate);
+    timePart = timePart.replace(/\./g, ':').replace(/\s/g, '');
+    return `${datePart} • ${timePart}`;
+  }
+
+  function openPendingApprovalPane({ account, payload } = {}) {
+    if (!pendingPaneNode) return;
+
+    const accountName = (account && account.name) || (payload && payload.name) || '-';
+    if (pendingAccountNameNode) {
+      pendingAccountNameNode.textContent = accountName || '-';
+    }
+
+    const accountPurpose = (payload && payload.purpose) || (account && account.purpose) || '-';
+    if (pendingAccountPurposeNode) {
+      pendingAccountPurposeNode.textContent = accountPurpose || '-';
+    }
+
+    if (pendingRequestCreatorNode) {
+      pendingRequestCreatorNode.textContent = getCurrentUserName();
+    }
+    if (pendingRequestDatetimeNode) {
+      pendingRequestDatetimeNode.textContent = formatCurrentDatetime(new Date());
+    }
+
+    setPendingSpecExpanded(false);
+    pendingPaneLastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+    pendingPaneNode.classList.remove('hidden');
+    pendingPaneNode.setAttribute('aria-hidden', 'false');
+    if (document.body) {
+      document.body.classList.add('overflow-hidden');
+    }
+
+    const focusTarget = pendingPaneNode.querySelector('[data-pending-focus]');
+    if (focusTarget && typeof focusTarget.focus === 'function') {
+      try {
+        focusTarget.focus();
+      } catch (err) {
+        focusTarget.focus();
+      }
+    }
+  }
+
+  function closePendingApprovalPane() {
+    if (!pendingPaneNode || pendingPaneNode.classList.contains('hidden')) {
+      return;
+    }
+    pendingPaneNode.classList.add('hidden');
+    pendingPaneNode.setAttribute('aria-hidden', 'true');
+    if (document.body) {
+      document.body.classList.remove('overflow-hidden');
+    }
+    if (pendingPaneLastFocusedElement && typeof pendingPaneLastFocusedElement.focus === 'function') {
+      try {
+        pendingPaneLastFocusedElement.focus();
+      } catch (err) {
+        // ignore focus errors
+      }
+    }
+    pendingPaneLastFocusedElement = null;
+  }
+
   function handleConfirmSheetSubmit() {
     if (!pendingConfirmationPayload || isConfirmingBottomSheet) {
       return;
@@ -509,12 +667,17 @@
     const otpValue = otpInputs.map((input) => input.value).join('');
     console.log('OTP submitted:', otpValue);
 
+    const confirmationSnapshot = pendingConfirmationPayload
+      ? { ...pendingConfirmationPayload }
+      : null;
+
     addAccount(pendingConfirmationPayload)
-      .then(() => {
+      .then((newAccount) => {
         renderAccounts();
         showToast('Rekening baru berhasil dibuat');
         closeConfirmSheet({ resetPending: true });
         closeDrawer();
+        openPendingApprovalPane({ account: newAccount, payload: confirmationSnapshot });
       })
       .catch(() => {
         showToast('Gagal menambahkan rekening. Silakan coba lagi.', { variant: 'error' });
@@ -996,6 +1159,10 @@
     if (event.key !== 'Escape') {
       return;
     }
+    if (isPendingPaneOpen()) {
+      closePendingApprovalPane();
+      return;
+    }
     if (isConfirmSheetOpen()) {
       closeConfirmSheet({ resetPending: true });
       return;
@@ -1042,6 +1209,18 @@
     otpCountdownMessageNode = document.getElementById('addAccountOtpCountdownMessage');
     otpTimerNode = document.getElementById('addAccountOtpTimer');
     otpResendButtonNode = document.getElementById('addAccountOtpResend');
+    pendingPaneNode = document.getElementById('pendingApprovalPane');
+    pendingSpecToggleNode = document.getElementById('pendingSpecToggle');
+    pendingSpecContentNode = document.getElementById('pendingSpecContent');
+    pendingSpecChevronNode = pendingSpecToggleNode ? pendingSpecToggleNode.querySelector('[data-chevron]') : null;
+    pendingAccountNameNode = document.getElementById('pendingAccountName');
+    pendingAccountPurposeNode = document.getElementById('pendingAccountPurpose');
+    pendingRequestCreatorNode = document.getElementById('pendingRequestCreator');
+    pendingRequestDatetimeNode = document.getElementById('pendingRequestDatetime');
+    pendingPaneCloseButtons = [
+      document.getElementById('pendingPaneCloseHeader'),
+      document.getElementById('pendingPaneCloseBtn'),
+    ].filter(Boolean);
     if (otpCountdownMessageNode) {
       const defaultText = otpCountdownMessageNode.textContent ? otpCountdownMessageNode.textContent.trim() : '';
       if (defaultText) {
@@ -1094,6 +1273,27 @@
     if (confirmOverlayNode) {
       confirmOverlayNode.addEventListener('click', () => {
         closeConfirmSheet({ resetPending: true });
+      });
+    }
+
+    if (pendingSpecToggleNode) {
+      pendingSpecToggleNode.addEventListener('click', togglePendingSpec);
+      setPendingSpecExpanded(false);
+    }
+
+    if (pendingPaneCloseButtons.length) {
+      pendingPaneCloseButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          closePendingApprovalPane();
+        });
+      });
+    }
+
+    if (pendingPaneNode) {
+      pendingPaneNode.addEventListener('click', (event) => {
+        if (event.target === pendingPaneNode) {
+          closePendingApprovalPane();
+        }
       });
     }
 
