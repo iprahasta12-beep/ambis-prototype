@@ -18,6 +18,7 @@
     const state = {
       overlay: null,
       modal: null,
+      container: null,
       headerMonth: null,
       headerYear: null,
       prevBtn: null,
@@ -48,11 +49,16 @@
       return btn;
     }
 
-    function ensureElements() {
-      if (state.overlay) return;
+    function ensureElements(container) {
+      if (!container) return;
+
+      if (state.overlay) {
+        container.appendChild(state.overlay);
+        return;
+      }
 
       const overlay = document.createElement('div');
-      overlay.className = 'month-year-picker-overlay hidden';
+      overlay.className = 'month-year-picker-overlay';
 
       const modal = document.createElement('div');
       modal.className = 'month-year-picker-modal';
@@ -128,7 +134,7 @@
       modal.appendChild(footer);
 
       overlay.appendChild(modal);
-      document.body.appendChild(overlay);
+      container.appendChild(overlay);
 
       state.overlay = overlay;
       state.modal = modal;
@@ -209,7 +215,12 @@
       });
 
       document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' && state.overlay && !state.overlay.classList.contains('hidden')) {
+        if (
+          event.key === 'Escape'
+          && state.overlay
+          && state.container
+          && state.container.classList.contains('month-year-picker-active')
+        ) {
           closePicker();
         }
       });
@@ -277,6 +288,7 @@
 
     function resetState() {
       state.activeInstance = null;
+      state.container = null;
       state.viewMonth = 0;
       state.viewYear = 0;
       state.selectedMonth = 0;
@@ -290,10 +302,12 @@
     }
 
     function openPicker(instance, view) {
-      if (!instance) return;
-      ensureElements();
+      if (!instance || !instance.calendarContainer) return;
+      const container = instance.calendarContainer;
+      ensureElements(container);
 
       state.activeInstance = instance;
+      state.container = container;
       state.selectedMonth = instance.currentMonth;
       state.selectedYear = instance.currentYear;
       state.viewMonth = instance.currentMonth;
@@ -304,15 +318,15 @@
       state.activeView = view === 'year' ? 'year' : 'month';
       state.yearRangeStart = computeYearRangeStart(state.viewYear);
 
-      state.overlay.classList.remove('hidden');
-      document.body.classList.add('month-year-picker-open');
+      container.classList.add('month-year-picker-active');
       render();
     }
 
     function closePicker() {
       if (!state.overlay) return;
-      state.overlay.classList.add('hidden');
-      document.body.classList.remove('month-year-picker-open');
+      if (state.container) {
+        state.container.classList.remove('month-year-picker-active');
+      }
       resetState();
     }
 
@@ -341,36 +355,38 @@
 
       container.dataset.monthYearPickerBound = 'true';
 
-      const header = container.querySelector('.flatpickr-current-month');
-      if (!header) return;
+      const monthContainers = container.querySelectorAll('.flatpickr-month');
+      if (!monthContainers.length) return;
 
-      const monthTrigger = header.querySelector('.cur-month');
-      const yearInput = header.querySelector('.cur-year');
-
-      if (monthTrigger) {
-        monthTrigger.addEventListener('click', (event) => {
+      monthContainers.forEach((monthEl) => {
+        monthEl.addEventListener('click', (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLElement)) return;
           event.preventDefault();
           event.stopPropagation();
-          openPicker(instance, 'month');
+          const isYearTarget = target.closest('.cur-year') || target.closest('.numInputWrapper');
+          const view = isYearTarget ? 'year' : 'month';
+          openPicker(instance, view);
         });
-      }
 
-      if (yearInput) {
-        yearInput.setAttribute('readonly', 'readonly');
-        yearInput.addEventListener('click', (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          openPicker(instance, 'year');
-        });
-        yearInput.addEventListener('focus', (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          openPicker(instance, 'year');
-        });
-        yearInput.addEventListener('keydown', (event) => {
-          event.preventDefault();
-        });
-      }
+        const yearInput = monthEl.querySelector('.cur-year');
+        if (yearInput) {
+          yearInput.setAttribute('readonly', 'readonly');
+          yearInput.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            openPicker(instance, 'year');
+          });
+          yearInput.addEventListener('focus', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            openPicker(instance, 'year');
+          });
+          yearInput.addEventListener('keydown', (event) => {
+            event.preventDefault();
+          });
+        }
+      });
     }
 
     return {
