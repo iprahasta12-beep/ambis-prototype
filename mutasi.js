@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('mutasiAccountGrid');
-  const isEmbedded = !container && Boolean(document.getElementById('mutasiPane'));
+  if (!container) return;
 
   const drawer = document.getElementById('drawer');
   const drawerInner = document.getElementById('mutasiDrawerInner');
@@ -472,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function collapseSidebar() {
-    if (!sidebar || isEmbedded) return;
+    if (!sidebar) return;
     sidebarWasCollapsed = sidebar.classList.contains('collapsed');
     if (!sidebarWasCollapsed) {
       sidebar.classList.add('collapsed');
@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function restoreSidebar() {
-    if (!sidebar || isEmbedded) return;
+    if (!sidebar) return;
     if (!sidebarWasCollapsed) {
       sidebar.classList.remove('collapsed');
     }
@@ -769,41 +769,30 @@ document.addEventListener('DOMContentLoaded', () => {
     applyFiltersAndRender();
   }
 
-  function prepareAccount(account, options = {}) {
-    if (!account) return;
-    const { updateTitle = true, updateAccountLabel = true } = options;
-
+  function openDrawer(account) {
+    if (!drawer) return;
     activeAccount = account;
     activeData = null;
 
     resetEStatement();
     setActiveTab('mutasi');
 
-    if (updateTitle && drawerTitle) {
-      drawerTitle.textContent = account.displayName || account.name || 'Mutasi Rekening';
-    }
-    if (updateAccountLabel && drawerAccountLabel) {
-      drawerAccountLabel.textContent = account.displayName || account.name || 'Mutasi Rekening';
-    }
+    if (drawerTitle) drawerTitle.textContent = account.displayName || account.name || 'Mutasi Rekening';
+    if (drawerAccountLabel) drawerAccountLabel.textContent = account.displayName || account.name || 'Mutasi Rekening';
 
     resetFilters();
     showState('loading');
-
-    if (loadTimer) clearTimeout(loadTimer);
-    loadTimer = setTimeout(() => {
-      loadTransactions(account);
-    }, 300);
-  }
-
-  function openDrawer(account) {
-    if (!drawer) return;
-    prepareAccount(account);
     drawer.classList.add('open');
     collapseSidebar();
 
     if (drawerInner) {
       drawerInner.classList.remove('opacity-0');
     }
+
+    if (loadTimer) clearTimeout(loadTimer);
+    loadTimer = setTimeout(() => {
+      loadTransactions(account);
+    }, 300);
   }
 
   function closeDrawer() {
@@ -875,15 +864,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (container) {
-    renderCards();
+  renderCards();
 
-    if (typeof ambis.onBrandNameChange === 'function') {
-      ambis.onBrandNameChange(renderCards);
-    }
+  if (typeof ambis.onBrandNameChange === 'function') {
+    ambis.onBrandNameChange(renderCards);
   }
 
-  if (closeBtn && !isEmbedded) {
+  if (closeBtn) {
     closeBtn.addEventListener('click', closeDrawer);
   }
 
@@ -905,20 +892,6 @@ document.addEventListener('DOMContentLoaded', () => {
   detailCloseButtons.forEach((button) => {
     button.addEventListener('click', () => closeDetailSheet());
   });
-
-  const publicApi = {
-    prepareAccount: (account, options = {}) => {
-      prepareAccount(account, options);
-    },
-    setActiveTab: (name) => {
-      setActiveTab(name);
-    },
-    closeDetailSheet: (immediate = false) => {
-      closeDetailSheet(immediate);
-    },
-  };
-
-  window.AMBIS_MUTASI = Object.assign(window.AMBIS_MUTASI || {}, publicApi);
 
   document.addEventListener('click', (event) => {
     if (!openDropdown) return;
