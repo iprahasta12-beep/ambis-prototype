@@ -88,8 +88,8 @@
   const CURRENCY_FORMATTER = new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   });
 
   const TOAST_BASE_INNER_CLASSES = 'pointer-events-auto flex items-center gap-3 rounded-2xl px-4 py-3 shadow-lg text-sm';
@@ -146,9 +146,9 @@
       value = Number.isFinite(parsed) ? parsed : 0;
     }
     if (!Number.isFinite(value)) {
-      return CURRENCY_FORMATTER.format(0);
+      return CURRENCY_FORMATTER.format(0).replace(/\s+/g, '');
     }
-    return CURRENCY_FORMATTER.format(value);
+    return CURRENCY_FORMATTER.format(value).replace(/\s+/g, '');
   }
 
   function sanitizeNumber(value) {
@@ -156,8 +156,19 @@
     return String(value).replace(/\D+/g, '');
   }
 
-  function maskCurrencyText() {
-    return MASKED_BALANCE_TEXT;
+  function maskCurrencyText(originalValue) {
+    const text = typeof originalValue === 'string' ? originalValue : '';
+    if (text) {
+      const prefixMatch = text.match(/^([^\d-]+)/);
+      if (prefixMatch && prefixMatch[0].trim()) {
+        return `${prefixMatch[0].replace(/\s+/g, '')}${MASKED_BALANCE_TEXT}`;
+      }
+      const trimmed = text.trim();
+      if (trimmed.toUpperCase().startsWith('RP')) {
+        return `Rp${MASKED_BALANCE_TEXT}`;
+      }
+    }
+    return `Rp${MASKED_BALANCE_TEXT}`;
   }
 
   function registerBalanceElement(el, value) {
