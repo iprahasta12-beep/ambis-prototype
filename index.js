@@ -109,8 +109,19 @@ function formatCurrency(num) {
   }).format(safeValue);
 }
 
-function maskCurrencyText() {
-  return MASKED_BALANCE_TEXT;
+function maskCurrencyText(originalValue) {
+  const text = typeof originalValue === 'string' ? originalValue : '';
+  if (text) {
+    const prefixMatch = text.match(/^([^\d-]+)/);
+    if (prefixMatch && prefixMatch[0].trim()) {
+      return `${prefixMatch[0].replace(/\s+/g, '')}${MASKED_BALANCE_TEXT}`;
+    }
+    const trimmed = text.trim();
+    if (trimmed.toUpperCase().startsWith('RP')) {
+      return `Rp${MASKED_BALANCE_TEXT}`;
+    }
+  }
+  return `Rp${MASKED_BALANCE_TEXT}`;
 }
 
 function setBalanceValue(el, value) {
