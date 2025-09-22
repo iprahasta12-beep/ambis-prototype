@@ -1444,26 +1444,26 @@
     if (!account || typeof account !== 'object') {
       return MUTASI_DRAWER_DEFAULT_TITLE;
     }
-    const labelParts = [];
-    if (typeof account.name === 'string' && account.name.trim()) {
-      labelParts.push(account.name.trim());
-    } else if (typeof account.displayName === 'string' && account.displayName.trim()) {
-      labelParts.push(account.displayName.trim());
+    const candidates = [account.name, account.displayName, account.company, account.brandName];
+    for (let index = 0; index < candidates.length; index += 1) {
+      const value = candidates[index];
+      if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (trimmed) {
+          return trimmed;
+        }
+      }
     }
-    if (typeof account.number === 'string' && account.number.trim()) {
-      labelParts.push(account.number.trim());
-    }
-    if (!labelParts.length && typeof account.company === 'string' && account.company.trim()) {
-      labelParts.push(account.company.trim());
-    }
-    if (!labelParts.length) {
-      return MUTASI_DRAWER_DEFAULT_TITLE;
-    }
-    return `${MUTASI_DRAWER_DEFAULT_TITLE} — ${labelParts.join(' - ')}`;
+    return MUTASI_DRAWER_DEFAULT_TITLE;
   }
 
   function openMutasiPane(account) {
     const title = getMutasiDrawerTitle(account);
+    if (window.AMBIS_MUTASI && typeof window.AMBIS_MUTASI.prepareDrawerForAccount === 'function') {
+      window.AMBIS_MUTASI.prepareDrawerForAccount(account, { titleOverride: title });
+    } else if (mutasiDrawerTitleNode) {
+      mutasiDrawerTitleNode.textContent = title;
+    }
     if (mutasiDrawerTitleNode) {
       mutasiDrawerTitleNode.textContent = title;
     }
