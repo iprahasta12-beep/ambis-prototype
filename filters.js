@@ -476,6 +476,25 @@
           onChange: updateButtons
         });
         inp.addEventListener('input', updateButtons);
+
+        const openCalendar = () => {
+          const instance = inp._flatpickr;
+          if (instance && !instance.isOpen) {
+            instance.open();
+          }
+        };
+
+        inp.addEventListener('focus', openCalendar);
+        inp.addEventListener('click', (event) => {
+          event.preventDefault();
+          openCalendar();
+        });
+        inp.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openCalendar();
+          }
+        });
       });
     }
 
