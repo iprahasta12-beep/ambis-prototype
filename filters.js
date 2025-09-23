@@ -14,6 +14,42 @@
     'Desember'
   ];
 
+  function formatDateLabel(date) {
+    if (!(date instanceof Date)) return '';
+    if (Number.isNaN(date.getTime())) return '';
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  function getPresetDateRange(value) {
+    const today = new Date();
+    const end = new Date(today.getTime());
+    let start = null;
+
+    if (value === '7 Hari Terakhir') {
+      start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
+    } else if (value === '30 Hari Terakhir') {
+      start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 30);
+    } else if (value === '1 Tahun Terakhir') {
+      start = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+    }
+
+    if (!start) return null;
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
+    return { start, end };
+  }
+
+  function getPresetDateLabel(value) {
+    const range = getPresetDateRange(value);
+    if (!range) return '';
+    const startText = formatDateLabel(range.start);
+    const endText = formatDateLabel(range.end);
+    if (!startText || !endText) return '';
+    return `${startText} – ${endText}`;
+  }
+
   const monthYearPicker = (() => {
     const state = {
       overlay: null,
@@ -591,17 +627,22 @@
         setTriggerState(true);
       } else {
         filter.dataset.applied = selected.join(',');
-        if (isMulti) {
+        let labelText = defaultLabel;
+
+        if (isDate && selected.length > 0) {
+          const presetLabel = getPresetDateLabel(selected[0]);
+          labelText = presetLabel || selected[0] || defaultLabel;
+        } else if (isMulti) {
           if (selected.length === 1) {
-            labelSpan.textContent = selected[0];
+            labelText = selected[0];
           } else if (selected.length > 1) {
-            labelSpan.textContent = `${name} (${selected.length})`;
-          } else {
-            labelSpan.textContent = defaultLabel;
+            labelText = `${name} (${selected.length})`;
           }
         } else {
-          labelSpan.textContent = selected[0] || defaultLabel;
+          labelText = selected[0] || defaultLabel;
         }
+
+        labelSpan.textContent = labelText;
         setTriggerState(selected.length > 0);
       }
       emitChange();
