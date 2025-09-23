@@ -104,31 +104,15 @@
     return `${year}-${month}-${day}`;
   }
 
-  function getPresetDateRange(value) {
-    const today = new Date();
-    const end = new Date(today.getTime());
-    let start = null;
-
-    if (value === '7 Hari Terakhir') {
-      start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
-    } else if (value === '30 Hari Terakhir') {
-      start = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 30);
-    } else if (value === '1 Tahun Terakhir') {
-      start = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-    }
-
-    if (!start) return null;
-    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null;
-    return { start, end };
-  }
-
   function getPresetDateLabel(value) {
-    const range = getPresetDateRange(value);
-    if (!range) return '';
-    const startText = formatDateLabel(range.start);
-    const endText = formatDateLabel(range.end);
-    if (!startText || !endText) return '';
-    return `${startText} – ${endText}`;
+    switch (value) {
+      case '7 Hari Terakhir':
+      case '30 Hari Terakhir':
+      case '1 Tahun Terakhir':
+        return value;
+      default:
+        return '';
+    }
   }
 
   const allFilters = document.querySelectorAll('.filter');
@@ -520,9 +504,7 @@
         const startISO = formatISODate(start);
         const endISO = formatISODate(end);
         filter.dataset.applied = `custom:${startISO}|${endISO}`;
-        const startLabel = formatDateLabel(start);
-        const endLabel = formatDateLabel(end);
-        labelSpan.textContent = `${startLabel} – ${endLabel}`;
+        labelSpan.textContent = 'Custom';
         setTriggerState(true);
       } else {
         filter.dataset.applied = selected.join(',');
