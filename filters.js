@@ -149,6 +149,20 @@
     const customRange = isDate ? panel.querySelector('.custom-range') : null;
     const customRangeStartInput = customRange ? customRange.querySelector('[data-date-start]') : null;
     const customRangeEndInput = customRange ? customRange.querySelector('[data-date-end]') : null;
+    const dateOptionEntries = isDate
+      ? Array.from(panel.querySelectorAll('label')).map(label => {
+          const radio = label.querySelector('input[type="radio"]');
+          return radio ? { label, input: radio } : null;
+        }).filter(Boolean)
+      : [];
+    if (isDate) {
+      dateOptionEntries.forEach(({ label }) => {
+        label.classList.add('filter-date-option');
+      });
+    }
+    const customOption = isDate
+      ? Array.from(options).find(option => option.value === 'custom') || null
+      : null;
     const customRangeStartPlaceholder = customRangeStartInput ? (customRangeStartInput.getAttribute('placeholder') || '') : '';
     const customRangeEndPlaceholder = customRangeEndInput ? (customRangeEndInput.getAttribute('placeholder') || '') : '';
     if (customRangeStartInput) {
@@ -185,6 +199,40 @@
 
     filter._setTriggerState = setTriggerState;
     setTriggerState(Boolean(filter.dataset.applied));
+
+    function refreshDateOptionHighlight() {
+      if (!isDate) return;
+      const selected = getSelected();
+      const activeValue = selected.length > 0 ? selected[0] : null;
+      dateOptionEntries.forEach(({ label, input }) => {
+        const isActive = input.value === activeValue;
+        label.classList.toggle('filter-date-option-active', isActive);
+      });
+    }
+
+    function ensureDefaultDateSelection() {
+      if (!isDate) return;
+      const hasChecked = Array.from(options).some(option => option.checked);
+      if (!hasChecked) {
+        const defaultOption = Array.from(options).find(option => option.value === '7 Hari Terakhir');
+        if (defaultOption) defaultOption.checked = true;
+      }
+      refreshDateOptionHighlight();
+    }
+
+    function activateCustomOptionFromPicker() {
+      if (!isDate || !customOption) return;
+      if (!customOption.checked) {
+        customOption.checked = true;
+      }
+      if (customRange) {
+        customRange.classList.remove('hidden');
+      }
+      refreshDateOptionHighlight();
+    }
+
+    filter._refreshDateOptionHighlight = refreshDateOptionHighlight;
+    filter._ensureDefaultDateSelection = ensureDefaultDateSelection;
 
     function setDateInputValue(input, date) {
       if (!input) return;
@@ -240,6 +288,7 @@
           } else {
             setDateInputValue(customRangeStartInput, null);
           }
+          activateCustomOptionFromPicker();
           updateButtons();
         },
       });
@@ -272,6 +321,7 @@
           } else {
             setDateInputValue(customRangeEndInput, null);
           }
+          activateCustomOptionFromPicker();
           updateButtons();
         },
       });
@@ -349,6 +399,7 @@
       }
 
       updateButtons();
+      refreshDateOptionHighlight();
     }
 
     function emitChange() {
@@ -414,6 +465,9 @@
           clearCustomRange();
         }
       }
+      if (isDate) {
+        ensureDefaultDateSelection();
+      }
       updateButtons();
       panel.classList.remove('hidden');
       openPanel = panel;
@@ -446,12 +500,12 @@
           clearCustomRange();
         } else if (o.value !== 'custom') {
           customRange.classList.add('hidden');
-          const customOption = Array.from(options).find(opt => opt.value === 'custom');
           if (customOption) customOption.checked = false;
           clearCustomRange();
         }
       }
       updateButtons();
+      refreshDateOptionHighlight();
     }));
 
     applyBtn.addEventListener('click', () => {
@@ -490,6 +544,7 @@
         labelSpan.textContent = labelText;
         setTriggerState(selected.length > 0);
       }
+      refreshDateOptionHighlight();
       emitChange();
       close();
     });
@@ -542,8 +597,10 @@
             });
           }
           if (typeof f._setTriggerState === 'function') f._setTriggerState(false);
+          if (typeof f._ensureDefaultDateSelection === 'function') f._ensureDefaultDateSelection();
         });
         updateButtons();
+        refreshDateOptionHighlight();
         emitChange();
         close();
       }

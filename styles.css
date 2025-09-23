@@ -151,3 +151,21 @@ html, body{
 .transfer-embedded #drawer.open{
   width:100% !important;
 }
+
+/* Date filter option highlighting */
+.filter-panel label.filter-date-option{
+  padding:8px 12px;
+  border-radius:12px;
+  transition:background-color .2s ease, color .2s ease;
+}
+.filter-panel label.filter-date-option-active{
+  background-color:#E6F5F7;
+  color:#0E7490;
+  font-weight:600;
+}
+.filter-panel label.filter-date-option-active span{
+  color:inherit;
+}
+.filter-panel label.filter-date-option-active input[type="radio"]{
+  accent-color:#0E7490;
+}
