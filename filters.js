@@ -182,7 +182,7 @@
     }
 
     if (isDate) {
-      defaultLabel = 'Rentang Tanggal';
+      defaultLabel = 'Tanggal';
       filter.dataset.default = defaultLabel;
     } else if (!defaultLabel) {
       defaultLabel = name || '';
