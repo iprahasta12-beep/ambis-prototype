@@ -535,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
           input.checked = false;
         } else {
           input.value = '';
-          if (input._flatpickr) input._flatpickr.clear();
+          if (input._airDatepicker) input._airDatepicker.clear();
         }
       });
       const custom = filter.querySelector('.custom-range');
