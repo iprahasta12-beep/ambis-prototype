@@ -195,8 +195,36 @@
       labelSpan.textContent = defaultLabel;
     }
 
+    function setCustomRangeEnabled(enabled) {
+      if (!customRange) return;
+      const inputs = [customRangeStartInput, customRangeEndInput];
+      inputs.forEach(input => {
+        if (!input) return;
+        input.disabled = !enabled;
+        if (!enabled && input._airDatepicker && typeof input._airDatepicker.hide === 'function') {
+          input._airDatepicker.hide();
+        }
+      });
+    }
+
+    function showCustomRange() {
+      if (!customRange) return;
+      customRange.classList.remove('hidden');
+      setCustomRangeEnabled(true);
+    }
+
+    function hideCustomRange() {
+      if (!customRange) return;
+      customRange.classList.add('hidden');
+      setCustomRangeEnabled(false);
+    }
+
     filter._setTriggerState = setTriggerState;
     setTriggerState(Boolean(filter.dataset.applied));
+
+    if (customRange) {
+      setCustomRangeEnabled(!customRange.classList.contains('hidden'));
+    }
 
     function refreshDateOptionHighlight() {
       if (!isDate) return;
@@ -212,7 +240,7 @@
       if (!isDate) return;
       const hasChecked = Array.from(options).some(option => option.checked);
       if (!hasChecked && customRange) {
-        customRange.classList.add('hidden');
+        hideCustomRange();
         clearCustomRange();
       }
       refreshDateOptionHighlight();
@@ -224,8 +252,13 @@
         customOption.checked = true;
       }
       if (customRange) {
-        customRange.classList.remove('hidden');
+        showCustomRange();
       }
+      Array.from(options).forEach(option => {
+        if (option !== customOption && option.type === 'radio') {
+          option.checked = false;
+        }
+      });
       refreshDateOptionHighlight();
     }
 
@@ -367,6 +400,7 @@
 
       if (!startDate || !endDate) {
         clearCustomRange();
+        hideCustomRange();
         return;
       }
 
@@ -445,24 +479,24 @@
     function open() {
       if (openPanel && openPanel !== panel) openPanel.classList.add('hidden');
       const applied = filter.dataset.applied;
-      if (isDate && applied && applied.startsWith('custom:')) {
-        options.forEach(o => {
-          o.checked = o.value === 'custom';
-        });
-        if (customRange) {
-          customRange.classList.remove('hidden');
-          setCustomRangeFromApplied(applied);
+        if (isDate && applied && applied.startsWith('custom:')) {
+          options.forEach(o => {
+            o.checked = o.value === 'custom';
+          });
+          if (customRange) {
+            showCustomRange();
+            setCustomRangeFromApplied(applied);
+          }
+        } else {
+          const appliedArr = applied ? applied.split(',') : [];
+          options.forEach(o => {
+            o.checked = appliedArr.includes(o.value);
+          });
+          if (customRange) {
+            hideCustomRange();
+            clearCustomRange();
+          }
         }
-      } else {
-        const appliedArr = applied ? applied.split(',') : [];
-        options.forEach(o => {
-          o.checked = appliedArr.includes(o.value);
-        });
-        if (customRange) {
-          customRange.classList.add('hidden');
-          clearCustomRange();
-        }
-      }
       if (isDate) {
         ensureDefaultDateSelection();
       }
@@ -489,15 +523,20 @@
     options.forEach(o => o.addEventListener('change', () => {
       if (isDate && customRange) {
         if (o.value === 'custom' && o.checked) {
-          customRange.classList.remove('hidden');
+          showCustomRange();
+          Array.from(options).forEach(option => {
+            if (option !== o && option.type === 'radio') {
+              option.checked = false;
+            }
+          });
           const picker = ensureStartDatepicker();
           if (customRangeStartInput) customRangeStartInput.focus();
           if (picker) picker.show();
         } else if (o.value === 'custom' && !o.checked) {
-          customRange.classList.add('hidden');
+          hideCustomRange();
           clearCustomRange();
         } else if (o.value !== 'custom') {
-          customRange.classList.add('hidden');
+          hideCustomRange();
           if (customOption) customOption.checked = false;
           clearCustomRange();
         }
@@ -582,6 +621,7 @@
                   rangeInput._airDatepicker.update({ minDate: null, maxDate: null });
                 }
               }
+              rangeInput.disabled = true;
               rangeInput.value = '';
               if (rangeInput.dataset && rangeInput.dataset.isoValue) {
                 delete rangeInput.dataset.isoValue;
