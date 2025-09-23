@@ -99,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let eStatementYear = '';
   let eStatementMonth = '';
   let openDropdown = null;
+  const savedFiltersByAccount = new Map();
 
   function closeDropdownMenu(target) {
     if (!target || !target.panel) return;
@@ -543,6 +544,94 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function resolveAccountKey(account) {
+    if (!account) return '__default__';
+    const candidates = [
+      account.id,
+      account.numberRaw,
+      account.number,
+      account.displayName,
+      account.name,
+    ];
+
+    for (let index = 0; index < candidates.length; index += 1) {
+      const candidate = candidates[index];
+      if (candidate === null || candidate === undefined) continue;
+      const value = typeof candidate === 'string' ? candidate : String(candidate);
+      if (value && value.trim()) {
+        return value.trim();
+      }
+    }
+
+    return '__default__';
+  }
+
+  function persistCurrentFilters() {
+    if (!filterGroup || !activeAccount) return;
+    const accountKey = resolveAccountKey(activeAccount);
+    if (!accountKey) return;
+
+    const filters = {};
+    let hasApplied = false;
+    filterGroup.querySelectorAll('.filter').forEach((filter) => {
+      const filterName = filter.dataset.filter;
+      if (!filterName) return;
+
+      const applied = filter.dataset.applied || '';
+      const labelEl = filter.querySelector('.filter-label');
+      const labelText = labelEl && typeof labelEl.textContent === 'string'
+        ? labelEl.textContent
+        : (filter.dataset.default || '');
+
+      if (applied) {
+        hasApplied = true;
+      }
+
+      filters[filterName] = {
+        applied,
+        label: labelText,
+      };
+    });
+
+    if (!hasApplied) {
+      savedFiltersByAccount.delete(accountKey);
+      return;
+    }
+
+    savedFiltersByAccount.set(accountKey, filters);
+  }
+
+  function restoreFiltersForAccount(account) {
+    if (!filterGroup) return;
+    const accountKey = resolveAccountKey(account);
+    if (!accountKey) return;
+
+    const saved = savedFiltersByAccount.get(accountKey);
+    if (!saved) return;
+
+    filterGroup.querySelectorAll('.filter').forEach((filter) => {
+      const filterName = filter.dataset.filter;
+      if (!filterName) return;
+      const state = saved[filterName];
+      if (!state) return;
+
+      const applied = typeof state.applied === 'string' ? state.applied : '';
+      const labelText = typeof state.label === 'string' && state.label.trim()
+        ? state.label
+        : (filter.dataset.default || '');
+
+      filter.dataset.applied = applied;
+      const labelEl = filter.querySelector('.filter-label');
+      if (labelEl) {
+        labelEl.textContent = labelText;
+      }
+
+      if (typeof filter._setTriggerState === 'function') {
+        filter._setTriggerState(Boolean(applied));
+      }
+    });
+  }
+
   function getDataForAccount(account) {
     if (!account) return { status: 'empty', groups: [] };
     const key = account.id || account.numberRaw || account.number || '';
@@ -787,6 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (drawerAccountLabel) drawerAccountLabel.textContent = defaultTitle;
 
     resetFilters();
+    restoreFiltersForAccount(account);
     showState('loading');
 
     if (autoOpen) {
@@ -928,6 +1018,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('filter-change', (event) => {
     const groupId = event.detail ? event.detail.groupId : null;
     if (!groupId || groupId === 'mutasi') {
+      persistCurrentFilters();
       applyFiltersAndRender();
     }
   });
