@@ -127,7 +127,7 @@
     const labelSpan = trigger.querySelector('.filter-label');
     const iconEl = trigger.querySelector('img');
     const name = filter.dataset.name;
-    const defaultLabel = filter.dataset.default;
+    let defaultLabel = filter.dataset.default || '';
     const isMulti = options[0] && options[0].type === 'checkbox';
     const isDate = filter.dataset.filter === 'date';
     const customRange = isDate ? panel.querySelector('.custom-range') : null;
@@ -181,6 +181,20 @@
 
     }
 
+    if (isDate) {
+      defaultLabel = 'Rentang Tanggal';
+      filter.dataset.default = defaultLabel;
+    } else if (!defaultLabel) {
+      defaultLabel = name || '';
+      if (defaultLabel) {
+        filter.dataset.default = defaultLabel;
+      }
+    }
+
+    if (labelSpan) {
+      labelSpan.textContent = defaultLabel;
+    }
+
     filter._setTriggerState = setTriggerState;
     setTriggerState(Boolean(filter.dataset.applied));
 
@@ -197,9 +211,9 @@
     function ensureDefaultDateSelection() {
       if (!isDate) return;
       const hasChecked = Array.from(options).some(option => option.checked);
-      if (!hasChecked) {
-        const defaultOption = Array.from(options).find(option => option.value === '7 Hari Terakhir');
-        if (defaultOption) defaultOption.checked = true;
+      if (!hasChecked && customRange) {
+        customRange.classList.add('hidden');
+        clearCustomRange();
       }
       refreshDateOptionHighlight();
     }
