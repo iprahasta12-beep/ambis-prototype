@@ -89,8 +89,16 @@
     const isMulti = options[0] && options[0].type === 'checkbox';
     const isDate = filter.dataset.filter === 'date';
     const customRange = isDate ? panel.querySelector('.custom-range') : null;
-    const customRangeInput = customRange ? customRange.querySelector('input') : null;
-    let datepickerInstance = null;
+    const customRangeStartInput = customRange ? customRange.querySelector('[data-date-start]') : null;
+    const customRangeEndInput = customRange ? customRange.querySelector('[data-date-end]') : null;
+    const customRangeStartPlaceholder = customRangeStartInput ? (customRangeStartInput.getAttribute('placeholder') || '') : '';
+    const customRangeEndPlaceholder = customRangeEndInput ? (customRangeEndInput.getAttribute('placeholder') || '') : '';
+    if (customRangeStartInput) {
+      customRangeStartInput.dataset.defaultPlaceholder = customRangeStartPlaceholder;
+    }
+    if (customRangeEndInput) {
+      customRangeEndInput.dataset.defaultPlaceholder = customRangeEndPlaceholder;
+    }
     const groupEl = filter.closest('[data-filter-group]');
     const groupId = groupEl ? groupEl.dataset.filterGroup || null : null;
     const groupFilters = groupEl ? groupEl.querySelectorAll('.filter') : allFilters;
@@ -120,51 +128,126 @@
     filter._setTriggerState = setTriggerState;
     setTriggerState(Boolean(filter.dataset.applied));
 
-    function getDatepickerInstance() {
-      if (!customRangeInput) return null;
-      if (customRangeInput._airDatepicker) return customRangeInput._airDatepicker;
+    function setDateInputValue(input, date) {
+      if (!input) return;
+      if (date instanceof Date && !Number.isNaN(date.getTime())) {
+        const label = formatDateLabel(date);
+        const isoValue = formatISODate(date);
+        input.value = label;
+        input.dataset.isoValue = isoValue;
+        if (label) {
+          input.setAttribute('placeholder', label);
+        }
+      } else {
+        input.value = '';
+        delete input.dataset.isoValue;
+        const defaultPlaceholder = input.dataset.defaultPlaceholder || '';
+        if (defaultPlaceholder) {
+          input.setAttribute('placeholder', defaultPlaceholder);
+        } else {
+          input.removeAttribute('placeholder');
+        }
+      }
+    }
+
+    function getInputDate(input) {
+      if (!input) return null;
+      const isoValue = input.dataset.isoValue;
+      if (!isoValue) return null;
+      return parseISODate(isoValue);
+    }
+
+    function ensureStartDatepicker() {
+      if (!customRangeStartInput) return null;
+      if (customRangeStartInput._airDatepicker) return customRangeStartInput._airDatepicker;
       if (typeof AirDatepicker === 'undefined') return null;
-      datepickerInstance = new AirDatepicker(customRangeInput, {
-        range: true,
+      const instance = new AirDatepicker(customRangeStartInput, {
         autoClose: true,
         dateFormat: 'dd/MM/yyyy',
-        multipleDatesSeparator: ' – ',
-        onSelect: () => {
+        onSelect: ({ date }) => {
+          if (date instanceof Date && !Number.isNaN(date.getTime())) {
+            setDateInputValue(customRangeStartInput, date);
+            const endPicker = ensureEndDatepicker();
+            if (endPicker) {
+              if (typeof endPicker.update === 'function') {
+                endPicker.update({ minDate: date });
+              }
+              const endDate = getInputDate(customRangeEndInput);
+              if (endDate && endDate.getTime() < date.getTime()) {
+                setDateInputValue(customRangeEndInput, null);
+                endPicker.clear();
+              }
+            }
+          } else {
+            setDateInputValue(customRangeStartInput, null);
+          }
           updateButtons();
         },
       });
-      customRangeInput._airDatepicker = datepickerInstance;
-      return datepickerInstance;
+      customRangeStartInput._airDatepicker = instance;
+      return instance;
     }
 
-    function getExistingDatepicker() {
-      if (!customRangeInput) return null;
-      return customRangeInput._airDatepicker || datepickerInstance;
+    function ensureEndDatepicker() {
+      if (!customRangeEndInput) return null;
+      if (customRangeEndInput._airDatepicker) return customRangeEndInput._airDatepicker;
+      if (typeof AirDatepicker === 'undefined') return null;
+      const instance = new AirDatepicker(customRangeEndInput, {
+        autoClose: true,
+        dateFormat: 'dd/MM/yyyy',
+        onSelect: ({ date }) => {
+          if (date instanceof Date && !Number.isNaN(date.getTime())) {
+            setDateInputValue(customRangeEndInput, date);
+            const startPicker = ensureStartDatepicker();
+            const startDate = getInputDate(customRangeStartInput);
+            if (startPicker) {
+              if (typeof startPicker.update === 'function') {
+                startPicker.update({ maxDate: date });
+              }
+            }
+            if (startDate && startDate.getTime() > date.getTime()) {
+              setDateInputValue(customRangeStartInput, null);
+              if (startPicker) startPicker.clear();
+            }
+          } else {
+            setDateInputValue(customRangeEndInput, null);
+          }
+          updateButtons();
+        },
+      });
+      customRangeEndInput._airDatepicker = instance;
+      return instance;
     }
 
     function clearCustomRange() {
-      if (customRangeInput) {
-        customRangeInput.value = '';
+      setDateInputValue(customRangeStartInput, null);
+      setDateInputValue(customRangeEndInput, null);
+      const startPicker = customRangeStartInput ? customRangeStartInput._airDatepicker : null;
+      const endPicker = customRangeEndInput ? customRangeEndInput._airDatepicker : null;
+      if (startPicker) {
+        startPicker.clear();
+        if (typeof startPicker.update === 'function') {
+          startPicker.update({ maxDate: null });
+        }
       }
-      const picker = getExistingDatepicker();
-      if (picker) {
-        picker.clear();
+      if (endPicker) {
+        endPicker.clear();
+        if (typeof endPicker.update === 'function') {
+          endPicker.update({ minDate: null });
+        }
       }
     }
 
     function getSelectedRange() {
-      const picker = getExistingDatepicker();
-      if (!picker) return null;
-      const dates = picker.selectedDates;
-      if (!Array.isArray(dates) || dates.length < 2) return null;
-      const [start, end] = dates;
-      if (!(start instanceof Date) || Number.isNaN(start.getTime())) return null;
-      if (!(end instanceof Date) || Number.isNaN(end.getTime())) return null;
-      return { start, end };
+      const startDate = getInputDate(customRangeStartInput);
+      const endDate = getInputDate(customRangeEndInput);
+      if (!startDate || !endDate) return null;
+      if (startDate.getTime() > endDate.getTime()) return null;
+      return { start: startDate, end: endDate };
     }
 
     function setCustomRangeFromApplied(applied) {
-      if (!customRange || !customRangeInput) return;
+      if (!customRange || (!customRangeStartInput && !customRangeEndInput)) return;
       if (!applied || !applied.startsWith('custom:')) {
         clearCustomRange();
         return;
@@ -179,17 +262,33 @@
         return;
       }
 
-      const picker = getDatepickerInstance();
-      if (picker) {
-        picker.clear();
-        picker.selectDate([startDate, endDate]);
+      const startPicker = ensureStartDatepicker();
+      const endPicker = ensureEndDatepicker();
+
+      if (startPicker) {
+        startPicker.selectDate(startDate);
       } else {
-        const startLabel = formatDateLabel(startDate);
-        const endLabel = formatDateLabel(endDate);
-        if (startLabel && endLabel) {
-          customRangeInput.value = `${startLabel} – ${endLabel}`;
+        setDateInputValue(customRangeStartInput, startDate);
+      }
+
+      if (endPicker) {
+        endPicker.selectDate(endDate);
+      } else {
+        setDateInputValue(customRangeEndInput, endDate);
+      }
+
+      if (startPicker) {
+        if (typeof startPicker.update === 'function') {
+          startPicker.update({ maxDate: endDate });
         }
       }
+      if (endPicker) {
+        if (typeof endPicker.update === 'function') {
+          endPicker.update({ minDate: startDate });
+        }
+      }
+
+      updateButtons();
     }
 
     function emitChange() {
@@ -211,24 +310,28 @@
       const anyApplied = selected.length > 0 || Array.from(groupFilters).some(f => f.dataset.applied);
       cancelBtn.textContent = anyApplied ? 'Reset Ulang' : 'Batalkan';
     }
-    if (customRangeInput) {
-      customRangeInput.addEventListener('focus', () => {
-        const picker = getDatepickerInstance();
+    [
+      { input: customRangeStartInput, ensure: ensureStartDatepicker },
+      { input: customRangeEndInput, ensure: ensureEndDatepicker },
+    ].forEach(({ input, ensure }) => {
+      if (!input) return;
+      input.addEventListener('focus', () => {
+        const picker = ensure();
         if (picker) picker.show();
       });
-      customRangeInput.addEventListener('click', (event) => {
+      input.addEventListener('click', (event) => {
         event.preventDefault();
-        const picker = getDatepickerInstance();
+        const picker = ensure();
         if (picker) picker.show();
       });
-      customRangeInput.addEventListener('keydown', (event) => {
+      input.addEventListener('keydown', (event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          const picker = getDatepickerInstance();
+          const picker = ensure();
           if (picker) picker.show();
         }
       });
-    }
+    });
 
     function open() {
       if (openPanel && openPanel !== panel) openPanel.classList.add('hidden');
@@ -259,8 +362,10 @@
     function close() {
       panel.classList.add('hidden');
       if (isDate) {
-        const picker = getExistingDatepicker();
-        if (picker) picker.hide();
+        const startPicker = customRangeStartInput ? customRangeStartInput._airDatepicker : null;
+        const endPicker = customRangeEndInput ? customRangeEndInput._airDatepicker : null;
+        if (startPicker) startPicker.hide();
+        if (endPicker) endPicker.hide();
       }
       openPanel = null;
     }
@@ -273,7 +378,8 @@
       if (isDate && customRange) {
         if (o.value === 'custom' && o.checked) {
           customRange.classList.remove('hidden');
-          const picker = getDatepickerInstance();
+          const picker = ensureStartDatepicker();
+          if (customRangeStartInput) customRangeStartInput.focus();
           if (picker) picker.show();
         } else if (o.value === 'custom' && !o.checked) {
           customRange.classList.add('hidden');
@@ -340,17 +446,40 @@
             if (inp.type === 'radio' || inp.type === 'checkbox') inp.checked = false;
             else {
               inp.value = '';
-              if (inp._airDatepicker) inp._airDatepicker.clear();
+              if (inp._airDatepicker) {
+                inp._airDatepicker.clear();
+                if (typeof inp._airDatepicker.update === 'function') {
+                  inp._airDatepicker.update({ minDate: null, maxDate: null });
+                }
+              }
+              if (inp.dataset && inp.dataset.isoValue) {
+                delete inp.dataset.isoValue;
+              }
+              const defaultPlaceholder = inp.dataset ? inp.dataset.defaultPlaceholder : '';
+              if (defaultPlaceholder) {
+                inp.setAttribute('placeholder', defaultPlaceholder);
+              }
             }
           });
           const cr = f.querySelector('.custom-range');
           if (cr) {
             cr.classList.add('hidden');
-            const rangeInput = cr.querySelector('input');
-            if (rangeInput && rangeInput._airDatepicker) {
-              rangeInput._airDatepicker.clear();
-            }
-            if (rangeInput) rangeInput.value = '';
+            cr.querySelectorAll('input').forEach(rangeInput => {
+              if (rangeInput._airDatepicker) {
+                rangeInput._airDatepicker.clear();
+                if (typeof rangeInput._airDatepicker.update === 'function') {
+                  rangeInput._airDatepicker.update({ minDate: null, maxDate: null });
+                }
+              }
+              rangeInput.value = '';
+              if (rangeInput.dataset && rangeInput.dataset.isoValue) {
+                delete rangeInput.dataset.isoValue;
+              }
+              const defaultPlaceholder = rangeInput.dataset ? rangeInput.dataset.defaultPlaceholder : '';
+              if (defaultPlaceholder) {
+                rangeInput.setAttribute('placeholder', defaultPlaceholder);
+              }
+            });
           }
           if (typeof f._setTriggerState === 'function') f._setTriggerState(false);
         });
@@ -363,9 +492,13 @@
     document.addEventListener('click', e => {
       let interactedWithCalendar = false;
       if (isDate) {
-        const picker = getExistingDatepicker();
-        if (picker && picker.$datepicker) {
-          interactedWithCalendar = picker.$datepicker.contains(e.target);
+        const startPicker = customRangeStartInput ? customRangeStartInput._airDatepicker : null;
+        const endPicker = customRangeEndInput ? customRangeEndInput._airDatepicker : null;
+        if (startPicker && startPicker.$datepicker && startPicker.$datepicker.contains(e.target)) {
+          interactedWithCalendar = true;
+        }
+        if (!interactedWithCalendar && endPicker && endPicker.$datepicker && endPicker.$datepicker.contains(e.target)) {
+          interactedWithCalendar = true;
         }
       }
       if (!filter.contains(e.target) && !interactedWithCalendar && !panel.classList.contains('hidden')) {
