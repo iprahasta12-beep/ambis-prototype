@@ -13,8 +13,12 @@
   const cardCurrentEl = document.getElementById('currentLimitDisplay');
   const cardMaxEl = document.getElementById('maxLimitDisplay');
   const progressBar = document.getElementById('limitBar');
+  const infoBtn = document.getElementById('limitInfoBtn');
+  const infoOverlay = document.getElementById('limitInfoOverlay');
+  const infoCloseBtn = document.getElementById('limitInfoCloseBtn');
 
   let ignoreOutsideClick = false;
+  let infoOverlayOpen = false;
 
   let currentLimit = 150_000_000;
 
@@ -28,6 +32,23 @@
     }
   } catch (err) {
     // localStorage might be unavailable; ignore.
+  }
+
+  function closeInfoOverlay() {
+    infoOverlayOpen = false;
+    if (infoOverlay) {
+      infoOverlay.classList.add('hidden');
+    }
+    if (infoBtn) {
+      infoBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function openInfoOverlay() {
+    if (!infoOverlay || !infoBtn) return;
+    infoOverlay.classList.remove('hidden');
+    infoBtn.setAttribute('aria-expanded', 'true');
+    infoOverlayOpen = true;
   }
 
   function formatCurrency(value) {
@@ -126,10 +147,10 @@
 
     if (input) {
       input.value = '';
-      input.focus();
     }
 
     hideError();
+    closeInfoOverlay();
 
     if (confirmBtn) confirmBtn.disabled = true;
 
@@ -150,6 +171,7 @@
   function closeDrawer() {
     if (!drawer) return;
     drawer.classList.remove('open');
+    closeInfoOverlay();
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
@@ -183,6 +205,22 @@
     validateInput();
   });
 
+  infoBtn?.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (infoOverlayOpen) {
+      closeInfoOverlay();
+    } else {
+      openInfoOverlay();
+    }
+  });
+
+  infoCloseBtn?.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    closeInfoOverlay();
+  });
+
   input?.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
@@ -190,6 +228,13 @@
         confirmBtn?.click();
       }
     }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!infoOverlayOpen) return;
+    if (infoOverlay?.contains(event.target)) return;
+    if (infoBtn?.contains(event.target)) return;
+    closeInfoOverlay();
   });
 
   document.addEventListener('click', (event) => {
