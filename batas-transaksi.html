@@ -154,11 +154,11 @@
           </div>
 
           <!-- Values -->
-          <p class="font-bold text-slate-900">Rp150.000.000</p>
-          <p class="text-slate-500   mb-4">dari total batas transaksi Rp200.000.000</p>
+          <p id="currentLimitDisplay" class="font-bold text-slate-900">Rp150.000.000</p>
+          <p class="text-slate-500 mb-4">dari total batas transaksi <span id="maxLimitDisplay">Rp200.000.000</span></p>
 
           <!-- Button -->
-          <button class="w-full rounded-lg border border-cyan-500 text-cyan-600 px-4 py-2 flex items-center justify-center gap-2 hover:bg-cyan-50">
+          <button id="openLimitDrawerBtn" class="w-full rounded-lg border border-cyan-500 text-cyan-600 px-4 py-2 flex items-center justify-center gap-2 hover:bg-cyan-50">
             Ubah Batas Transaksi
             <img src="img/icon/batas-transaksi.svg" alt="" class="w-5 h-5"/>
           </button>
@@ -166,8 +166,48 @@
       </div>
     </main>
     <!-- ============ /MAIN ============ -->
+
+    <!-- Drawer -->
+    <div id="drawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100">
+      <div class="flex items-start justify-between gap-4 border-b px-6 py-5">
+        <div>
+          <h2 class="text-xl font-semibold">Ubah Batas Transaksi Harian</h2>
+        </div>
+        <button type="button" id="limitDrawerCloseBtn" class="text-2xl leading-none" aria-label="Tutup">
+          &times;
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+        <div class="space-y-2">
+          <label class="block text-sm text-slate-500">Batas Transaksi Harian Maksimum</label>
+          <div id="drawerMaxLimit" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-slate-900">Rp200.000.000</div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-sm text-slate-500">Batas Transaksi Harian Saat Ini</label>
+          <div id="drawerCurrentLimit" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-slate-900">Rp150.000.000</div>
+        </div>
+
+        <div class="space-y-2">
+          <label for="newLimitInput" class="block text-sm text-slate-500">Batas Transaksi Harian Baru</label>
+          <div class="flex items-center rounded-xl border border-slate-200 bg-white px-4 py-3">
+            <span class="mr-2 font-semibold text-slate-500">Rp</span>
+            <input id="newLimitInput" type="text" inputmode="numeric" autocomplete="off" class="w-full border-none p-0 focus:ring-0" placeholder="0" aria-describedby="newLimitError">
+          </div>
+          <p id="newLimitError" class="hidden text-sm text-red-600"></p>
+        </div>
+      </div>
+
+      <div class="border-t px-6 py-5 sticky bottom-0 bg-white">
+        <button id="confirmLimitBtn" type="button" class="w-full rounded-xl bg-cyan-500 text-white py-3 font-semibold" disabled>
+          Konfirmasi Perubahan Batas Transaksi
+        </button>
+      </div>
+    </div>
   </div>
 
+  <script src="batas-transaksi.js"></script>
   <script src="sidebar.js"></script>
 </body>
 </html>
