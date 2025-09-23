@@ -581,27 +581,15 @@
                         <span>Custom Rentang Tanggal</span>
                       </label>
                       <div class="custom-range hidden">
-                        <div class="flex gap-2">
-                          <div class="flex flex-col w-1/2">
-                            <span class="mb-1 text-sm">Tanggal Awal</span>
-                            <input
-                              type="text"
-                              class="h-10 border border-slate-300 rounded-lg text-center flatpickr-input"
-                              placeholder="DD/MM/YYYY"
-                              data-field="start"
-                              readonly
-                            />
-                          </div>
-                          <div class="flex flex-col w-1/2">
-                            <span class="mb-1 text-sm">Tanggal Akhir</span>
-                            <input
-                              type="text"
-                              class="h-10 border border-slate-300 rounded-lg text-center flatpickr-input"
-                              placeholder="DD/MM/YYYY"
-                              data-field="end"
-                              readonly
-                            />
-                          </div>
+                        <div class="flex flex-col">
+                          <span class="mb-1 text-sm">Rentang Tanggal</span>
+                          <input
+                            type="text"
+                            class="h-10 border border-slate-300 rounded-lg text-center"
+                            placeholder="DD/MM/YYYY – DD/MM/YYYY"
+                            data-date-range
+                            readonly
+                          />
                         </div>
                       </div>
                     </div>
