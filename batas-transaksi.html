@@ -190,7 +190,25 @@
         </div>
 
         <div class="space-y-2">
-          <label for="newLimitInput" class="block text-sm text-slate-500">Batas Transaksi Harian Baru</label>
+          <div class="flex items-start justify-between gap-2">
+            <label for="newLimitInput" class="block text-sm text-slate-500">Batas Transaksi Harian Baru</label>
+            <div class="relative flex-shrink-0">
+              <button type="button" id="limitInfoBtn" class="p-1 -m-1 rounded-full hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500" aria-haspopup="true" aria-expanded="false" aria-controls="limitInfoOverlay">
+                <img src="img/icon/info.svg" alt="Informasi batas transaksi" class="w-5 h-5" />
+              </button>
+              <div id="limitInfoOverlay" role="dialog" aria-modal="false" aria-labelledby="limitInfoTitle" class="hidden absolute right-0 mt-2 w-72 rounded-xl bg-black/80 text-white shadow-lg">
+                <div class="flex items-start gap-3 p-4">
+                  <div class="flex-1">
+                    <p id="limitInfoTitle" class="text-base font-semibold">Batas Transaksi Harian</p>
+                    <p class="mt-2 text-sm leading-relaxed">Batas harian berlaku untuk semua transaksi di perusahaan Anda.<br>Limit Transaksi akan diperbarui otomatis setiap hari.</p>
+                  </div>
+                  <button type="button" id="limitInfoCloseBtn" class="-mr-1 -mt-1 p-1 text-white/70 hover:text-white" aria-label="Tutup bantuan">
+                    &times;
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="flex items-center rounded-xl border border-slate-200 bg-white px-4 py-3">
             <span class="mr-2 font-semibold text-slate-500">Rp</span>
             <input id="newLimitInput" type="text" inputmode="numeric" autocomplete="off" class="w-full border-none p-0 focus:ring-0" placeholder="0" aria-describedby="newLimitError">
