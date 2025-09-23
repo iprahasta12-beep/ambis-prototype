@@ -14,6 +14,64 @@
     'Desember'
   ];
 
+  const MONTH_NAMES_SHORT = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'Mei',
+    'Jun',
+    'Jul',
+    'Agu',
+    'Sep',
+    'Okt',
+    'Nov',
+    'Des'
+  ];
+
+  const AIR_DATEPICKER_LOCALE_ID = Object.freeze({
+    days: [
+      'Minggu',
+      'Senin',
+      'Selasa',
+      'Rabu',
+      'Kamis',
+      'Jumat',
+      'Sabtu'
+    ],
+    daysShort: [
+      'Min',
+      'Sen',
+      'Sel',
+      'Rab',
+      'Kam',
+      'Jum',
+      'Sab'
+    ],
+    daysMin: [
+      'Mg',
+      'Sn',
+      'Sl',
+      'Rb',
+      'Km',
+      'Jm',
+      'Sb'
+    ],
+    months: MONTH_NAMES.slice(),
+    monthsShort: MONTH_NAMES_SHORT,
+    today: 'Hari ini',
+    clear: 'Bersihkan',
+    dateFormat: 'dd/MM/yyyy',
+    timeFormat: 'HH:mm',
+    firstDay: 1,
+    ariaLabel: {
+      month: 'Pilih bulan',
+      year: 'Pilih tahun',
+      hour: 'Pilih jam',
+      minute: 'Pilih menit'
+    }
+  });
+
   function formatDateLabel(date) {
     if (!(date instanceof Date)) return '';
     if (Number.isNaN(date.getTime())) return '';
@@ -164,6 +222,7 @@
       const instance = new AirDatepicker(customRangeStartInput, {
         autoClose: true,
         dateFormat: 'dd/MM/yyyy',
+        locale: AIR_DATEPICKER_LOCALE_ID,
         onSelect: ({ date }) => {
           if (date instanceof Date && !Number.isNaN(date.getTime())) {
             setDateInputValue(customRangeStartInput, date);
@@ -195,6 +254,7 @@
       const instance = new AirDatepicker(customRangeEndInput, {
         autoClose: true,
         dateFormat: 'dd/MM/yyyy',
+        locale: AIR_DATEPICKER_LOCALE_ID,
         onSelect: ({ date }) => {
           if (date instanceof Date && !Number.isNaN(date.getTime())) {
             setDateInputValue(customRangeEndInput, date);
