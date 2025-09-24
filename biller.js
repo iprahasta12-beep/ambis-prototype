@@ -306,7 +306,8 @@
       }
       if (accountNameEl) {
         if (account) {
-          accountNameEl.textContent = account.displayName || '';
+          const nickname = account.name || account.displayName || '';
+          accountNameEl.textContent = nickname;
           accountNameEl.classList.remove('hidden');
         } else {
           accountNameEl.textContent = '';
@@ -315,9 +316,9 @@
       }
       if (accountSubtitleEl) {
         if (account) {
-          const subtitle = account.subtitle || [account.company, account.number].filter(Boolean).join(' • ');
-          accountSubtitleEl.textContent = subtitle;
-          accountSubtitleEl.classList.toggle('hidden', !subtitle);
+          const accountNumber = account.number || formatAccountNumber(account.numberRaw) || '';
+          accountSubtitleEl.textContent = accountNumber;
+          accountSubtitleEl.classList.toggle('hidden', !accountNumber);
         } else {
           accountSubtitleEl.textContent = '';
           accountSubtitleEl.classList.add('hidden');
@@ -339,25 +340,15 @@
       return 'Rp0';
     }
 
-    function resolveRadioDotClass(account) {
-      const color = typeof account?.color === 'string' ? account.color.trim() : '';
-      if (!color) {
-        return 'bg-cyan-500';
-      }
-      const backgroundClass = color
-        .split(/\s+/)
-        .find((cls) => cls.startsWith('bg-'));
-      if (!backgroundClass) {
-        return 'bg-cyan-500';
-      }
-      return backgroundClass.replace(/-\d{2,3}$/u, '-500');
+    function resolveRadioDotClass() {
+      return 'bg-cyan-500';
     }
 
     function renderAccountOptions(selectedId) {
       if (!accountSheetList) return;
       const items = accountDisplayList.map((account) => {
         const avatarClasses = account.color || 'bg-cyan-100 text-cyan-600';
-        const radioDotClass = resolveRadioDotClass(account);
+        const radioDotClass = resolveRadioDotClass();
         const isSelected = account.id === selectedId;
         const selectedClasses = isSelected ? ` ${SHEET_SELECTED_CLASSES.join(' ')}` : '';
         const checkedAttr = isSelected ? ' checked' : '';
