@@ -21,7 +21,7 @@
       safelist: [
         "opacity-0","opacity-100","translate-y-0","translate-y-1",
         "ring-2","ring-cyan-400","bg-cyan-50","border-cyan-300",
-        "text-slate-900","text-slate-400"
+        "text-slate-900","text-slate-400","min-h-[56px]"
       ]
     };
   </script>
@@ -257,9 +257,15 @@
               <p id="idInputError" class="hidden text-sm text-rose-500"></p>
             </div>
 
-            <div>
-              <button id="savedNumberButton" type="button" class="rounded-xl border border-cyan-500 text-cyan-600 p-3 text-sm font-medium hover:bg-cyan-50">
-                Nomor Tersimpan
+            <div class="space-y-2">
+              <span class="block text-sm text-slate-600">Nomor Tersimpan</span>
+              <button id="savedNumberButton" type="button" class="w-full text-left rounded-xl border border-cyan-500 text-cyan-600 px-4 py-3 text-sm font-medium hover:bg-cyan-50">
+                <div class="flex items-center justify-between gap-3">
+                  <span id="savedNumberDisplay" class="truncate text-sm text-slate-400">Pilih nomor tersimpan</span>
+                  <svg class="w-4 h-4 text-current flex-none" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M7 5l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </div>
               </button>
             </div>
           </section>
@@ -282,6 +288,21 @@
         <div class="sticky bottom-0 bg-white p-4 border-t flex gap-3">
           <button id="sheetCancel" type="button" class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-medium text-slate-700 focus:outline-none hover:bg-slate-100">Batalkan</button>
           <button id="sheetConfirm" type="button" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 text-sm font-semibold opacity-50 cursor-not-allowed focus:outline-none" disabled>Pilih</button>
+        </div>
+      </div>
+      <div id="savedSheetOverlay" class="hidden absolute inset-0 bg-slate-900/30 opacity-0 transition-opacity duration-200 z-20"></div>
+      <div id="savedBottomSheet" class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col h-3/4 z-30">
+        <div class="relative flex items-center justify-center px-5 pt-5 pb-4 border-b border-slate-100">
+          <h3 class="text-base font-semibold text-slate-900 text-center">Nomor Tersimpan</h3>
+          <button id="savedSheetClose" type="button" class="absolute right-5 top-5 text-2xl leading-none text-slate-500 hover:text-slate-700 focus:outline-none" aria-label="Tutup pilihan nomor tersimpan">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <ul id="savedSheetList" class="divide-y divide-slate-100 list-none"></ul>
+          <div id="savedSheetEmpty" class="hidden px-6 py-10 text-sm text-slate-500 text-center">Belum ada nomor tersimpan untuk layanan ini.</div>
+        </div>
+        <div class="sticky bottom-0 bg-white border-t border-slate-100 p-4 flex gap-3">
+          <button id="savedSheetCancel" type="button" class="flex-1 rounded-xl border border-cyan-500 text-cyan-600 py-3 text-sm font-medium hover:bg-cyan-50">Tutup</button>
+          <button id="savedSheetConfirm" type="button" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 text-sm font-semibold opacity-50 cursor-not-allowed" disabled>Pilih Nomor</button>
         </div>
       </div>
     </div>
