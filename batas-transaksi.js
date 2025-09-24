@@ -16,10 +16,23 @@
   const infoBtn = document.getElementById('limitInfoBtn');
   const infoOverlay = document.getElementById('limitInfoOverlay');
   const infoCloseBtn = document.getElementById('limitInfoCloseBtn');
+  const successMessageEl = document.getElementById('limitSuccessMessage');
+  const confirmElements = {
+    container: document.getElementById('limitConfirmContainer'),
+    overlay: document.getElementById('limitConfirmOverlay'),
+    sheet: document.getElementById('limitConfirmSheet'),
+    previousValue: document.getElementById('limitConfirmPreviousValue'),
+    newValue: document.getElementById('limitConfirmNewValue'),
+    cancelBtn: document.getElementById('limitConfirmCancelBtn'),
+    proceedBtn: document.getElementById('limitConfirmProceedBtn'),
+  };
 
   let infoOverlayOpen = false;
 
   let currentLimit = 150_000_000;
+  let pendingNewLimit = null;
+  let confirmSheetOpen = false;
+  let successTimer = null;
 
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -75,6 +88,25 @@
     } catch (err) {
       // Ignore persistence errors.
     }
+  }
+
+  function hideSuccessMessage() {
+    if (!successMessageEl) return;
+    successMessageEl.classList.add('hidden');
+  }
+
+  function showSuccessMessage(message) {
+    if (!successMessageEl) return;
+    successMessageEl.textContent = message;
+    successMessageEl.classList.remove('hidden');
+    if (successTimer) {
+      clearTimeout(successTimer);
+      successTimer = null;
+    }
+    successTimer = setTimeout(() => {
+      hideSuccessMessage();
+      successTimer = null;
+    }, 4000);
   }
 
   function hideError() {
@@ -140,8 +172,80 @@
     return true;
   }
 
+  function openConfirmSheet(newLimitValue) {
+    const { container, overlay, sheet, previousValue, newValue } = confirmElements;
+    if (!overlay || !sheet) return;
+
+    pendingNewLimit = newLimitValue;
+    confirmSheetOpen = true;
+
+    if (previousValue) {
+      previousValue.textContent = formatCurrency(currentLimit);
+    }
+    if (newValue) {
+      newValue.textContent = formatCurrency(newLimitValue);
+    }
+
+    sheet.setAttribute('aria-hidden', 'false');
+
+    container?.classList.remove('pointer-events-none');
+
+    overlay.classList.remove('hidden');
+    overlay.classList.add('opacity-0');
+    overlay.classList.remove('opacity-100');
+
+    sheet.classList.add('translate-y-full');
+    sheet.classList.remove('translate-y-0');
+
+    requestAnimationFrame(() => {
+      overlay.classList.remove('opacity-0');
+      overlay.classList.add('opacity-100');
+      sheet.classList.remove('translate-y-full');
+      sheet.classList.add('translate-y-0');
+    });
+  }
+
+  function closeConfirmSheet(options = {}) {
+    const { container, overlay, sheet } = confirmElements;
+    if (!overlay || !sheet) return;
+    if (!confirmSheetOpen && !options.force) return;
+
+    confirmSheetOpen = false;
+    pendingNewLimit = null;
+    sheet.setAttribute('aria-hidden', 'true');
+
+    const finishClose = () => {
+      overlay.classList.add('hidden');
+      container?.classList.add('pointer-events-none');
+    };
+
+    if (options.immediate) {
+      overlay.classList.add('opacity-0');
+      overlay.classList.remove('opacity-100');
+      finishClose();
+      sheet.classList.add('translate-y-full');
+      sheet.classList.remove('translate-y-0');
+      return;
+    }
+
+    overlay.classList.remove('opacity-100');
+    overlay.classList.add('opacity-0');
+    sheet.classList.add('translate-y-full');
+    sheet.classList.remove('translate-y-0');
+
+    const handleTransitionEnd = (event) => {
+      if (event.target !== sheet) return;
+      finishClose();
+      sheet.removeEventListener('transitionend', handleTransitionEnd);
+    };
+
+    sheet.addEventListener('transitionend', handleTransitionEnd);
+  }
+
   function openDrawer() {
     if (!drawer) return;
+
+    closeConfirmSheet({ immediate: true });
 
     if (input) {
       input.value = '';
@@ -162,6 +266,7 @@
 
   function closeDrawer() {
     if (!drawer) return;
+    closeConfirmSheet({ immediate: true });
     drawer.classList.remove('open');
     closeInfoOverlay();
     if (typeof window.sidebarRestoreForDrawer === 'function') {
@@ -179,15 +284,13 @@
     closeDrawer();
   });
 
-  confirmBtn?.addEventListener('click', () => {
+  confirmBtn?.addEventListener('click', (event) => {
+    event.preventDefault();
     if (!validateInput()) return;
     const newValue = getInputValue();
     if (Number.isNaN(newValue)) return;
 
-    currentLimit = newValue;
-    persistLimit();
-    updateDisplays();
-    closeDrawer();
+    openConfirmSheet(newValue);
   });
 
   input?.addEventListener('input', () => {
@@ -230,9 +333,41 @@
   });
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && drawer?.classList.contains('open')) {
+    if (event.key !== 'Escape') return;
+    if (confirmSheetOpen) {
+      closeConfirmSheet();
+      return;
+    }
+    if (drawer?.classList.contains('open')) {
       closeDrawer();
     }
+  });
+
+  confirmElements.cancelBtn?.addEventListener('click', () => {
+    closeConfirmSheet();
+  });
+
+  confirmElements.overlay?.addEventListener('click', (event) => {
+    if (event.target === confirmElements.overlay) {
+      closeConfirmSheet();
+    }
+  });
+
+  confirmElements.proceedBtn?.addEventListener('click', () => {
+    if (typeof pendingNewLimit !== 'number' || Number.isNaN(pendingNewLimit)) {
+      closeConfirmSheet({ immediate: true, force: true });
+      return;
+    }
+
+    const newLimitValue = pendingNewLimit;
+
+    currentLimit = newLimitValue;
+    persistLimit();
+    updateDisplays();
+
+    closeConfirmSheet();
+    closeDrawer();
+    showSuccessMessage('Batas transaksi harian berhasil diperbarui.');
   });
 
   updateDisplays();
