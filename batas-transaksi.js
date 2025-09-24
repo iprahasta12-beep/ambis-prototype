@@ -27,6 +27,26 @@
     proceedBtn: document.getElementById('limitConfirmProceedBtn'),
   };
 
+  const otpElements = {
+    section: document.getElementById('limitOtpSection'),
+    inputs: Array.from(document.querySelectorAll('#limitOtpSection .otp-input')),
+    countdown: document.getElementById('limitOtpCountdown'),
+    countdownMessage: document.getElementById('limitOtpCountdownMessage'),
+    timer: document.getElementById('limitOtpTimer'),
+    resendBtn: document.getElementById('limitOtpResend'),
+    error: document.getElementById('limitOtpError'),
+  };
+
+  const OTP_DURATION_SECONDS = 30;
+  const OTP_DEFAULT_COUNTDOWN_MESSAGE = 'Sesi akan berakhir dalam';
+  const OTP_EXPIRED_MESSAGE = 'Kode OTP kedaluwarsa. Silakan kirim ulang kode untuk melanjutkan.';
+  const otpCountdownDefaultMessage =
+    otpElements.countdownMessage?.textContent?.trim() || OTP_DEFAULT_COUNTDOWN_MESSAGE;
+
+  let otpActive = false;
+  let otpIntervalId = null;
+  let otpTimeLeft = OTP_DURATION_SECONDS;
+
   let infoOverlayOpen = false;
 
   let currentLimit = 150_000_000;
@@ -121,6 +141,166 @@
     errorEl.classList.remove('hidden');
   }
 
+  function hideOtpError() {
+    if (!otpElements.error) return;
+    otpElements.error.textContent = '';
+    otpElements.error.classList.add('hidden');
+  }
+
+  function showOtpError(message) {
+    if (!otpElements.error) return;
+    otpElements.error.textContent = message;
+    otpElements.error.classList.remove('hidden');
+  }
+
+  function resetOtpInputs() {
+    otpElements.inputs.forEach((input) => {
+      input.value = '';
+    });
+  }
+
+  function isOtpFilled() {
+    if (!otpElements.inputs.length) return false;
+    return otpElements.inputs.every((input) => input.value && input.value.trim() !== '');
+  }
+
+  function clearOtpTimer() {
+    if (otpIntervalId) {
+      clearInterval(otpIntervalId);
+      otpIntervalId = null;
+    }
+  }
+
+  function formatOtpTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+  }
+
+  function updateOtpCountdownDisplay() {
+    if (otpElements.timer) {
+      otpElements.timer.textContent = formatOtpTime(otpTimeLeft);
+    }
+  }
+
+  function showOtpCountdownDefaultMessage() {
+    if (otpElements.countdownMessage) {
+      otpElements.countdownMessage.textContent = otpCountdownDefaultMessage;
+    }
+    if (otpElements.timer) {
+      otpElements.timer.classList.remove('hidden');
+    }
+  }
+
+  function showOtpExpiredMessage() {
+    if (otpElements.countdownMessage) {
+      otpElements.countdownMessage.textContent = OTP_EXPIRED_MESSAGE;
+    }
+    if (otpElements.timer) {
+      otpElements.timer.classList.add('hidden');
+    }
+  }
+
+  function updateOtpVerifyState() {
+    if (!confirmElements.proceedBtn) return;
+    if (!otpActive) {
+      confirmElements.proceedBtn.disabled = false;
+      return;
+    }
+
+    if (otpTimeLeft <= 0) {
+      confirmElements.proceedBtn.disabled = true;
+      return;
+    }
+
+    confirmElements.proceedBtn.disabled = !isOtpFilled();
+  }
+
+  function startOtpTimer() {
+    if (!otpActive) return;
+
+    if (otpElements.countdown) {
+      otpElements.countdown.classList.remove('hidden');
+    }
+    showOtpCountdownDefaultMessage();
+    hideOtpError();
+    if (otpElements.resendBtn) {
+      otpElements.resendBtn.classList.add('hidden');
+    }
+    otpTimeLeft = OTP_DURATION_SECONDS;
+    updateOtpCountdownDisplay();
+    clearOtpTimer();
+
+    otpIntervalId = setInterval(() => {
+      otpTimeLeft -= 1;
+      if (otpTimeLeft <= 0) {
+        otpTimeLeft = 0;
+        updateOtpCountdownDisplay();
+        clearOtpTimer();
+        showOtpExpiredMessage();
+        if (otpElements.resendBtn) {
+          otpElements.resendBtn.classList.remove('hidden');
+        }
+        showOtpError('Kode OTP kedaluwarsa. Silakan kirim ulang kode untuk melanjutkan.');
+        updateOtpVerifyState();
+        return;
+      }
+
+      updateOtpCountdownDisplay();
+    }, 1000);
+  }
+
+  function resetOtpState() {
+    otpActive = false;
+    clearOtpTimer();
+    otpTimeLeft = OTP_DURATION_SECONDS;
+    if (otpElements.section) {
+      otpElements.section.classList.add('hidden');
+    }
+    resetOtpInputs();
+    if (otpElements.countdown) {
+      otpElements.countdown.classList.remove('hidden');
+    }
+    showOtpCountdownDefaultMessage();
+    if (otpElements.timer) {
+      otpElements.timer.textContent = formatOtpTime(OTP_DURATION_SECONDS);
+      otpElements.timer.classList.remove('hidden');
+    }
+    if (otpElements.resendBtn) {
+      otpElements.resendBtn.classList.add('hidden');
+    }
+    hideOtpError();
+    if (confirmElements.proceedBtn) {
+      confirmElements.proceedBtn.textContent = 'Lanjut Ubah Batas Transaksi';
+      confirmElements.proceedBtn.disabled = false;
+    }
+    if (confirmElements.cancelBtn) {
+      confirmElements.cancelBtn.textContent = 'Batal';
+    }
+    updateOtpVerifyState();
+  }
+
+  function showOtpSection() {
+    if (!otpElements.section || !confirmElements.proceedBtn) return;
+
+    otpActive = true;
+    otpElements.section.classList.remove('hidden');
+    confirmElements.proceedBtn.textContent = 'Verifikasi';
+    confirmElements.proceedBtn.disabled = true;
+    if (confirmElements.cancelBtn) {
+      confirmElements.cancelBtn.textContent = 'Batalkan';
+    }
+    resetOtpInputs();
+    hideOtpError();
+    otpElements.inputs[0]?.focus();
+    startOtpTimer();
+    updateOtpVerifyState();
+  }
+
+  function getOtpValue() {
+    return otpElements.inputs.map((input) => input.value).join('');
+  }
+
   function sanitizeInputValue(rawValue) {
     const digitsOnly = rawValue.replace(/\D/g, '');
     if (!digitsOnly) return '';
@@ -179,6 +359,8 @@
     pendingNewLimit = newLimitValue;
     confirmSheetOpen = true;
 
+    resetOtpState();
+
     if (previousValue) {
       previousValue.textContent = formatCurrency(currentLimit);
     }
@@ -212,6 +394,7 @@
 
     confirmSheetOpen = false;
     pendingNewLimit = null;
+    resetOtpState();
     sheet.setAttribute('aria-hidden', 'true');
 
     const finishClose = () => {
@@ -353,13 +536,109 @@
     }
   });
 
-  confirmElements.proceedBtn?.addEventListener('click', () => {
+  otpElements.resendBtn?.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (!otpActive) return;
+    resetOtpInputs();
+    hideOtpError();
+    otpElements.inputs[0]?.focus();
+    startOtpTimer();
+    updateOtpVerifyState();
+  });
+
+  otpElements.inputs.forEach((input, index) => {
+    input.addEventListener('input', (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
+      const digits = target.value.replace(/\D/g, '');
+      target.value = digits.slice(-1);
+      if (target.value && index < otpElements.inputs.length - 1) {
+        otpElements.inputs[index + 1]?.focus();
+      }
+      hideOtpError();
+      updateOtpVerifyState();
+    });
+
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Backspace' && !input.value && index > 0) {
+        event.preventDefault();
+        const previous = otpElements.inputs[index - 1];
+        previous.value = '';
+        previous.focus();
+        updateOtpVerifyState();
+        return;
+      }
+      if (event.key === 'ArrowLeft' && index > 0) {
+        event.preventDefault();
+        otpElements.inputs[index - 1]?.focus();
+        return;
+      }
+      if (event.key === 'ArrowRight' && index < otpElements.inputs.length - 1) {
+        event.preventDefault();
+        otpElements.inputs[index + 1]?.focus();
+      }
+    });
+
+    input.addEventListener('paste', (event) => {
+      event.preventDefault();
+      const clipboard = event.clipboardData || window.clipboardData;
+      const text = clipboard?.getData('text') || '';
+      const digits = text.replace(/\D/g, '');
+      if (!digits) return;
+      resetOtpInputs();
+      const chars = digits.split('').slice(0, otpElements.inputs.length);
+      chars.forEach((char, charIndex) => {
+        otpElements.inputs[charIndex].value = char;
+      });
+      const focusIndex = Math.min(chars.length - 1, otpElements.inputs.length - 1);
+      if (focusIndex >= 0) {
+        otpElements.inputs[focusIndex].focus();
+      }
+      hideOtpError();
+      updateOtpVerifyState();
+    });
+
+    input.addEventListener('focus', () => {
+      if (input.value) {
+        input.select();
+      }
+    });
+  });
+
+  confirmElements.proceedBtn?.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    if (!otpActive) {
+      showOtpSection();
+      return;
+    }
+
+    if (!confirmElements.proceedBtn || confirmElements.proceedBtn.disabled) {
+      return;
+    }
+
+    if (otpTimeLeft <= 0) {
+      showOtpError('Kode OTP kedaluwarsa. Silakan kirim ulang kode untuk melanjutkan.');
+      confirmElements.proceedBtn.disabled = true;
+      return;
+    }
+
+    if (!isOtpFilled()) {
+      showOtpError('Masukkan kode OTP lengkap.');
+      confirmElements.proceedBtn.disabled = true;
+      return;
+    }
+
     if (typeof pendingNewLimit !== 'number' || Number.isNaN(pendingNewLimit)) {
       closeConfirmSheet({ immediate: true, force: true });
       return;
     }
 
     const newLimitValue = pendingNewLimit;
+
+    const otpValue = getOtpValue();
+    hideOtpError();
+    console.log('OTP submitted:', otpValue);
 
     currentLimit = newLimitValue;
     persistLimit();
