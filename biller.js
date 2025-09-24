@@ -162,9 +162,11 @@
 
     const accountSheet = document.getElementById('accountSheet');
     const accountSheetBackdrop = document.getElementById('accountSheetBackdrop');
-    const accountSheetPanel = document.getElementById('bottomSheet');
+    const accountSheetPanel = document.getElementById('accountSheetPanel');
     const accountSheetList = document.getElementById('accountSheetList');
     const accountSheetClose = document.getElementById('accountSheetClose');
+    const accountSheetCancel = document.getElementById('accountSheetCancel');
+    const accountSheetConfirm = document.getElementById('accountSheetConfirm');
 
     const sheet = document.getElementById('paymentSheet');
     const sheetBackdrop = document.getElementById('paymentSheetBackdrop');
@@ -233,6 +235,14 @@
       if (formattedNumber) subtitleParts.push(formattedNumber);
       const subtitle = subtitleParts.join(' • ');
 
+      const color = (typeof account.color === 'string' && account.color.trim())
+        ? account.color.trim()
+        : 'bg-cyan-100 text-cyan-600';
+      const initialSource = (typeof account.initial === 'string' && account.initial.trim())
+        ? account.initial.trim()
+        : (displayName || '').toString().trim();
+      const initial = initialSource ? initialSource.charAt(0).toUpperCase() : 'R';
+
       return {
         id,
         displayName,
@@ -241,6 +251,8 @@
         number: formattedNumber,
         numberRaw,
         balance: account.balance,
+        color,
+        initial,
       };
     }
 
@@ -265,6 +277,8 @@
       if (!accountSheet || accountSheet.classList.contains('hidden')) return;
       const immediate = Boolean(options.immediate);
       accountSheetOpen = false;
+      sheetSelectionId = appliedAccountId;
+      updateSheetActionState();
       accountButton?.setAttribute('aria-expanded', 'false');
       if (immediate) {
         accountSheet.classList.add('hidden');
@@ -281,6 +295,7 @@
 
     function openAccountSheet() {
       if (!accountSheet || accountSheetOpen) return;
+      sheetSelectionId = appliedAccountId;
       renderAccountList();
       accountSheet.classList.remove('hidden');
       accountButton?.setAttribute('aria-expanded', 'true');
@@ -291,80 +306,106 @@
       accountSheetOpen = true;
     }
 
+    function updateSheetActionState() {
+      const hasSelection = Boolean(sheetSelectionId);
+      if (accountSheetConfirm) {
+        accountSheetConfirm.disabled = !hasSelection;
+      }
+    }
+
     function renderAccountList() {
       accountSheetList.innerHTML = '';
       if (!accountDisplayList.length) {
+        sheetSelectionId = '';
         const empty = document.createElement('li');
-        empty.className = 'px-6 py-6 text-sm text-slate-500';
+        empty.className = 'px-4 py-6 text-center text-sm text-slate-500';
         empty.textContent = 'Tidak ada rekening tersedia.';
         accountSheetList.appendChild(empty);
+        updateSheetActionState();
         return;
       }
 
       accountDisplayList.forEach((account) => {
         const li = document.createElement('li');
+        li.className = 'list-none';
+
         const button = document.createElement('button');
         button.type = 'button';
         button.dataset.accountId = account.id;
-        button.className = 'w-full flex items-center gap-4 px-6 py-4 text-left hover:bg-slate-50 focus:outline-none';
-        if (account.id === selectedAccountId) {
-          button.classList.add('bg-cyan-50');
+        button.setAttribute('role', 'radio');
+        const isSelected = account.id === sheetSelectionId;
+        button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+        button.className = 'w-full flex items-center gap-4 rounded-xl border border-transparent bg-white px-4 py-3 text-left transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400';
+        if (isSelected) {
+          button.classList.add('border-cyan-300', 'bg-cyan-50');
         }
 
+        const avatar = document.createElement('div');
+        avatar.className = `flex h-10 w-10 flex-none items-center justify-center rounded-full text-sm font-semibold ${account.color || 'bg-cyan-100 text-cyan-600'}`;
+        const initialSource = (account.initial || account.displayName || '').toString().trim();
+        const initial = initialSource ? initialSource.charAt(0).toUpperCase() : 'R';
+        avatar.textContent = initial;
+        button.appendChild(avatar);
+
         const info = document.createElement('div');
-        info.className = 'flex-1 min-w-0';
+        info.className = 'min-w-0 flex-1';
         const title = document.createElement('p');
-        title.className = 'font-semibold text-slate-900 truncate';
+        title.className = 'truncate font-semibold text-slate-900';
         title.textContent = account.displayName;
         info.appendChild(title);
 
-        const subtitleText = account.subtitle || '';
+        const subtitleText = account.subtitle || [account.company, account.number].filter(Boolean).join(' • ');
         if (subtitleText) {
           const subtitle = document.createElement('p');
-          subtitle.className = 'text-sm text-slate-500 truncate';
+          subtitle.className = 'truncate text-sm text-slate-500';
           subtitle.textContent = subtitleText;
           info.appendChild(subtitle);
         }
-
         button.appendChild(info);
+
+        const trailing = document.createElement('div');
+        trailing.className = 'flex flex-none items-center gap-3';
 
         const balanceText = formatAccountBalance(account.balance);
         if (balanceText) {
           const balanceEl = document.createElement('p');
-          balanceEl.className = 'text-sm font-semibold text-slate-900 whitespace-nowrap';
+          balanceEl.className = 'whitespace-nowrap text-sm font-semibold text-slate-900 text-right';
           balanceEl.textContent = balanceText;
-          button.appendChild(balanceEl);
+          trailing.appendChild(balanceEl);
         }
 
         const indicator = document.createElement('span');
-        indicator.className = 'flex-none w-5 h-5 rounded-full border grid place-items-center';
-        if (account.id === selectedAccountId) {
-          indicator.classList.add('bg-cyan-500', 'border-cyan-500', 'text-white');
+        indicator.className = 'flex h-5 w-5 items-center justify-center rounded-full border transition-colors';
+        indicator.textContent = '✓';
+        if (isSelected) {
+          indicator.classList.add('border-cyan-500', 'bg-cyan-500', 'text-white');
         } else {
-          indicator.classList.add('border-slate-300');
+          indicator.classList.add('border-slate-300', 'text-transparent');
         }
-        const check = document.createElement('span');
-        check.className = 'text-xs font-semibold';
-        check.textContent = '✓';
-        if (account.id !== selectedAccountId) {
-          check.classList.add('hidden');
-        }
-        indicator.appendChild(check);
-        button.appendChild(indicator);
+        trailing.appendChild(indicator);
+
+        button.appendChild(trailing);
 
         button.addEventListener('click', () => {
-          setSelectedAccount(account.id);
-          closeAccountSheet();
+          setSheetSelection(account.id);
         });
 
         li.appendChild(button);
         accountSheetList.appendChild(li);
       });
+
+      updateSheetActionState();
     }
 
-    function setSelectedAccount(nextId) {
+    function setSheetSelection(nextId) {
       const resolvedId = accountMap.has(nextId) ? nextId : '';
-      selectedAccountId = resolvedId;
+      sheetSelectionId = resolvedId;
+      renderAccountList();
+    }
+
+    function applyAccountSelection(nextId) {
+      const resolvedId = accountMap.has(nextId) ? nextId : '';
+      appliedAccountId = resolvedId;
       const account = resolvedId ? accountMap.get(resolvedId) : null;
 
       if (accountPlaceholderEl) {
@@ -390,7 +431,6 @@
         }
       }
 
-      renderAccountList();
       updateConfirmState();
     }
 
@@ -402,7 +442,8 @@
     let idDirty = false;
     let sheetOpen = false;
     let accountSheetOpen = false;
-    let selectedAccountId = '';
+    let appliedAccountId = '';
+    let sheetSelectionId = '';
 
     function setActiveButton(next) {
       if (activeButton && activeButton !== next) {
@@ -466,7 +507,9 @@
       idError.classList.add('hidden');
       idError.textContent = '';
 
-      setSelectedAccount('');
+      applyAccountSelection('');
+      sheetSelectionId = appliedAccountId;
+      updateSheetActionState();
 
       applyValidationAttributes(currentValidation);
 
@@ -511,7 +554,7 @@
     }
 
     function updateConfirmState() {
-      const hasAccount = Boolean(selectedAccountId);
+      const hasAccount = Boolean(appliedAccountId);
       const { valid } = checkValidity(idInput.value);
       confirmBtn.disabled = !(hasAccount && valid);
     }
@@ -542,7 +585,7 @@
         : idInput.value.trim();
       idInput.value = sanitizedId;
 
-      const account = selectedAccountId ? accountMap.get(selectedAccountId) : null;
+      const account = appliedAccountId ? accountMap.get(appliedAccountId) : null;
       sheetBiller.textContent = config.title;
       sheetIdLabel.textContent = config.idCopy || 'ID Pelanggan';
       sheetIdValue.textContent = sanitizedId || '-';
@@ -652,6 +695,12 @@
 
     accountSheetBackdrop?.addEventListener('click', () => closeAccountSheet());
     accountSheetClose?.addEventListener('click', () => closeAccountSheet());
+    accountSheetCancel?.addEventListener('click', () => closeAccountSheet());
+    accountSheetConfirm?.addEventListener('click', () => {
+      if (!sheetSelectionId) return;
+      applyAccountSelection(sheetSelectionId);
+      closeAccountSheet();
+    });
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
