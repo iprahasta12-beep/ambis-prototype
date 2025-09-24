@@ -6,6 +6,11 @@
   const openBtn = document.getElementById('openLimitDrawerBtn');
   const closeBtn = document.getElementById('limitDrawerCloseBtn');
   const confirmBtn = document.getElementById('confirmLimitBtn');
+  const formSection = document.getElementById('limitFormSection');
+  const pendingSection = document.getElementById('limitPendingSection');
+  const pendingPreviousValueEl = document.getElementById('limitPendingPreviousValue');
+  const pendingNewValueEl = document.getElementById('limitPendingNewValue');
+  const pendingCloseBtn = document.getElementById('limitPendingCloseBtn');
   const input = document.getElementById('newLimitInput');
   const errorEl = document.getElementById('newLimitError');
   const drawerMaxEl = document.getElementById('drawerMaxLimit');
@@ -316,6 +321,33 @@
     return parseInt(digitsOnly, 10);
   }
 
+  function showFormView() {
+    if (formSection) {
+      formSection.classList.remove('hidden');
+    }
+    if (pendingSection) {
+      pendingSection.classList.add('hidden');
+    }
+  }
+
+  function showPendingView(previousLimit, newLimitValue) {
+    if (pendingPreviousValueEl) {
+      pendingPreviousValueEl.textContent = formatCurrency(previousLimit);
+    }
+    if (pendingNewValueEl) {
+      pendingNewValueEl.textContent = formatCurrency(newLimitValue);
+    }
+
+    if (pendingSection) {
+      pendingSection.classList.remove('hidden');
+    }
+    if (formSection) {
+      formSection.classList.add('hidden');
+    }
+
+    pendingCloseBtn?.focus?.();
+  }
+
   function validateInput() {
     if (!input || !confirmBtn) return false;
 
@@ -430,6 +462,8 @@
 
     closeConfirmSheet({ immediate: true });
 
+    showFormView();
+
     if (input) {
       input.value = '';
     }
@@ -452,6 +486,7 @@
     closeConfirmSheet({ immediate: true });
     drawer.classList.remove('open');
     closeInfoOverlay();
+    showFormView();
     if (typeof window.sidebarRestoreForDrawer === 'function') {
       window.sidebarRestoreForDrawer();
     }
@@ -634,19 +669,20 @@
       return;
     }
 
+    const previousLimitValue = currentLimit;
     const newLimitValue = pendingNewLimit;
 
     const otpValue = getOtpValue();
     hideOtpError();
     console.log('OTP submitted:', otpValue);
 
-    currentLimit = newLimitValue;
-    persistLimit();
-    updateDisplays();
-
     closeConfirmSheet();
+    showPendingView(previousLimitValue, newLimitValue);
+  });
+
+  pendingCloseBtn?.addEventListener('click', (event) => {
+    event.preventDefault();
     closeDrawer();
-    showSuccessMessage('Batas transaksi harian berhasil diperbarui.');
   });
 
   updateDisplays();
