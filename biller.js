@@ -339,19 +339,28 @@
         const checkedAttr = isSelected ? ' checked' : '';
         return `
       <li>
-        <label data-account-id="${account.id}" class="sheet-item flex items-center justify-between gap-3 px-4 py-3 border-b cursor-pointer transition-colors hover:bg-slate-50 focus:outline-none${selectedClasses}">
-          <div class="flex items-center gap-3 flex-1 min-w-0">
-            <div class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center font-semibold ${avatarClasses}">${account.initial || 'R'}</div>
-            <div class="min-w-0 space-y-1">
-              <p class="font-semibold text-base text-slate-900">${account.displayName || 'Rekening'}</p>
-              ${subtitle ? `<p class="text-sm text-slate-500">${subtitle}</p>` : ''}
-            </div>
+        <button type="button" data-account-id="${account.id}" class="sheet-item w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 focus:outline-none ${selectedClasses}">
+          <!-- Avatar -->
+          <div class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center font-semibold ${avatarClasses}">
+            ${account.initial || 'R'}
           </div>
-          <div class="flex items-center gap-4 pl-4">
-            <span class="text-sm font-semibold text-slate-900 whitespace-nowrap">${formatAccountBalance(account.balance)}</span>
-            <input type="radio" name="sheetAccountOption" value="${account.id}" class="w-4 h-4 accent-cyan-500"${checkedAttr} />
+      
+          <!-- Account info -->
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-base text-slate-900">${account.displayName || 'Rekening'}</p>
+            ${subtitle ? `<p class="text-sm text-slate-500">${subtitle}</p>` : ''}
           </div>
-        </label>
+      
+          <!-- Balance -->
+          <div class="text-sm font-semibold text-slate-900 whitespace-nowrap mr-2">
+            ${formatAccountBalance(account.balance)}
+          </div>
+      
+          <!-- Custom radio -->
+          <span class="ml-2 w-5 h-5 rounded-full border border-slate-300 grid place-items-center">
+            <span class="radio-dot w-2 h-2 rounded-full bg-cyan-500 ${checkedAttr ? '' : 'hidden'}"></span>
+          </span>
+        </button>
       </li>`;
       });
       accountSheetList.innerHTML = items.join('');
