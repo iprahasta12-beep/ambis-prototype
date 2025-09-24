@@ -135,6 +135,45 @@
     },
   };
 
+  const SAVED_NUMBERS = {
+    'token-listrik': [
+      { id: '45093051325', name: 'Ramero Carlo' },
+      { id: '0992837566', name: 'Bill Listeria' },
+      { id: '88771288234', name: 'Gudang Jakarta' },
+    ],
+    'tagihan-listrik': [
+      { id: '56009800321', name: 'CV Andalas' },
+      { id: '88771288234', name: 'Rumah Utama' },
+      { id: '66781200345', name: 'Toko Sore' },
+    ],
+    indihome: [
+      { id: '120034556788', name: 'Cabang Bandung' },
+      { id: '120034556799', name: 'Ruko Merpati' },
+    ],
+    myrepublic: [
+      { id: '8899322001', name: 'Kantor Utama' },
+      { id: '8899322002', name: 'Gudang Utama' },
+    ],
+    cbn: [
+      { id: '7788200345', name: 'CBN Operasional' },
+    ],
+    iconnet: [
+      { id: '223300145678', name: 'Iconnet Lantai 3' },
+    ],
+    'bpjs-keluarga': [
+      { id: '8888800123456789', name: 'BPJS Keluarga Utama' },
+    ],
+    'bpjs-badan-usaha': [
+      { id: '8888800456123789', name: 'BPJS Badan Usaha' },
+    ],
+    'bpjstk-penerima-upah': [
+      { id: '888880011223', name: 'BPJSTK Karyawan' },
+    ],
+    'bpjstk-bukan-penerima-upah': [
+      { id: '888880099887', name: 'BPJSTK Mandiri' },
+    ],
+  };
+
   function mergeValidation(config) {
     if (!config || !config.validation) {
       return { ...DEFAULT_VALIDATION };
@@ -177,6 +216,14 @@
     const accountSheetCancel = document.getElementById('sheetCancel');
     const accountSheetConfirm = document.getElementById('sheetConfirm');
     const accountSheetList = document.getElementById('sheetList');
+    const savedDisplay = document.getElementById('savedNumberDisplay');
+    const savedSheetOverlay = document.getElementById('savedSheetOverlay');
+    const savedBottomSheet = document.getElementById('savedBottomSheet');
+    const savedSheetClose = document.getElementById('savedSheetClose');
+    const savedSheetCancel = document.getElementById('savedSheetCancel');
+    const savedSheetConfirm = document.getElementById('savedSheetConfirm');
+    const savedSheetList = document.getElementById('savedSheetList');
+    const savedSheetEmpty = document.getElementById('savedSheetEmpty');
 
     if (!drawer || !drawerInner || !drawerTitle || !notesList || !idInput || !confirmBtn) {
       return;
@@ -470,6 +517,214 @@
       closeAccountSheet();
     }
 
+    function getSavedOptions(key) {
+      if (!key) return [];
+      if (savedOptionsCache.has(key)) {
+        return savedOptionsCache.get(key);
+      }
+      const source = Array.isArray(SAVED_NUMBERS[key]) ? SAVED_NUMBERS[key] : [];
+      const options = source
+        .map((item, index) => {
+          if (!item) return null;
+          const rawNumber = (item.number ?? item.id ?? '').toString().trim();
+          if (!rawNumber) return null;
+          const optionId = (item.id ?? '').toString().trim() || `saved-${index}`;
+          const name = (item.name ?? '').toString().trim();
+          return {
+            id: optionId,
+            name,
+            number: rawNumber,
+          };
+        })
+        .filter(Boolean);
+      savedOptionsCache.set(key, options);
+      return options;
+    }
+
+    function getSavedDisplayText(selection) {
+      if (!selection) return '';
+      const number = selection.number || selection.value || '';
+      if (selection.name) {
+        return `${selection.name} – ${number}`;
+      }
+      return number;
+    }
+
+    function updateSavedDisplayForKey(key) {
+      if (!savedDisplay) return;
+      const selection = savedSelections.get(key);
+      if (!selection) {
+        savedDisplay.textContent = 'Pilih nomor tersimpan';
+        savedDisplay.classList.add('text-slate-400');
+        savedDisplay.classList.remove('text-slate-900', 'font-semibold');
+        return;
+      }
+      savedDisplay.textContent = getSavedDisplayText(selection);
+      savedDisplay.classList.remove('text-slate-400');
+      savedDisplay.classList.add('text-slate-900', 'font-semibold');
+    }
+
+    function applySavedValueToInput(key) {
+      if (!idInput) return;
+      const selection = savedSelections.get(key);
+      if (!selection) return;
+      const baseValue = (selection.value ?? selection.number ?? '').toString();
+      if (!baseValue) return;
+      const sanitized = typeof currentValidation.sanitize === 'function'
+        ? currentValidation.sanitize(baseValue)
+        : baseValue;
+      if (sanitized !== idInput.value) {
+        idInput.value = sanitized;
+      }
+      if (sanitized.trim()) {
+        idDirty = true;
+      }
+    }
+
+    function setSavedSheetConfirmState(enabled) {
+      if (!savedSheetConfirm) return;
+      savedSheetConfirm.disabled = !enabled;
+      savedSheetConfirm.classList.toggle('opacity-50', !enabled);
+      savedSheetConfirm.classList.toggle('cursor-not-allowed', !enabled);
+      savedSheetConfirm.classList.toggle('hover:bg-cyan-600', enabled);
+    }
+
+    function renderSavedOptions(selectedId) {
+      if (!savedSheetList) return;
+      savedSheetList.innerHTML = '';
+      const options = getSavedOptions(activeKey);
+      if (!options.length) {
+        savedSheetEmpty?.classList.remove('hidden');
+        setSavedSheetConfirmState(false);
+        return;
+      }
+      savedSheetEmpty?.classList.add('hidden');
+      options.forEach((option) => {
+        const li = document.createElement('li');
+        const label = document.createElement('label');
+        label.setAttribute('data-saved-id', option.id);
+        label.className = 'flex w-full items-center justify-between gap-3 px-5 py-3 min-h-[56px] cursor-pointer hover:bg-slate-50 transition-colors';
+
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'savedNumberOption';
+        radio.value = option.id;
+        radio.className = 'hidden';
+
+        const left = document.createElement('div');
+        left.className = 'flex-1 min-w-0';
+
+        const primary = document.createElement('p');
+        primary.className = 'text-sm font-semibold text-slate-900 truncate';
+        primary.textContent = option.name || 'Tanpa Nama';
+
+        const secondary = document.createElement('p');
+        secondary.className = 'text-xs text-slate-500 truncate';
+        secondary.textContent = option.number;
+
+        left.appendChild(primary);
+        left.appendChild(secondary);
+
+        const radioVisual = document.createElement('span');
+        radioVisual.className = 'saved-radio w-5 h-5 flex items-center justify-center rounded-full border border-slate-300 transition-colors';
+
+        const dot = document.createElement('span');
+        dot.className = 'saved-radio-dot w-2.5 h-2.5 rounded-full bg-cyan-500 hidden';
+        radioVisual.appendChild(dot);
+
+        label.appendChild(radio);
+        label.appendChild(left);
+        label.appendChild(radioVisual);
+        li.appendChild(label);
+        savedSheetList.appendChild(li);
+      });
+      selectSavedNumber(selectedId);
+    }
+
+    function openSavedSheet() {
+      if (!savedSheetOverlay || !savedBottomSheet) return;
+      if (!activeKey) return;
+      closeAccountSheet({ immediate: true });
+      closePaymentSheet({ immediate: true });
+      pendingSavedId = savedSelections.get(activeKey)?.id || '';
+      renderSavedOptions(pendingSavedId);
+      if (savedSheetList && !savedSheetList.children.length) {
+        setSavedSheetConfirmState(false);
+      }
+      savedSheetOverlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        savedSheetOverlay.classList.add('opacity-100');
+        savedBottomSheet.classList.remove('translate-y-full');
+      });
+      savedSheetOpen = true;
+    }
+
+    function closeSavedSheet(options = {}) {
+      if (!savedSheetOverlay || !savedBottomSheet) return;
+      const immediate = Boolean(options.immediate);
+      savedSheetOpen = false;
+      if (immediate) {
+        savedSheetOverlay.classList.remove('opacity-100');
+        savedSheetOverlay.classList.add('hidden');
+        savedBottomSheet.classList.add('translate-y-full');
+        pendingSavedId = savedSelections.get(activeKey)?.id || '';
+        return;
+      }
+      savedSheetOverlay.classList.remove('opacity-100');
+      savedBottomSheet.classList.add('translate-y-full');
+      setTimeout(() => {
+        savedSheetOverlay.classList.add('hidden');
+        pendingSavedId = savedSelections.get(activeKey)?.id || '';
+      }, 220);
+    }
+
+    function selectSavedNumber(optionId) {
+      if (!savedSheetList) {
+        setSavedSheetConfirmState(false);
+        return;
+      }
+      pendingSavedId = optionId || '';
+      const labels = savedSheetList.querySelectorAll('label[data-saved-id]');
+      labels.forEach((label) => {
+        const isMatch = label.getAttribute('data-saved-id') === optionId;
+        label.classList.toggle('bg-cyan-50', isMatch);
+        const radio = label.querySelector('input[type="radio"]');
+        if (radio) {
+          radio.checked = isMatch;
+        }
+        const visual = label.querySelector('.saved-radio');
+        if (visual) {
+          visual.classList.toggle('border-cyan-500', isMatch);
+          visual.classList.toggle('border-slate-300', !isMatch);
+        }
+        const dot = label.querySelector('.saved-radio-dot');
+        if (dot) {
+          dot.classList.toggle('hidden', !isMatch);
+        }
+      });
+      setSavedSheetConfirmState(Boolean(optionId));
+    }
+
+    function applySavedSelection(optionId) {
+      if (!activeKey) return;
+      const option = getSavedOptions(activeKey).find((item) => item.id === optionId);
+      if (!option) return;
+      const sanitizedValue = typeof currentValidation.sanitize === 'function'
+        ? currentValidation.sanitize(option.number)
+        : option.number;
+      const selection = {
+        id: option.id,
+        name: option.name,
+        number: option.number,
+        value: sanitizedValue,
+      };
+      savedSelections.set(activeKey, selection);
+      updateSavedDisplayForKey(activeKey);
+      applySavedValueToInput(activeKey);
+      updateIdError();
+      updateConfirmState();
+    }
+
     const ACTIVE_CLASSES = ['ring-2', 'ring-cyan-400', 'border-cyan-300', 'bg-cyan-50'];
 
     let activeButton = null;
@@ -478,8 +733,12 @@
     let idDirty = false;
     let paymentSheetOpen = false;
     let accountSheetOpen = false;
+    let savedSheetOpen = false;
     let appliedAccountId = '';
     let pendingAccountId = '';
+    let pendingSavedId = '';
+    const savedSelections = new Map();
+    const savedOptionsCache = new Map();
 
     rebuildAccountCollections();
     applyAccountSelection(appliedAccountId);
@@ -547,6 +806,12 @@
       idError.textContent = '';
 
       applyValidationAttributes(currentValidation);
+
+      pendingSavedId = savedSelections.get(key)?.id || '';
+      updateSavedDisplayForKey(key);
+      applySavedValueToInput(key);
+      updateIdError();
+      updateConfirmState();
 
       requestAnimationFrame(() => {
         idInput.focus({ preventScroll: true });
@@ -639,6 +904,7 @@
     function openDrawer(key, button) {
       const config = BILLER_CONFIG[key];
       if (!config) return;
+      closeSavedSheet({ immediate: true });
       closeAccountSheet({ immediate: true });
       closePaymentSheet({ immediate: true });
       setActiveButton(button);
@@ -661,6 +927,7 @@
       if (!drawer.classList.contains('open')) return;
       drawerInner.classList.remove('opacity-100', 'translate-x-0');
       drawerInner.classList.add('opacity-0', 'translate-x-4');
+      closeSavedSheet({ immediate: true });
       closeAccountSheet({ immediate: true });
       closePaymentSheet({ immediate: true });
       setTimeout(() => {
@@ -730,7 +997,31 @@
     });
 
     savedBtn?.addEventListener('click', () => {
-      console.info('Fitur nomor tersimpan belum tersedia dalam prototipe ini.');
+      if (!activeKey) return;
+      openSavedSheet();
+    });
+
+    savedSheetOverlay?.addEventListener('click', () => closeSavedSheet());
+    savedSheetClose?.addEventListener('click', () => closeSavedSheet());
+    savedSheetCancel?.addEventListener('click', () => closeSavedSheet());
+    savedSheetConfirm?.addEventListener('click', () => {
+      if (!pendingSavedId) return;
+      applySavedSelection(pendingSavedId);
+      closeSavedSheet();
+    });
+
+    savedSheetList?.addEventListener('click', (event) => {
+      const label = event.target.closest('label[data-saved-id]');
+      if (!label) return;
+      const optionId = label.getAttribute('data-saved-id');
+      if (!optionId) return;
+      selectSavedNumber(optionId);
+    });
+
+    savedSheetList?.addEventListener('change', (event) => {
+      const target = event.target;
+      if (!target || target.type !== 'radio' || target.name !== 'savedNumberOption') return;
+      selectSavedNumber(target.value);
     });
 
     paymentSheetBackdrop?.addEventListener('click', () => closePaymentSheet());
@@ -743,7 +1034,9 @@
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
-        if (accountSheetOpen) {
+        if (savedSheetOpen) {
+          closeSavedSheet();
+        } else if (accountSheetOpen) {
           closeAccountSheet();
         } else if (paymentSheetOpen) {
           closePaymentSheet();
