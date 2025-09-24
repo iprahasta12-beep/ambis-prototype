@@ -159,17 +159,24 @@
     const closeBtn = document.getElementById('drawerCloseBtn');
     const savedBtn = document.getElementById('savedNumberButton');
 
-    const sheet = document.getElementById('paymentSheet');
-    const sheetBackdrop = document.getElementById('paymentSheetBackdrop');
-    const sheetPanel = document.getElementById('paymentSheetPanel');
-    const sheetClose = document.getElementById('paymentSheetClose');
-    const sheetCancel = document.getElementById('paymentSheetCancel');
-    const sheetConfirm = document.getElementById('paymentSheetConfirm');
+    const paymentSheet = document.getElementById('paymentSheet');
+    const paymentSheetBackdrop = document.getElementById('paymentSheetBackdrop');
+    const paymentSheetPanel = document.getElementById('paymentSheetPanel');
+    const paymentSheetClose = document.getElementById('paymentSheetClose');
+    const paymentSheetCancel = document.getElementById('paymentSheetCancel');
+    const paymentSheetConfirm = document.getElementById('paymentSheetConfirm');
     const sheetBiller = document.getElementById('sheetBiller');
     const sheetAccountName = document.getElementById('sheetAccountName');
     const sheetAccountNumber = document.getElementById('sheetAccountNumber');
     const sheetIdLabel = document.getElementById('sheetIdLabel');
     const sheetIdValue = document.getElementById('sheetIdValue');
+    const moveSourceButton = document.getElementById('moveSourceButton');
+    const accountSheetOverlay = document.getElementById('sheetOverlay');
+    const accountBottomSheet = document.getElementById('bottomSheet');
+    const accountSheetClose = document.getElementById('sheetClose');
+    const accountSheetCancel = document.getElementById('sheetCancel');
+    const accountSheetConfirm = document.getElementById('sheetConfirm');
+    const accountSheetList = document.getElementById('sheetList');
 
     if (!drawer || !drawerInner || !drawerTitle || !notesList || !idInput || !confirmBtn) {
       return;
@@ -207,6 +214,7 @@
 
     const accountMap = new Map();
     const accountDisplayList = [];
+    const currencyFormatter = new Intl.NumberFormat('id-ID');
 
     function normaliseAccount(account, index) {
       if (!account) return null;
@@ -255,6 +263,7 @@
     function applyAccountSelection(nextId) {
       const resolvedId = accountMap.has(nextId) ? nextId : '';
       appliedAccountId = resolvedId;
+      pendingAccountId = resolvedId;
       const account = resolvedId ? accountMap.get(resolvedId) : null;
 
       if (accountPlaceholderEl) {
@@ -283,17 +292,129 @@
       updateConfirmState();
     }
 
+    const SHEET_SELECTED_CLASSES = ['ring-2', 'ring-cyan-400', 'bg-cyan-50'];
+
+    function formatAccountBalance(balance) {
+      if (typeof balance === 'number' && Number.isFinite(balance)) {
+        return `Rp${currencyFormatter.format(balance)}`;
+      }
+      if (typeof balance === 'string' && balance.trim()) {
+        return balance;
+      }
+      return 'Rp0';
+    }
+
+    function resolveAccountSubtitle(account) {
+      if (!account) return '';
+      if (account.subtitle) return account.subtitle;
+      const parts = [];
+      if (account.company) parts.push(account.company);
+      if (account.number) parts.push(account.number);
+      return parts.join(' • ');
+    }
+
+    function renderAccountOptions(selectedId) {
+      if (!accountSheetList) return;
+      const items = accountDisplayList.map((account) => {
+        const subtitle = resolveAccountSubtitle(account);
+        const isSelected = account.id === selectedId;
+        const selectedClasses = isSelected ? ` ${SHEET_SELECTED_CLASSES.join(' ')}` : '';
+        const dotHiddenClass = isSelected ? '' : ' hidden';
+        return `
+      <li>
+        <button type="button" data-account-id="${account.id}" class="sheet-item w-full flex items-center gap-3 px-4 py-4 text-left border border-transparent rounded-xl${selectedClasses}">
+          <div class="w-10 h-10 rounded-full ${account.color || 'bg-cyan-100 text-cyan-600'} flex items-center justify-center font-semibold">${account.initial || 'R'}</div>
+          <div class="flex-1 min-w-0 space-y-1">
+            <p class="font-medium text-sm text-slate-900 truncate">${account.displayName || 'Rekening'}</p>
+            ${subtitle ? `<p class="text-xs text-slate-500 truncate">${subtitle}</p>` : ''}
+            <p class="text-xs text-slate-500">Saldo: ${formatAccountBalance(account.balance)}</p>
+          </div>
+          <span class="ml-2 w-5 h-5 rounded-full border border-slate-300 grid place-items-center">
+            <span class="radio-dot w-2 h-2 rounded-full bg-cyan-500${dotHiddenClass}"></span>
+          </span>
+        </button>
+      </li>`;
+      });
+      accountSheetList.innerHTML = items.join('');
+    }
+
+    function setAccountSheetConfirmState(enabled) {
+      if (!accountSheetConfirm) return;
+      accountSheetConfirm.disabled = !enabled;
+      accountSheetConfirm.classList.toggle('opacity-50', !enabled);
+      accountSheetConfirm.classList.toggle('cursor-not-allowed', !enabled);
+    }
+
+    function openAccountSheet() {
+      if (!moveSourceButton || !accountSheetOverlay || !accountBottomSheet) return;
+      if (!accountDisplayList.length) return;
+      renderAccountOptions(pendingAccountId);
+      setAccountSheetConfirmState(Boolean(pendingAccountId));
+      accountSheetOverlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        accountSheetOverlay.classList.add('opacity-100');
+        accountBottomSheet.classList.remove('translate-y-full');
+      });
+      accountSheetOpen = true;
+    }
+
+    function closeAccountSheet(options = {}) {
+      if (!accountSheetOverlay || !accountBottomSheet) return;
+      const immediate = Boolean(options.immediate);
+      accountSheetOpen = false;
+      if (immediate) {
+        accountSheetOverlay.classList.remove('opacity-100');
+        accountSheetOverlay.classList.add('hidden');
+        accountBottomSheet.classList.add('translate-y-full');
+        pendingAccountId = appliedAccountId;
+        return;
+      }
+      accountSheetOverlay.classList.remove('opacity-100');
+      accountBottomSheet.classList.add('translate-y-full');
+      setTimeout(() => {
+        accountSheetOverlay.classList.add('hidden');
+        pendingAccountId = appliedAccountId;
+      }, 220);
+    }
+
+    function selectAccount(accountId, button) {
+      if (!accountSheetList || !accountId) return;
+      pendingAccountId = accountId;
+      accountSheetList.querySelectorAll('button[data-account-id]').forEach((item) => {
+        item.classList.remove(...SHEET_SELECTED_CLASSES);
+        const dot = item.querySelector('.radio-dot');
+        if (dot) {
+          dot.classList.add('hidden');
+        }
+      });
+      if (button) {
+        button.classList.add(...SHEET_SELECTED_CLASSES);
+        const dot = button.querySelector('.radio-dot');
+        if (dot) {
+          dot.classList.remove('hidden');
+        }
+      }
+      setAccountSheetConfirmState(true);
+    }
+
+    function confirmAccount() {
+      if (!pendingAccountId) return;
+      applyAccountSelection(pendingAccountId);
+      closeAccountSheet();
+    }
+
     const ACTIVE_CLASSES = ['ring-2', 'ring-cyan-400', 'border-cyan-300', 'bg-cyan-50'];
 
     let activeButton = null;
     let activeKey = '';
     let currentValidation = { ...DEFAULT_VALIDATION };
     let idDirty = false;
-    let sheetOpen = false;
+    let paymentSheetOpen = false;
+    let accountSheetOpen = false;
     let appliedAccountId = '';
+    let pendingAccountId = '';
 
-    const defaultAccountId = accountDisplayList.length ? accountDisplayList[0].id : '';
-    applyAccountSelection(defaultAccountId);
+    applyAccountSelection('');
 
     function setActiveButton(next) {
       if (activeButton && activeButton !== next) {
@@ -405,25 +526,25 @@
       confirmBtn.disabled = !(hasAccount && valid);
     }
 
-    function closeSheet(options = {}) {
-      if (!sheet || sheet.classList.contains('hidden')) return;
+    function closePaymentSheet(options = {}) {
+      if (!paymentSheet || paymentSheet.classList.contains('hidden')) return;
       const immediate = Boolean(options.immediate);
-      sheetOpen = false;
+      paymentSheetOpen = false;
       if (immediate) {
-        sheet.classList.add('hidden');
-        sheetBackdrop?.classList.add('opacity-0');
-        sheetPanel?.classList.add('translate-y-full');
+        paymentSheet.classList.add('hidden');
+        paymentSheetBackdrop?.classList.add('opacity-0');
+        paymentSheetPanel?.classList.add('translate-y-full');
         return;
       }
-      sheetBackdrop?.classList.add('opacity-0');
-      sheetPanel?.classList.add('translate-y-full');
+      paymentSheetBackdrop?.classList.add('opacity-0');
+      paymentSheetPanel?.classList.add('translate-y-full');
       setTimeout(() => {
-        sheet.classList.add('hidden');
+        paymentSheet.classList.add('hidden');
       }, 220);
     }
 
-    function openSheet() {
-      if (!sheet || !activeKey) return;
+    function openPaymentSheet() {
+      if (!paymentSheet || !activeKey) return;
       const config = BILLER_CONFIG[activeKey];
       if (!config) return;
       const sanitizedId = typeof currentValidation.sanitize === 'function'
@@ -439,18 +560,19 @@
       const accountSubtitle = account?.subtitle || [account?.company, account?.number].filter(Boolean).join(' • ');
       sheetAccountNumber.textContent = accountSubtitle || '-';
 
-      sheet.classList.remove('hidden');
+      paymentSheet.classList.remove('hidden');
       requestAnimationFrame(() => {
-        sheetBackdrop?.classList.remove('opacity-0');
-        sheetPanel?.classList.remove('translate-y-full');
+        paymentSheetBackdrop?.classList.remove('opacity-0');
+        paymentSheetPanel?.classList.remove('translate-y-full');
       });
-      sheetOpen = true;
+      paymentSheetOpen = true;
     }
 
     function openDrawer(key, button) {
       const config = BILLER_CONFIG[key];
       if (!config) return;
-      closeSheet({ immediate: true });
+      closeAccountSheet({ immediate: true });
+      closePaymentSheet({ immediate: true });
       setActiveButton(button);
       const wasClosed = !drawer.classList.contains('open');
       applyConfig(key, config);
@@ -471,7 +593,8 @@
       if (!drawer.classList.contains('open')) return;
       drawerInner.classList.remove('opacity-100', 'translate-x-0');
       drawerInner.classList.add('opacity-0', 'translate-x-4');
-      closeSheet({ immediate: true });
+      closeAccountSheet({ immediate: true });
+      closePaymentSheet({ immediate: true });
       setTimeout(() => {
         drawer.classList.remove('open');
         if (typeof window.sidebarRestoreForDrawer === 'function') {
@@ -491,6 +614,20 @@
 
     closeBtn?.addEventListener('click', () => {
       closeDrawer();
+    });
+
+    moveSourceButton?.addEventListener('click', openAccountSheet);
+
+    accountSheetOverlay?.addEventListener('click', () => closeAccountSheet());
+    accountSheetClose?.addEventListener('click', () => closeAccountSheet());
+    accountSheetCancel?.addEventListener('click', () => closeAccountSheet());
+    accountSheetConfirm?.addEventListener('click', confirmAccount);
+
+    accountSheetList?.addEventListener('click', (event) => {
+      const button = event.target.closest('button[data-account-id]');
+      if (!button) return;
+      const accountId = button.getAttribute('data-account-id');
+      selectAccount(accountId, button);
     });
 
     idInput.addEventListener('input', () => {
@@ -518,25 +655,27 @@
       if (confirmBtn.disabled) return;
       const valid = updateIdError(true);
       if (!valid) return;
-      openSheet();
+      openPaymentSheet();
     });
 
     savedBtn?.addEventListener('click', () => {
       console.info('Fitur nomor tersimpan belum tersedia dalam prototipe ini.');
     });
 
-    sheetBackdrop?.addEventListener('click', () => closeSheet());
-    sheetClose?.addEventListener('click', () => closeSheet());
-    sheetCancel?.addEventListener('click', () => closeSheet());
-    sheetConfirm?.addEventListener('click', () => {
-      closeSheet();
+    paymentSheetBackdrop?.addEventListener('click', () => closePaymentSheet());
+    paymentSheetClose?.addEventListener('click', () => closePaymentSheet());
+    paymentSheetCancel?.addEventListener('click', () => closePaymentSheet());
+    paymentSheetConfirm?.addEventListener('click', () => {
+      closePaymentSheet();
       console.info('Konfirmasi pembayaran diproses (mock).');
     });
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
-        if (sheetOpen) {
-          closeSheet();
+        if (accountSheetOpen) {
+          closeAccountSheet();
+        } else if (paymentSheetOpen) {
+          closePaymentSheet();
         } else {
           closeDrawer();
         }
