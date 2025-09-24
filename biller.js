@@ -152,9 +152,7 @@
     const idHint = document.getElementById('idInputHint');
     const idInput = document.getElementById('billerIdInput');
     const idError = document.getElementById('idInputError');
-    const accountDisplayEl = document.getElementById('sourceAccountDisplay');
     const accountNameEl = document.getElementById('sourceAccountName');
-    const accountSeparatorEl = document.getElementById('sourceAccountSeparator');
     const accountSubtitleEl = document.getElementById('sourceAccountSubtitle');
     const accountPlaceholderEl = document.getElementById('sourceAccountPlaceholder');
     const confirmBtn = document.getElementById('confirmPaymentBtn');
@@ -303,40 +301,28 @@
       pendingAccountId = resolvedId;
       const account = resolvedId ? accountMap.get(resolvedId) : null;
 
-      if (accountDisplayEl) {
-        accountDisplayEl.classList.toggle('hidden', !account);
-      }
       if (accountPlaceholderEl) {
         accountPlaceholderEl.classList.toggle('hidden', Boolean(account));
       }
-
-      const nickname = account ? account.name || account.displayName || '' : '';
-      const accountNumber = account
-        ? account.number || formatAccountNumber(account.numberRaw) || ''
-        : '';
-
       if (accountNameEl) {
-        accountNameEl.textContent = nickname;
-        if (nickname) {
-          accountNameEl.setAttribute('title', nickname);
+        if (account) {
+          const nickname = account.name || account.displayName || '';
+          accountNameEl.textContent = nickname;
+          accountNameEl.classList.remove('hidden');
         } else {
-          accountNameEl.removeAttribute('title');
+          accountNameEl.textContent = '';
+          accountNameEl.classList.add('hidden');
         }
       }
-
       if (accountSubtitleEl) {
-        accountSubtitleEl.textContent = accountNumber;
-        const shouldHideNumber = !account || !accountNumber;
-        accountSubtitleEl.classList.toggle('hidden', shouldHideNumber);
-        if (!shouldHideNumber) {
-          accountSubtitleEl.setAttribute('title', accountNumber);
+        if (account) {
+          const accountNumber = account.number || formatAccountNumber(account.numberRaw) || '';
+          accountSubtitleEl.textContent = accountNumber;
+          accountSubtitleEl.classList.toggle('hidden', !accountNumber);
         } else {
-          accountSubtitleEl.removeAttribute('title');
+          accountSubtitleEl.textContent = '';
+          accountSubtitleEl.classList.add('hidden');
         }
-      }
-
-      if (accountSeparatorEl) {
-        accountSeparatorEl.classList.toggle('hidden', !account || !accountNumber);
       }
 
       updateConfirmState();
