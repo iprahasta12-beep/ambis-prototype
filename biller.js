@@ -339,12 +339,12 @@
         const checkedAttr = isSelected ? ' checked' : '';
         return `
       <li>
-        <label data-account-id="${account.id}" class="sheet-item flex items-center justify-between gap-4 p-4 border-b cursor-pointer transition-colors hover:bg-slate-50 focus:outline-none active:bg-cyan-50${selectedClasses}">
+        <label data-account-id="${account.id}" class="sheet-item flex items-center justify-between gap-3 px-4 py-3 border-b cursor-pointer transition-colors hover:bg-slate-50 focus:outline-none${selectedClasses}">
           <div class="flex items-center gap-3 flex-1 min-w-0">
-            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${avatarClasses}">${account.initial || 'R'}</div>
+            <div class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center font-semibold ${avatarClasses}">${account.initial || 'R'}</div>
             <div class="min-w-0 space-y-1">
-              <p class="font-semibold text-base text-slate-900 truncate">${account.displayName || 'Rekening'}</p>
-              ${subtitle ? `<p class="text-sm text-slate-500 truncate">${subtitle}</p>` : ''}
+              <p class="font-semibold text-base text-slate-900">${account.displayName || 'Rekening'}</p>
+              ${subtitle ? `<p class="text-sm text-slate-500">${subtitle}</p>` : ''}
             </div>
           </div>
           <div class="flex items-center gap-4 pl-4">
