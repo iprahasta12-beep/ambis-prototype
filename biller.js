@@ -152,10 +152,19 @@
     const idHint = document.getElementById('idInputHint');
     const idInput = document.getElementById('billerIdInput');
     const idError = document.getElementById('idInputError');
-    const accountSelect = document.getElementById('sourceAccountSelect');
+    const accountButton = document.getElementById('sourceAccountButton');
+    const accountNameEl = document.getElementById('sourceAccountName');
+    const accountSubtitleEl = document.getElementById('sourceAccountSubtitle');
+    const accountPlaceholderEl = document.getElementById('sourceAccountPlaceholder');
     const confirmBtn = document.getElementById('confirmPaymentBtn');
     const closeBtn = document.getElementById('drawerCloseBtn');
     const savedBtn = document.getElementById('savedNumberButton');
+
+    const accountSheet = document.getElementById('accountSheet');
+    const accountSheetBackdrop = document.getElementById('accountSheetBackdrop');
+    const accountSheetPanel = document.getElementById('bottomSheet');
+    const accountSheetList = document.getElementById('accountSheetList');
+    const accountSheetClose = document.getElementById('accountSheetClose');
 
     const sheet = document.getElementById('paymentSheet');
     const sheetBackdrop = document.getElementById('paymentSheetBackdrop');
@@ -169,7 +178,7 @@
     const sheetIdLabel = document.getElementById('sheetIdLabel');
     const sheetIdValue = document.getElementById('sheetIdValue');
 
-    if (!drawer || !drawerInner || !drawerTitle || !notesList || !idInput || !accountSelect || !confirmBtn) {
+    if (!drawer || !drawerInner || !drawerTitle || !notesList || !idInput || !accountButton || !confirmBtn || !accountSheetList) {
       return;
     }
 
@@ -185,27 +194,204 @@
         ? ambis.accounts
         : [];
 
+    const currencyFormatter = new Intl.NumberFormat('id-ID');
+
+    function sanitizeNumber(value) {
+      return (value || '').toString().replace(/\D+/g, '');
+    }
+
+    function fallbackFormatNumber(value) {
+      const raw = sanitizeNumber(value);
+      if (!raw) return '';
+      return raw.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+    }
+
+    const formatAccountNumber = typeof ambis.formatAccountNumber === 'function'
+      ? (value) => ambis.formatAccountNumber(value)
+      : fallbackFormatNumber;
+
+    const defaultCompanyName = typeof ambis.getBrandName === 'function'
+      ? ambis.getBrandName()
+      : (ambis.brandName || '');
+
     const accountMap = new Map();
-    if (accountSelect.options.length <= 1 && sharedAccounts.length) {
-      sharedAccounts.forEach((account, index) => {
-        if (!account) return;
-        const option = document.createElement('option');
-        const value = account.id || account.numberRaw || account.number || `acc-${index}`;
-        const label = account.displayName || account.name || `Rekening ${index + 1}`;
-        const number = account.number || account.numberRaw || '';
-        option.value = value;
-        option.textContent = number ? `${label} • ${number}` : label;
-        if (number) {
-          option.dataset.number = number;
+    const accountDisplayList = [];
+
+    function normaliseAccount(account, index) {
+      if (!account) return null;
+      const id = account.id || account.accountId || account.numberRaw || account.number || `acc-${index}`;
+      const displayName = account.displayName || account.name || account.alias || `Rekening ${index + 1}`;
+      const numberSource = account.numberRaw || account.number || '';
+      const numberRaw = sanitizeNumber(numberSource);
+      const formattedNumber = numberRaw ? formatAccountNumber(numberRaw) : formatAccountNumber(numberSource) || '';
+      const company = (typeof account.company === 'string' && account.company.trim())
+        || (typeof account.brandName === 'string' && account.brandName.trim())
+        || defaultCompanyName
+        || '';
+      const subtitleParts = [];
+      if (company) subtitleParts.push(company);
+      if (formattedNumber) subtitleParts.push(formattedNumber);
+      const subtitle = subtitleParts.join(' • ');
+
+      return {
+        id,
+        displayName,
+        company,
+        subtitle,
+        number: formattedNumber,
+        numberRaw,
+        balance: account.balance,
+      };
+    }
+
+    sharedAccounts.forEach((account, index) => {
+      const normalised = normaliseAccount(account, index);
+      if (!normalised) return;
+      accountMap.set(normalised.id, normalised);
+      accountDisplayList.push(normalised);
+    });
+
+    function formatAccountBalance(balance) {
+      if (typeof balance === 'number' && Number.isFinite(balance)) {
+        return `Rp ${currencyFormatter.format(balance)}`;
+      }
+      if (typeof balance === 'string' && balance.trim()) {
+        return balance.trim();
+      }
+      return '';
+    }
+
+    function closeAccountSheet(options = {}) {
+      if (!accountSheet || accountSheet.classList.contains('hidden')) return;
+      const immediate = Boolean(options.immediate);
+      accountSheetOpen = false;
+      accountButton?.setAttribute('aria-expanded', 'false');
+      if (immediate) {
+        accountSheet.classList.add('hidden');
+        accountSheetBackdrop?.classList.add('opacity-0');
+        accountSheetPanel?.classList.add('translate-y-full');
+        return;
+      }
+      accountSheetBackdrop?.classList.add('opacity-0');
+      accountSheetPanel?.classList.add('translate-y-full');
+      setTimeout(() => {
+        accountSheet.classList.add('hidden');
+      }, 220);
+    }
+
+    function openAccountSheet() {
+      if (!accountSheet || accountSheetOpen) return;
+      renderAccountList();
+      accountSheet.classList.remove('hidden');
+      accountButton?.setAttribute('aria-expanded', 'true');
+      requestAnimationFrame(() => {
+        accountSheetBackdrop?.classList.remove('opacity-0');
+        accountSheetPanel?.classList.remove('translate-y-full');
+      });
+      accountSheetOpen = true;
+    }
+
+    function renderAccountList() {
+      accountSheetList.innerHTML = '';
+      if (!accountDisplayList.length) {
+        const empty = document.createElement('li');
+        empty.className = 'px-6 py-6 text-sm text-slate-500';
+        empty.textContent = 'Tidak ada rekening tersedia.';
+        accountSheetList.appendChild(empty);
+        return;
+      }
+
+      accountDisplayList.forEach((account) => {
+        const li = document.createElement('li');
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.accountId = account.id;
+        button.className = 'w-full flex items-center gap-4 px-6 py-4 text-left hover:bg-slate-50 focus:outline-none';
+        if (account.id === selectedAccountId) {
+          button.classList.add('bg-cyan-50');
         }
-        accountSelect.appendChild(option);
-        accountMap.set(value, account);
+
+        const info = document.createElement('div');
+        info.className = 'flex-1 min-w-0';
+        const title = document.createElement('p');
+        title.className = 'font-semibold text-slate-900 truncate';
+        title.textContent = account.displayName;
+        info.appendChild(title);
+
+        const subtitleText = account.subtitle || '';
+        if (subtitleText) {
+          const subtitle = document.createElement('p');
+          subtitle.className = 'text-sm text-slate-500 truncate';
+          subtitle.textContent = subtitleText;
+          info.appendChild(subtitle);
+        }
+
+        button.appendChild(info);
+
+        const balanceText = formatAccountBalance(account.balance);
+        if (balanceText) {
+          const balanceEl = document.createElement('p');
+          balanceEl.className = 'text-sm font-semibold text-slate-900 whitespace-nowrap';
+          balanceEl.textContent = balanceText;
+          button.appendChild(balanceEl);
+        }
+
+        const indicator = document.createElement('span');
+        indicator.className = 'flex-none w-5 h-5 rounded-full border grid place-items-center';
+        if (account.id === selectedAccountId) {
+          indicator.classList.add('bg-cyan-500', 'border-cyan-500', 'text-white');
+        } else {
+          indicator.classList.add('border-slate-300');
+        }
+        const check = document.createElement('span');
+        check.className = 'text-xs font-semibold';
+        check.textContent = '✓';
+        if (account.id !== selectedAccountId) {
+          check.classList.add('hidden');
+        }
+        indicator.appendChild(check);
+        button.appendChild(indicator);
+
+        button.addEventListener('click', () => {
+          setSelectedAccount(account.id);
+          closeAccountSheet();
+        });
+
+        li.appendChild(button);
+        accountSheetList.appendChild(li);
       });
-    } else {
-      Array.from(accountSelect.options).forEach((option) => {
-        if (!option.value) return;
-        accountMap.set(option.value, { number: option.dataset?.number || option.textContent, displayName: option.textContent });
-      });
+    }
+
+    function setSelectedAccount(nextId) {
+      const resolvedId = accountMap.has(nextId) ? nextId : '';
+      selectedAccountId = resolvedId;
+      const account = resolvedId ? accountMap.get(resolvedId) : null;
+
+      if (accountPlaceholderEl) {
+        accountPlaceholderEl.classList.toggle('hidden', Boolean(account));
+      }
+      if (accountNameEl) {
+        if (account) {
+          accountNameEl.textContent = account.displayName || '';
+          accountNameEl.classList.remove('hidden');
+        } else {
+          accountNameEl.textContent = '';
+          accountNameEl.classList.add('hidden');
+        }
+      }
+      if (accountSubtitleEl) {
+        if (account) {
+          const subtitle = account.subtitle || [account.company, account.number].filter(Boolean).join(' • ');
+          accountSubtitleEl.textContent = subtitle;
+          accountSubtitleEl.classList.toggle('hidden', !subtitle);
+        } else {
+          accountSubtitleEl.textContent = '';
+          accountSubtitleEl.classList.add('hidden');
+        }
+      }
+
+      renderAccountList();
+      updateConfirmState();
     }
 
     const ACTIVE_CLASSES = ['ring-2', 'ring-cyan-400', 'border-cyan-300', 'bg-cyan-50'];
@@ -215,6 +401,8 @@
     let currentValidation = { ...DEFAULT_VALIDATION };
     let idDirty = false;
     let sheetOpen = false;
+    let accountSheetOpen = false;
+    let selectedAccountId = '';
 
     function setActiveButton(next) {
       if (activeButton && activeButton !== next) {
@@ -278,8 +466,9 @@
       idError.classList.add('hidden');
       idError.textContent = '';
 
+      setSelectedAccount('');
+
       applyValidationAttributes(currentValidation);
-      updateConfirmState();
 
       requestAnimationFrame(() => {
         idInput.focus({ preventScroll: true });
@@ -322,7 +511,7 @@
     }
 
     function updateConfirmState() {
-      const hasAccount = Boolean(accountSelect.value);
+      const hasAccount = Boolean(selectedAccountId);
       const { valid } = checkValidity(idInput.value);
       confirmBtn.disabled = !(hasAccount && valid);
     }
@@ -353,12 +542,13 @@
         : idInput.value.trim();
       idInput.value = sanitizedId;
 
-      const account = accountMap.get(accountSelect.value) || null;
+      const account = selectedAccountId ? accountMap.get(selectedAccountId) : null;
       sheetBiller.textContent = config.title;
       sheetIdLabel.textContent = config.idCopy || 'ID Pelanggan';
       sheetIdValue.textContent = sanitizedId || '-';
-      sheetAccountName.textContent = (account && (account.displayName || account.name)) || '-';
-      sheetAccountNumber.textContent = account?.number || account?.numberRaw || '-';
+      sheetAccountName.textContent = account?.displayName || '-';
+      const accountSubtitle = account?.subtitle || [account?.company, account?.number].filter(Boolean).join(' • ');
+      sheetAccountNumber.textContent = accountSubtitle || '-';
 
       sheet.classList.remove('hidden');
       requestAnimationFrame(() => {
@@ -372,6 +562,7 @@
       const config = BILLER_CONFIG[key];
       if (!config) return;
       closeSheet({ immediate: true });
+      closeAccountSheet({ immediate: true });
       setActiveButton(button);
       const wasClosed = !drawer.classList.contains('open');
       applyConfig(key, config);
@@ -393,6 +584,7 @@
       drawerInner.classList.remove('opacity-100', 'translate-x-0');
       drawerInner.classList.add('opacity-0', 'translate-x-4');
       closeSheet({ immediate: true });
+      closeAccountSheet({ immediate: true });
       setTimeout(() => {
         drawer.classList.remove('open');
         if (typeof window.sidebarRestoreForDrawer === 'function') {
@@ -414,8 +606,8 @@
       closeDrawer();
     });
 
-    accountSelect.addEventListener('change', () => {
-      updateConfirmState();
+    accountButton.addEventListener('click', () => {
+      openAccountSheet();
     });
 
     idInput.addEventListener('input', () => {
@@ -458,10 +650,15 @@
       console.info('Konfirmasi pembayaran diproses (mock).');
     });
 
+    accountSheetBackdrop?.addEventListener('click', () => closeAccountSheet());
+    accountSheetClose?.addEventListener('click', () => closeAccountSheet());
+
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         if (sheetOpen) {
           closeSheet();
+        } else if (accountSheetOpen) {
+          closeAccountSheet();
         } else {
           closeDrawer();
         }

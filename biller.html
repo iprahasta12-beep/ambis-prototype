@@ -239,15 +239,17 @@
 
           <section class="space-y-5">
             <div class="space-y-2">
-              <label for="sourceAccountSelect" class="block text-sm text-slate-600">Sumber Rekening</label>
-              <div class="relative">
-                <select id="sourceAccountSelect" class="w-full appearance-none border border-slate-200 rounded-xl px-4 py-3 pr-10 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
-                  <option value="" selected disabled>Pilih sumber rekening</option>
-                </select>
-                <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M10 12a1 1 0 0 1-.707-.293l-4-4a1 1 0 1 1 1.414-1.414L10 9.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-4 4A1 1 0 0 1 10 12z" clip-rule="evenodd" />
+              <span class="block text-sm text-slate-600">Sumber Rekening</span>
+              <button id="sourceAccountButton" type="button" aria-haspopup="dialog" aria-expanded="false" class="w-full border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3 text-left focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <div class="flex-1 min-w-0">
+                  <p id="sourceAccountName" class="text-sm font-semibold text-slate-900 truncate hidden"></p>
+                  <p id="sourceAccountSubtitle" class="text-xs text-slate-500 truncate hidden"></p>
+                  <span id="sourceAccountPlaceholder" class="text-sm text-slate-400">Pilih Rekening</span>
+                </div>
+                <svg class="w-4 h-4 text-slate-400 flex-none" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 0 1 0-1.414L10.586 10 7.293 6.707a1 1 0 0 1 1.414-1.414l4 4a1 1 0 0 1 0 1.414l-4 4a1 1 0 0 1-1.414 0z" clip-rule="evenodd" />
                 </svg>
-              </div>
+              </button>
             </div>
 
             <div class="space-y-2">
@@ -271,6 +273,22 @@
             Konfirmasi Pembayaran
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account selection bottom sheet -->
+  <div id="accountSheet" class="hidden fixed inset-0 z-50">
+    <div id="accountSheetBackdrop" class="absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200"></div>
+    <div id="bottomSheet" class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200 max-h-[85%] flex flex-col">
+      <div class="px-6 pt-5 pb-4 border-b">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-slate-900">Pilih Sumber Rekening</h3>
+          <button id="accountSheetClose" type="button" class="text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup daftar rekening">&times;</button>
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto">
+        <ul id="accountSheetList" class="divide-y"></ul>
       </div>
     </div>
   </div>
