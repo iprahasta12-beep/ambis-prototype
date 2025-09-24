@@ -198,35 +198,66 @@
         </button>
       </div>
 
-      <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-        <div class="space-y-2">
-          <label class="block text-sm text-slate-500">Batas Transaksi Harian Maksimum</label>
-          <div id="drawerMaxLimit" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-slate-900">Rp200.000.000</div>
-        </div>
+      <div id="limitFormSection" class="flex-1 flex flex-col">
+        <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+          <div class="space-y-2">
+            <label class="block text-sm text-slate-500">Batas Transaksi Harian Maksimum</label>
+            <div id="drawerMaxLimit" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-slate-900">Rp200.000.000</div>
+          </div>
 
-        <div class="space-y-2">
-          <label class="block text-sm text-slate-500">Batas Transaksi Harian Saat Ini</label>
-          <div id="drawerCurrentLimit" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-slate-900">Rp150.000.000</div>
-        </div>
+          <div class="space-y-2">
+            <label class="block text-sm text-slate-500">Batas Transaksi Harian Saat Ini</label>
+            <div id="drawerCurrentLimit" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 font-semibold text-slate-900">Rp150.000.000</div>
+          </div>
 
-        <div class="space-y-2">
-          <div class="flex items-start justify-between gap-2">
-            <label for="newLimitInput" class="block text-sm text-slate-500">Batas Transaksi Harian Baru</label>
-            <div class="relative flex-shrink-0">
+          <div class="space-y-2">
+            <div class="flex items-start justify-between gap-2">
+              <label for="newLimitInput" class="block text-sm text-slate-500">Batas Transaksi Harian Baru</label>
+              <div class="relative flex-shrink-0">
+              </div>
             </div>
+            <div class="flex items-center rounded-xl border border-slate-200 bg-white px-4 py-3">
+              <span class="mr-2 font-semibold text-slate-500">Rp</span>
+              <input id="newLimitInput" type="text" inputmode="numeric" autocomplete="off" class="w-full border-none p-0 focus:ring-0" placeholder="0" aria-describedby="newLimitError">
+            </div>
+            <p id="newLimitError" class="hidden text-sm text-red-600"></p>
           </div>
-          <div class="flex items-center rounded-xl border border-slate-200 bg-white px-4 py-3">
-            <span class="mr-2 font-semibold text-slate-500">Rp</span>
-            <input id="newLimitInput" type="text" inputmode="numeric" autocomplete="off" class="w-full border-none p-0 focus:ring-0" placeholder="0" aria-describedby="newLimitError">
-          </div>
-          <p id="newLimitError" class="hidden text-sm text-red-600"></p>
+        </div>
+
+        <div class="border-t px-6 py-5 sticky bottom-0 bg-white">
+          <button id="confirmLimitBtn" type="button" class="w-full rounded-xl bg-cyan-500 text-white py-3 font-semibold" disabled>
+            Konfirmasi Perubahan Batas Transaksi
+          </button>
         </div>
       </div>
 
-      <div class="border-t px-6 py-5 sticky bottom-0 bg-white">
-        <button id="confirmLimitBtn" type="button" class="w-full rounded-xl bg-cyan-500 text-white py-3 font-semibold" disabled>
-          Konfirmasi Perubahan Batas Transaksi
-        </button>
+      <div id="limitPendingSection" class="hidden flex-1 flex-col">
+        <div class="flex-1 overflow-y-auto px-6 py-6">
+          <div class="flex flex-col items-center text-center gap-4">
+            <img src="img/illustration-2.svg" alt="Menunggu persetujuan" class="w-16 h-auto" />
+            <h3 class="text-xl font-bold text-slate-900">Batas Transaksi Menunggu Persetujuan</h3>
+          </div>
+
+          <section class="mt-8 space-y-4">
+            <p class="font-semibold text-slate-900 text-left">Ubah Batas Transaksi</p>
+            <dl class="space-y-4 text-sm">
+              <div class="flex items-baseline justify-between gap-4">
+                <dt class="text-slate-600">Batas Transaksi Harian Sebelumnya</dt>
+                <dd id="limitPendingPreviousValue" class="text-base font-semibold text-slate-900">Rp250.000.000</dd>
+              </div>
+              <div class="flex items-baseline justify-between gap-4">
+                <dt class="text-slate-600">Perubahan Batas Transaksi Harian Baru</dt>
+                <dd id="limitPendingNewValue" class="text-base font-semibold text-slate-900">Rp100.000.000</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+
+        <div class="border-t px-6 py-5 sticky bottom-0 bg-white">
+          <button id="limitPendingCloseBtn" type="button" class="w-full rounded-xl border border-cyan-500 text-cyan-600 font-semibold py-3 hover:bg-cyan-50">
+            Keluar
+          </button>
+        </div>
       </div>
 
       <div id="limitConfirmContainer" class="pointer-events-none absolute inset-0">
