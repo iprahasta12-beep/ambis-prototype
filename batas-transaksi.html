@@ -272,6 +272,39 @@
                 </div>
               </dl>
             </section>
+
+            <div id="limitOtpSection" class="hidden border-t border-slate-200 pt-6 space-y-4">
+              <div class="space-y-2 text-center">
+                <h4 class="text-base font-semibold text-slate-900">Masukkan Kode OTP</h4>
+                <p class="text-sm text-slate-600">Masukkan 8 digit kode OTP yang dikirim ke nomor terdaftar.</p>
+              </div>
+
+              <div class="flex justify-center gap-2">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-12 h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              </div>
+
+              <div id="limitOtpCountdown" class="text-sm text-slate-500 text-center">
+                <span id="limitOtpCountdownMessage">Sesi akan berakhir dalam</span>
+                <span id="limitOtpTimer" class="ml-1 text-cyan-500 font-semibold">00:30</span>
+              </div>
+
+              <button
+                id="limitOtpResend"
+                type="button"
+                class="hidden mx-auto rounded-lg border border-cyan-300 px-4 py-2 text-sm font-medium text-cyan-500 hover:bg-slate-50"
+              >
+                Kirim Ulang Kode OTP
+              </button>
+
+              <p id="limitOtpError" class="hidden text-center text-sm text-rose-600"></p>
+            </div>
           </div>
 
           <div class="sticky bottom-0 border-t border-slate-200 bg-white p-4 flex flex-col gap-3 sm:flex-row">
