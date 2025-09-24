@@ -17,7 +17,6 @@
   const infoOverlay = document.getElementById('limitInfoOverlay');
   const infoCloseBtn = document.getElementById('limitInfoCloseBtn');
 
-  let ignoreOutsideClick = false;
   let infoOverlayOpen = false;
 
   let currentLimit = 150_000_000;
@@ -143,7 +142,6 @@
 
   function openDrawer() {
     if (!drawer) return;
-    ignoreOutsideClick = true;
 
     if (input) {
       input.value = '';
@@ -160,12 +158,6 @@
     if (typeof window.sidebarCollapseForDrawer === 'function') {
       window.sidebarCollapseForDrawer();
     }
-
-    // Allow outside click to close on the next tick so the opening click
-    // doesn't immediately trigger a close.
-    setTimeout(() => {
-      ignoreOutsideClick = false;
-    }, 0);
   }
 
   function closeDrawer() {
@@ -235,14 +227,6 @@
     if (infoOverlay?.contains(event.target)) return;
     if (infoBtn?.contains(event.target)) return;
     closeInfoOverlay();
-  });
-
-  document.addEventListener('click', (event) => {
-    if (!drawer || !drawer.classList.contains('open')) return;
-    if (ignoreOutsideClick) return;
-    if (drawer.contains(event.target)) return;
-    if (openBtn && openBtn.contains(event.target)) return;
-    closeDrawer();
   });
 
   document.addEventListener('keydown', (event) => {
