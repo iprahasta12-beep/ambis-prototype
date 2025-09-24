@@ -292,7 +292,7 @@
       updateConfirmState();
     }
 
-    const SHEET_SELECTED_CLASSES = ['ring-2', 'ring-cyan-400', 'bg-cyan-50'];
+    const SHEET_SELECTED_CLASSES = ['bg-cyan-50'];
 
     function formatAccountBalance(balance) {
       if (typeof balance === 'number' && Number.isFinite(balance)) {
@@ -304,11 +304,27 @@
       return 'Rp0';
     }
 
+    function resolveAvatarClasses(account) {
+      const color = typeof account?.color === 'string' ? account.color.trim() : '';
+      if (!color) {
+        return 'bg-cyan-500';
+      }
+      const backgroundClass = color
+        .split(/\s+/)
+        .find((cls) => cls.startsWith('bg-'));
+      if (!backgroundClass) {
+        return 'bg-cyan-500';
+      }
+      const elevatedBackground = backgroundClass.replace(/-\d{2,3}$/u, '-500');
+      return elevatedBackground;
+    }
+
     function resolveAccountSubtitle(account) {
       if (!account) return '';
       if (account.subtitle) return account.subtitle;
       const parts = [];
       if (account.company) parts.push(account.company);
+      if (account.bank) parts.push(account.bank);
       if (account.number) parts.push(account.number);
       return parts.join(' • ');
     }
@@ -317,22 +333,25 @@
       if (!accountSheetList) return;
       const items = accountDisplayList.map((account) => {
         const subtitle = resolveAccountSubtitle(account);
+        const avatarClasses = resolveAvatarClasses(account);
         const isSelected = account.id === selectedId;
         const selectedClasses = isSelected ? ` ${SHEET_SELECTED_CLASSES.join(' ')}` : '';
-        const dotHiddenClass = isSelected ? '' : ' hidden';
+        const checkedAttr = isSelected ? ' checked' : '';
         return `
       <li>
-        <button type="button" data-account-id="${account.id}" class="sheet-item w-full flex items-center gap-3 px-4 py-4 text-left border border-transparent rounded-xl${selectedClasses}">
-          <div class="w-10 h-10 rounded-full ${account.color || 'bg-cyan-100 text-cyan-600'} flex items-center justify-center font-semibold">${account.initial || 'R'}</div>
-          <div class="flex-1 min-w-0 space-y-1">
-            <p class="font-medium text-sm text-slate-900 truncate">${account.displayName || 'Rekening'}</p>
-            ${subtitle ? `<p class="text-xs text-slate-500 truncate">${subtitle}</p>` : ''}
-            <p class="text-xs text-slate-500">Saldo: ${formatAccountBalance(account.balance)}</p>
+        <label data-account-id="${account.id}" class="sheet-item flex items-center justify-between gap-4 p-4 border-b cursor-pointer transition-colors hover:bg-slate-50 focus:outline-none active:bg-cyan-50${selectedClasses}">
+          <div class="flex items-center gap-3 flex-1 min-w-0">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${avatarClasses}">${account.initial || 'R'}</div>
+            <div class="min-w-0 space-y-1">
+              <p class="font-semibold text-base text-slate-900 truncate">${account.displayName || 'Rekening'}</p>
+              ${subtitle ? `<p class="text-sm text-slate-500 truncate">${subtitle}</p>` : ''}
+            </div>
           </div>
-          <span class="ml-2 w-5 h-5 rounded-full border border-slate-300 grid place-items-center">
-            <span class="radio-dot w-2 h-2 rounded-full bg-cyan-500${dotHiddenClass}"></span>
-          </span>
-        </button>
+          <div class="flex items-center gap-4 pl-4">
+            <span class="text-sm font-semibold text-slate-900 whitespace-nowrap">${formatAccountBalance(account.balance)}</span>
+            <input type="radio" name="sheetAccountOption" value="${account.id}" class="w-4 h-4 accent-cyan-500"${checkedAttr} />
+          </div>
+        </label>
       </li>`;
       });
       accountSheetList.innerHTML = items.join('');
@@ -343,6 +362,7 @@
       accountSheetConfirm.disabled = !enabled;
       accountSheetConfirm.classList.toggle('opacity-50', !enabled);
       accountSheetConfirm.classList.toggle('cursor-not-allowed', !enabled);
+      accountSheetConfirm.classList.toggle('hover:bg-cyan-600', enabled);
     }
 
     function openAccountSheet() {
@@ -377,24 +397,22 @@
       }, 220);
     }
 
-    function selectAccount(accountId, button) {
-      if (!accountSheetList || !accountId) return;
-      pendingAccountId = accountId;
-      accountSheetList.querySelectorAll('button[data-account-id]').forEach((item) => {
+    function selectAccount(accountId) {
+      if (!accountSheetList) return;
+      pendingAccountId = accountId || '';
+      const labels = accountSheetList.querySelectorAll('label[data-account-id]');
+      labels.forEach((item) => {
+        const isMatch = item.getAttribute('data-account-id') === accountId;
         item.classList.remove(...SHEET_SELECTED_CLASSES);
-        const dot = item.querySelector('.radio-dot');
-        if (dot) {
-          dot.classList.add('hidden');
+        const radio = item.querySelector('input[type="radio"]');
+        if (radio) {
+          radio.checked = isMatch;
+        }
+        if (isMatch) {
+          item.classList.add(...SHEET_SELECTED_CLASSES);
         }
       });
-      if (button) {
-        button.classList.add(...SHEET_SELECTED_CLASSES);
-        const dot = button.querySelector('.radio-dot');
-        if (dot) {
-          dot.classList.remove('hidden');
-        }
-      }
-      setAccountSheetConfirmState(true);
+      setAccountSheetConfirmState(Boolean(accountId));
     }
 
     function confirmAccount() {
@@ -623,11 +641,14 @@
     accountSheetCancel?.addEventListener('click', () => closeAccountSheet());
     accountSheetConfirm?.addEventListener('click', confirmAccount);
 
-    accountSheetList?.addEventListener('click', (event) => {
-      const button = event.target.closest('button[data-account-id]');
-      if (!button) return;
-      const accountId = button.getAttribute('data-account-id');
-      selectAccount(accountId, button);
+    accountSheetList?.addEventListener('change', (event) => {
+      const target = event.target;
+      if (!target || target.tagName !== 'INPUT') return;
+      if (target.type !== 'radio' || target.name !== 'sheetAccountOption') return;
+      const label = target.closest('label[data-account-id]');
+      const accountId = target.value || label?.getAttribute('data-account-id');
+      if (!accountId) return;
+      selectAccount(accountId);
     });
 
     idInput.addEventListener('input', () => {
