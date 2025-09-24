@@ -188,11 +188,6 @@
     }
 
     const ambis = window.AMBIS || {};
-    const sharedAccounts = typeof ambis.getAccounts === 'function'
-      ? ambis.getAccounts({ clone: false })
-      : Array.isArray(ambis.accounts)
-        ? ambis.accounts
-        : [];
 
     function sanitizeNumber(value) {
       return (value || '').toString().replace(/\D+/g, '');
@@ -220,16 +215,27 @@
       if (!account) return null;
       const id = account.id || account.accountId || account.numberRaw || account.number || `acc-${index}`;
       const displayName = account.displayName || account.name || account.alias || `Rekening ${index + 1}`;
+      const shortName = typeof account.name === 'string' && account.name.trim()
+        ? account.name.trim()
+        : displayName;
       const numberSource = account.numberRaw || account.number || '';
       const numberRaw = sanitizeNumber(numberSource);
       const formattedNumber = numberRaw ? formatAccountNumber(numberRaw) : formatAccountNumber(numberSource) || '';
+      const bank = typeof account.bank === 'string' ? account.bank.trim() : '';
       const company = (typeof account.company === 'string' && account.company.trim())
         || (typeof account.brandName === 'string' && account.brandName.trim())
         || defaultCompanyName
         || '';
       const subtitleParts = [];
       if (company) subtitleParts.push(company);
-      if (formattedNumber) subtitleParts.push(formattedNumber);
+      const bankSubtitleParts = [];
+      if (bank) bankSubtitleParts.push(bank);
+      if (formattedNumber) bankSubtitleParts.push(formattedNumber);
+      if (bankSubtitleParts.length) {
+        subtitleParts.push(bankSubtitleParts.join(' - '));
+      } else if (formattedNumber) {
+        subtitleParts.push(formattedNumber);
+      }
       const subtitle = subtitleParts.join(' • ');
 
       const color = (typeof account.color === 'string' && account.color.trim())
@@ -243,7 +249,9 @@
       return {
         id,
         displayName,
+        name: shortName,
         company,
+        bank,
         subtitle,
         number: formattedNumber,
         numberRaw,
@@ -253,12 +261,39 @@
       };
     }
 
-    sharedAccounts.forEach((account, index) => {
-      const normalised = normaliseAccount(account, index);
-      if (!normalised) return;
-      accountMap.set(normalised.id, normalised);
-      accountDisplayList.push(normalised);
-    });
+    function getAvailableAccounts() {
+      if (typeof ambis.getAccounts === 'function') {
+        const result = ambis.getAccounts({ clone: false });
+        if (Array.isArray(result)) {
+          return result;
+        }
+      }
+      if (Array.isArray(ambis.accounts)) {
+        return ambis.accounts;
+      }
+      return [];
+    }
+
+    function rebuildAccountCollections() {
+      accountMap.clear();
+      accountDisplayList.length = 0;
+      const accounts = getAvailableAccounts();
+      accounts.forEach((account, index) => {
+        const normalised = normaliseAccount(account, index);
+        if (!normalised) return;
+        accountMap.set(normalised.id, normalised);
+        accountDisplayList.push(normalised);
+      });
+      let selectionChanged = false;
+      if (appliedAccountId && !accountMap.has(appliedAccountId)) {
+        appliedAccountId = '';
+        selectionChanged = true;
+      }
+      if (pendingAccountId && !accountMap.has(pendingAccountId)) {
+        pendingAccountId = appliedAccountId;
+      }
+      return selectionChanged;
+    }
 
     function applyAccountSelection(nextId) {
       const resolvedId = accountMap.has(nextId) ? nextId : '';
@@ -304,7 +339,7 @@
       return 'Rp0';
     }
 
-    function resolveAvatarClasses(account) {
+    function resolveRadioDotClass(account) {
       const color = typeof account?.color === 'string' ? account.color.trim() : '';
       if (!color) {
         return 'bg-cyan-500';
@@ -315,52 +350,55 @@
       if (!backgroundClass) {
         return 'bg-cyan-500';
       }
-      const elevatedBackground = backgroundClass.replace(/-\d{2,3}$/u, '-500');
-      return elevatedBackground;
-    }
-
-    function resolveAccountSubtitle(account) {
-      if (!account) return '';
-      if (account.subtitle) return account.subtitle;
-      const parts = [];
-      if (account.company) parts.push(account.company);
-      if (account.bank) parts.push(account.bank);
-      if (account.number) parts.push(account.number);
-      return parts.join(' • ');
+      return backgroundClass.replace(/-\d{2,3}$/u, '-500');
     }
 
     function renderAccountOptions(selectedId) {
       if (!accountSheetList) return;
       const items = accountDisplayList.map((account) => {
-        const subtitle = resolveAccountSubtitle(account);
-        const avatarClasses = resolveAvatarClasses(account);
+        const avatarClasses = account.color || 'bg-cyan-100 text-cyan-600';
+        const radioDotClass = resolveRadioDotClass(account);
         const isSelected = account.id === selectedId;
         const selectedClasses = isSelected ? ` ${SHEET_SELECTED_CLASSES.join(' ')}` : '';
         const checkedAttr = isSelected ? ' checked' : '';
+        const metaLines = [];
+        if (account.company) {
+          metaLines.push(`<p class="text-sm text-slate-500">${account.company}</p>`);
+        }
+        const bankNumberParts = [];
+        if (account.bank) bankNumberParts.push(account.bank);
+        if (account.number) bankNumberParts.push(account.number);
+        if (bankNumberParts.length) {
+          metaLines.push(`<p class="text-sm text-slate-500">${bankNumberParts.join(' - ')}</p>`);
+        }
+        const metaMarkup = metaLines.length
+          ? `<div class="space-y-1">${metaLines.join('')}</div>`
+          : '';
         return `
       <li>
-        <button type="button" data-account-id="${account.id}" class="sheet-item w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 focus:outline-none ${selectedClasses}">
+        <label data-account-id="${account.id}" class="sheet-item w-full flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 focus-within:bg-slate-50 rounded-2xl cursor-pointer${selectedClasses}">
+          <input type="radio" class="sr-only" name="sheetAccountOption" value="${account.id}"${checkedAttr}>
           <!-- Avatar -->
-          <div class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center font-semibold ${avatarClasses}">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold ${avatarClasses}">
             ${account.initial || 'R'}
           </div>
-      
+
           <!-- Account info -->
           <div class="flex-1 min-w-0">
-            <p class="font-semibold text-base text-slate-900">${account.displayName || 'Rekening'}</p>
-            ${subtitle ? `<p class="text-sm text-slate-500">${subtitle}</p>` : ''}
+            <p class="font-semibold text-base text-slate-900 truncate">${account.name || account.displayName || 'Rekening'}</p>
+            ${metaMarkup}
           </div>
-      
+
           <!-- Balance -->
           <div class="text-sm font-semibold text-slate-900 whitespace-nowrap mr-2">
             ${formatAccountBalance(account.balance)}
           </div>
-      
+
           <!-- Custom radio -->
           <span class="ml-2 w-5 h-5 rounded-full border border-slate-300 grid place-items-center">
-            <span class="radio-dot w-2 h-2 rounded-full bg-cyan-500 ${checkedAttr ? '' : 'hidden'}"></span>
+            <span class="radio-dot w-2 h-2 rounded-full ${radioDotClass} ${isSelected ? '' : 'hidden'}"></span>
           </span>
-        </button>
+        </label>
       </li>`;
       });
       accountSheetList.innerHTML = items.join('');
@@ -376,7 +414,14 @@
 
     function openAccountSheet() {
       if (!moveSourceButton || !accountSheetOverlay || !accountBottomSheet) return;
+      const selectionChanged = rebuildAccountCollections();
+      if (selectionChanged || appliedAccountId || !pendingAccountId) {
+        applyAccountSelection(appliedAccountId);
+      }
       if (!accountDisplayList.length) return;
+      if (pendingAccountId && !accountMap.has(pendingAccountId)) {
+        pendingAccountId = appliedAccountId;
+      }
       renderAccountOptions(pendingAccountId);
       setAccountSheetConfirmState(Boolean(pendingAccountId));
       accountSheetOverlay.classList.remove('hidden');
@@ -417,6 +462,10 @@
         if (radio) {
           radio.checked = isMatch;
         }
+        const dot = item.querySelector('.radio-dot');
+        if (dot) {
+          dot.classList.toggle('hidden', !isMatch);
+        }
         if (isMatch) {
           item.classList.add(...SHEET_SELECTED_CLASSES);
         }
@@ -441,7 +490,8 @@
     let appliedAccountId = '';
     let pendingAccountId = '';
 
-    applyAccountSelection('');
+    rebuildAccountCollections();
+    applyAccountSelection(appliedAccountId);
 
     function setActiveButton(next) {
       if (activeButton && activeButton !== next) {
