@@ -156,11 +156,11 @@
             <h3 class="font-medium">Listrik PLN</h3>
           </div>
           <div class="grid grid-cols-4 gap-4">
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-3">
+            <button data-biller="token-listrik" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-3">
               <img src="img/biller/pln.svg" class="w-6 h-6"/>
               Token Listrik
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-3">
+            <button data-biller="tagihan-listrik" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-3">
               <img src="img/biller/pln.svg" class="w-6 h-6"/>
               Tagihan Listrik
             </button>
@@ -174,16 +174,16 @@
             <h3 class="font-medium">Internet</h3>
           </div>
           <div class="grid grid-cols-4 gap-4">
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+            <button data-biller="indihome" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
               <img src="img/biller/indihome.svg" class="w-6 h-6"/> Indihome
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+            <button data-biller="myrepublic" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
               <img src="img/biller/myrepublic.svg" class="w-6 h-6"/> My Republic
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+            <button data-biller="cbn" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
               <img src="img/biller/cbn.png" class="w-6 h-6"/> CBN
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+            <button data-biller="iconnet" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
               <img src="img/biller/iconnet.png" class="w-6 h-6"/> Iconnet
             </button>
           </div>
@@ -196,16 +196,16 @@
             <h3 class="font-medium">BPJS</h3>
           </div>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+            <button data-biller="bpjs-keluarga" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
               <img src="img/biller/bpjs.svg" class="w-6 h-6 mr-2"/> BPJS Kesehatan keluarga
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+            <button data-biller="bpjs-badan-usaha" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
               <img src="img/biller/bpjs.svg" class="w-6 h-6 mr-2"/> BPJS Kesehatan Badan Usaha
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+            <button data-biller="bpjstk-penerima-upah" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
               <img src="img/biller/jmo.svg" class="w-6 h-6 mr-2"/> BPJSTK Penerima Upah
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+            <button data-biller="bpjstk-bukan-penerima-upah" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
               <img src="img/biller/jmo.svg" class="w-6 h-6 mr-2"/> BPJSTK Bukan Penerima Upah
             </button>
           </div>
@@ -214,8 +214,105 @@
       </div>
     </main>
     <!-- ============ /MAIN ============ -->
+    
+    <!-- Drawer -->
+    <div id="drawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100">
+      <div class="flex items-start justify-between gap-4 border-b px-6 py-5">
+        <div>
+          <h2 id="drawerTitle" class="text-xl font-semibold">Pembayaran</h2>
+        </div>
+        <button type="button" id="drawerCloseBtn" class="text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup drawer">
+          &times;
+        </button>
+      </div>
+      <div class="flex-1 flex flex-col">
+        <div id="drawerInner" class="flex-1 overflow-y-auto px-6 py-6 space-y-6 opacity-0 translate-x-4 transition-all duration-200">
+          <section class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-slate-700">Catatan</h3>
+            </div>
+            <div class="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-4">
+              <ul id="drawerNotes" class="list-disc space-y-2 pl-5 text-sm text-slate-700"></ul>
+              <p id="drawerNotesEmpty" class="text-sm text-slate-600 hidden">Tidak ada catatan tambahan untuk biller ini.</p>
+            </div>
+          </section>
+
+          <section class="space-y-5">
+            <div class="space-y-2">
+              <label for="sourceAccountSelect" class="block text-sm text-slate-600">Sumber Rekening</label>
+              <div class="relative">
+                <select id="sourceAccountSelect" class="w-full appearance-none border border-slate-200 rounded-xl px-4 py-3 pr-10 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                  <option value="" selected disabled>Pilih sumber rekening</option>
+                </select>
+                <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M10 12a1 1 0 0 1-.707-.293l-4-4a1 1 0 1 1 1.414-1.414L10 9.586l3.293-3.293a1 1 0 1 1 1.414 1.414l-4 4A1 1 0 0 1 10 12z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label id="idInputLabel" for="billerIdInput" class="block text-sm text-slate-600">ID Pelanggan</label>
+                <span id="idInputHint" class="text-xs text-slate-500"></span>
+              </div>
+              <input id="billerIdInput" type="text" inputmode="numeric" autocomplete="off" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Masukkan ID Pelanggan" />
+              <p id="idInputError" class="hidden text-sm text-rose-500"></p>
+            </div>
+
+            <div>
+              <button id="savedNumberButton" type="button" class="w-full rounded-xl border border-cyan-500 text-cyan-600 py-3 text-sm font-medium hover:bg-cyan-50">
+                Nomor Tersimpan
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <div class="border-t px-6 py-5 sticky bottom-0 bg-white">
+          <button id="confirmPaymentBtn" type="button" class="w-full rounded-xl bg-cyan-600 text-white py-3 font-semibold hover:bg-cyan-700" disabled>
+            Konfirmasi Pembayaran
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- Bottom sheet -->
+  <div id="paymentSheet" class="hidden fixed inset-0 z-50">
+    <div id="paymentSheetBackdrop" class="absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200"></div>
+    <div id="paymentSheetPanel" class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200">
+      <div class="px-6 pt-5 pb-4 border-b">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-slate-900">Konfirmasi Pembayaran</h3>
+          <button id="paymentSheetClose" type="button" class="text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup konfirmasi">&times;</button>
+        </div>
+        <p class="text-sm text-slate-500 mt-1">Tinjau detail pembayaran sebelum melanjutkan.</p>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <div class="flex items-start justify-between gap-4">
+          <span class="text-sm text-slate-500">Biller</span>
+          <span id="sheetBiller" class="text-sm font-semibold text-slate-900 text-right">-</span>
+        </div>
+        <div class="flex items-start justify-between gap-4">
+          <span class="text-sm text-slate-500">Sumber Rekening</span>
+          <div class="text-right">
+            <p id="sheetAccountName" class="text-sm font-semibold text-slate-900">-</p>
+            <p id="sheetAccountNumber" class="text-xs text-slate-500">-</p>
+          </div>
+        </div>
+        <div class="flex items-start justify-between gap-4">
+          <span id="sheetIdLabel" class="text-sm text-slate-500">ID Pelanggan</span>
+          <span id="sheetIdValue" class="text-sm font-semibold text-slate-900 text-right">-</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 px-6 py-5 border-t bg-white rounded-b-3xl">
+        <button id="paymentSheetCancel" type="button" class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50">Batalkan</button>
+        <button id="paymentSheetConfirm" type="button" class="flex-1 rounded-xl bg-cyan-600 text-white py-3 text-sm font-semibold hover:bg-cyan-700">Bayar Sekarang</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="data/rekening-data.js"></script>
+  <script src="biller.js"></script>
   <script src="sidebar.js"></script>
 </body>
 </html>
