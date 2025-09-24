@@ -270,18 +270,18 @@
             Konfirmasi Pembayaran
           </button>
         </div>
-      <div id="sheetOverlay" class="hidden absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200"></div>
-      <div id="bottomSheet" class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col">
-        <div class="px-6 pt-5 pb-4 border-b flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-slate-900">Sumber Rekening</h3>
-          <button id="sheetClose" type="button" class="text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup pilihan sumber rekening">&times;</button>
+      <div id="sheetOverlay" class="hidden absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200 z-10"></div>
+      <div id="bottomSheet" class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col h-3/4 z-20">
+        <div class="p-4 border-b flex items-center justify-between">
+          <h3 class="text-base font-semibold text-slate-900">Sumber Rekening</h3>
+          <button id="sheetClose" type="button" class="text-2xl leading-none text-slate-500 hover:text-slate-700 focus:outline-none" aria-label="Tutup pilihan sumber rekening">&times;</button>
         </div>
         <div class="flex-1 overflow-y-auto">
-          <ul id="sheetList" class="divide-y"></ul>
+          <ul id="sheetList"></ul>
         </div>
-        <div class="px-6 py-4 border-t bg-white flex gap-3">
-          <button id="sheetCancel" type="button" class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50">Batalkan</button>
-          <button id="sheetConfirm" type="button" class="flex-1 rounded-xl bg-cyan-600 text-white py-3 text-sm font-semibold opacity-50 cursor-not-allowed" disabled>Pilih Rekening</button>
+        <div class="sticky bottom-0 bg-white p-4 border-t flex gap-3">
+          <button id="sheetCancel" type="button" class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-medium text-slate-700 focus:outline-none hover:bg-slate-100">Batalkan</button>
+          <button id="sheetConfirm" type="button" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 text-sm font-semibold opacity-50 cursor-not-allowed focus:outline-none" disabled>Pilih Rekening</button>
         </div>
       </div>
     </div>
