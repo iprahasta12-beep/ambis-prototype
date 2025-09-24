@@ -240,16 +240,13 @@
           <section class="space-y-5">
             <div class="space-y-2">
               <span class="block text-sm text-slate-600">Sumber Rekening</span>
-              <button id="sourceAccountButton" type="button" aria-haspopup="dialog" aria-expanded="false" class="w-full border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3 text-left focus:outline-none focus:ring-2 focus:ring-cyan-500">
+              <div class="w-full border border-slate-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3">
                 <div class="flex-1 min-w-0">
                   <p id="sourceAccountName" class="text-sm font-semibold text-slate-900 truncate hidden"></p>
                   <p id="sourceAccountSubtitle" class="text-xs text-slate-500 truncate hidden"></p>
                   <span id="sourceAccountPlaceholder" class="text-sm text-slate-400">Pilih Rekening</span>
                 </div>
-                <svg class="w-4 h-4 text-slate-400 flex-none" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 0 1 0-1.414L10.586 10 7.293 6.707a1 1 0 0 1 1.414-1.414l4 4a1 1 0 0 1 0 1.414l-4 4a1 1 0 0 1-1.414 0z" clip-rule="evenodd" />
-                </svg>
-              </button>
+              </div>
             </div>
 
             <div class="space-y-2">
@@ -275,27 +272,6 @@
         </div>
       </div>
 
-      <!-- Account selection bottom sheet -->
-      <div id="accountSheet" class="hidden absolute inset-0 z-40">
-        <div id="accountSheetBackdrop" class="absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200"></div>
-        <div id="accountSheetPanel" class="absolute inset-x-0 bottom-0 w-full bg-white rounded-t-2xl shadow-lg transition-transform duration-200 h-3/4 z-20 flex flex-co">
-          <div class="mx-4 mb-4 overflow-hidden rounded-3xl bg-white shadow-xl flex flex-col max-h-[calc(100%-1rem)]">
-            <div class="px-6 pt-5 pb-4 border-b">
-              <div class="flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-slate-900">Sumber Rekening</h3>
-                <button id="accountSheetClose" type="button" class="text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup daftar rekening">&times;</button>
-              </div>
-            </div>
-            <div class="flex-1 overflow-y-auto px-6 py-4">
-              <ul id="accountSheetList" role="radiogroup" class="space-y-3"></ul>
-            </div>
-            <div class="px-6 py-4 border-t bg-white flex items-center gap-3">
-              <button id="accountSheetCancel" type="button" class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">Batalkan</button>
-              <button id="accountSheetConfirm" type="button" class="flex-1 rounded-xl bg-cyan-600 text-white py-3 text-sm font-semibold hover:bg-cyan-700 disabled:bg-slate-200 disabled:text-slate-500 disabled:cursor-not-allowed" disabled>Pilih Rekening</button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
