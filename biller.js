@@ -615,7 +615,7 @@
         left.className = 'flex-1 min-w-0';
 
         const primary = document.createElement('p');
-        primary.className = 'text-sm font-semibold text-slate-900 truncate mb-4';
+        primary.className = 'text-sm font-semibold text-slate-900 truncate mb-2';
         primary.textContent = option.name || 'Tanpa Nama';
 
         const secondary = document.createElement('p');
