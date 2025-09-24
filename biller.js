@@ -111,7 +111,7 @@
     },
     'bpjstk-penerima-upah': {
       title: 'BPJSTK Penerima Upah',
-      notes: ['Pastikan ID pelanggan sesuai data kepesertaan BPJSTK Anda.'],
+      notes: ['Nomor virtual account mengikuti ketentuan BPJS Ketenagakerjaan (88888 + 11 digit terakhir nomor peserta).'],
       idCopy: 'ID Pelanggan',
       idHint: 'Masukkan ID Pelanggan BPJSTK.',
       validation: {
@@ -123,7 +123,7 @@
     },
     'bpjstk-bukan-penerima-upah': {
       title: 'BPJSTK Bukan Penerima Upah',
-      notes: ['Pastikan ID pelanggan sesuai data kepesertaan BPJSTK Anda.'],
+      notes: ['Nomor virtual account mengikuti ketentuan BPJS Ketenagakerjaan (88888 + 11 digit terakhir nomor peserta).'],
       idCopy: 'ID Pelanggan',
       idHint: 'Masukkan ID Pelanggan BPJSTK.',
       validation: {
