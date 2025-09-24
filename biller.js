@@ -152,21 +152,12 @@
     const idHint = document.getElementById('idInputHint');
     const idInput = document.getElementById('billerIdInput');
     const idError = document.getElementById('idInputError');
-    const accountButton = document.getElementById('sourceAccountButton');
     const accountNameEl = document.getElementById('sourceAccountName');
     const accountSubtitleEl = document.getElementById('sourceAccountSubtitle');
     const accountPlaceholderEl = document.getElementById('sourceAccountPlaceholder');
     const confirmBtn = document.getElementById('confirmPaymentBtn');
     const closeBtn = document.getElementById('drawerCloseBtn');
     const savedBtn = document.getElementById('savedNumberButton');
-
-    const accountSheet = document.getElementById('accountSheet');
-    const accountSheetBackdrop = document.getElementById('accountSheetBackdrop');
-    const accountSheetPanel = document.getElementById('accountSheetPanel');
-    const accountSheetList = document.getElementById('accountSheetList');
-    const accountSheetClose = document.getElementById('accountSheetClose');
-    const accountSheetCancel = document.getElementById('accountSheetCancel');
-    const accountSheetConfirm = document.getElementById('accountSheetConfirm');
 
     const sheet = document.getElementById('paymentSheet');
     const sheetBackdrop = document.getElementById('paymentSheetBackdrop');
@@ -180,7 +171,7 @@
     const sheetIdLabel = document.getElementById('sheetIdLabel');
     const sheetIdValue = document.getElementById('sheetIdValue');
 
-    if (!drawer || !drawerInner || !drawerTitle || !notesList || !idInput || !accountButton || !confirmBtn || !accountSheetList) {
+    if (!drawer || !drawerInner || !drawerTitle || !notesList || !idInput || !confirmBtn) {
       return;
     }
 
@@ -195,8 +186,6 @@
       : Array.isArray(ambis.accounts)
         ? ambis.accounts
         : [];
-
-    const currencyFormatter = new Intl.NumberFormat('id-ID');
 
     function sanitizeNumber(value) {
       return (value || '').toString().replace(/\D+/g, '');
@@ -263,146 +252,6 @@
       accountDisplayList.push(normalised);
     });
 
-    function formatAccountBalance(balance) {
-      if (typeof balance === 'number' && Number.isFinite(balance)) {
-        return `Rp ${currencyFormatter.format(balance)}`;
-      }
-      if (typeof balance === 'string' && balance.trim()) {
-        return balance.trim();
-      }
-      return '';
-    }
-
-    function closeAccountSheet(options = {}) {
-      if (!accountSheet || accountSheet.classList.contains('hidden')) return;
-      const immediate = Boolean(options.immediate);
-      accountSheetOpen = false;
-      sheetSelectionId = appliedAccountId;
-      updateSheetActionState();
-      accountButton?.setAttribute('aria-expanded', 'false');
-      if (immediate) {
-        accountSheet.classList.add('hidden');
-        accountSheetBackdrop?.classList.add('opacity-0');
-        accountSheetPanel?.classList.add('translate-y-full');
-        return;
-      }
-      accountSheetBackdrop?.classList.add('opacity-0');
-      accountSheetPanel?.classList.add('translate-y-full');
-      setTimeout(() => {
-        accountSheet.classList.add('hidden');
-      }, 220);
-    }
-
-    function openAccountSheet() {
-      if (!accountSheet || accountSheetOpen) return;
-      sheetSelectionId = appliedAccountId;
-      renderAccountList();
-      accountSheet.classList.remove('hidden');
-      accountButton?.setAttribute('aria-expanded', 'true');
-      requestAnimationFrame(() => {
-        accountSheetBackdrop?.classList.remove('opacity-0');
-        accountSheetPanel?.classList.remove('translate-y-full');
-      });
-      accountSheetOpen = true;
-    }
-
-    function updateSheetActionState() {
-      const hasSelection = Boolean(sheetSelectionId);
-      if (accountSheetConfirm) {
-        accountSheetConfirm.disabled = !hasSelection;
-      }
-    }
-
-    function renderAccountList() {
-      accountSheetList.innerHTML = '';
-      if (!accountDisplayList.length) {
-        sheetSelectionId = '';
-        const empty = document.createElement('li');
-        empty.className = 'px-4 py-6 text-center text-sm text-slate-500';
-        empty.textContent = 'Tidak ada rekening tersedia.';
-        accountSheetList.appendChild(empty);
-        updateSheetActionState();
-        return;
-      }
-
-      accountDisplayList.forEach((account) => {
-        const li = document.createElement('li');
-        li.className = 'list-none';
-
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.dataset.accountId = account.id;
-        button.setAttribute('role', 'radio');
-        const isSelected = account.id === sheetSelectionId;
-        button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-        button.className = 'w-full flex items-center gap-4 rounded-xl border border-transparent bg-white px-4 py-3 text-left transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400';
-        if (isSelected) {
-          button.classList.add('border-cyan-300', 'bg-cyan-50');
-        }
-
-        const avatar = document.createElement('div');
-        avatar.className = `flex h-10 w-10 flex-none items-center justify-center rounded-full text-sm font-semibold ${account.color || 'bg-cyan-100 text-cyan-600'}`;
-        const initialSource = (account.initial || account.displayName || '').toString().trim();
-        const initial = initialSource ? initialSource.charAt(0).toUpperCase() : 'R';
-        avatar.textContent = initial;
-        button.appendChild(avatar);
-
-        const info = document.createElement('div');
-        info.className = 'min-w-0 flex-1';
-        const title = document.createElement('p');
-        title.className = 'truncate font-semibold text-slate-900';
-        title.textContent = account.displayName;
-        info.appendChild(title);
-
-        const subtitleText = account.subtitle || [account.company, account.number].filter(Boolean).join(' • ');
-        if (subtitleText) {
-          const subtitle = document.createElement('p');
-          subtitle.className = 'truncate text-sm text-slate-500';
-          subtitle.textContent = subtitleText;
-          info.appendChild(subtitle);
-        }
-        button.appendChild(info);
-
-        const trailing = document.createElement('div');
-        trailing.className = 'flex flex-none items-center gap-3';
-
-        const balanceText = formatAccountBalance(account.balance);
-        if (balanceText) {
-          const balanceEl = document.createElement('p');
-          balanceEl.className = 'whitespace-nowrap text-sm font-semibold text-slate-900 text-right';
-          balanceEl.textContent = balanceText;
-          trailing.appendChild(balanceEl);
-        }
-
-        const indicator = document.createElement('span');
-        indicator.className = 'flex h-5 w-5 items-center justify-center rounded-full border transition-colors';
-        indicator.textContent = '✓';
-        if (isSelected) {
-          indicator.classList.add('border-cyan-500', 'bg-cyan-500', 'text-white');
-        } else {
-          indicator.classList.add('border-slate-300', 'text-transparent');
-        }
-        trailing.appendChild(indicator);
-
-        button.appendChild(trailing);
-
-        button.addEventListener('click', () => {
-          setSheetSelection(account.id);
-        });
-
-        li.appendChild(button);
-        accountSheetList.appendChild(li);
-      });
-
-      updateSheetActionState();
-    }
-
-    function setSheetSelection(nextId) {
-      const resolvedId = accountMap.has(nextId) ? nextId : '';
-      sheetSelectionId = resolvedId;
-      renderAccountList();
-    }
-
     function applyAccountSelection(nextId) {
       const resolvedId = accountMap.has(nextId) ? nextId : '';
       appliedAccountId = resolvedId;
@@ -441,9 +290,10 @@
     let currentValidation = { ...DEFAULT_VALIDATION };
     let idDirty = false;
     let sheetOpen = false;
-    let accountSheetOpen = false;
     let appliedAccountId = '';
-    let sheetSelectionId = '';
+
+    const defaultAccountId = accountDisplayList.length ? accountDisplayList[0].id : '';
+    applyAccountSelection(defaultAccountId);
 
     function setActiveButton(next) {
       if (activeButton && activeButton !== next) {
@@ -506,10 +356,6 @@
       }
       idError.classList.add('hidden');
       idError.textContent = '';
-
-      applyAccountSelection('');
-      sheetSelectionId = appliedAccountId;
-      updateSheetActionState();
 
       applyValidationAttributes(currentValidation);
 
@@ -605,7 +451,6 @@
       const config = BILLER_CONFIG[key];
       if (!config) return;
       closeSheet({ immediate: true });
-      closeAccountSheet({ immediate: true });
       setActiveButton(button);
       const wasClosed = !drawer.classList.contains('open');
       applyConfig(key, config);
@@ -627,7 +472,6 @@
       drawerInner.classList.remove('opacity-100', 'translate-x-0');
       drawerInner.classList.add('opacity-0', 'translate-x-4');
       closeSheet({ immediate: true });
-      closeAccountSheet({ immediate: true });
       setTimeout(() => {
         drawer.classList.remove('open');
         if (typeof window.sidebarRestoreForDrawer === 'function') {
@@ -647,10 +491,6 @@
 
     closeBtn?.addEventListener('click', () => {
       closeDrawer();
-    });
-
-    accountButton.addEventListener('click', () => {
-      openAccountSheet();
     });
 
     idInput.addEventListener('input', () => {
@@ -693,21 +533,10 @@
       console.info('Konfirmasi pembayaran diproses (mock).');
     });
 
-    accountSheetBackdrop?.addEventListener('click', () => closeAccountSheet());
-    accountSheetClose?.addEventListener('click', () => closeAccountSheet());
-    accountSheetCancel?.addEventListener('click', () => closeAccountSheet());
-    accountSheetConfirm?.addEventListener('click', () => {
-      if (!sheetSelectionId) return;
-      applyAccountSelection(sheetSelectionId);
-      closeAccountSheet();
-    });
-
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
         if (sheetOpen) {
           closeSheet();
-        } else if (accountSheetOpen) {
-          closeAccountSheet();
         } else {
           closeDrawer();
         }
