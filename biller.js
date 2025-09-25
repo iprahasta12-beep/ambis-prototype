@@ -174,6 +174,138 @@
     ],
   };
 
+  const PAYMENT_DETAILS = {
+    'token-listrik': {
+      type: 'pembelian',
+      displayName: 'Token Listrik',
+      customerName: 'Gudang Jakarta',
+      dynamic: [
+        { label: 'Tarif/Daya', value: 'R2 / 4400 VA' },
+      ],
+      amounts: {
+        nominal: 200000,
+        admin: 2500,
+      },
+      cta: 'Bayar Token Listrik',
+    },
+    'tagihan-listrik': {
+      type: 'pembayaran',
+      displayName: 'Tagihan Listrik',
+      customerName: 'CV Andalas',
+      dynamic: [
+        { label: 'Tarif/Daya', value: 'R2 / 4400 VA' },
+        { label: 'Jumlah Bulan', value: '2' },
+        { label: 'Bulan Tagihan', value: 'Juli & Agustus 2025' },
+      ],
+      amounts: {
+        nominal: 875000,
+        admin: 2500,
+      },
+      cta: 'Bayar Listrik',
+    },
+    indihome: {
+      type: 'pembayaran',
+      displayName: 'IndiHome',
+      customerName: 'Cabang Bandung',
+      dynamic: [],
+      amounts: {
+        nominal: 480000,
+        admin: 2000,
+      },
+      cta: 'Bayar IndiHome',
+    },
+    myrepublic: {
+      type: 'pembayaran',
+      displayName: 'MyRepublic',
+      customerName: 'Kantor Utama',
+      dynamic: [],
+      amounts: {
+        nominal: 550000,
+        admin: 2500,
+      },
+      cta: 'Bayar MyRepublic',
+    },
+    cbn: {
+      type: 'pembayaran',
+      displayName: 'CBN',
+      customerName: 'CBN Operasional',
+      dynamic: [],
+      amounts: {
+        nominal: 610000,
+        admin: 2500,
+      },
+      cta: 'Bayar CBN',
+    },
+    iconnet: {
+      type: 'pembayaran',
+      displayName: 'Iconnet',
+      customerName: 'Iconnet Lantai 3',
+      dynamic: [],
+      amounts: {
+        nominal: 425000,
+        admin: 2500,
+      },
+      cta: 'Bayar Iconnet',
+    },
+    'bpjs-keluarga': {
+      type: 'pembayaran',
+      displayName: 'BPJS Kesehatan Keluarga',
+      customerName: 'Keluarga Hartono',
+      dynamic: [
+        { label: 'Jumlah Keluarga', value: '3' },
+      ],
+      amounts: {
+        nominal: 150000,
+        admin: 2500,
+      },
+      cta: 'Bayar BPJS',
+    },
+    'bpjs-badan-usaha': {
+      type: 'pembayaran',
+      displayName: 'BPJS Kesehatan Badan Usaha',
+      customerName: 'PT Maju Lancar',
+      dynamic: [
+        { label: 'Jumlah Karyawan', value: '60' },
+      ],
+      amounts: {
+        nominal: 2500000,
+        admin: 5000,
+      },
+      cta: 'Bayar BPJS',
+    },
+    'bpjstk-penerima-upah': {
+      type: 'pembayaran',
+      displayName: 'BPJSTK Penerima Upah',
+      customerName: 'PT Sentosa Prima',
+      dynamic: [
+        { label: 'Tagihan', value: 'Juli 2025' },
+      ],
+      amounts: {
+        nominal: 3500000,
+        admin: 5000,
+      },
+      cta: 'Bayar BPJSTK',
+    },
+    'bpjstk-bukan-penerima-upah': {
+      type: 'pembayaran',
+      displayName: 'BPJSTK Bukan Penerima Upah',
+      customerName: 'Bimo Santosa',
+      dynamic: [
+        { label: 'Tagihan', value: 'Juli 2025' },
+        { label: 'Tanggal Lahir', value: '2 Februari 2000' },
+        { label: 'Alamat Personal', value: 'Jl Kejora 24' },
+        { label: 'Alamat Kantor Cabang', value: 'Ciracas' },
+        { label: 'Upah', value: 'Rp7.200.000' },
+        { label: 'Program', value: 'JKK + JKM' },
+      ],
+      amounts: {
+        nominal: 750000,
+        admin: 3500,
+      },
+      cta: 'Bayar BPJSTK',
+    },
+  };
+
   function mergeValidation(config) {
     if (!config || !config.validation) {
       return { ...DEFAULT_VALIDATION };
@@ -198,17 +330,22 @@
     const closeBtn = document.getElementById('drawerCloseBtn');
     const savedBtn = document.getElementById('savedNumberButton');
 
-    const paymentSheet = document.getElementById('paymentSheet');
-    const paymentSheetBackdrop = document.getElementById('paymentSheetBackdrop');
-    const paymentSheetPanel = document.getElementById('paymentSheetPanel');
+    const paymentSheetOverlay = document.getElementById('paymentSheetOverlay');
+    const paymentBottomSheet = document.getElementById('paymentBottomSheet');
     const paymentSheetClose = document.getElementById('paymentSheetClose');
     const paymentSheetCancel = document.getElementById('paymentSheetCancel');
     const paymentSheetConfirm = document.getElementById('paymentSheetConfirm');
-    const sheetBiller = document.getElementById('sheetBiller');
-    const sheetAccountName = document.getElementById('sheetAccountName');
-    const sheetAccountNumber = document.getElementById('sheetAccountNumber');
-    const sheetIdLabel = document.getElementById('sheetIdLabel');
-    const sheetIdValue = document.getElementById('sheetIdValue');
+    const paymentSheetTitle = document.getElementById('paymentSheetTitle');
+    const paymentSheetTypeLabel = document.getElementById('paymentSheetTypeLabel');
+    const paymentSheetBiller = document.getElementById('paymentSheetBiller');
+    const paymentSheetAccountValue = document.getElementById('paymentSheetAccountValue');
+    const paymentSheetIdLabel = document.getElementById('paymentSheetIdLabel');
+    const paymentSheetIdValue = document.getElementById('paymentSheetIdValue');
+    const paymentSheetCustomerName = document.getElementById('paymentSheetCustomerName');
+    const paymentSheetDynamicSection = document.getElementById('paymentSheetDynamicSection');
+    const paymentSheetNominal = document.getElementById('paymentSheetNominal');
+    const paymentSheetAdmin = document.getElementById('paymentSheetAdmin');
+    const paymentSheetTotal = document.getElementById('paymentSheetTotal');
     const moveSourceButton = document.getElementById('moveSourceButton');
     const accountSheetOverlay = document.getElementById('sheetOverlay');
     const accountBottomSheet = document.getElementById('bottomSheet');
@@ -799,8 +936,8 @@
         idHint.textContent = hintText ? hintText : '';
         idHint.classList.toggle('hidden', !hintText);
       }
-      if (sheetIdLabel) {
-        sheetIdLabel.textContent = label;
+      if (paymentSheetIdLabel) {
+        paymentSheetIdLabel.textContent = label;
       }
       idError.classList.add('hidden');
       idError.textContent = '';
@@ -860,43 +997,155 @@
     }
 
     function closePaymentSheet(options = {}) {
-      if (!paymentSheet || paymentSheet.classList.contains('hidden')) return;
+      if (!paymentSheetOverlay || !paymentBottomSheet) return;
+      if (paymentSheetOverlay.classList.contains('hidden') && !paymentSheetOpen) {
+        return;
+      }
       const immediate = Boolean(options.immediate);
       paymentSheetOpen = false;
       if (immediate) {
-        paymentSheet.classList.add('hidden');
-        paymentSheetBackdrop?.classList.add('opacity-0');
-        paymentSheetPanel?.classList.add('translate-y-full');
+        paymentSheetOverlay.classList.remove('opacity-100');
+        paymentSheetOverlay.classList.add('hidden');
+        paymentBottomSheet.classList.add('translate-y-full');
         return;
       }
-      paymentSheetBackdrop?.classList.add('opacity-0');
-      paymentSheetPanel?.classList.add('translate-y-full');
+      paymentSheetOverlay.classList.remove('opacity-100');
+      paymentBottomSheet.classList.add('translate-y-full');
       setTimeout(() => {
-        paymentSheet.classList.add('hidden');
+        paymentSheetOverlay.classList.add('hidden');
       }, 220);
     }
 
+    function renderPaymentDynamic(fields) {
+      if (!paymentSheetDynamicSection) return;
+      paymentSheetDynamicSection.innerHTML = '';
+      const items = Array.isArray(fields) ? fields.filter((item) => item && item.label && item.value !== undefined && item.value !== null) : [];
+      if (!items.length) {
+        paymentSheetDynamicSection.classList.add('hidden');
+        return;
+      }
+      items.forEach((item) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-start justify-between gap-4';
+
+        const label = document.createElement('span');
+        label.className = 'text-sm text-slate-500';
+        label.textContent = item.label;
+
+        const value = document.createElement('span');
+        value.className = 'text-sm font-semibold text-slate-900 text-right max-w-[60%] whitespace-pre-line';
+        value.textContent = `${item.value}`;
+
+        row.appendChild(label);
+        row.appendChild(value);
+        paymentSheetDynamicSection.appendChild(row);
+      });
+      paymentSheetDynamicSection.classList.remove('hidden');
+    }
+
+    function formatCurrencyValue(value, fallback = 'Rp0') {
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return `Rp${currencyFormatter.format(value)}`;
+      }
+      if (typeof value === 'string' && value.trim()) {
+        return value;
+      }
+      return fallback;
+    }
+
+    function formatAccountForPayment(account) {
+      if (!account) {
+        return '-';
+      }
+      const name = account.displayName || account.name || '';
+      const number = account.number || formatAccountNumber(account.numberRaw) || '';
+      if (name && number) {
+        return `${name} – ${number}`;
+      }
+      if (name) {
+        return name;
+      }
+      if (number) {
+        return number;
+      }
+      if (account.subtitle) {
+        return account.subtitle;
+      }
+      return '-';
+    }
+
     function openPaymentSheet() {
-      if (!paymentSheet || !activeKey) return;
+      if (!paymentSheetOverlay || !paymentBottomSheet || !activeKey) return;
       const config = BILLER_CONFIG[activeKey];
       if (!config) return;
+
+      closeAccountSheet({ immediate: true });
+      closeSavedSheet({ immediate: true });
+
       const sanitizedId = typeof currentValidation.sanitize === 'function'
         ? currentValidation.sanitize(idInput.value.trim())
         : idInput.value.trim();
       idInput.value = sanitizedId;
 
+      const summary = PAYMENT_DETAILS[activeKey] || {};
+      const type = summary.type === 'pembelian' ? 'pembelian' : 'pembayaran';
+      const headerTitle = type === 'pembelian' ? 'Konfirmasi Pembelian' : 'Konfirmasi Pembayaran';
+      const transactionLabel = type === 'pembelian' ? 'Pembelian' : 'Pembayaran';
+      const displayName = summary.displayName || config.title || '-';
       const account = appliedAccountId ? accountMap.get(appliedAccountId) : null;
-      sheetBiller.textContent = config.title;
-      sheetIdLabel.textContent = config.idCopy || 'ID Pelanggan';
-      sheetIdValue.textContent = sanitizedId || '-';
-      sheetAccountName.textContent = account?.displayName || '-';
-      const accountSubtitle = account?.subtitle || [account?.company, account?.number].filter(Boolean).join(' • ');
-      sheetAccountNumber.textContent = accountSubtitle || '-';
+      const savedSelection = activeKey ? savedSelections.get(activeKey) : null;
+      const customerName = savedSelection?.name || summary.customerName || '-';
 
-      paymentSheet.classList.remove('hidden');
+      if (paymentSheetTitle) {
+        paymentSheetTitle.textContent = headerTitle;
+      }
+      if (paymentSheetTypeLabel) {
+        paymentSheetTypeLabel.textContent = transactionLabel;
+      }
+      if (paymentSheetBiller) {
+        paymentSheetBiller.textContent = displayName;
+      }
+      if (paymentSheetAccountValue) {
+        paymentSheetAccountValue.textContent = formatAccountForPayment(account);
+      }
+      if (paymentSheetIdLabel) {
+        paymentSheetIdLabel.textContent = config.idCopy || 'ID Pelanggan';
+      }
+      if (paymentSheetIdValue) {
+        paymentSheetIdValue.textContent = sanitizedId || '-';
+      }
+      if (paymentSheetCustomerName) {
+        paymentSheetCustomerName.textContent = customerName || '-';
+      }
+
+      renderPaymentDynamic(summary.dynamic);
+
+      const nominalValue = summary.amounts?.nominal;
+      const adminValue = summary.amounts?.admin;
+      let totalValue = summary.amounts?.total;
+      if (typeof totalValue !== 'number' && typeof nominalValue === 'number' && typeof adminValue === 'number') {
+        totalValue = nominalValue + adminValue;
+      }
+
+      if (paymentSheetNominal) {
+        paymentSheetNominal.textContent = formatCurrencyValue(nominalValue);
+      }
+      if (paymentSheetAdmin) {
+        paymentSheetAdmin.textContent = formatCurrencyValue(adminValue);
+      }
+      if (paymentSheetTotal) {
+        paymentSheetTotal.textContent = formatCurrencyValue(totalValue, formatCurrencyValue(nominalValue));
+      }
+
+      const ctaText = summary.cta || (displayName && displayName !== '-' ? `Bayar ${displayName}` : 'Bayar Sekarang');
+      if (paymentSheetConfirm) {
+        paymentSheetConfirm.textContent = ctaText;
+      }
+
+      paymentSheetOverlay.classList.remove('hidden');
       requestAnimationFrame(() => {
-        paymentSheetBackdrop?.classList.remove('opacity-0');
-        paymentSheetPanel?.classList.remove('translate-y-full');
+        paymentSheetOverlay.classList.add('opacity-100');
+        paymentBottomSheet.classList.remove('translate-y-full');
       });
       paymentSheetOpen = true;
     }
@@ -1024,7 +1273,11 @@
       selectSavedNumber(target.value);
     });
 
-    paymentSheetBackdrop?.addEventListener('click', () => closePaymentSheet());
+    paymentSheetOverlay?.addEventListener('click', (event) => {
+      if (event.target === paymentSheetOverlay) {
+        closePaymentSheet();
+      }
+    });
     paymentSheetClose?.addEventListener('click', () => closePaymentSheet());
     paymentSheetCancel?.addEventListener('click', () => closePaymentSheet());
     paymentSheetConfirm?.addEventListener('click', () => {
