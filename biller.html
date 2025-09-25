@@ -347,6 +347,30 @@
               </div>
             </div>
           </section>
+          <section id="paymentOtpSection" class="hidden border-t border-slate-200 pt-6 space-y-4">
+            <h4 class="text-lg font-semibold text-slate-900 text-center">Masukkan kode verifikasi</h4>
+            <div class="grid grid-cols-8 gap-2">
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+            </div>
+            <p class="text-sm text-slate-500 text-center">
+              Silakan login &amp; cek aplikasi Amar Bank Bisnis pada handphone Anda untuk mendapatkan kode verifikasi.
+            </p>
+            <p id="paymentOtpCountdown" class="text-sm text-slate-500 text-center">
+              <span id="paymentOtpCountdownMessage">Sesi akan berakhir dalam</span>
+              <span id="paymentOtpTimer" class="text-cyan-500 font-semibold">00:30</span>
+            </p>
+            <button id="paymentOtpResend" type="button" class="hidden mx-auto rounded-lg border border-cyan-300 px-4 py-2 text-sm font-medium text-cyan-500 hover:bg-slate-50">
+              Kirim Ulang Kode Verifikasi
+            </button>
+            <p id="paymentOtpError" class="hidden text-sm text-rose-500 text-center"></p>
+          </section>
         </div>
         <div class="border-t border-slate-100 px-6 py-4 bg-white flex gap-3">
           <button id="paymentSheetCancel" type="button" class="flex-1 rounded-xl border border-slate-300 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50">Batalkan</button>

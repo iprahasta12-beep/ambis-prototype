@@ -361,6 +361,13 @@
     const savedSheetConfirm = document.getElementById('savedSheetConfirm');
     const savedSheetList = document.getElementById('savedSheetList');
     const savedSheetEmpty = document.getElementById('savedSheetEmpty');
+    const paymentOtpSection = document.getElementById('paymentOtpSection');
+    const paymentOtpInputs = paymentOtpSection ? Array.from(paymentOtpSection.querySelectorAll('.otp-input')) : [];
+    const paymentOtpCountdown = document.getElementById('paymentOtpCountdown');
+    const paymentOtpCountdownMessage = document.getElementById('paymentOtpCountdownMessage');
+    const paymentOtpTimer = document.getElementById('paymentOtpTimer');
+    const paymentOtpResend = document.getElementById('paymentOtpResend');
+    const paymentOtpError = document.getElementById('paymentOtpError');
 
     if (!drawer || !drawerInner || !drawerTitle || !notesList || !idInput || !confirmBtn) {
       return;
@@ -876,6 +883,16 @@
     let pendingSavedId = '';
     const savedSelections = new Map();
     const savedOptionsCache = new Map();
+    const PAYMENT_OTP_DURATION_SECONDS = 30;
+    const PAYMENT_OTP_DEFAULT_COUNTDOWN_MESSAGE = 'Sesi akan berakhir dalam';
+    const PAYMENT_OTP_EXPIRED_MESSAGE = 'Kode OTP kedaluwarsa. Silakan kirim ulang kode untuk melanjutkan.';
+    const paymentOtpCountdownDefaultMessage =
+      paymentOtpCountdownMessage?.textContent?.trim() || PAYMENT_OTP_DEFAULT_COUNTDOWN_MESSAGE;
+
+    let paymentOtpActive = false;
+    let paymentOtpIntervalId = null;
+    let paymentOtpTimeLeft = PAYMENT_OTP_DURATION_SECONDS;
+    let paymentSheetDefaultCta = 'Bayar Sekarang';
 
     rebuildAccountCollections();
     applyAccountSelection(appliedAccountId);
@@ -1001,6 +1018,7 @@
       if (paymentSheetOverlay.classList.contains('hidden') && !paymentSheetOpen) {
         return;
       }
+      resetPaymentOtpState();
       const immediate = Boolean(options.immediate);
       paymentSheetOpen = false;
       if (immediate) {
@@ -1074,6 +1092,148 @@
       return '-';
     }
 
+    function setPaymentSheetConfirmEnabled(enabled) {
+      if (!paymentSheetConfirm) return;
+      paymentSheetConfirm.disabled = !enabled;
+      paymentSheetConfirm.classList.toggle('opacity-50', !enabled);
+      paymentSheetConfirm.classList.toggle('cursor-not-allowed', !enabled);
+    }
+
+    function setPaymentSheetConfirmText(text) {
+      if (!paymentSheetConfirm) return;
+      paymentSheetConfirm.textContent = text;
+    }
+
+    function hidePaymentOtpError() {
+      if (!paymentOtpError) return;
+      paymentOtpError.textContent = '';
+      paymentOtpError.classList.add('hidden');
+    }
+
+    function showPaymentOtpError(message) {
+      if (!paymentOtpError) return;
+      paymentOtpError.textContent = message;
+      paymentOtpError.classList.remove('hidden');
+    }
+
+    function resetPaymentOtpInputs() {
+      if (!paymentOtpInputs.length) return;
+      paymentOtpInputs.forEach((input) => {
+        input.value = '';
+      });
+    }
+
+    function formatPaymentOtpTime(seconds) {
+      const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      return `${mins}:${secs}`;
+    }
+
+    function updatePaymentOtpCountdownDisplay() {
+      if (!paymentOtpTimer) return;
+      paymentOtpTimer.textContent = formatPaymentOtpTime(paymentOtpTimeLeft);
+    }
+
+    function showPaymentOtpCountdownDefaultMessage() {
+      if (paymentOtpCountdownMessage) {
+        paymentOtpCountdownMessage.textContent = paymentOtpCountdownDefaultMessage;
+      }
+      if (paymentOtpTimer) {
+        paymentOtpTimer.classList.remove('hidden');
+      }
+    }
+
+    function showPaymentOtpExpiredMessage() {
+      if (paymentOtpCountdownMessage) {
+        paymentOtpCountdownMessage.textContent = PAYMENT_OTP_EXPIRED_MESSAGE;
+      }
+      if (paymentOtpTimer) {
+        paymentOtpTimer.classList.add('hidden');
+      }
+    }
+
+    function clearPaymentOtpTimer() {
+      if (paymentOtpIntervalId) {
+        clearInterval(paymentOtpIntervalId);
+        paymentOtpIntervalId = null;
+      }
+    }
+
+    function isPaymentOtpFilled() {
+      if (!paymentOtpInputs.length) return false;
+      return paymentOtpInputs.every((input) => input.value && input.value.trim() !== '');
+    }
+
+    function getPaymentOtpValue() {
+      if (!paymentOtpInputs.length) return '';
+      return paymentOtpInputs.map((input) => input.value).join('');
+    }
+
+    function updatePaymentOtpVerifyState() {
+      if (!paymentOtpActive) return;
+      const canVerify = isPaymentOtpFilled() && paymentOtpTimeLeft > 0;
+      setPaymentSheetConfirmEnabled(canVerify);
+    }
+
+    function startPaymentOtpTimer() {
+      if (paymentOtpCountdown) {
+        paymentOtpCountdown.classList.remove('hidden');
+      }
+      showPaymentOtpCountdownDefaultMessage();
+      paymentOtpResend?.classList.add('hidden');
+      paymentOtpTimeLeft = PAYMENT_OTP_DURATION_SECONDS;
+      updatePaymentOtpCountdownDisplay();
+      clearPaymentOtpTimer();
+      paymentOtpIntervalId = setInterval(() => {
+        paymentOtpTimeLeft -= 1;
+        if (paymentOtpTimeLeft <= 0) {
+          paymentOtpTimeLeft = 0;
+          updatePaymentOtpCountdownDisplay();
+          clearPaymentOtpTimer();
+          showPaymentOtpExpiredMessage();
+          paymentOtpResend?.classList.remove('hidden');
+          setPaymentSheetConfirmEnabled(false);
+          return;
+        }
+        updatePaymentOtpCountdownDisplay();
+      }, 1000);
+    }
+
+    function resetPaymentOtpState() {
+      paymentOtpActive = false;
+      clearPaymentOtpTimer();
+      paymentOtpTimeLeft = PAYMENT_OTP_DURATION_SECONDS;
+      if (paymentOtpSection) {
+        paymentOtpSection.classList.add('hidden');
+      }
+      resetPaymentOtpInputs();
+      hidePaymentOtpError();
+      if (paymentOtpCountdown) {
+        paymentOtpCountdown.classList.remove('hidden');
+      }
+      showPaymentOtpCountdownDefaultMessage();
+      if (paymentOtpTimer) {
+        paymentOtpTimer.textContent = formatPaymentOtpTime(PAYMENT_OTP_DURATION_SECONDS);
+      }
+      paymentOtpResend?.classList.add('hidden');
+      setPaymentSheetConfirmText(paymentSheetDefaultCta);
+      setPaymentSheetConfirmEnabled(true);
+    }
+
+    function startPaymentOtpFlow() {
+      paymentOtpActive = true;
+      hidePaymentOtpError();
+      resetPaymentOtpInputs();
+      if (paymentOtpSection) {
+        paymentOtpSection.classList.remove('hidden');
+      }
+      setPaymentSheetConfirmText('Verifikasi');
+      setPaymentSheetConfirmEnabled(false);
+      startPaymentOtpTimer();
+      updatePaymentOtpVerifyState();
+      paymentOtpInputs[0]?.focus();
+    }
+
     function openPaymentSheet() {
       if (!paymentSheetOverlay || !paymentBottomSheet || !activeKey) return;
       const config = BILLER_CONFIG[activeKey];
@@ -1138,9 +1298,8 @@
       }
 
       const ctaText = summary.cta || (displayName && displayName !== '-' ? `Bayar ${displayName}` : 'Bayar Sekarang');
-      if (paymentSheetConfirm) {
-        paymentSheetConfirm.textContent = ctaText;
-      }
+      paymentSheetDefaultCta = ctaText;
+      resetPaymentOtpState();
 
       paymentSheetOverlay.classList.remove('hidden');
       requestAnimationFrame(() => {
@@ -1273,6 +1432,75 @@
       selectSavedNumber(target.value);
     });
 
+    paymentOtpResend?.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (!paymentOtpActive) return;
+      resetPaymentOtpInputs();
+      hidePaymentOtpError();
+      startPaymentOtpTimer();
+      updatePaymentOtpVerifyState();
+      paymentOtpInputs[0]?.focus();
+    });
+
+    paymentOtpInputs.forEach((input, index) => {
+      input.addEventListener('input', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement)) return;
+        const digits = target.value.replace(/\D/g, '');
+        target.value = digits.slice(-1);
+        if (target.value && index < paymentOtpInputs.length - 1) {
+          paymentOtpInputs[index + 1]?.focus();
+        }
+        hidePaymentOtpError();
+        updatePaymentOtpVerifyState();
+      });
+
+      input.addEventListener('keydown', (event) => {
+        if (event.key === 'Backspace' && !input.value && index > 0) {
+          event.preventDefault();
+          const previous = paymentOtpInputs[index - 1];
+          previous.value = '';
+          previous.focus();
+          updatePaymentOtpVerifyState();
+          return;
+        }
+        if (event.key === 'ArrowLeft' && index > 0) {
+          event.preventDefault();
+          paymentOtpInputs[index - 1]?.focus();
+          return;
+        }
+        if (event.key === 'ArrowRight' && index < paymentOtpInputs.length - 1) {
+          event.preventDefault();
+          paymentOtpInputs[index + 1]?.focus();
+        }
+      });
+
+      input.addEventListener('paste', (event) => {
+        event.preventDefault();
+        const clipboard = event.clipboardData || window.clipboardData;
+        const text = clipboard?.getData('text') || '';
+        const digits = text.replace(/\D/g, '');
+        if (!digits) return;
+        resetPaymentOtpInputs();
+        const chars = digits.split('').slice(0, paymentOtpInputs.length);
+        chars.forEach((char, charIndex) => {
+          paymentOtpInputs[charIndex].value = char;
+        });
+        const focusIndex = Math.min(chars.length - 1, paymentOtpInputs.length - 1);
+        if (focusIndex >= 0) {
+          paymentOtpInputs[focusIndex].focus();
+        }
+        hidePaymentOtpError();
+        updatePaymentOtpVerifyState();
+      });
+
+      input.addEventListener('focus', () => {
+        if (input.value) {
+          input.select();
+        }
+      });
+    });
+
     paymentSheetOverlay?.addEventListener('click', (event) => {
       if (event.target === paymentSheetOverlay) {
         closePaymentSheet();
@@ -1280,7 +1508,32 @@
     });
     paymentSheetClose?.addEventListener('click', () => closePaymentSheet());
     paymentSheetCancel?.addEventListener('click', () => closePaymentSheet());
-    paymentSheetConfirm?.addEventListener('click', () => {
+    paymentSheetConfirm?.addEventListener('click', (event) => {
+      event.preventDefault();
+      if (!paymentSheetConfirm || paymentSheetConfirm.disabled) {
+        return;
+      }
+
+      if (!paymentOtpActive) {
+        startPaymentOtpFlow();
+        return;
+      }
+
+      if (paymentOtpTimeLeft <= 0) {
+        showPaymentOtpError(PAYMENT_OTP_EXPIRED_MESSAGE);
+        setPaymentSheetConfirmEnabled(false);
+        return;
+      }
+
+      if (!isPaymentOtpFilled()) {
+        showPaymentOtpError('Masukkan kode OTP lengkap.');
+        setPaymentSheetConfirmEnabled(false);
+        return;
+      }
+
+      const otpValue = getPaymentOtpValue();
+      hidePaymentOtpError();
+      console.info('OTP pembayaran diverifikasi:', otpValue);
       closePaymentSheet();
       console.info('Konfirmasi pembayaran diproses (mock).');
     });
