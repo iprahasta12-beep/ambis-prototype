@@ -368,6 +368,26 @@
     const paymentOtpTimer = document.getElementById('paymentOtpTimer');
     const paymentOtpResend = document.getElementById('paymentOtpResend');
     const paymentOtpError = document.getElementById('paymentOtpError');
+    const successDrawer = document.getElementById('paymentSuccessDrawer');
+    const successDrawerInner = document.getElementById('paymentSuccessInner');
+    const successHeaderClose = document.getElementById('successDrawerHeaderClose');
+    const successCloseButton = document.getElementById('successDrawerCloseButton');
+    const successStatusButton = document.getElementById('successDrawerStatusButton');
+    const successHeroTitle = document.getElementById('successHeroTitle');
+    const successHeroCategory = document.getElementById('successHeroCategory');
+    const successHeroSubtitle = document.getElementById('successHeroSubtitle');
+    const successPaymentLabel = document.getElementById('successPaymentLabel');
+    const successPaymentValue = document.getElementById('successPaymentValue');
+    const successAccountValue = document.getElementById('successAccountValue');
+    const successIdLabel = document.getElementById('successIdLabel');
+    const successIdValue = document.getElementById('successIdValue');
+    const successCustomerName = document.getElementById('successCustomerName');
+    const successDynamicSection = document.getElementById('successDynamicSection');
+    const successStatusPill = document.getElementById('successStatusPill');
+    const successNominal = document.getElementById('successNominal');
+    const successAdmin = document.getElementById('successAdmin');
+    const successTotal = document.getElementById('successTotal');
+    const successStatusButtonDefaultText = successStatusButton?.textContent?.trim() || 'Cek Status';
 
     if (!drawer || !drawerInner || !drawerTitle || !notesList || !idInput || !confirmBtn) {
       return;
@@ -888,11 +908,35 @@
     const PAYMENT_OTP_EXPIRED_MESSAGE = 'Kode OTP kedaluwarsa. Silakan kirim ulang kode untuk melanjutkan.';
     const paymentOtpCountdownDefaultMessage =
       paymentOtpCountdownMessage?.textContent?.trim() || PAYMENT_OTP_DEFAULT_COUNTDOWN_MESSAGE;
+    const SUCCESS_STATUS_CONFIG = {
+      processing: {
+        label: 'Sedang Diproses',
+        pillClass: 'bg-amber-100 text-amber-600',
+        heroTitle: 'Transaksi Sedang Diproses',
+      },
+      success: {
+        label: 'Berhasil',
+        pillClass: 'bg-emerald-100 text-emerald-600',
+        heroTitle: 'Transaksi Berhasil',
+      },
+      failed: {
+        label: 'Gagal',
+        pillClass: 'bg-rose-100 text-rose-600',
+        heroTitle: 'Transaksi Gagal',
+      },
+    };
+    const SUCCESS_STATUS_SEQUENCE = ['processing', 'success', 'failed'];
+    const SUCCESS_STATUS_PILL_BASE = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold';
 
     let paymentOtpActive = false;
     let paymentOtpIntervalId = null;
     let paymentOtpTimeLeft = PAYMENT_OTP_DURATION_SECONDS;
     let paymentSheetDefaultCta = 'Bayar Sekarang';
+    let successDrawerOpen = false;
+    let successStatusLoading = false;
+    let currentSuccessStatusKey = 'processing';
+    let lastConfirmationContext = null;
+    let lastSuccessDetails = null;
 
     rebuildAccountCollections();
     applyAccountSelection(appliedAccountId);
@@ -1061,6 +1105,35 @@
       paymentSheetDynamicSection.classList.remove('hidden');
     }
 
+    function renderSuccessDynamic(fields) {
+      if (!successDynamicSection) return;
+      successDynamicSection.innerHTML = '';
+      const items = Array.isArray(fields)
+        ? fields.filter((item) => item && item.label && item.value !== undefined && item.value !== null)
+        : [];
+      if (!items.length) {
+        successDynamicSection.classList.add('hidden');
+        return;
+      }
+      items.forEach((item) => {
+        const row = document.createElement('div');
+        row.className = 'flex items-start justify-between gap-4';
+
+        const label = document.createElement('span');
+        label.className = 'text-sm text-slate-500';
+        label.textContent = item.label;
+
+        const value = document.createElement('span');
+        value.className = 'max-w-[60%] whitespace-pre-line text-right text-sm font-semibold text-slate-900';
+        value.textContent = `${item.value}`;
+
+        row.appendChild(label);
+        row.appendChild(value);
+        successDynamicSection.appendChild(row);
+      });
+      successDynamicSection.classList.remove('hidden');
+    }
+
     function formatCurrencyValue(value, fallback = 'Rp0') {
       if (typeof value === 'number' && Number.isFinite(value)) {
         return `Rp${currencyFormatter.format(value)}`;
@@ -1090,6 +1163,193 @@
         return account.subtitle;
       }
       return '-';
+    }
+
+    function getSuccessStatusConfig(key) {
+      return SUCCESS_STATUS_CONFIG[key] || SUCCESS_STATUS_CONFIG.processing;
+    }
+
+    function setSuccessStatus(statusKey, options = {}) {
+      const config = getSuccessStatusConfig(statusKey);
+      currentSuccessStatusKey = statusKey;
+      if (successStatusPill) {
+        successStatusPill.className = `${SUCCESS_STATUS_PILL_BASE} ${config.pillClass}`;
+        successStatusPill.textContent = config.label;
+      }
+      if (!options.skipHeroTitle && successHeroTitle) {
+        successHeroTitle.textContent = config.heroTitle || SUCCESS_STATUS_CONFIG.processing.heroTitle;
+      }
+      if (lastSuccessDetails) {
+        lastSuccessDetails.status = statusKey;
+      }
+    }
+
+    function resetSuccessDrawerControls() {
+      if (successStatusButton) {
+        successStatusButton.disabled = false;
+        successStatusButton.textContent = successStatusButtonDefaultText;
+      }
+      successStatusLoading = false;
+    }
+
+    function populateSuccessDrawer(details) {
+      if (!details) return;
+      const dynamicFields = Array.isArray(details.dynamicFields)
+        ? details.dynamicFields.map((item) => ({
+            label: item.label,
+            value: item.value,
+          }))
+        : [];
+      lastSuccessDetails = {
+        ...details,
+        dynamicFields,
+        amounts: {
+          nominal: details.amounts?.nominal,
+          admin: details.amounts?.admin,
+          total: details.amounts?.total,
+        },
+      };
+      if (successHeroCategory) {
+        successHeroCategory.textContent = details.heroCategory || 'Beli & Bayar';
+      }
+      if (successHeroSubtitle) {
+        successHeroSubtitle.textContent = details.heroSubtitle || details.displayName || '-';
+      }
+      if (successPaymentLabel) {
+        successPaymentLabel.textContent = details.transactionLabel || 'Pembayaran';
+      }
+      if (successPaymentValue) {
+        successPaymentValue.textContent = details.displayName || '-';
+      }
+      if (successAccountValue) {
+        successAccountValue.textContent = details.accountDisplay || '-';
+      }
+      if (successIdLabel) {
+        successIdLabel.textContent = details.idLabel || 'ID Pelanggan';
+      }
+      if (successIdValue) {
+        successIdValue.textContent = details.idValue || '-';
+      }
+      if (successCustomerName) {
+        successCustomerName.textContent = details.customerName || '-';
+      }
+      renderSuccessDynamic(dynamicFields);
+      if (successNominal) {
+        successNominal.textContent = formatCurrencyValue(details.amounts?.nominal);
+      }
+      if (successAdmin) {
+        successAdmin.textContent = formatCurrencyValue(details.amounts?.admin);
+      }
+      if (successTotal) {
+        successTotal.textContent = formatCurrencyValue(
+          details.amounts?.total,
+          formatCurrencyValue(details.amounts?.nominal)
+        );
+      }
+      setSuccessStatus(details.status || 'processing');
+      resetSuccessDrawerControls();
+    }
+
+    function buildSuccessDetailsFromContext(context) {
+      if (!context) return null;
+      const dynamicFields = Array.isArray(context.dynamicFields)
+        ? context.dynamicFields.map((item) => ({
+            label: item.label,
+            value: item.value,
+          }))
+        : [];
+      return {
+        key: context.key,
+        type: context.type,
+        transactionLabel: context.transactionLabel,
+        displayName: context.displayName,
+        accountDisplay: context.accountDisplay,
+        idLabel: context.idLabel,
+        idValue: context.idValue,
+        customerName: context.customerName,
+        dynamicFields,
+        amounts: {
+          nominal: context.amounts?.nominal,
+          admin: context.amounts?.admin,
+          total: context.amounts?.total,
+        },
+        status: context.status || 'processing',
+        heroCategory: context.heroCategory || 'Beli & Bayar',
+        heroSubtitle: context.heroSubtitle || context.displayName || '-',
+      };
+    }
+
+    function openSuccessDrawer(details) {
+      if (!successDrawer || !successDrawerInner || !details) return;
+      populateSuccessDrawer(details);
+      successDrawer.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        successDrawerInner.classList.remove('translate-x-8', 'opacity-0');
+        successDrawerInner.classList.add('translate-x-0', 'opacity-100');
+      });
+      successDrawerOpen = true;
+      successCloseButton?.focus();
+    }
+
+    function hideSuccessDrawer(options = {}) {
+      if (!successDrawer || !successDrawerInner) {
+        if (typeof options.onHidden === 'function') {
+          options.onHidden();
+        }
+        return;
+      }
+      if (successDrawer.classList.contains('hidden')) {
+        successDrawerOpen = false;
+        if (typeof options.onHidden === 'function') {
+          options.onHidden();
+        }
+        return;
+      }
+      successDrawerOpen = false;
+      const finalize = () => {
+        successDrawer.classList.add('hidden');
+        successDrawerInner.classList.remove('translate-x-0', 'opacity-100');
+        successDrawerInner.classList.add('translate-x-8', 'opacity-0');
+        resetSuccessDrawerControls();
+        if (typeof options.onHidden === 'function') {
+          options.onHidden();
+        }
+      };
+      if (options.immediate) {
+        finalize();
+        return;
+      }
+      successDrawerInner.classList.remove('translate-x-0', 'opacity-100');
+      successDrawerInner.classList.add('translate-x-8', 'opacity-0');
+      setTimeout(finalize, 220);
+    }
+
+    function closeSuccessDrawerAndPanel() {
+      hideSuccessDrawer({ onHidden: () => closeDrawer() });
+    }
+
+    function getNextSuccessStatusKey(currentKey) {
+      const index = SUCCESS_STATUS_SEQUENCE.indexOf(currentKey);
+      if (index === -1 || index === SUCCESS_STATUS_SEQUENCE.length - 1) {
+        return SUCCESS_STATUS_SEQUENCE[0];
+      }
+      return SUCCESS_STATUS_SEQUENCE[index + 1];
+    }
+
+    function refreshSuccessStatus() {
+      if (successStatusLoading || !successStatusButton || !lastSuccessDetails || !successDrawerOpen) {
+        return;
+      }
+      successStatusLoading = true;
+      successStatusButton.disabled = true;
+      successStatusButton.textContent = 'Memuat...';
+      console.info('Memeriksa status transaksi (mock)...');
+      setTimeout(() => {
+        const nextStatus = getNextSuccessStatusKey(currentSuccessStatusKey);
+        setSuccessStatus(nextStatus);
+        console.info('Status transaksi diperbarui menjadi:', getSuccessStatusConfig(nextStatus).label);
+        resetSuccessDrawerControls();
+      }, 1200);
     }
 
     function setPaymentSheetConfirmEnabled(enabled) {
@@ -1301,6 +1561,28 @@
       paymentSheetDefaultCta = ctaText;
       resetPaymentOtpState();
 
+      lastConfirmationContext = {
+        key: activeKey,
+        type,
+        transactionLabel,
+        displayName,
+        accountDisplay: formatAccountForPayment(account),
+        idLabel: config.idCopy || 'ID Pelanggan',
+        idValue: sanitizedId || '-',
+        customerName,
+        dynamicFields: Array.isArray(summary.dynamic)
+          ? summary.dynamic.map((item) => ({ label: item.label, value: item.value }))
+          : [],
+        amounts: {
+          nominal: nominalValue,
+          admin: adminValue,
+          total: totalValue,
+        },
+        status: 'processing',
+        heroCategory: 'Beli & Bayar',
+        heroSubtitle: displayName,
+      };
+
       paymentSheetOverlay.classList.remove('hidden');
       requestAnimationFrame(() => {
         paymentSheetOverlay.classList.add('opacity-100');
@@ -1315,6 +1597,7 @@
       closeSavedSheet({ immediate: true });
       closeAccountSheet({ immediate: true });
       closePaymentSheet({ immediate: true });
+      hideSuccessDrawer({ immediate: true });
       setActiveButton(button);
       const wasClosed = !drawer.classList.contains('open');
       applyConfig(key, config);
@@ -1333,6 +1616,7 @@
 
     function closeDrawer() {
       if (!drawer.classList.contains('open')) return;
+      hideSuccessDrawer({ immediate: true });
       drawerInner.classList.remove('opacity-100', 'translate-x-0');
       drawerInner.classList.add('opacity-0', 'translate-x-4');
       closeSavedSheet({ immediate: true });
@@ -1536,6 +1820,24 @@
       console.info('OTP pembayaran diverifikasi:', otpValue);
       closePaymentSheet();
       console.info('Konfirmasi pembayaran diproses (mock).');
+      const successDetails = buildSuccessDetailsFromContext(lastConfirmationContext);
+      if (successDetails) {
+        setTimeout(() => {
+          openSuccessDrawer(successDetails);
+        }, 220);
+      }
+    });
+
+    successHeaderClose?.addEventListener('click', () => {
+      closeSuccessDrawerAndPanel();
+    });
+
+    successCloseButton?.addEventListener('click', () => {
+      closeSuccessDrawerAndPanel();
+    });
+
+    successStatusButton?.addEventListener('click', () => {
+      refreshSuccessStatus();
     });
 
     document.addEventListener('keydown', (event) => {
@@ -1546,6 +1848,8 @@
           closeAccountSheet();
         } else if (paymentSheetOpen) {
           closePaymentSheet();
+        } else if (successDrawerOpen) {
+          closeSuccessDrawerAndPanel();
         } else {
           closeDrawer();
         }

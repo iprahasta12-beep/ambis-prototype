@@ -225,7 +225,7 @@
           &times;
         </button>
       </div>
-      <div class="flex-1 flex flex-col">
+      <div class="flex-1 flex flex-col relative">
         <div id="drawerInner" class="flex-1 overflow-y-auto px-6 py-6 space-y-6 opacity-0 translate-x-4 transition-all duration-200">
           <section class="space-y-3">
             <div class="rounded-xl border border-sky-100 bg-sky-50 text-sky-800 px-4 py-4">
@@ -268,6 +268,76 @@
             Konfirmasi Pembayaran
           </button>
         </div>
+
+        <div id="paymentSuccessDrawer" class="hidden absolute inset-0 z-[70] flex flex-col">
+          <div id="paymentSuccessInner" class="flex h-full flex-col translate-x-8 bg-white opacity-0 transition-all duration-200">
+            <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+              <h2 class="text-xl font-semibold">Detail Pembayaran</h2>
+              <button id="successDrawerHeaderClose" type="button" class="text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup ringkasan pembayaran">&times;</button>
+            </div>
+            <div class="flex-1 space-y-6 overflow-y-auto px-6 py-6">
+              <div class="space-y-4 text-center">
+                <img src="img/illustration-2.svg" alt="Status transaksi" class="mx-auto w-20" />
+                <h3 id="successHeroTitle" class="text-2xl font-semibold">Transaksi Sedang Diproses</h3>
+                <div class="space-y-1">
+                  <p id="successHeroCategory" class="text-sm font-semibold text-slate-900">Beli &amp; Bayar</p>
+                  <p id="successHeroSubtitle" class="text-sm text-slate-600">-</p>
+                </div>
+              </div>
+
+              <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+                <p class="text-xs font-semibold uppercase tracking-[.18em] text-slate-500">Rincian Transaksi</p>
+                <div class="space-y-4">
+                  <div class="flex items-start justify-between gap-4">
+                    <span id="successPaymentLabel" class="text-sm text-slate-500">Pembayaran</span>
+                    <span id="successPaymentValue" class="max-w-[60%] text-right text-sm font-semibold text-slate-900">-</span>
+                  </div>
+                  <div class="flex items-start justify-between gap-4">
+                    <span class="text-sm text-slate-500">Status Pembayaran</span>
+                    <span id="successStatusPill" class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-600">Sedang Diproses</span>
+                  </div>
+                  <div class="flex items-start justify-between gap-4">
+                    <span class="text-sm text-slate-500">Sumber Rekening</span>
+                    <span id="successAccountValue" class="max-w-[60%] text-right text-sm font-semibold text-slate-900">-</span>
+                  </div>
+                  <div class="flex items-start justify-between gap-4">
+                    <span id="successIdLabel" class="text-sm text-slate-500">ID Pelanggan</span>
+                    <span id="successIdValue" class="max-w-[60%] text-right text-sm font-semibold text-slate-900">-</span>
+                  </div>
+                  <div class="flex items-start justify-between gap-4">
+                    <span class="text-sm text-slate-500">Nama Pelanggan</span>
+                    <span id="successCustomerName" class="max-w-[60%] text-right text-sm font-semibold text-slate-900">-</span>
+                  </div>
+                  <div id="successDynamicSection" class="hidden space-y-4"></div>
+                </div>
+              </div>
+
+              <div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-6">
+                <p class="text-xs font-semibold uppercase tracking-[.18em] text-slate-500">Total Pembayaran</p>
+                <div class="space-y-3">
+                  <div class="flex items-start justify-between gap-4">
+                    <span class="text-sm text-slate-500">Nominal</span>
+                    <span id="successNominal" class="text-right text-sm font-semibold text-slate-900">Rp0</span>
+                  </div>
+                  <div class="flex items-start justify-between gap-4">
+                    <span class="text-sm text-slate-500">Biaya Admin</span>
+                    <span id="successAdmin" class="text-right text-sm font-semibold text-slate-900">Rp0</span>
+                  </div>
+                  <div class="border-t border-slate-100"></div>
+                  <div class="flex items-baseline justify-between gap-4">
+                    <span class="text-sm font-semibold text-slate-900">Total</span>
+                    <span id="successTotal" class="text-right text-lg font-semibold text-slate-900">Rp0</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-col gap-3 border-t border-slate-200 bg-white px-6 py-4 md:flex-row">
+              <button id="successDrawerCloseButton" type="button" class="rounded-xl border border-cyan-500 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-cyan-50 md:flex-1">Tutup</button>
+              <button id="successDrawerStatusButton" type="button" class="rounded-xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-white hover:bg-cyan-600 md:flex-1">Cek Status</button>
+            </div>
+          </div>
+        </div>
+
       <div id="sheetOverlay" class="hidden absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200 z-10"></div>
       <div id="bottomSheet" class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col h-3/4 z-20">
         <div class="p-4 border-b flex items-center justify-between">
