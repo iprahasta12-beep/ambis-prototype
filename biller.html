@@ -300,17 +300,16 @@
         </div>
       </div>
       <div id="paymentSheetOverlay" class="hidden absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200 z-40"></div>
-      <div id="paymentBottomSheet" class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col h-[88%] z-50">
-        <div class="px-6 pt-5 pb-4 border-b border-slate-100">
-          <div class="flex items-center justify-between">
-            <h3 id="paymentSheetTitle" class="text-lg font-semibold text-slate-900">Konfirmasi Pembayaran</h3>
-            <button id="paymentSheetClose" type="button" class="text-2xl leading-none text-slate-500 hover:text-slate-700 focus:outline-none" aria-label="Tutup konfirmasi">&times;</button>
+      <div id="paymentBottomSheet" class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col h-full z-50">
+        <div class="p-4 pb-4 border-b border-slate-100">
+          <div class="text-center justify-between">
+            <h3 id="paymentSheetTitle" class="text-lg text-center font-semibold text-slate-900">Konfirmasi Pembayaran</h3>
           </div>
           <p class="text-sm text-slate-500 mt-1">Beli &amp; Bayar</p>
         </div>
-        <div class="flex-1 overflow-y-auto px-6 py-6 space-y-8">
+        <div class="flex-1 overflow-y-auto p-4 space-y-8">
           <section>
-            <p class="inline-block font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 px-3 py-2 text-[11px]">Rincian Transaksi</p>
+            <p class="inline-block font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 px-3 py-2 text-[11px] w-full">Rincian Transaksi</p>
             <div class="space-y-4">
               <div class="flex items-start justify-between gap-4">
                 <span id="paymentSheetTypeLabel" class="text-sm text-slate-500">Pembayaran</span>
@@ -332,7 +331,7 @@
             </div>
           </section>
           <section>
-            <p class="inline-block font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 px-3 py-2 text-[11px]">Total Pembayaran</p>
+            <p class="inline-block font-semibold text-slate-500 uppercase tracking-[.18em] mb-4 bg-slate-100 px-3 py-2 text-[11px] w-full">Total Pembayaran</p>
             <div class="space-y-3">
               <div class="flex items-center justify-between gap-4">
                 <span class="text-sm text-slate-500">Nominal</span>
