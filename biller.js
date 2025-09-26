@@ -322,6 +322,140 @@
     },
   };
 
+  const HISTORY_TRANSACTIONS = (() => {
+    const base = new Date();
+    base.setSeconds(0, 0);
+
+    const toISO = (daysOffset = 0, minutesOffset = 0) => {
+      const date = new Date(base);
+      date.setDate(base.getDate() + daysOffset);
+      date.setMinutes(base.getMinutes() + minutesOffset);
+      return date.toISOString();
+    };
+
+    return [
+      {
+        id: 'HIST-PLN-001',
+        reference: 'INV/PLN/2025/08/0021',
+        status: 'processing',
+        progress: 'Menunggu Pembayaran',
+        progressDetail: 'Verifikasi akan berlangsung maksimal 5 menit.',
+        category: 'Listrik',
+        service: 'Token Listrik',
+        customer: 'Gudang Jakarta',
+        description: 'Nomor Meter 45093051325',
+        accountName: 'Rekening Operasional',
+        accountNumber: '**** 1023',
+        amount: 250000,
+        createdAt: toISO(0, -35),
+        icon: 'img/biller/pln.svg',
+        channel: 'Virtual Account Amar',
+      },
+      {
+        id: 'HIST-INET-002',
+        reference: 'INV/INET/2025/08/0007',
+        status: 'processing',
+        progress: 'Sedang Diproses',
+        progressDetail: 'Sistem sedang mengonfirmasi pembayaran IndiHome.',
+        category: 'Internet',
+        service: 'IndiHome',
+        customer: 'Cabang Bandung',
+        description: 'ID Pelanggan 120034556788',
+        accountName: 'Rekening Bisnis 2',
+        accountNumber: '**** 5521',
+        amount: 385000,
+        createdAt: toISO(-1, -120),
+        icon: 'img/biller/indihome.svg',
+        channel: 'Saldo Perusahaan',
+      },
+      {
+        id: 'HIST-BPJS-003',
+        reference: 'INV/BPJS/2025/07/0312',
+        status: 'processing',
+        progress: 'Menunggu Persetujuan',
+        progressDetail: 'Menunggu konfirmasi admin perusahaan.',
+        category: 'BPJS',
+        service: 'BPJS Kesehatan',
+        customer: 'BPJS Karyawan',
+        description: 'Nomor VA 888880011223',
+        accountName: 'Rekening Operasional',
+        accountNumber: '**** 1023',
+        amount: 520000,
+        createdAt: toISO(-3, -200),
+        icon: 'img/biller/jmo.svg',
+        channel: 'Virtual Account Amar',
+      },
+      {
+        id: 'HIST-TAGIHAN-004',
+        reference: 'INV/PLN/2025/07/0208',
+        status: 'completed',
+        outcome: 'success',
+        progressDetail: 'Pembayaran PLN telah diterima.',
+        category: 'Tagihan',
+        service: 'Tagihan Listrik',
+        customer: 'CV Andalas',
+        description: 'ID Pelanggan 56009800321',
+        accountName: 'Rekening Operasional',
+        accountNumber: '**** 1023',
+        amount: 775000,
+        createdAt: toISO(-5, -90),
+        icon: 'img/biller/pln.svg',
+        channel: 'Virtual Account Amar',
+      },
+      {
+        id: 'HIST-TRANSFER-005',
+        reference: 'TRF/2025/07/5421',
+        status: 'completed',
+        outcome: 'success',
+        progressDetail: 'Dana berhasil dikirim ke rekening tujuan.',
+        category: 'Transfer',
+        service: 'Transfer Antar Bank',
+        customer: 'PT Nusantara Lestari',
+        description: 'Bank XYZ • 9876543210',
+        accountName: 'Rekening Payroll',
+        accountNumber: '**** 3344',
+        amount: 15000000,
+        createdAt: toISO(-8, -60),
+        icon: 'img/icon/transfer.svg',
+        channel: 'BI Fast',
+      },
+      {
+        id: 'HIST-TOPUP-006',
+        reference: 'TOPUP/2025/07/8842',
+        status: 'completed',
+        outcome: 'failed',
+        progressDetail: 'Saldo tidak terpotong. Silakan coba lagi.',
+        category: 'Top-up',
+        service: 'Top-up e-Wallet',
+        customer: 'OVO - 081234567890',
+        description: 'Nominal 1.000.000',
+        accountName: 'Rekening Operasional',
+        accountNumber: '**** 1023',
+        amount: 1000000,
+        createdAt: toISO(-12, -180),
+        icon: 'img/icon/info.svg',
+        channel: 'Virtual Account Amar',
+      },
+      {
+        id: 'HIST-LAIN-007',
+        reference: 'INV/LAIN/2025/07/0021',
+        status: 'completed',
+        outcome: 'success',
+        progressDetail: 'Pembayaran pajak berhasil diteruskan.',
+        category: 'Lainnya',
+        service: 'Pembayaran Pajak',
+        customer: 'Direktorat Pajak',
+        description: 'ID Billing 0200020202',
+        accountName: 'Rekening Pajak',
+        accountNumber: '**** 7788',
+        amount: 2500000,
+        createdAt: toISO(-15, -30),
+        icon: 'img/icon/info.svg',
+        channel: 'Virtual Account Amar',
+      },
+    ];
+  })();
+
   function mergeValidation(config) {
     if (!config || !config.validation) {
       return { ...DEFAULT_VALIDATION };
@@ -345,6 +479,432 @@
     const confirmBtn = document.getElementById('confirmPaymentBtn');
     const closeBtn = document.getElementById('drawerCloseBtn');
     const savedBtn = document.getElementById('savedNumberButton');
+    const openHistoryDrawerBtn = document.getElementById('openHistoryDrawerBtn');
+    const historyDrawer = document.getElementById('historyDrawer');
+    const historyDrawerOverlay = document.getElementById('historyDrawerOverlay');
+    const historyDrawerCloseBtn = document.getElementById('historyDrawerCloseBtn');
+    const historyTabButtons = Array.from(document.querySelectorAll('[data-history-tab]'));
+    const historyFilterGroup = document.querySelector('[data-filter-group="history"]');
+    const historyListContainer = document.getElementById('historyListContainer');
+    const historyListEl = document.getElementById('historyList');
+    const historyEmptyState = document.getElementById('historyEmptyState');
+    const historyErrorBanner = document.getElementById('historyErrorBanner');
+    const historyErrorMessageEl = document.getElementById('historyErrorMessage');
+    const historyRetryBtn = document.getElementById('historyRetryBtn');
+
+    const historyDateFormatter = new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    const historyTimeFormatter = new Intl.DateTimeFormat('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    let historyActiveTab = 'processing';
+    let historyDrawerOpen = false;
+    let historyHasError = false;
+    let lastHistoryTrigger = null;
+    const defaultHistoryErrorMessage = 'Terjadi kendala saat memuat data. Silakan coba lagi.';
+
+    function parseISOToDate(value) {
+      if (typeof value !== 'string' || !value) return null;
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return null;
+      return date;
+    }
+
+    function startOfDay(date) {
+      if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+      const result = new Date(date);
+      result.setHours(0, 0, 0, 0);
+      return result;
+    }
+
+    function endOfDay(date) {
+      if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+      const result = new Date(date);
+      result.setHours(23, 59, 59, 999);
+      return result;
+    }
+
+    function matchesDate(transaction, filterValue) {
+      if (!filterValue || filterValue === 'Semua Tanggal') return true;
+      const txDate = parseISOToDate(transaction?.createdAt);
+      if (!txDate) return false;
+
+      const now = new Date();
+      const todayStart = startOfDay(now);
+      const todayEnd = endOfDay(now);
+
+      if (!todayStart || !todayEnd) return true;
+
+      if (filterValue === 'Hari ini') {
+        return txDate >= todayStart && txDate <= todayEnd;
+      }
+
+      if (filterValue === '7 Hari Terakhir') {
+        const start = new Date(todayStart);
+        start.setDate(start.getDate() - 6);
+        return txDate >= start && txDate <= todayEnd;
+      }
+
+      if (filterValue === '30 Hari Terakhir') {
+        const start = new Date(todayStart);
+        start.setDate(start.getDate() - 29);
+        return txDate >= start && txDate <= todayEnd;
+      }
+
+      if (filterValue.startsWith('custom:')) {
+        const range = filterValue.slice(7).split('|');
+        const [startIso, endIso] = range;
+        const start = startOfDay(parseISOToDate(startIso));
+        const end = endOfDay(parseISOToDate(endIso));
+        if (!start || !end) return true;
+        return txDate >= start && txDate <= end;
+      }
+
+      return true;
+    }
+
+    function matchesCategory(transaction, filterValue) {
+      if (!filterValue || filterValue === 'Semua Kategori') return true;
+      const category = (transaction?.category || '').toLowerCase();
+      return category === filterValue.toLowerCase();
+    }
+
+    function getHistoryFilters() {
+      const filters = { date: '', category: '' };
+      if (!historyFilterGroup) return filters;
+      const filterElements = historyFilterGroup.querySelectorAll('.filter');
+      filterElements.forEach((filter) => {
+        const key = filter.dataset.filter;
+        if (!key) return;
+        filters[key] = filter.dataset.applied || '';
+      });
+      return filters;
+    }
+
+    function getHistoryStatusMeta(transaction) {
+      if (!transaction || transaction.status === 'processing') {
+        return {
+          label: transaction?.progress || 'Dalam Proses',
+          className: 'border-amber-200 bg-amber-50 text-amber-700',
+        };
+      }
+      if (transaction.outcome === 'failed') {
+        return {
+          label: 'Gagal',
+          className: 'border-rose-200 bg-rose-50 text-rose-700',
+        };
+      }
+      return {
+        label: 'Berhasil',
+        className: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+      };
+    }
+
+    function formatHistoryDateTime(isoString) {
+      const date = parseISOToDate(isoString);
+      if (!date) return '';
+      const dateLabel = historyDateFormatter.format(date);
+      const timeLabel = historyTimeFormatter.format(date);
+      return `${dateLabel} • ${timeLabel} WIB`;
+    }
+
+    function openHistoryDetail(transaction) {
+      if (!transaction) return;
+      console.info('Detail riwayat transaksi', transaction);
+    }
+
+    function createHistoryItem(transaction) {
+      const item = document.createElement('div');
+      item.className = 'group flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-colors hover:border-cyan-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400';
+      item.setAttribute('role', 'button');
+      item.setAttribute('tabindex', '0');
+      item.dataset.historyId = transaction.id || '';
+
+      const topRow = document.createElement('div');
+      topRow.className = 'flex items-start justify-between gap-4';
+
+      const left = document.createElement('div');
+      left.className = 'flex items-start gap-3';
+
+      const iconWrapper = document.createElement('div');
+      iconWrapper.className = 'flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100';
+      const icon = document.createElement('img');
+      icon.className = 'h-7 w-7';
+      icon.src = transaction.icon || 'img/icon/info.svg';
+      icon.alt = transaction.service || 'Transaksi';
+      iconWrapper.appendChild(icon);
+
+      const textContainer = document.createElement('div');
+      textContainer.className = 'space-y-1';
+
+      const title = document.createElement('p');
+      title.className = 'text-base font-semibold text-slate-900';
+      title.textContent = transaction.service || 'Transaksi';
+      textContainer.appendChild(title);
+
+      if (transaction.customer) {
+        const customer = document.createElement('p');
+        customer.className = 'text-sm text-slate-600';
+        customer.textContent = transaction.customer;
+        textContainer.appendChild(customer);
+      }
+
+      if (transaction.description) {
+        const desc = document.createElement('p');
+        desc.className = 'text-xs text-slate-500';
+        desc.textContent = transaction.description;
+        textContainer.appendChild(desc);
+      }
+
+      left.appendChild(iconWrapper);
+      left.appendChild(textContainer);
+
+      const right = document.createElement('div');
+      right.className = 'text-right space-y-2';
+
+      const amount = document.createElement('p');
+      amount.className = 'text-lg font-semibold text-slate-900';
+      const amountValue = typeof transaction.amount === 'number' ? transaction.amount : 0;
+      amount.textContent = `Rp${currencyFormatter.format(amountValue)}`;
+      right.appendChild(amount);
+
+      const statusMeta = getHistoryStatusMeta(transaction);
+      const status = document.createElement('span');
+      status.className = `inline-flex items-center justify-center rounded-full border px-3 py-1 text-xs font-semibold ${statusMeta.className}`;
+      status.textContent = statusMeta.label;
+      right.appendChild(status);
+
+      if (transaction.progressDetail) {
+        const detail = document.createElement('p');
+        detail.className = 'text-xs text-slate-500';
+        detail.textContent = transaction.progressDetail;
+        right.appendChild(detail);
+      }
+
+      topRow.appendChild(left);
+      topRow.appendChild(right);
+      item.appendChild(topRow);
+
+      const metaRow = document.createElement('div');
+      metaRow.className = 'flex flex-wrap items-center gap-3 text-xs text-slate-500';
+
+      const dateLabel = formatHistoryDateTime(transaction.createdAt);
+      if (dateLabel) {
+        const dateEl = document.createElement('span');
+        dateEl.textContent = dateLabel;
+        metaRow.appendChild(dateEl);
+      }
+
+      if (transaction.category) {
+        const category = document.createElement('span');
+        category.className = 'inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600';
+        category.textContent = transaction.category;
+        metaRow.appendChild(category);
+      }
+
+      if (transaction.reference) {
+        const ref = document.createElement('span');
+        ref.textContent = `Ref: ${transaction.reference}`;
+        metaRow.appendChild(ref);
+      }
+
+      const accountParts = [];
+      if (transaction.accountName) accountParts.push(transaction.accountName);
+      if (transaction.accountNumber) accountParts.push(transaction.accountNumber);
+      if (accountParts.length) {
+        const account = document.createElement('span');
+        account.textContent = `Sumber: ${accountParts.join(' • ')}`;
+        metaRow.appendChild(account);
+      }
+
+      if (transaction.channel) {
+        const channel = document.createElement('span');
+        channel.textContent = `Metode: ${transaction.channel}`;
+        metaRow.appendChild(channel);
+      }
+
+      item.appendChild(metaRow);
+
+      item.addEventListener('click', () => {
+        openHistoryDetail(transaction);
+      });
+
+      item.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openHistoryDetail(transaction);
+        }
+      });
+
+      return item;
+    }
+
+    function setHistoryError(message) {
+      historyHasError = Boolean(message);
+      if (!historyErrorBanner) return;
+      if (historyHasError) {
+        historyErrorBanner.classList.remove('hidden');
+        if (historyErrorMessageEl) {
+          historyErrorMessageEl.textContent = message || defaultHistoryErrorMessage;
+        }
+      } else {
+        historyErrorBanner.classList.add('hidden');
+        if (historyErrorMessageEl) {
+          historyErrorMessageEl.textContent = defaultHistoryErrorMessage;
+        }
+      }
+    }
+
+    function renderHistoryList() {
+      if (!historyListEl) return;
+      if (historyHasError) {
+        historyListEl.innerHTML = '';
+        historyEmptyState?.classList.add('hidden');
+        return;
+      }
+
+      const filters = getHistoryFilters();
+      const filtered = HISTORY_TRANSACTIONS.filter((transaction) => {
+        if (historyActiveTab === 'processing') {
+          if (transaction.status !== 'processing') return false;
+        } else if (transaction.status !== 'completed') {
+          return false;
+        }
+        if (!matchesDate(transaction, filters.date)) return false;
+        if (!matchesCategory(transaction, filters.category)) return false;
+        return true;
+      }).sort((a, b) => {
+        const dateA = parseISOToDate(a.createdAt);
+        const dateB = parseISOToDate(b.createdAt);
+        const timeA = dateA ? dateA.getTime() : 0;
+        const timeB = dateB ? dateB.getTime() : 0;
+        return timeB - timeA;
+      });
+
+      historyListEl.innerHTML = '';
+      if (!filtered.length) {
+        historyEmptyState?.classList.remove('hidden');
+        return;
+      }
+
+      historyEmptyState?.classList.add('hidden');
+      filtered.forEach((transaction) => {
+        const item = createHistoryItem(transaction);
+        historyListEl.appendChild(item);
+      });
+    }
+
+    function openHistoryDrawer() {
+      if (!historyDrawer || !historyDrawerOverlay) return;
+      closeDrawer();
+      lastHistoryTrigger = document.activeElement instanceof HTMLElement ? document.activeElement : openHistoryDrawerBtn;
+      historyDrawerOverlay.classList.remove('hidden', 'pointer-events-none');
+      historyDrawerOverlay.setAttribute('aria-hidden', 'false');
+      requestAnimationFrame(() => {
+        historyDrawerOverlay.classList.add('opacity-100');
+        historyDrawer.classList.remove('translate-x-full');
+      });
+      historyDrawer.setAttribute('aria-hidden', 'false');
+      historyDrawerOpen = true;
+      renderHistoryList();
+      if (historyDrawerCloseBtn) {
+        historyDrawerCloseBtn.focus({ preventScroll: true });
+      }
+      if (openHistoryDrawerBtn) {
+        openHistoryDrawerBtn.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    function closeHistoryDrawer(options = {}) {
+      if (!historyDrawer || !historyDrawerOverlay) return;
+      const immediate = Boolean(options.immediate);
+      if (!historyDrawerOpen && !immediate) return;
+
+      historyDrawer.classList.add('translate-x-full');
+      historyDrawer.setAttribute('aria-hidden', 'true');
+      historyDrawerOverlay.classList.remove('opacity-100');
+      historyDrawerOpen = false;
+
+      const finalize = () => {
+        historyDrawerOverlay.classList.add('hidden', 'pointer-events-none');
+        historyDrawerOverlay.setAttribute('aria-hidden', 'true');
+        if (openHistoryDrawerBtn) {
+          openHistoryDrawerBtn.setAttribute('aria-expanded', 'false');
+        }
+        const target = lastHistoryTrigger;
+        lastHistoryTrigger = null;
+        if (target && typeof target.focus === 'function') {
+          target.focus({ preventScroll: true });
+        }
+      };
+
+      if (immediate) {
+        finalize();
+        return;
+      }
+
+      setTimeout(finalize, 220);
+    }
+
+    function setActiveHistoryTab(nextTab) {
+      const resolved = nextTab === 'completed' ? 'completed' : 'processing';
+      historyActiveTab = resolved;
+      historyTabButtons.forEach((button) => {
+        const tab = button.dataset.historyTab;
+        const isActive = tab === resolved;
+        button.classList.toggle('bg-white', isActive);
+        button.classList.toggle('shadow-sm', isActive);
+        button.classList.toggle('text-slate-900', isActive);
+        button.classList.toggle('text-slate-500', !isActive);
+        button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      renderHistoryList();
+    }
+
+    setHistoryError('');
+    setActiveHistoryTab(historyActiveTab);
+
+    historyTabButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const tab = button.dataset.historyTab || 'processing';
+        setActiveHistoryTab(tab);
+      });
+    });
+
+    if (openHistoryDrawerBtn) {
+      openHistoryDrawerBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    openHistoryDrawerBtn?.addEventListener('click', () => {
+      setHistoryError('');
+      openHistoryDrawer();
+    });
+
+    historyDrawerCloseBtn?.addEventListener('click', () => {
+      closeHistoryDrawer();
+    });
+
+    historyDrawerOverlay?.addEventListener('click', (event) => {
+      if (event.target === historyDrawerOverlay) {
+        closeHistoryDrawer();
+      }
+    });
+
+    historyRetryBtn?.addEventListener('click', () => {
+      setHistoryError('');
+      renderHistoryList();
+    });
+
+    document.addEventListener('filter-change', (event) => {
+      const detail = event.detail || {};
+      if (detail.groupId && detail.groupId !== 'history') return;
+      renderHistoryList();
+    });
 
     const paymentSheetOverlay = document.getElementById('paymentSheetOverlay');
     const paymentBottomSheet = document.getElementById('paymentBottomSheet');
@@ -1818,7 +2378,9 @@
 
     document.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
-        if (savedSheetOpen) {
+        if (historyDrawerOpen) {
+          closeHistoryDrawer();
+        } else if (savedSheetOpen) {
           closeSavedSheet();
         } else if (accountSheetOpen) {
           closeAccountSheet();
