@@ -19,6 +19,121 @@
 
   const digitsOnly = (value = '') => value.replace(/\D+/g, '');
 
+  const HISTORY_DRAWER_WIDTH = 420;
+  const HISTORY_TIMEZONE = 'Asia/Jakarta';
+  const HISTORY_DATE_FORMAT = new Intl.DateTimeFormat('id-ID', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: HISTORY_TIMEZONE,
+  });
+  const HISTORY_TIME_FORMAT = new Intl.DateTimeFormat('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: HISTORY_TIMEZONE,
+  });
+
+  function prepareHistoryEntry(entry = {}) {
+    const prepared = { ...entry };
+    const date = entry && entry.datetime ? new Date(entry.datetime) : null;
+    if (date instanceof Date && !Number.isNaN(date.getTime())) {
+      prepared.date = date;
+      prepared.dateValue = date.getTime();
+    } else {
+      prepared.date = null;
+      prepared.dateValue = null;
+    }
+    return prepared;
+  }
+
+  const HISTORY_DATA = {
+    processing: [
+      prepareHistoryEntry({
+        id: 'INV-20250802-001',
+        service: 'Token Listrik',
+        description: 'Token listrik 20 kWh',
+        customer: 'Gudang Jakarta',
+        account: 'Rekening Operasional • 9021 3344 5566',
+        category: 'Listrik',
+        amount: 250000,
+        datetime: '2025-08-02T09:30:00+07:00',
+        badge: { label: 'Sedang Diproses', className: 'bg-amber-100 text-amber-600' },
+        note: 'Menunggu konfirmasi PLN sebelum token diterbitkan.',
+      }),
+      prepareHistoryEntry({
+        id: 'INV-20250801-003',
+        service: 'BPJS Kesehatan Badan Usaha',
+        description: 'Pembayaran iuran bulan Agustus 2025',
+        customer: 'CV Andalas',
+        account: 'Rekening Operasional • 9021 7777 8899',
+        category: 'BPJS',
+        amount: 510000,
+        datetime: '2025-08-01T15:20:00+07:00',
+        badge: { label: 'Menunggu Persetujuan', className: 'bg-cyan-100 text-cyan-600' },
+        note: 'Menunggu persetujuan pejabat berwenang.',
+      }),
+      prepareHistoryEntry({
+        id: 'INV-20250730-009',
+        service: 'Pembayaran Internet',
+        description: 'Tagihan IndiHome Juli 2025',
+        customer: 'Kantor Utama',
+        account: 'Rekening Payroll • 9011 2233 4455',
+        category: 'Internet',
+        amount: 385000,
+        datetime: '2025-07-30T10:45:00+07:00',
+        badge: { label: 'Sedang Diproses', className: 'bg-amber-100 text-amber-600' },
+        note: 'Provider sedang memvalidasi pembayaran.',
+      }),
+    ],
+    completed: [
+      prepareHistoryEntry({
+        id: 'INV-20250729-008',
+        service: 'Transfer Vendor',
+        description: 'Pembayaran ke PT Elektron Nusantara',
+        customer: 'PT Elektron Nusantara',
+        account: 'Rekening Operasional • 9021 3344 5566',
+        category: 'Transfer',
+        amount: 17500000,
+        datetime: '2025-07-29T11:10:00+07:00',
+        badge: { label: 'Berhasil', className: 'bg-emerald-100 text-emerald-600' },
+        note: 'Dana telah diterima oleh bank tujuan.',
+      }),
+      prepareHistoryEntry({
+        id: 'INV-20250728-004',
+        service: 'Tagihan Listrik',
+        description: 'Tagihan PLN Kantor Pusat',
+        customer: 'Kantor Pusat',
+        account: 'Rekening Operasional • 9021 3344 5566',
+        category: 'Tagihan',
+        amount: 2250000,
+        datetime: '2025-07-28T09:05:00+07:00',
+        badge: { label: 'Berhasil', className: 'bg-emerald-100 text-emerald-600' },
+        note: 'Transaksi selesai dan tersimpan di Riwayat.',
+      }),
+      prepareHistoryEntry({
+        id: 'INV-20250725-002',
+        service: 'Top-up E-Wallet',
+        description: 'Top-up OVO Corporate',
+        customer: 'OVO Corporate',
+        account: 'Rekening Operasional • 9021 6677 8899',
+        category: 'Top-up',
+        amount: 1500000,
+        datetime: '2025-07-25T17:25:00+07:00',
+        badge: { label: 'Berhasil', className: 'bg-emerald-100 text-emerald-600' },
+        note: 'Saldo sudah masuk ke akun OVO Corporate.',
+      }),
+    ],
+  };
+
+  function formatHistoryDate(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '-';
+    const datePart = HISTORY_DATE_FORMAT.format(date);
+    const timePart = HISTORY_TIME_FORMAT.format(date);
+    return `${datePart} • ${timePart} WIB`;
+  }
+
   const DEFAULT_VALIDATION = {
     sanitize: digitsOnly,
     pattern: /^\d{6,20}$/,
@@ -330,6 +445,401 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    const historyDrawer = document.getElementById('historyDrawer');
+    const historyDrawerContent = document.getElementById('historyDrawerContent');
+    const openHistoryDrawerBtn = document.getElementById('openHistoryDrawerBtn');
+    const historyDrawerCloseBtn = document.getElementById('historyDrawerCloseBtn');
+    const historyList = document.getElementById('historyList');
+    const historyEmptyState = document.getElementById('historyEmptyState');
+    const historyErrorBanner = document.getElementById('historyErrorBanner');
+    const historyRetryBtn = document.getElementById('historyErrorRetry');
+    const historyTabs = Array.from(document.querySelectorAll('[data-history-tab]'));
+    const historyFilterGroup = document.querySelector('[data-filter-group="history"]');
+
+    const historyState = {
+      activeTab: 'processing',
+      filters: { date: { type: 'all' }, category: null },
+      error: false,
+    };
+
+    let historyDrawerOpen = false;
+    let historyCloseFallback = null;
+    let lastHistoryTrigger = null;
+
+    function initializeHistoryFilters() {
+      if (!historyFilterGroup) return;
+      const dateFilter = historyFilterGroup.querySelector('[data-filter="date"]');
+      const categoryFilter = historyFilterGroup.querySelector('[data-filter="category"]');
+      if (dateFilter) {
+        dateFilter.dataset.default = 'Semua Tanggal';
+        const label = dateFilter.querySelector('.filter-label');
+        if (label) label.textContent = 'Semua Tanggal';
+        if (typeof dateFilter._setTriggerState === 'function') {
+          dateFilter._setTriggerState(Boolean(dateFilter.dataset.applied));
+        }
+      }
+      if (categoryFilter) {
+        categoryFilter.dataset.default = 'Semua Kategori';
+        const label = categoryFilter.querySelector('.filter-label');
+        if (label) label.textContent = 'Semua Kategori';
+        if (typeof categoryFilter._setTriggerState === 'function') {
+          categoryFilter._setTriggerState(Boolean(categoryFilter.dataset.applied));
+        }
+      }
+    }
+
+    function resetHistoryFilters() {
+      if (!historyFilterGroup) return;
+      const filters = historyFilterGroup.querySelectorAll('.filter');
+      filters.forEach((filter) => {
+        if (filter.dataset.filter === 'date') {
+          filter.dataset.default = 'Semua Tanggal';
+        } else if (filter.dataset.filter === 'category') {
+          filter.dataset.default = 'Semua Kategori';
+        }
+        filter.dataset.applied = '';
+        const label = filter.querySelector('.filter-label');
+        const defaultLabel = filter.dataset.default || filter.dataset.name || '';
+        if (label) label.textContent = defaultLabel;
+        const inputs = filter.querySelectorAll('input');
+        inputs.forEach((input) => {
+          if (input.type === 'radio' || input.type === 'checkbox') {
+            const shouldCheck =
+              (filter.dataset.filter === 'date' && input.value === 'Semua Tanggal') ||
+              (filter.dataset.filter === 'category' && input.value === 'Semua Kategori');
+            input.checked = shouldCheck;
+          } else {
+            input.value = '';
+            if (input.dataset && input.dataset.isoValue) {
+              delete input.dataset.isoValue;
+            }
+            if (input._airDatepicker && typeof input._airDatepicker.clear === 'function') {
+              input._airDatepicker.clear();
+              if (typeof input._airDatepicker.update === 'function') {
+                input._airDatepicker.update({ minDate: null, maxDate: null });
+              }
+            }
+          }
+        });
+        const customRange = filter.querySelector('.custom-range');
+        if (customRange) {
+          customRange.classList.add('hidden');
+        }
+        if (typeof filter._setTriggerState === 'function') {
+          filter._setTriggerState(false);
+        }
+        if (typeof filter._ensureDefaultDateSelection === 'function') {
+          filter._ensureDefaultDateSelection();
+        }
+      });
+      historyState.filters = { date: { type: 'all' }, category: null };
+    }
+
+    function parseDateFilter(value) {
+      if (!value || value === 'Semua Tanggal') {
+        return { type: 'all' };
+      }
+      if (value.startsWith('custom:')) {
+        const payload = value.slice(7).split('|');
+        const startIso = payload[0];
+        const endIso = payload[1];
+        const startDate = startIso ? new Date(startIso) : null;
+        const endDate = endIso ? new Date(endIso) : null;
+        if (startDate instanceof Date && endDate instanceof Date && !Number.isNaN(startDate.getTime()) && !Number.isNaN(endDate.getTime())) {
+          const start = new Date(startDate);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          return { type: 'range', start: start.getTime(), end: end.getTime() };
+        }
+        return { type: 'all' };
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const endOfToday = new Date(today);
+      endOfToday.setHours(23, 59, 59, 999);
+
+      if (value === 'Hari ini') {
+        return { type: 'range', start: today.getTime(), end: endOfToday.getTime() };
+      }
+      if (value === '7 Hari Terakhir') {
+        const start = new Date(today);
+        start.setDate(start.getDate() - 6);
+        return { type: 'range', start: start.getTime(), end: endOfToday.getTime() };
+      }
+      if (value === '30 Hari Terakhir') {
+        const start = new Date(today);
+        start.setDate(start.getDate() - 29);
+        return { type: 'range', start: start.getTime(), end: endOfToday.getTime() };
+      }
+      return { type: 'all' };
+    }
+
+    function getHistoryFilters() {
+      const result = { date: { type: 'all' }, category: null };
+      if (!historyFilterGroup) return result;
+      const dateFilter = historyFilterGroup.querySelector('[data-filter="date"]');
+      const categoryFilter = historyFilterGroup.querySelector('[data-filter="category"]');
+      if (dateFilter) {
+        const applied = dateFilter.dataset.applied || '';
+        result.date = parseDateFilter(applied);
+      }
+      if (categoryFilter) {
+        const applied = categoryFilter.dataset.applied || '';
+        result.category = applied && applied !== 'Semua Kategori' ? applied : null;
+      }
+      return result;
+    }
+
+    function createHistoryCard(entry) {
+      const container = document.createElement('div');
+      container.className = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-cyan-300 focus-within:border-cyan-300';
+      if (entry.id) {
+        container.dataset.historyTransaction = entry.id;
+      }
+
+      const topRow = document.createElement('div');
+      topRow.className = 'flex flex-col gap-4 md:flex-row md:items-start md:justify-between';
+
+      const left = document.createElement('div');
+      left.className = 'space-y-2';
+      if (entry.category) {
+        const categoryPill = document.createElement('span');
+        categoryPill.className = 'inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600';
+        categoryPill.textContent = entry.category;
+        left.appendChild(categoryPill);
+      }
+
+      const title = document.createElement('p');
+      title.className = 'text-base font-semibold text-slate-900';
+      title.textContent = entry.service || 'Transaksi';
+      left.appendChild(title);
+
+      if (entry.description) {
+        const description = document.createElement('p');
+        description.className = 'text-sm text-slate-500';
+        description.textContent = entry.description;
+        left.appendChild(description);
+      }
+
+      if (entry.id) {
+        const idLine = document.createElement('p');
+        idLine.className = 'text-sm text-slate-500';
+        idLine.textContent = `ID Transaksi: ${entry.id}`;
+        left.appendChild(idLine);
+      }
+
+      if (entry.customer) {
+        const customerLine = document.createElement('p');
+        customerLine.className = 'text-sm text-slate-500';
+        customerLine.textContent = entry.customer;
+        left.appendChild(customerLine);
+      }
+
+      if (entry.account) {
+        const accountLine = document.createElement('p');
+        accountLine.className = 'text-sm text-slate-500';
+        accountLine.textContent = entry.account;
+        left.appendChild(accountLine);
+      }
+
+      const right = document.createElement('div');
+      right.className = 'space-y-2 text-right';
+      if (typeof entry.amount === 'number' && Number.isFinite(entry.amount)) {
+        const amount = document.createElement('p');
+        amount.className = 'text-base font-semibold text-slate-900';
+        amount.textContent = `Rp${currencyFormatter.format(entry.amount)}`;
+        right.appendChild(amount);
+      }
+
+      if (entry.badge && entry.badge.label) {
+        const badge = document.createElement('span');
+        badge.className = `inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${entry.badge.className || ''}`.trim();
+        badge.textContent = entry.badge.label;
+        right.appendChild(badge);
+      }
+
+      if (entry.date) {
+        const dateLine = document.createElement('p');
+        dateLine.className = 'text-xs text-slate-500';
+        dateLine.textContent = formatHistoryDate(entry.date);
+        right.appendChild(dateLine);
+      }
+
+      topRow.appendChild(left);
+      topRow.appendChild(right);
+      container.appendChild(topRow);
+
+      if (entry.note) {
+        const note = document.createElement('p');
+        note.className = 'mt-4 text-sm text-slate-600';
+        note.textContent = entry.note;
+        container.appendChild(note);
+      }
+
+      return container;
+    }
+
+    function renderHistoryList() {
+      if (!historyList || !historyEmptyState) return;
+      historyList.innerHTML = '';
+      const filters = getHistoryFilters();
+      historyState.filters = filters;
+
+      if (historyState.error) {
+        if (historyErrorBanner) historyErrorBanner.classList.remove('hidden');
+        historyEmptyState.classList.add('hidden');
+        return;
+      }
+
+      if (historyErrorBanner) historyErrorBanner.classList.add('hidden');
+
+      const dataset = Array.isArray(HISTORY_DATA[historyState.activeTab]) ? HISTORY_DATA[historyState.activeTab] : [];
+      const filtered = dataset.filter((entry) => {
+        if (!entry) return false;
+        if (filters.category && entry.category !== filters.category) return false;
+        if (filters.date && filters.date.type === 'range') {
+          if (typeof entry.dateValue !== 'number') return false;
+          if (entry.dateValue < filters.date.start || entry.dateValue > filters.date.end) return false;
+        }
+        return true;
+      });
+
+      if (!filtered.length) {
+        historyEmptyState.classList.remove('hidden');
+        return;
+      }
+
+      historyEmptyState.classList.add('hidden');
+      const fragment = document.createDocumentFragment();
+      filtered.forEach((entry) => {
+        fragment.appendChild(createHistoryCard(entry));
+      });
+      historyList.appendChild(fragment);
+    }
+
+    function setHistoryActiveTab(target) {
+      const normalized = target === 'completed' ? 'completed' : 'processing';
+      historyState.activeTab = normalized;
+      historyTabs.forEach((tab) => {
+        const isActive = tab.dataset.historyTab === normalized;
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        tab.classList.toggle('bg-white', isActive);
+        tab.classList.toggle('text-slate-900', isActive);
+        tab.classList.toggle('shadow-sm', isActive);
+        tab.classList.toggle('text-slate-500', !isActive);
+        tab.classList.toggle('hover:text-slate-700', !isActive);
+      });
+      renderHistoryList();
+    }
+
+    function closeHistoryDrawer({ focusTrigger = true } = {}) {
+      if (!historyDrawer || !historyDrawerOpen) return;
+      historyDrawerOpen = false;
+      historyDrawer.setAttribute('aria-hidden', 'true');
+
+      const finalizeClose = () => {
+        if (historyCloseFallback) {
+          clearTimeout(historyCloseFallback);
+          historyCloseFallback = null;
+        }
+        historyDrawer.style.width = '0px';
+        historyDrawer.classList.add('pointer-events-none');
+        if (focusTrigger && lastHistoryTrigger && typeof lastHistoryTrigger.focus === 'function') {
+          try {
+            lastHistoryTrigger.focus();
+          } catch (err) {
+            // Ignore focus errors.
+          }
+        }
+      };
+
+      if (historyDrawerContent) {
+        historyDrawerContent.classList.remove('opacity-100');
+        historyDrawerContent.classList.add('opacity-0', 'translate-x-full');
+        const handleTransitionEnd = (event) => {
+          if (event.target !== historyDrawerContent) return;
+          finalizeClose();
+        };
+        historyDrawerContent.addEventListener('transitionend', handleTransitionEnd, { once: true });
+        historyCloseFallback = window.setTimeout(finalizeClose, 400);
+      } else {
+        finalizeClose();
+      }
+    }
+
+    function openHistoryDrawer() {
+      if (!historyDrawer || historyDrawerOpen) return;
+      historyDrawerOpen = true;
+      historyState.error = false;
+      if (historyCloseFallback) {
+        clearTimeout(historyCloseFallback);
+        historyCloseFallback = null;
+      }
+      historyDrawer.classList.remove('pointer-events-none');
+      historyDrawer.setAttribute('aria-hidden', 'false');
+      historyDrawer.style.width = `${HISTORY_DRAWER_WIDTH}px`;
+      if (historyDrawerContent) {
+        requestAnimationFrame(() => {
+          historyDrawerContent.classList.remove('translate-x-full', 'opacity-0');
+          historyDrawerContent.classList.add('opacity-100');
+        });
+      }
+      resetHistoryFilters();
+      setHistoryActiveTab('processing');
+      window.setTimeout(() => {
+        if (historyDrawerCloseBtn && typeof historyDrawerCloseBtn.focus === 'function') {
+          try {
+            historyDrawerCloseBtn.focus();
+          } catch (err) {
+            // Ignore focus errors.
+          }
+        }
+      }, 250);
+    }
+
+    function handleHistoryRetry() {
+      historyState.error = false;
+      renderHistoryList();
+    }
+
+    initializeHistoryFilters();
+    setHistoryActiveTab(historyState.activeTab);
+
+    if (openHistoryDrawerBtn) {
+      openHistoryDrawerBtn.addEventListener('click', () => {
+        lastHistoryTrigger = openHistoryDrawerBtn;
+        openHistoryDrawer();
+      });
+    }
+
+    if (historyDrawerCloseBtn) {
+      historyDrawerCloseBtn.addEventListener('click', () => closeHistoryDrawer());
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && historyDrawerOpen) {
+        closeHistoryDrawer();
+      }
+    });
+
+    historyTabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const targetTab = tab.dataset.historyTab || 'processing';
+        setHistoryActiveTab(targetTab);
+      });
+    });
+
+    document.addEventListener('filter-change', (event) => {
+      if (!event || !event.detail || event.detail.groupId !== 'history') return;
+      renderHistoryList();
+    });
+
+    if (historyRetryBtn) {
+      historyRetryBtn.addEventListener('click', handleHistoryRetry);
+    }
+
     const drawer = document.getElementById('drawer');
     const drawerInner = document.getElementById('drawerInner');
     const drawerTitle = document.getElementById('drawerTitle');
