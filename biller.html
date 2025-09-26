@@ -342,43 +342,53 @@
           </button>
         </div>
         <div id="drawerInner" class="flex-1 overflow-y-auto px-6 py-6 space-y-6 opacity-0 translate-x-4 transition-all duration-200">
-          <section class="space-y-3">
-            <div class="rounded-xl border border-sky-100 bg-sky-50 text-sky-800 px-4 py-4">
-               <h3 class="text-sm font-semibold text-slate-700 mb-2">Catatan</h3>
-              <ul id="drawerNotes" class="list-disc space-y-2 pl-5 text-sm text-slate-700"></ul>
-              <p id="drawerNotesEmpty" class="text-sm text-slate-600 hidden">Tidak ada catatan tambahan untuk biller ini.</p>
-            </div>
-          </section>
-
-          <section class="space-y-5">
-            <div class="space-y-2">
-              <span class="block text-sm text-slate-600">Sumber Rekening</span>
-              <button id="moveSourceButton" type="button" class="w-full text-left border border-slate-200 rounded-xl px-4 py-3 flex items-center gap-3">
-                <div class="flex-1 min-w-0">
-                  <p id="sourceAccountName" class="text-sm font-semibold text-slate-900 truncate hidden"></p>
-                  <p id="sourceAccountSubtitle" class="text-xs text-slate-500 truncate hidden"></p>
-                  <span id="sourceAccountPlaceholder" class="text-sm text-slate-400">Pilih Sumber Rekening</span>
-                </div>
-              </button>
-            </div>
-
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <label id="idInputLabel" for="billerIdInput" class="block text-sm text-slate-600">ID Pelanggan</label>
+          <div id="drawerDefaultContent" class="space-y-6">
+            <section class="space-y-3">
+              <div class="rounded-xl border border-sky-100 bg-sky-50 text-sky-800 px-4 py-4">
+                 <h3 class="text-sm font-semibold text-slate-700 mb-2">Catatan</h3>
+                <ul id="drawerNotes" class="list-disc space-y-2 pl-5 text-sm text-slate-700"></ul>
+                <p id="drawerNotesEmpty" class="text-sm text-slate-600 hidden">Tidak ada catatan tambahan untuk biller ini.</p>
               </div>
-              <input id="billerIdInput" type="text" inputmode="numeric" autocomplete="off" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Masukkan ID Pelanggan" />
-              <p id="idInputError" class="hidden text-sm text-rose-500"></p>
-            </div>
+            </section>
 
-            <div class="space-y-2">
-              <button id="savedNumberButton" type="button" class="text-left rounded-xl border border-cyan-500 text-cyan-600 px-4 py-3 text-sm font-medium hover:bg-cyan-50">
-               Nomor Tersimpan
-              </button>
+            <section class="space-y-5">
+              <div class="space-y-2">
+                <span class="block text-sm text-slate-600">Sumber Rekening</span>
+                <button id="moveSourceButton" type="button" class="w-full text-left border border-slate-200 rounded-xl px-4 py-3 flex items-center gap-3">
+                  <div class="flex-1 min-w-0">
+                    <p id="sourceAccountName" class="text-sm font-semibold text-slate-900 truncate hidden"></p>
+                    <p id="sourceAccountSubtitle" class="text-xs text-slate-500 truncate hidden"></p>
+                    <span id="sourceAccountPlaceholder" class="text-sm text-slate-400">Pilih Sumber Rekening</span>
+                  </div>
+                </button>
+              </div>
+
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label id="idInputLabel" for="billerIdInput" class="block text-sm text-slate-600">ID Pelanggan</label>
+                </div>
+                <input id="billerIdInput" type="text" inputmode="numeric" autocomplete="off" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500" placeholder="Masukkan ID Pelanggan" />
+                <p id="idInputError" class="hidden text-sm text-rose-500"></p>
+              </div>
+
+              <div class="space-y-2">
+                <button id="savedNumberButton" type="button" class="text-left rounded-xl border border-cyan-500 text-cyan-600 px-4 py-3 text-sm font-medium hover:bg-cyan-50">
+                 Nomor Tersimpan
+                </button>
+              </div>
+            </section>
+          </div>
+
+          <div id="drawerHistoryContent" class="hidden h-full">
+            <div class="flex h-full flex-col items-center justify-center text-center text-slate-500">
+              <img src="img/illustration-2.svg" alt="Riwayat transaksi" class="mb-4 w-28 max-w-full" />
+              <p class="text-base font-semibold text-slate-700">Riwayat Transaksi</p>
+              <p class="mt-2 max-w-[240px] text-sm text-slate-500">Pilih transaksi di daftar riwayat untuk melihat detailnya di sini.</p>
             </div>
-          </section>
+          </div>
         </div>
 
-        <div class="border-t px-6 py-5 sticky bottom-0 bg-white">
+        <div id="drawerFooter" class="border-t px-6 py-5 sticky bottom-0 bg-white">
           <button id="confirmPaymentBtn" type="button" class="w-full rounded-xl bg-cyan-600 text-white py-3 font-semibold hover:bg-cyan-700" disabled>
             Konfirmasi Pembayaran
           </button>

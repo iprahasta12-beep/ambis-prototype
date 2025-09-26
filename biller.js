@@ -345,6 +345,10 @@
     const confirmBtn = document.getElementById('confirmPaymentBtn');
     const closeBtn = document.getElementById('drawerCloseBtn');
     const savedBtn = document.getElementById('savedNumberButton');
+    const openHistoryDrawerBtn = document.getElementById('openHistoryDrawerBtn');
+    const drawerDefaultContent = document.getElementById('drawerDefaultContent');
+    const drawerHistoryContent = document.getElementById('drawerHistoryContent');
+    const drawerFooter = document.getElementById('drawerFooter');
 
     const paymentSheetOverlay = document.getElementById('paymentSheetOverlay');
     const paymentBottomSheet = document.getElementById('paymentBottomSheet');
@@ -922,6 +926,22 @@
 
     rebuildAccountCollections();
     applyAccountSelection(appliedAccountId);
+
+    function showDrawerBillerMode() {
+      drawerDefaultContent?.classList.remove('hidden');
+      drawerHistoryContent?.classList.add('hidden');
+      drawerFooter?.classList.remove('hidden');
+    }
+
+    function showDrawerHistoryMode() {
+      drawerDefaultContent?.classList.add('hidden');
+      drawerHistoryContent?.classList.remove('hidden');
+      drawerFooter?.classList.add('hidden');
+      if (notesList) {
+        notesList.innerHTML = '';
+      }
+      notesEmpty?.classList.add('hidden');
+    }
 
     function setActiveButton(next) {
       if (activeButton && activeButton !== next) {
@@ -1575,8 +1595,33 @@
       closePaymentSheet({ immediate: true });
       hideSuccessDrawer({ immediate: true });
       setActiveButton(button);
+      showDrawerBillerMode();
       const wasClosed = !drawer.classList.contains('open');
       applyConfig(key, config);
+      if (wasClosed) {
+        drawer.classList.add('open');
+        drawerInner.classList.remove('opacity-0', 'translate-x-4');
+        drawerInner.classList.add('opacity-100', 'translate-x-0');
+        if (typeof window.sidebarCollapseForDrawer === 'function') {
+          window.sidebarCollapseForDrawer();
+        }
+      } else {
+        drawerInner.classList.remove('opacity-0', 'translate-x-4');
+        drawerInner.classList.add('opacity-100', 'translate-x-0');
+      }
+    }
+
+    function openHistoryDrawer() {
+      closeSavedSheet({ immediate: true });
+      closeAccountSheet({ immediate: true });
+      closePaymentSheet({ immediate: true });
+      hideSuccessDrawer({ immediate: true });
+      setActiveButton(null);
+      activeKey = null;
+      currentValidation = { ...DEFAULT_VALIDATION };
+      drawerTitle.textContent = 'Riwayat Transaksi';
+      showDrawerHistoryMode();
+      const wasClosed = !drawer.classList.contains('open');
       if (wasClosed) {
         drawer.classList.add('open');
         drawerInner.classList.remove('opacity-0', 'translate-x-4');
@@ -1617,6 +1662,11 @@
 
     closeBtn?.addEventListener('click', () => {
       closeDrawer();
+    });
+
+    openHistoryDrawerBtn?.addEventListener('click', (event) => {
+      event.preventDefault();
+      openHistoryDrawer();
     });
 
     moveSourceButton?.addEventListener('click', openAccountSheet);
