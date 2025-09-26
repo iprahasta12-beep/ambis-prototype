@@ -322,6 +322,110 @@
     },
   };
 
+  const HISTORY_TRANSACTIONS = [
+    {
+      id: 'HIS-20250802-001',
+      status: 'processing',
+      type: 'pembelian',
+      serviceName: 'Token Listrik',
+      billerName: 'PLN Prabayar',
+      customerId: '45093051325',
+      reference: 'TRX-20250802-001',
+      category: 'Listrik PLN',
+      amount: 250000,
+      fee: 2500,
+      accountName: 'Rekening Operasional',
+      createdAt: '2025-08-02T09:24:00+07:00',
+    },
+    {
+      id: 'HIS-20250801-004',
+      status: 'processing',
+      type: 'pembayaran',
+      serviceName: 'BPJS Kesehatan',
+      billerName: 'BPJS Kesehatan Keluarga',
+      customerId: '8888800123456789',
+      reference: 'TRX-20250801-004',
+      category: 'BPJS',
+      amount: 150000,
+      fee: 2500,
+      accountName: 'Rekening Operasional',
+      createdAt: '2025-08-01T16:45:00+07:00',
+    },
+    {
+      id: 'HIS-20250730-003',
+      status: 'processing',
+      type: 'pembelian',
+      serviceName: 'Iconnet',
+      billerName: 'PLN Icon Plus',
+      customerId: '223300145678',
+      reference: 'TRX-20250730-003',
+      category: 'Internet',
+      amount: 385000,
+      fee: 2500,
+      accountName: 'Rekening Cabang Bandung',
+      createdAt: '2025-07-30T08:30:00+07:00',
+    },
+    {
+      id: 'HIS-20250728-010',
+      status: 'completed',
+      type: 'pembayaran',
+      serviceName: 'Tagihan Listrik',
+      billerName: 'PLN Pascabayar',
+      customerId: '56009800321',
+      reference: 'TRX-20250728-010',
+      category: 'Listrik PLN',
+      amount: 875000,
+      fee: 2500,
+      accountName: 'Rekening Operasional',
+      createdAt: '2025-07-28T11:05:00+07:00',
+    },
+    {
+      id: 'HIS-20250725-007',
+      status: 'completed',
+      type: 'pembayaran',
+      serviceName: 'IndiHome',
+      billerName: 'PT Telkom Indonesia',
+      customerId: '120034556788',
+      reference: 'TRX-20250725-007',
+      category: 'Internet',
+      amount: 550000,
+      fee: 2500,
+      accountName: 'Rekening Operasional',
+      createdAt: '2025-07-25T14:20:00+07:00',
+    },
+    {
+      id: 'HIS-20250722-002',
+      status: 'completed',
+      type: 'pembayaran',
+      serviceName: 'BPJSTK Penerima Upah',
+      billerName: 'BPJS Ketenagakerjaan',
+      customerId: '888880011223',
+      reference: 'TRX-20250722-002',
+      category: 'BPJS',
+      amount: 210000,
+      fee: 2500,
+      accountName: 'Rekening Operasional',
+      createdAt: '2025-07-22T10:15:00+07:00',
+    },
+  ];
+
+  const HISTORY_STATUS_LABELS = {
+    processing: 'Dalam Proses',
+    completed: 'Selesai',
+    failed: 'Gagal',
+  };
+
+  const HISTORY_STATUS_PILL_CLASSES = {
+    processing: 'bg-amber-100 text-amber-700',
+    completed: 'bg-emerald-100 text-emerald-700',
+    failed: 'bg-rose-100 text-rose-600',
+  };
+
+  const HISTORY_TYPE_LABELS = {
+    pembelian: 'Pembelian',
+    pembayaran: 'Pembayaran',
+  };
+
   function mergeValidation(config) {
     if (!config || !config.validation) {
       return { ...DEFAULT_VALIDATION };
@@ -349,6 +453,23 @@
     const drawerDefaultContent = document.getElementById('drawerDefaultContent');
     const drawerHistoryContent = document.getElementById('drawerHistoryContent');
     const drawerFooter = document.getElementById('drawerFooter');
+    const historyTabButtons = drawerHistoryContent
+      ? Array.from(drawerHistoryContent.querySelectorAll('[data-history-tab]'))
+      : [];
+    const historyList = document.getElementById('historyList');
+    const historyEmptyState = document.getElementById('historyEmptyState');
+    const historyErrorBanner = document.getElementById('historyErrorBanner');
+    const historyErrorMessage = document.getElementById('historyErrorMessage');
+    const historyErrorRetry = document.getElementById('historyErrorRetry');
+    const historyFiltersGroup = drawerHistoryContent
+      ? drawerHistoryContent.querySelector('[data-filter-group="history"]')
+      : null;
+    const historyDateFilter = historyFiltersGroup
+      ? historyFiltersGroup.querySelector('[data-filter="date"]')
+      : null;
+    const historyCategoryFilter = historyFiltersGroup
+      ? historyFiltersGroup.querySelector('[data-filter="category"]')
+      : null;
 
     const paymentSheetOverlay = document.getElementById('paymentSheetOverlay');
     const paymentBottomSheet = document.getElementById('paymentBottomSheet');
@@ -913,6 +1034,15 @@
     };
     const SUCCESS_STATUS_SEQUENCE = ['processing', 'success', 'failed'];
     const SUCCESS_STATUS_PILL_BASE = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold';
+    const historyDateFormatter = new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    const historyTimeFormatter = new Intl.DateTimeFormat('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
     let paymentOtpActive = false;
     let paymentOtpIntervalId = null;
@@ -923,6 +1053,8 @@
     let currentSuccessStatusKey = 'processing';
     let lastConfirmationContext = null;
     let lastSuccessDetails = null;
+    let historyActiveTab = 'processing';
+    let historyHasError = false;
 
     rebuildAccountCollections();
     applyAccountSelection(appliedAccountId);
@@ -941,6 +1073,270 @@
         notesList.innerHTML = '';
       }
       notesEmpty?.classList.add('hidden');
+    }
+
+    function resetHistoryFilters() {
+      if (!historyFiltersGroup) return;
+      const filterElements = Array.from(historyFiltersGroup.querySelectorAll('.filter'));
+      filterElements.forEach((filter) => {
+        filter.dataset.applied = '';
+        const label = filter.querySelector('.filter-label');
+        const defaultLabel = filter.dataset.default || '';
+        if (label) {
+          label.textContent = defaultLabel;
+        }
+        filter.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((input) => {
+          input.checked = false;
+        });
+        const customRange = filter.querySelector('.custom-range');
+        if (customRange) {
+          customRange.classList.add('hidden');
+          const rangeInputs = Array.from(customRange.querySelectorAll('input'));
+          rangeInputs.forEach((rangeInput) => {
+            if (rangeInput._airDatepicker) {
+              rangeInput._airDatepicker.clear();
+              if (typeof rangeInput._airDatepicker.update === 'function') {
+                rangeInput._airDatepicker.update({ minDate: null, maxDate: null });
+              }
+            }
+            rangeInput.value = '';
+            rangeInput.disabled = true;
+            if (rangeInput.dataset && rangeInput.dataset.isoValue) {
+              delete rangeInput.dataset.isoValue;
+            }
+            const defaultPlaceholder = rangeInput.dataset ? rangeInput.dataset.defaultPlaceholder : '';
+            if (defaultPlaceholder) {
+              rangeInput.setAttribute('placeholder', defaultPlaceholder);
+            }
+          });
+        }
+        if (typeof filter._setTriggerState === 'function') {
+          filter._setTriggerState(false);
+        }
+        if (typeof filter._ensureDefaultDateSelection === 'function') {
+          filter._ensureDefaultDateSelection();
+        }
+        if (typeof filter._refreshDateOptionHighlight === 'function') {
+          filter._refreshDateOptionHighlight();
+        }
+      });
+    }
+
+    function updateHistoryTabsUI() {
+      historyTabButtons.forEach((button) => {
+        const tabKey = button.getAttribute('data-history-tab');
+        const isActive = tabKey === historyActiveTab;
+        button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        button.classList.toggle('bg-white', isActive);
+        button.classList.toggle('shadow-sm', isActive);
+        button.classList.toggle('text-slate-900', isActive);
+        button.classList.toggle('text-slate-500', !isActive);
+      });
+    }
+
+    function setHistoryActiveTab(nextTab) {
+      if (!nextTab) return;
+      historyActiveTab = nextTab;
+      updateHistoryTabsUI();
+      renderHistoryList();
+    }
+
+    function getHistoryFilterState() {
+      return {
+        date: historyDateFilter?.dataset.applied || '',
+        category: historyCategoryFilter?.dataset.applied || '',
+      };
+    }
+
+    function parseHistoryDateRange(applied) {
+      if (!applied || applied === 'Semua Tanggal') {
+        return null;
+      }
+
+      if (applied.startsWith('custom:')) {
+        const range = applied.slice(7).split('|');
+        if (range.length !== 2) return null;
+        const [startIso, endIso] = range;
+        const startDate = startIso ? new Date(startIso) : null;
+        const endDate = endIso ? new Date(endIso) : null;
+        if (!startDate || Number.isNaN(startDate.getTime()) || !endDate || Number.isNaN(endDate.getTime())) {
+          return null;
+        }
+        const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+        const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate(), 23, 59, 59, 999);
+        return { start, end };
+      }
+
+      const today = new Date();
+      const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const endOfToday = new Date(startOfToday.getFullYear(), startOfToday.getMonth(), startOfToday.getDate(), 23, 59, 59, 999);
+
+      switch (applied) {
+        case 'Hari Ini':
+          return { start: startOfToday, end: endOfToday };
+        case '7 Hari Terakhir': {
+          const start = new Date(startOfToday);
+          start.setDate(start.getDate() - 6);
+          return { start, end: endOfToday };
+        }
+        case '30 Hari Terakhir': {
+          const start = new Date(startOfToday);
+          start.setDate(start.getDate() - 29);
+          return { start, end: endOfToday };
+        }
+        default:
+          return null;
+      }
+    }
+
+    function isDateWithinRange(date, range) {
+      if (!range) return true;
+      if (!(date instanceof Date) || Number.isNaN(date.getTime())) return false;
+      const { start, end } = range;
+      if (start && date.getTime() < start.getTime()) return false;
+      if (end && date.getTime() > end.getTime()) return false;
+      return true;
+    }
+
+    function formatHistoryDateText(value) {
+      if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
+        return '-';
+      }
+      return historyDateFormatter.format(value);
+    }
+
+    function formatHistoryTimeText(value) {
+      if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
+        return '';
+      }
+      return historyTimeFormatter.format(value);
+    }
+
+    function buildHistoryAmount(amount) {
+      if (typeof amount !== 'number') {
+        return '-';
+      }
+      return `Rp${currencyFormatter.format(amount)}`;
+    }
+
+    function renderHistoryItem(item) {
+      const date = new Date(item.createdAt);
+      const dateLabel = formatHistoryDateText(date);
+      const timeLabel = formatHistoryTimeText(date);
+      const statusLabel = HISTORY_STATUS_LABELS[item.status] || item.status;
+      const statusClass = HISTORY_STATUS_PILL_CLASSES[item.status] || 'bg-slate-200 text-slate-600';
+      const typeLabel = HISTORY_TYPE_LABELS[item.type] || 'Transaksi';
+      const nominal = buildHistoryAmount(item.amount);
+      const fee = buildHistoryAmount(item.fee);
+      const totalValue = (typeof item.amount === 'number' ? item.amount : 0)
+        + (typeof item.fee === 'number' ? item.fee : 0);
+      const total = buildHistoryAmount(totalValue);
+      const timeDisplay = timeLabel ? ` • ${timeLabel}` : '';
+
+      return `
+        <article class="rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-cyan-300">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="space-y-1">
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">${typeLabel}</p>
+              <p class="text-base font-semibold text-slate-900">${item.serviceName || '-'}</p>
+              <p class="text-sm text-slate-500">${item.billerName || '-'}</p>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <p class="text-sm font-semibold text-slate-900">${nominal}</p>
+              <span class="${SUCCESS_STATUS_PILL_BASE} ${statusClass}">${statusLabel}</span>
+            </div>
+          </div>
+          <div class="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
+            <div>
+              <span class="block text-xs font-semibold uppercase tracking-wide text-slate-400">Tanggal</span>
+              <span>${dateLabel}${timeDisplay}</span>
+            </div>
+            <div>
+              <span class="block text-xs font-semibold uppercase tracking-wide text-slate-400">Kategori</span>
+              <span>${item.category || '-'}</span>
+            </div>
+            <div>
+              <span class="block text-xs font-semibold uppercase tracking-wide text-slate-400">ID Pelanggan</span>
+              <span>${item.customerId || '-'}</span>
+            </div>
+            <div>
+              <span class="block text-xs font-semibold uppercase tracking-wide text-slate-400">Nomor Referensi</span>
+              <span>${item.reference || '-'}</span>
+            </div>
+            <div>
+              <span class="block text-xs font-semibold uppercase tracking-wide text-slate-400">Biaya Admin</span>
+              <span>${fee}</span>
+            </div>
+            <div>
+              <span class="block text-xs font-semibold uppercase tracking-wide text-slate-400">Total</span>
+              <span>${total}</span>
+            </div>
+            <div class="sm:col-span-2">
+              <span class="block text-xs font-semibold uppercase tracking-wide text-slate-400">Sumber Dana</span>
+              <span>${item.accountName || '-'}</span>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function getFilteredHistoryTransactions() {
+      const { date, category } = getHistoryFilterState();
+      const range = parseHistoryDateRange(date);
+      const categoryFilter = category && category !== 'Semua Kategori' ? category : '';
+
+      return HISTORY_TRANSACTIONS
+        .filter((item) => item.status === historyActiveTab)
+        .filter((item) => {
+          if (categoryFilter && item.category !== categoryFilter) {
+            return false;
+          }
+          const createdDate = new Date(item.createdAt);
+          return isDateWithinRange(createdDate, range);
+        })
+        .sort((a, b) => {
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
+          return dateB - dateA;
+        });
+    }
+
+    function renderHistoryList() {
+      if (!historyList) return;
+
+      if (historyHasError) {
+        historyList.innerHTML = '';
+        historyEmptyState?.classList.add('hidden');
+        historyErrorBanner?.classList.remove('hidden');
+        return;
+      }
+
+      historyErrorBanner?.classList.add('hidden');
+      const items = getFilteredHistoryTransactions();
+      if (!items.length) {
+        historyList.innerHTML = '';
+        historyEmptyState?.classList.remove('hidden');
+        return;
+      }
+
+      historyEmptyState?.classList.add('hidden');
+      historyList.innerHTML = items.map((item) => renderHistoryItem(item)).join('');
+    }
+
+    function setHistoryErrorState(message) {
+      if (historyErrorMessage && message) {
+        historyErrorMessage.textContent = message;
+      }
+      historyHasError = true;
+      renderHistoryList();
+    }
+
+    function resetHistoryState() {
+      historyHasError = false;
+      resetHistoryFilters();
+      historyActiveTab = 'processing';
+      updateHistoryTabsUI();
+      renderHistoryList();
     }
 
     function setActiveButton(next) {
@@ -1619,7 +2015,8 @@
       setActiveButton(null);
       activeKey = null;
       currentValidation = { ...DEFAULT_VALIDATION };
-      drawerTitle.textContent = 'Riwayat Transaksi';
+      drawerTitle.textContent = 'Riwayat';
+      resetHistoryState();
       showDrawerHistoryMode();
       const wasClosed = !drawer.classList.contains('open');
       if (wasClosed) {
@@ -1662,6 +2059,30 @@
 
     closeBtn?.addEventListener('click', () => {
       closeDrawer();
+    });
+
+    historyTabButtons.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        const tab = button.getAttribute('data-history-tab');
+        if (tab) {
+          setHistoryActiveTab(tab);
+        }
+      });
+    });
+
+    historyErrorRetry?.addEventListener('click', (event) => {
+      event.preventDefault();
+      historyHasError = false;
+      renderHistoryList();
+    });
+
+    document.addEventListener('filter-change', (event) => {
+      const groupId = event.detail?.groupId || '';
+      if (groupId === 'history') {
+        historyHasError = false;
+        renderHistoryList();
+      }
     });
 
     openHistoryDrawerBtn?.addEventListener('click', (event) => {
