@@ -1,6 +1,22 @@
 (function () {
   'use strict';
 
+  const ambis = window.AMBIS || {};
+  const sanitizeNumber = (value = '') => value.toString().replace(/\D+/g, '');
+  const formatAccountNumber = typeof ambis.formatAccountNumber === 'function'
+    ? (value) => ambis.formatAccountNumber(value)
+    : (value) => {
+        const raw = sanitizeNumber(value);
+        if (!raw) return '';
+        return raw.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+      };
+  const currencyFormatter = new Intl.NumberFormat('id-ID');
+  const defaultCompanyName = typeof ambis.getBrandName === 'function'
+    ? ambis.getBrandName()
+    : (ambis.brandName || '');
+  const accountMap = new Map();
+  const accountDisplayList = [];
+
   const digitsOnly = (value = '') => value.replace(/\D+/g, '');
 
   const DEFAULT_VALIDATION = {
