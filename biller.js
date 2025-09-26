@@ -306,6 +306,281 @@
     },
   };
 
+  const HISTORY_COLLECTION = {
+    processing: [
+      {
+        id: '2025-08-02',
+        label: 'Sabtu, 2 Agustus 2025',
+        transactions: [
+          {
+            id: 'hist-processing-token-listrik',
+            detailId: 'hist-processing-token-listrik',
+            billerName: 'Token Listrik',
+            badgeText: 'TOKEN LISTRIK',
+            badgeClass: 'border-orange-300 text-orange-600 bg-orange-50',
+            logo: 'img/biller/pln.svg',
+            logoAlt: 'PLN',
+            customerId: '45093051325',
+            filterCategory: 'Listrik PLN',
+            amount: 1_002_500,
+            detail: {
+              transactionLabel: 'Pembelian',
+              displayName: 'Token Listrik',
+              accountDisplay: 'Rekening Operasional • 1234567890',
+              idLabel: 'ID Pelanggan',
+              idValue: '45093051325',
+              customerName: 'Gudang Jakarta',
+              dynamicFields: [
+                { label: 'Tarif/Daya', value: 'R2 / 4400 VA' },
+              ],
+              amounts: { nominal: 1_000_000, admin: 2_500, total: 1_002_500 },
+              status: 'processing',
+              heroCategory: 'Beli & Bayar',
+              heroSubtitle: 'Token Listrik',
+            },
+          },
+          {
+            id: 'hist-processing-indihome',
+            detailId: 'hist-processing-indihome',
+            billerName: 'IndiHome',
+            badgeText: 'INDIHOME',
+            badgeClass: 'border-rose-300 text-rose-600 bg-rose-50',
+            logo: 'img/biller/indihome.svg',
+            logoAlt: 'IndiHome',
+            customerId: '122009876543',
+            filterCategory: 'Internet',
+            amount: 87_412_500,
+            detail: {
+              transactionLabel: 'Pembayaran',
+              displayName: 'IndiHome',
+              accountDisplay: 'Rekening Operasional • 1234567890',
+              idLabel: 'ID Pelanggan',
+              idValue: '122009876543',
+              customerName: 'Cabang Bandung',
+              dynamicFields: [
+                { label: 'Periode Tagihan', value: 'Agustus 2025' },
+              ],
+              amounts: { nominal: 87_410_000, admin: 2_500, total: 87_412_500 },
+              status: 'processing',
+              heroCategory: 'Beli & Bayar',
+              heroSubtitle: 'IndiHome',
+            },
+          },
+          {
+            id: 'hist-processing-bpjs-badan-usaha',
+            detailId: 'hist-processing-bpjs-badan-usaha',
+            billerName: 'BPJS Badan Usaha',
+            badgeText: 'BPJS BADAN USAHA',
+            badgeClass: 'border-sky-300 text-sky-600 bg-sky-50',
+            logo: 'img/biller/bpjs.svg',
+            logoAlt: 'BPJS',
+            customerId: '8888800456123789',
+            filterCategory: 'BPJS',
+            amount: 77_412_500,
+            detail: {
+              transactionLabel: 'Pembayaran',
+              displayName: 'BPJS Kesehatan Badan Usaha',
+              accountDisplay: 'Rekening Operasional • 1234567890',
+              idLabel: 'Nomor Virtual Account',
+              idValue: '8888800456123789',
+              customerName: 'PT Maju Lancar',
+              dynamicFields: [
+                { label: 'Jumlah Karyawan', value: '60' },
+              ],
+              amounts: { nominal: 77_410_000, admin: 2_500, total: 77_412_500 },
+              status: 'processing',
+              heroCategory: 'Beli & Bayar',
+              heroSubtitle: 'BPJS Badan Usaha',
+            },
+          },
+        ],
+      },
+      {
+        id: '2025-08-01',
+        label: 'Jumat, 1 Agustus 2025',
+        transactions: [
+          {
+            id: 'hist-processing-tagihan-listrik',
+            detailId: 'hist-processing-tagihan-listrik',
+            billerName: 'Tagihan Listrik',
+            badgeText: 'TAGIHAN LISTRIK',
+            badgeClass: 'border-orange-300 text-orange-600 bg-orange-50',
+            logo: 'img/biller/pln.svg',
+            logoAlt: 'PLN',
+            customerId: '56009800321',
+            filterCategory: 'Listrik PLN',
+            amount: 4_472_500,
+            detail: {
+              transactionLabel: 'Pembayaran',
+              displayName: 'Tagihan Listrik',
+              accountDisplay: 'Rekening Operasional • 1234567890',
+              idLabel: 'ID Pelanggan',
+              idValue: '56009800321',
+              customerName: 'CV Andalas',
+              dynamicFields: [
+                { label: 'Jumlah Bulan', value: '2' },
+                { label: 'Bulan Tagihan', value: 'Juli & Agustus 2025' },
+              ],
+              amounts: { nominal: 4_470_000, admin: 2_500, total: 4_472_500 },
+              status: 'processing',
+              heroCategory: 'Beli & Bayar',
+              heroSubtitle: 'Tagihan Listrik',
+            },
+          },
+          {
+            id: 'hist-processing-bpjstk-upah',
+            detailId: 'hist-processing-bpjstk-upah',
+            billerName: 'BPJSTK Penerima Upah',
+            badgeText: 'BPJSTK PENERIMA UPAH',
+            badgeClass: 'border-emerald-300 text-emerald-600 bg-emerald-50',
+            logo: 'img/biller/jmo.svg',
+            logoAlt: 'BPJSTK',
+            customerId: '888880011223',
+            filterCategory: 'BPJS',
+            amount: 7_482_500,
+            detail: {
+              transactionLabel: 'Pembayaran',
+              displayName: 'BPJSTK Penerima Upah',
+              accountDisplay: 'Rekening Operasional • 1234567890',
+              idLabel: 'Nomor Virtual Account',
+              idValue: '888880011223',
+              customerName: 'PT Sentosa Prima',
+              dynamicFields: [
+                { label: 'Tagihan', value: 'Agustus 2025' },
+              ],
+              amounts: { nominal: 7_480_000, admin: 2_500, total: 7_482_500 },
+              status: 'processing',
+              heroCategory: 'Beli & Bayar',
+              heroSubtitle: 'BPJSTK Penerima Upah',
+            },
+          },
+        ],
+      },
+    ],
+    completed: [
+      {
+        id: '2025-07-31',
+        label: 'Kamis, 31 Juli 2025',
+        transactions: [
+          {
+            id: 'hist-completed-token-listrik',
+            detailId: 'hist-completed-token-listrik',
+            billerName: 'Token Listrik',
+            badgeText: 'TOKEN LISTRIK',
+            badgeClass: 'border-orange-300 text-orange-600 bg-orange-50',
+            logo: 'img/biller/pln.svg',
+            logoAlt: 'PLN',
+            customerId: '45093058888',
+            filterCategory: 'Listrik PLN',
+            amount: 502_500,
+            detail: {
+              transactionLabel: 'Pembelian',
+              displayName: 'Token Listrik',
+              accountDisplay: 'Rekening Operasional • 1234567890',
+              idLabel: 'ID Pelanggan',
+              idValue: '45093058888',
+              customerName: 'Toko Sore',
+              dynamicFields: [
+                { label: 'Tarif/Daya', value: 'R1 / 2200 VA' },
+              ],
+              amounts: { nominal: 500_000, admin: 2_500, total: 502_500 },
+              status: 'success',
+              heroCategory: 'Beli & Bayar',
+              heroSubtitle: 'Token Listrik',
+            },
+          },
+          {
+            id: 'hist-completed-indihome',
+            detailId: 'hist-completed-indihome',
+            billerName: 'IndiHome',
+            badgeText: 'INDIHOME',
+            badgeClass: 'border-rose-300 text-rose-600 bg-rose-50',
+            logo: 'img/biller/indihome.svg',
+            logoAlt: 'IndiHome',
+            customerId: '122009870001',
+            filterCategory: 'Internet',
+            amount: 782_500,
+            detail: {
+              transactionLabel: 'Pembayaran',
+              displayName: 'IndiHome',
+              accountDisplay: 'Rekening Operasional • 1234567890',
+              idLabel: 'ID Pelanggan',
+              idValue: '122009870001',
+              customerName: 'Ruko Merpati',
+              dynamicFields: [
+                { label: 'Periode Tagihan', value: 'Juli 2025' },
+              ],
+              amounts: { nominal: 780_000, admin: 2_500, total: 782_500 },
+              status: 'success',
+              heroCategory: 'Beli & Bayar',
+              heroSubtitle: 'IndiHome',
+            },
+          },
+        ],
+      },
+      {
+        id: '2025-07-30',
+        label: 'Rabu, 30 Juli 2025',
+        transactions: [
+          {
+            id: 'hist-completed-bpjs-keluarga',
+            detailId: 'hist-completed-bpjs-keluarga',
+            billerName: 'BPJS Keluarga',
+            badgeText: 'BPJS KELUARGA',
+            badgeClass: 'border-sky-300 text-sky-600 bg-sky-50',
+            logo: 'img/biller/bpjs.svg',
+            logoAlt: 'BPJS',
+            customerId: '8888800123456789',
+            filterCategory: 'BPJS',
+            amount: 152_500,
+            detail: {
+              transactionLabel: 'Pembayaran',
+              displayName: 'BPJS Kesehatan Keluarga',
+              accountDisplay: 'Rekening Operasional • 1234567890',
+              idLabel: 'Nomor Virtual Account',
+              idValue: '8888800123456789',
+              customerName: 'BPJS Keluarga Utama',
+              dynamicFields: [
+                { label: 'Jumlah Keluarga', value: '3' },
+              ],
+              amounts: { nominal: 150_000, admin: 2_500, total: 152_500 },
+              status: 'success',
+              heroCategory: 'Beli & Bayar',
+              heroSubtitle: 'BPJS Keluarga',
+            },
+          },
+          {
+            id: 'hist-completed-bpjstk-mandiri',
+            detailId: 'hist-completed-bpjstk-mandiri',
+            billerName: 'BPJSTK Mandiri',
+            badgeText: 'BPJSTK BPU',
+            badgeClass: 'border-emerald-300 text-emerald-600 bg-emerald-50',
+            logo: 'img/biller/jmo.svg',
+            logoAlt: 'BPJSTK',
+            customerId: '888880099887',
+            filterCategory: 'BPJS',
+            amount: 782_500,
+            detail: {
+              transactionLabel: 'Pembayaran',
+              displayName: 'BPJSTK Bukan Penerima Upah',
+              accountDisplay: 'Rekening Operasional • 1234567890',
+              idLabel: 'Nomor Virtual Account',
+              idValue: '888880099887',
+              customerName: 'BPJSTK Mandiri',
+              dynamicFields: [
+                { label: 'Program', value: 'JKK + JKM' },
+              ],
+              amounts: { nominal: 780_000, admin: 2_500, total: 782_500 },
+              status: 'success',
+              heroCategory: 'Beli & Bayar',
+              heroSubtitle: 'BPJSTK Mandiri',
+            },
+          },
+        ],
+      },
+    ],
+  };
+
   function mergeValidation(config) {
     if (!config || !config.validation) {
       return { ...DEFAULT_VALIDATION };
@@ -387,6 +662,17 @@
     const successTotal = document.getElementById('successTotal');
     const successStatusButtonDefaultText = successStatusButton?.textContent?.trim() || 'Cek Status';
 
+    const historyOpenBtn = document.getElementById('openHistoryDrawerBtn');
+    const historyDrawer = document.getElementById('historyDrawer');
+    const historyDrawerOverlay = document.getElementById('historyDrawerOverlay');
+    const historyDrawerCloseBtn = document.getElementById('historyDrawerCloseBtn');
+    const historyTabButtons = Array.from(document.querySelectorAll('[data-history-tab]'));
+    const historyList = document.getElementById('historyList');
+    const historyEmptyState = document.getElementById('historyEmptyState');
+    const historyFilterGroup = document.querySelector('[data-filter-group="history"]');
+    const historyDateFilter = historyFilterGroup?.querySelector('[data-filter="date"]') || null;
+    const historyCategoryFilter = historyFilterGroup?.querySelector('[data-filter="category"]') || null;
+
     if (!drawer || !drawerInner || !drawerTitle || !notesList || !idInput || !confirmBtn) {
       return;
     }
@@ -419,6 +705,266 @@
     const accountMap = new Map();
     const accountDisplayList = [];
     const currencyFormatter = new Intl.NumberFormat('id-ID');
+
+    const historyTransactionLookup = new Map();
+    Object.values(HISTORY_COLLECTION).forEach((groups) => {
+      groups.forEach((group) => {
+        group.transactions.forEach((transaction) => {
+          if (transaction.detailId && transaction.detail) {
+            historyTransactionLookup.set(transaction.detailId, { ...transaction.detail });
+          }
+        });
+      });
+    });
+
+    const HISTORY_DEFAULT_DATE = historyDateFilter?.dataset?.default || 'Semua Tanggal';
+    const HISTORY_DEFAULT_CATEGORY = historyCategoryFilter?.dataset?.default || 'Semua Kategori';
+
+    let historyDrawerOpen = false;
+    let activeHistoryTab = 'processing';
+    const historyFilters = {
+      date: HISTORY_DEFAULT_DATE,
+      category: HISTORY_DEFAULT_CATEGORY,
+    };
+
+    function maskCustomerId(value) {
+      const raw = typeof value === 'string' ? value.trim() : String(value || '').trim();
+      if (!raw) return '-';
+      const sanitized = raw.replace(/\s+/g, '');
+      if (!sanitized) return '-';
+      if (sanitized.length <= 4) {
+        return '*'.repeat(sanitized.length);
+      }
+      const visible = sanitized.slice(0, sanitized.length - 4);
+      return `${visible}${'*'.repeat(4)}`;
+    }
+
+    function getHistoryAppliedValue(filterEl, fallback) {
+      if (!filterEl) return fallback;
+      const applied = filterEl.dataset?.applied || '';
+      if (!applied || applied === 'Semua Tanggal' || applied === 'Semua Kategori') {
+        return fallback;
+      }
+      if (applied.startsWith('custom:')) {
+        return fallback;
+      }
+      const [first] = applied.split(',');
+      return first || fallback;
+    }
+
+    function syncHistoryFilters() {
+      historyFilters.date = getHistoryAppliedValue(historyDateFilter, HISTORY_DEFAULT_DATE);
+      historyFilters.category = getHistoryAppliedValue(historyCategoryFilter, HISTORY_DEFAULT_CATEGORY);
+    }
+
+    function resetHistoryFilters() {
+      if (!historyFilterGroup) return;
+      const filters = Array.from(historyFilterGroup.querySelectorAll('.filter'));
+      filters.forEach((filter) => {
+        filter.dataset.applied = '';
+        const labelSpan = filter.querySelector('.filter-label');
+        if (labelSpan) {
+          labelSpan.textContent = filter.dataset.default || labelSpan.textContent;
+        }
+        filter.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((input) => {
+          input.checked = false;
+        });
+        if (typeof filter._setTriggerState === 'function') {
+          filter._setTriggerState(false);
+        }
+        if (typeof filter._ensureDefaultDateSelection === 'function') {
+          filter._ensureDefaultDateSelection();
+        }
+      });
+      historyFilters.date = HISTORY_DEFAULT_DATE;
+      historyFilters.category = HISTORY_DEFAULT_CATEGORY;
+    }
+
+    function getFilteredHistoryGroups() {
+      const tabKey = HISTORY_COLLECTION[activeHistoryTab] ? activeHistoryTab : 'processing';
+      const groups = HISTORY_COLLECTION[tabKey] || [];
+      const selectedDate = historyFilters.date || HISTORY_DEFAULT_DATE;
+      const selectedCategory = historyFilters.category || HISTORY_DEFAULT_CATEGORY;
+      return groups
+        .filter((group) => selectedDate === HISTORY_DEFAULT_DATE || group.label === selectedDate)
+        .map((group) => {
+          const transactions = group.transactions.filter((transaction) => {
+            if (selectedCategory === HISTORY_DEFAULT_CATEGORY) return true;
+            return transaction.filterCategory === selectedCategory;
+          });
+          return { ...group, transactions };
+        })
+        .filter((group) => group.transactions.length > 0);
+    }
+
+    function renderHistoryList() {
+      if (!historyList) return;
+      const groups = getFilteredHistoryGroups();
+      if (!groups.length) {
+        historyList.innerHTML = '';
+        historyEmptyState?.classList.remove('hidden');
+        return;
+      }
+      historyEmptyState?.classList.add('hidden');
+      let html = '';
+      groups.forEach((group) => {
+        html += '<section class="space-y-3">';
+        html += `<h3 class="text-sm font-semibold text-slate-500">${group.label}</h3>`;
+        html += '<div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">';
+        group.transactions.forEach((transaction, index) => {
+          const rowClasses = index > 0
+            ? 'flex items-center gap-4 px-4 py-4 border-t border-slate-100'
+            : 'flex items-center gap-4 px-4 py-4';
+          const maskedId = maskCustomerId(transaction.customerId);
+          const amountDisplay = formatCurrencyValue(transaction.amount);
+          html += `<div class="${rowClasses}">`;
+          html += '<div class="flex items-center gap-3 min-w-[170px]">';
+          html += '<span class="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-50">';
+          html += `<img src="${transaction.logo}" alt="${transaction.logoAlt || transaction.billerName}" class="h-6 w-6" />`;
+          html += '</span>';
+          html += '<div class="min-w-0">';
+          html += `<p class="text-sm font-semibold text-slate-900 leading-tight">${transaction.billerName}</p>`;
+          html += `<span class="mt-1 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold ${transaction.badgeClass}">`;
+          html += `${transaction.badgeText}`;
+          html += '</span>';
+          html += '</div>';
+          html += '</div>';
+          html += '<div class="flex-1 min-w-0">';
+          html += '<p class="text-xs text-slate-500 uppercase tracking-[.12em]">ID Pelanggan</p>';
+          html += `<p class="mt-1 text-sm font-semibold text-slate-900 truncate">${maskedId}</p>`;
+          html += '</div>';
+          html += '<div class="flex flex-col items-end gap-2 text-right">';
+          html += '<div>';
+          html += '<p class="text-xs text-slate-500 uppercase tracking-[.12em]">Total</p>';
+          html += `<p class="text-base font-semibold text-slate-900">${amountDisplay}</p>`;
+          html += '</div>';
+          html += `<button type="button" class="rounded-lg border border-cyan-500 px-3 py-1.5 text-xs font-semibold text-cyan-600 hover:bg-cyan-50" data-history-detail="${transaction.detailId}">Detail</button>`;
+          html += '</div>';
+          html += '</div>';
+        });
+        html += '</div>';
+        html += '</section>';
+      });
+      historyList.innerHTML = html;
+    }
+
+    function setActiveHistoryTab(tabKey, options = {}) {
+      if (!HISTORY_COLLECTION[tabKey]) return;
+      activeHistoryTab = tabKey;
+      historyTabButtons.forEach((button) => {
+        const isActive = button.dataset.historyTab === tabKey;
+        button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        button.classList.toggle('bg-white', isActive);
+        button.classList.toggle('text-slate-900', isActive);
+        button.classList.toggle('shadow-sm', isActive);
+        button.classList.toggle('text-slate-500', !isActive);
+        button.classList.toggle('hover:text-slate-700', !isActive);
+      });
+      if (options.render !== false) {
+        renderHistoryList();
+      }
+    }
+
+    function openHistoryDrawer() {
+      if (!historyDrawer || !historyDrawerOverlay) return;
+      closeDrawer();
+      hideSuccessDrawer({ immediate: true });
+      resetHistoryFilters();
+      syncHistoryFilters();
+      setActiveHistoryTab('processing', { render: false });
+      renderHistoryList();
+      historyDrawer.classList.remove('translate-x-full');
+      historyDrawer.classList.add('translate-x-0');
+      historyDrawer.setAttribute('aria-hidden', 'false');
+      historyDrawerOverlay.classList.remove('hidden', 'pointer-events-none');
+      historyDrawerOverlay.classList.remove('opacity-0');
+      historyDrawerOverlay.setAttribute('aria-hidden', 'false');
+      requestAnimationFrame(() => {
+        historyDrawerOverlay.classList.add('opacity-100');
+      });
+      historyDrawerOpen = true;
+      historyOpenBtn?.setAttribute('aria-expanded', 'true');
+      historyDrawerCloseBtn?.focus({ preventScroll: true });
+    }
+
+    function closeHistoryDrawer(options = {}) {
+      if (!historyDrawer || !historyDrawerOverlay) return;
+      if (!historyDrawerOpen && !options.force) return;
+      const immediate = Boolean(options.immediate);
+      historyDrawerOpen = false;
+      historyDrawer.classList.add('translate-x-full');
+      historyDrawer.classList.remove('translate-x-0');
+      historyDrawer.setAttribute('aria-hidden', 'true');
+      historyDrawerOverlay.classList.remove('opacity-100');
+      historyDrawerOverlay.classList.add('opacity-0');
+      historyOpenBtn?.setAttribute('aria-expanded', 'false');
+      const finalize = () => {
+        historyDrawerOverlay.classList.add('hidden', 'pointer-events-none');
+        historyDrawerOverlay.setAttribute('aria-hidden', 'true');
+      };
+      if (immediate) {
+        finalize();
+      } else {
+        setTimeout(finalize, 220);
+      }
+    }
+
+    function openHistoryDetail(detailId) {
+      if (!detailId) return;
+      const details = historyTransactionLookup.get(detailId);
+      if (!details) return;
+      closeHistoryDrawer({ immediate: true });
+      if (drawer && drawerInner) {
+        if (!drawer.classList.contains('open')) {
+          drawer.classList.add('open');
+          drawerInner.classList.remove('opacity-0', 'translate-x-4');
+          drawerInner.classList.add('opacity-100', 'translate-x-0');
+          if (typeof window.sidebarCollapseForDrawer === 'function') {
+            window.sidebarCollapseForDrawer();
+          }
+        }
+      }
+      hideSuccessDrawer({ immediate: true });
+      openSuccessDrawer(details);
+    }
+
+    if (historyDrawer && historyDrawerOverlay && historyList) {
+      historyOpenBtn?.addEventListener('click', (event) => {
+        event.preventDefault();
+        openHistoryDrawer();
+      });
+
+      historyDrawerCloseBtn?.addEventListener('click', () => {
+        closeHistoryDrawer();
+      });
+
+      historyDrawerOverlay.addEventListener('click', () => {
+        closeHistoryDrawer();
+      });
+
+      historyTabButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const tabKey = button.dataset.historyTab;
+          if (tabKey) {
+            setActiveHistoryTab(tabKey);
+          }
+        });
+      });
+
+      historyList.addEventListener('click', (event) => {
+        const target = event.target.closest('[data-history-detail]');
+        if (!target) return;
+        event.preventDefault();
+        const detailId = target.getAttribute('data-history-detail');
+        openHistoryDetail(detailId);
+      });
+    }
+
+    document.addEventListener('filter-change', (event) => {
+      if (event.detail?.groupId !== 'history') return;
+      syncHistoryFilters();
+      renderHistoryList();
+    });
 
     function normaliseAccount(account, index) {
       if (!account) return null;
@@ -1842,6 +2388,8 @@
           closePaymentSheet();
         } else if (successDrawerOpen) {
           closeSuccessDrawerAndPanel();
+        } else if (historyDrawerOpen) {
+          closeHistoryDrawer();
         } else {
           closeDrawer();
         }
