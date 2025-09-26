@@ -334,12 +334,14 @@
 
     <!-- Drawer -->
     <div id="drawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100">
-      <button type="button" id="drawerCloseBtn" class="absolute right-4 top-4 text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup drawer">
-        &times;
-      </button>
       <div class="flex-1 flex flex-col relative">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+          <h2 id="drawerTitle" class="text-lg font-semibold text-slate-900">Pembayaran</h2>
+          <button type="button" id="drawerCloseBtn" class="text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup drawer">
+            &times;
+          </button>
+        </div>
         <div id="drawerInner" class="flex-1 overflow-y-auto px-6 py-6 space-y-6 opacity-0 translate-x-4 transition-all duration-200">
-          <h2 id="drawerTitle" class="sr-only">Pembayaran</h2>
           <section class="space-y-3">
             <div class="rounded-xl border border-sky-100 bg-sky-50 text-sky-800 px-4 py-4">
                <h3 class="text-sm font-semibold text-slate-700 mb-2">Catatan</h3>
