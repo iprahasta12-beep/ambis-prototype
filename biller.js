@@ -386,6 +386,7 @@
     const successAdmin = document.getElementById('successAdmin');
     const successTotal = document.getElementById('successTotal');
     const successStatusButtonDefaultText = successStatusButton?.textContent?.trim() || 'Cek Status';
+    const billerButtons = document.querySelectorAll('[data-biller]');
 
     function normaliseAccount(account, index) {
       if (!account) return null;
