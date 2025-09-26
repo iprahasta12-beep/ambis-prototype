@@ -336,8 +336,6 @@
     const paymentSheetCancel = document.getElementById('paymentSheetCancel');
     const paymentSheetConfirm = document.getElementById('paymentSheetConfirm');
     const paymentSheetTitle = document.getElementById('paymentSheetTitle');
-    const paymentSheetTypeLabel = document.getElementById('paymentSheetTypeLabel');
-    const paymentSheetBiller = document.getElementById('paymentSheetBiller');
     const paymentSheetAccountValue = document.getElementById('paymentSheetAccountValue');
     const paymentSheetIdLabel = document.getElementById('paymentSheetIdLabel');
     const paymentSheetIdValue = document.getElementById('paymentSheetIdValue');
@@ -1518,12 +1516,6 @@
 
       if (paymentSheetTitle) {
         paymentSheetTitle.textContent = headerTitle;
-      }
-      if (paymentSheetTypeLabel) {
-        paymentSheetTypeLabel.textContent = transactionLabel;
-      }
-      if (paymentSheetBiller) {
-        paymentSheetBiller.textContent = displayName;
       }
       if (paymentSheetAccountValue) {
         paymentSheetAccountValue.textContent = formatAccountForPayment(account);
