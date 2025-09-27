@@ -27,7 +27,6 @@ const infoCloseBtn = document.getElementById('limitInfoCloseBtn');
 const successMessageEl = document.getElementById('limitSuccessMessage');
 const confirmElements = {
   container: document.getElementById('limitConfirmContainer'),
-  overlay: document.getElementById('limitConfirmOverlay'),
   sheet: document.getElementById('limitConfirmSheet'),
   previousValue: document.getElementById('limitConfirmPreviousValue'),
   newValue: document.getElementById('limitConfirmNewValue'),
@@ -312,7 +311,7 @@ function validateInput() {
 }
 
 async function openConfirmSheet(newLimitValue) {
-  const { container, overlay, sheet, previousValue, newValue } = confirmElements;
+  const { container, sheet, previousValue, newValue } = confirmElements;
   if (!sheet) return;
 
   pendingNewLimit = newLimitValue;
@@ -325,10 +324,6 @@ async function openConfirmSheet(newLimitValue) {
   }
   if (newValue) {
     newValue.textContent = formatCurrency(newLimitValue);
-  }
-
-  if (overlay) {
-    overlay.classList.add('hidden');
   }
 
   await openBottomSheet({
@@ -348,7 +343,7 @@ async function openConfirmSheet(newLimitValue) {
 }
 
 async function closeConfirmSheet(options = {}) {
-  const { container, overlay, sheet } = confirmElements;
+  const { container, sheet } = confirmElements;
   if (!sheet) return;
   if (!confirmSheetOpen && !options.force) return;
 
@@ -358,9 +353,6 @@ async function closeConfirmSheet(options = {}) {
 
   await closeBottomSheet({ immediate: Boolean(options.immediate) });
 
-  if (overlay) {
-    overlay.classList.add('hidden');
-  }
   container?.classList.add('pointer-events-none');
 }
 
