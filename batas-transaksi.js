@@ -392,9 +392,6 @@ function openLimitDrawer() {
       }
     },
     closeSelectors: ['#limitDrawerCloseBtn'],
-    focusTarget: '#newLimitInput',
-    overlay: true,
-    closeOnOverlay: true,
     onOpen: () => {
       if (typeof window.sidebarCollapseForDrawer === 'function') {
         window.sidebarCollapseForDrawer();
