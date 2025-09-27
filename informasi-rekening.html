@@ -931,6 +931,12 @@
   </div>
 
   <script src="https://unpkg.com/air-datepicker@3.4.0/air-datepicker.js"></script>
+  <script type="module">
+    import * as AmbisUI from './ui/ui-components.js';
+
+    const globalAmbis = window.AMBIS = window.AMBIS || {};
+    globalAmbis.ui = Object.assign(globalAmbis.ui || {}, AmbisUI);
+  </script>
   <script src="filters.js"></script>
   <script src="data/rekening-data.js"></script>
   <script src="data/mutasi-data.js"></script>

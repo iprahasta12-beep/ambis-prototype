@@ -340,6 +340,12 @@
     </div>
   </div>
 
+  <script type="module">
+    import * as AmbisUI from './ui/ui-components.js';
+
+    const globalAmbis = window.AMBIS = window.AMBIS || {};
+    globalAmbis.ui = Object.assign(globalAmbis.ui || {}, AmbisUI);
+  </script>
   <script src="data/rekening-data.js"></script>
   <script src="index.js"></script>
   <script src="sidebar.js"></script>
