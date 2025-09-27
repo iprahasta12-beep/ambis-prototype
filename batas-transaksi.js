@@ -27,7 +27,6 @@ const infoCloseBtn = document.getElementById('limitInfoCloseBtn');
 const successMessageEl = document.getElementById('limitSuccessMessage');
 const confirmElements = {
   container: document.getElementById('limitConfirmContainer'),
-  overlay: document.getElementById('limitConfirmOverlay'),
   sheet: document.getElementById('limitConfirmSheet'),
   previousValue: document.getElementById('limitConfirmPreviousValue'),
   newValue: document.getElementById('limitConfirmNewValue'),
@@ -60,6 +59,8 @@ let currentLimit = 150_000_000;
 let pendingNewLimit = null;
 let confirmSheetOpen = false;
 let successTimer = null;
+let drawerTransitionDisabled = false;
+let drawerPreviousTransition = '';
 
 try {
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -195,6 +196,20 @@ function hideOtpError() {
   ensureOtpFlow().setError('');
 }
 
+function disableDrawerTransition() {
+  if (!drawer || drawerTransitionDisabled) return;
+  drawerPreviousTransition = drawer.style.transition;
+  drawer.style.transition = 'none';
+  drawerTransitionDisabled = true;
+}
+
+function restoreDrawerTransition() {
+  if (!drawer || !drawerTransitionDisabled) return;
+  drawer.style.transition = drawerPreviousTransition || '';
+  drawerPreviousTransition = '';
+  drawerTransitionDisabled = false;
+}
+
 function activateOtpFlow() {
   const flow = ensureOtpFlow();
   if (otpState === 'active') return flow;
@@ -312,7 +327,7 @@ function validateInput() {
 }
 
 async function openConfirmSheet(newLimitValue) {
-  const { container, overlay, sheet, previousValue, newValue } = confirmElements;
+  const { container, sheet, previousValue, newValue } = confirmElements;
   if (!sheet) return;
 
   pendingNewLimit = newLimitValue;
@@ -327,28 +342,31 @@ async function openConfirmSheet(newLimitValue) {
     newValue.textContent = formatCurrency(newLimitValue);
   }
 
-  if (overlay) {
-    overlay.classList.add('hidden');
-  }
-
   await openBottomSheet({
     container,
     sheet,
     closeSelectors: ['#limitConfirmCancelBtn'],
     focusTarget: '#limitConfirmProceedBtn',
+    overlayRoot: container || drawer,
     onOpen: () => {
       confirmSheetOpen = true;
+      disableDrawerTransition();
+      container?.classList.remove('pointer-events-none');
+      container?.setAttribute('aria-hidden', 'false');
     },
     onClose: () => {
       confirmSheetOpen = false;
       pendingNewLimit = null;
       resetOtpFlow();
+      restoreDrawerTransition();
+      container?.classList.add('pointer-events-none');
+      container?.setAttribute('aria-hidden', 'true');
     },
   });
 }
 
 async function closeConfirmSheet(options = {}) {
-  const { container, overlay, sheet } = confirmElements;
+  const { container, sheet } = confirmElements;
   if (!sheet) return;
   if (!confirmSheetOpen && !options.force) return;
 
@@ -358,10 +376,9 @@ async function closeConfirmSheet(options = {}) {
 
   await closeBottomSheet({ immediate: Boolean(options.immediate) });
 
-  if (overlay) {
-    overlay.classList.add('hidden');
-  }
   container?.classList.add('pointer-events-none');
+  container?.setAttribute('aria-hidden', 'true');
+  restoreDrawerTransition();
 }
 
 function openLimitDrawer() {
