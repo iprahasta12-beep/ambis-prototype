@@ -1,4 +1,6 @@
-import { openDrawer as showDrawer, closeDrawer as hideDrawer, openBottomSheet, closeBottomSheet, createOtpFlow } from './ui-components.js';
+import { openDrawer, closeDrawer } from './drawer.js';
+import { openBottomSheet, closeBottomSheet } from './bottomsheet.js';
+import { createOtpFlow } from './otp.js';
 
 const MAX_LIMIT = 200_000_000;
 const STORAGE_KEY = 'ambis:batas-transaksi-limit';
@@ -23,25 +25,63 @@ const infoBtn = document.getElementById('limitInfoBtn');
 const infoOverlay = document.getElementById('limitInfoOverlay');
 const infoCloseBtn = document.getElementById('limitInfoCloseBtn');
 const successMessageEl = document.getElementById('limitSuccessMessage');
-const confirmElements = {
-  container: document.getElementById('limitConfirmContainer'),
-  overlay: document.getElementById('limitConfirmOverlay'),
-  sheet: document.getElementById('limitConfirmSheet'),
-  previousValue: document.getElementById('limitConfirmPreviousValue'),
-  newValue: document.getElementById('limitConfirmNewValue'),
-  cancelBtn: document.getElementById('limitConfirmCancelBtn'),
-  proceedBtn: document.getElementById('limitConfirmProceedBtn'),
-};
+const confirmTemplate = document.getElementById('limitConfirmTemplate');
 
-const otpElements = {
-  section: document.getElementById('limitOtpSection'),
-  inputs: Array.from(document.querySelectorAll('#limitOtpSection .otp-input')),
-  countdown: document.getElementById('limitOtpCountdown'),
-  countdownMessage: document.getElementById('limitOtpCountdownMessage'),
-  timer: document.getElementById('limitOtpTimer'),
-  resendBtn: document.getElementById('limitOtpResend'),
-  error: document.getElementById('limitOtpError'),
-};
+function createConfirmSheet() {
+  if (!confirmTemplate) return null;
+
+  const container = document.createElement('div');
+  container.className = 'fixed inset-0 z-50 flex items-end justify-center pointer-events-none hidden';
+  container.setAttribute('aria-hidden', 'true');
+
+  const fragment = confirmTemplate.content.cloneNode(true);
+  container.appendChild(fragment);
+  document.body.appendChild(container);
+
+  const sheet = container.querySelector('[data-bottom-sheet]');
+  if (!sheet) {
+    document.body.removeChild(container);
+    return null;
+  }
+
+  return {
+    container,
+    sheet,
+    previousValue: container.querySelector('[data-limit-confirm-previous]'),
+    newValue: container.querySelector('[data-limit-confirm-new]'),
+    cancelBtn: container.querySelector('[data-limit-confirm-cancel]'),
+    proceedBtn: container.querySelector('[data-limit-confirm-proceed]'),
+    otpSection: container.querySelector('[data-limit-otp-section]'),
+    otpInputs: Array.from(container.querySelectorAll('[data-limit-otp-input]')),
+    otpCountdown: container.querySelector('[data-limit-otp-countdown]'),
+    otpCountdownMessage: container.querySelector('[data-limit-otp-countdown-message]'),
+    otpTimer: container.querySelector('[data-limit-otp-timer]'),
+    otpResend: container.querySelector('[data-limit-otp-resend]'),
+    otpError: container.querySelector('[data-limit-otp-error]'),
+  };
+}
+
+const confirmElements = createConfirmSheet();
+
+const otpElements = confirmElements
+  ? {
+      section: confirmElements.otpSection,
+      inputs: confirmElements.otpInputs,
+      countdown: confirmElements.otpCountdown,
+      countdownMessage: confirmElements.otpCountdownMessage,
+      timer: confirmElements.otpTimer,
+      resendBtn: confirmElements.otpResend,
+      error: confirmElements.otpError,
+    }
+  : {
+      section: null,
+      inputs: [],
+      countdown: null,
+      countdownMessage: null,
+      timer: null,
+      resendBtn: null,
+      error: null,
+    };
 
 const OTP_DURATION_SECONDS = 30;
 const OTP_DEFAULT_COUNTDOWN_MESSAGE = 'Sesi akan berakhir dalam';
@@ -57,7 +97,17 @@ let infoOverlayOpen = false;
 let currentLimit = 150_000_000;
 let pendingNewLimit = null;
 let confirmSheetOpen = false;
+let confirmSheetClosingReason = null;
 let successTimer = null;
+
+const confirmSheetDefaultCallbacks = {
+  onOpen: null,
+  onClose: null,
+  onConfirm: null,
+  onCancel: null,
+};
+
+let confirmSheetCallbacks = { ...confirmSheetDefaultCallbacks };
 
 try {
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -147,6 +197,7 @@ function showError(message) {
 }
 
 function ensureOtpFlow() {
+  if (!confirmElements) return null;
   if (otpFlowInstance) return otpFlowInstance;
   otpFlowInstance = createOtpFlow({
     container: otpElements.section,
@@ -186,15 +237,18 @@ function ensureOtpFlow() {
 }
 
 function showOtpError(message) {
-  ensureOtpFlow().setError(message);
+  const flow = ensureOtpFlow();
+  flow?.setError(message);
 }
 
 function hideOtpError() {
-  ensureOtpFlow().setError('');
+  const flow = ensureOtpFlow();
+  flow?.setError('');
 }
 
 function activateOtpFlow() {
   const flow = ensureOtpFlow();
+  if (!confirmElements || !flow) return null;
   if (otpState === 'active') return flow;
   otpState = 'active';
   if (otpElements.section) {
@@ -214,15 +268,15 @@ function activateOtpFlow() {
 function resetOtpFlow() {
   const flow = ensureOtpFlow();
   otpState = 'idle';
-  flow.reset();
+  flow?.reset?.();
   if (otpElements.section) {
     otpElements.section.classList.add('hidden');
   }
-  if (confirmElements.proceedBtn) {
-    confirmElements.proceedBtn.textContent = 'Lanjut Ubah Batas Transaksi';
+  if (confirmElements?.proceedBtn) {
+    confirmElements.proceedBtn.textContent = 'Konfirmasi';
     confirmElements.proceedBtn.disabled = false;
   }
-  if (confirmElements.cancelBtn) {
+  if (confirmElements?.cancelBtn) {
     confirmElements.cancelBtn.textContent = 'Batal';
   }
 }
@@ -309,63 +363,80 @@ function validateInput() {
   return true;
 }
 
-async function openConfirmSheet(newLimitValue) {
-  const { container, overlay, sheet, previousValue, newValue } = confirmElements;
-  if (!sheet) return;
+async function openConfirmSheet(newLimitValue, callbacks = {}) {
+  if (!confirmElements?.sheet) return;
 
   pendingNewLimit = newLimitValue;
-  confirmSheetOpen = true;
+  confirmSheetCallbacks = {
+    ...confirmSheetDefaultCallbacks,
+    ...callbacks,
+  };
 
+  confirmSheetClosingReason = null;
   resetOtpFlow();
 
-  if (previousValue) {
-    previousValue.textContent = formatCurrency(currentLimit);
+  if (confirmElements.previousValue) {
+    confirmElements.previousValue.textContent = formatCurrency(currentLimit);
   }
-  if (newValue) {
-    newValue.textContent = formatCurrency(newLimitValue);
-  }
-
-  if (overlay) {
-    overlay.classList.add('hidden');
+  if (confirmElements.newValue) {
+    confirmElements.newValue.textContent = formatCurrency(newLimitValue);
   }
 
   await openBottomSheet({
-    container,
-    sheet,
-    closeSelectors: ['#limitConfirmCancelBtn'],
-    focusTarget: '#limitConfirmProceedBtn',
+    container: confirmElements.container,
+    sheet: confirmElements.sheet,
+    closeSelectors: [],
+    focusTarget: confirmElements.proceedBtn,
     onOpen: () => {
       confirmSheetOpen = true;
+      if (typeof confirmSheetCallbacks.onOpen === 'function') {
+        confirmSheetCallbacks.onOpen({
+          sheet: confirmElements.sheet,
+          container: confirmElements.container,
+          newLimit: newLimitValue,
+        });
+      }
     },
     onClose: () => {
       confirmSheetOpen = false;
       pendingNewLimit = null;
       resetOtpFlow();
+      const reason = confirmSheetClosingReason || 'cancel';
+      if (reason !== 'confirm' && typeof confirmSheetCallbacks.onCancel === 'function') {
+        confirmSheetCallbacks.onCancel({
+          sheet: confirmElements.sheet,
+          container: confirmElements.container,
+          reason,
+        });
+      }
+      if (typeof confirmSheetCallbacks.onClose === 'function') {
+        confirmSheetCallbacks.onClose({
+          sheet: confirmElements.sheet,
+          container: confirmElements.container,
+          reason,
+        });
+      }
+      confirmSheetClosingReason = null;
+      confirmSheetCallbacks = { ...confirmSheetDefaultCallbacks };
     },
   });
 }
 
 async function closeConfirmSheet(options = {}) {
-  const { container, overlay, sheet } = confirmElements;
-  if (!sheet) return;
+  if (!confirmElements?.sheet) return;
   if (!confirmSheetOpen && !options.force) return;
 
-  confirmSheetOpen = false;
-  pendingNewLimit = null;
-  resetOtpFlow();
+  if (!confirmSheetClosingReason) {
+    confirmSheetClosingReason = 'cancel';
+  }
 
   await closeBottomSheet({ immediate: Boolean(options.immediate) });
-
-  if (overlay) {
-    overlay.classList.add('hidden');
-  }
-  container?.classList.add('pointer-events-none');
 }
 
-function openDrawer() {
+function openLimitDrawer() {
   if (!drawer) return;
 
-  closeConfirmSheet({ immediate: true });
+  closeConfirmSheet({ immediate: true, force: true });
 
   showFormView();
 
@@ -380,17 +451,23 @@ function openDrawer() {
 
   updateDisplays();
 
-  showDrawer({
+  openDrawer({
     drawer,
+    title: 'Ubah Batas Transaksi Harian',
+    contentTarget: '[data-drawer-content]',
+    content: (contentEl) => {
+      if (contentEl) {
+        contentEl.classList.add('drawer-content-ready');
+      }
+    },
     closeSelectors: ['#limitDrawerCloseBtn'],
-    focusTarget: '#newLimitInput',
     onOpen: () => {
       if (typeof window.sidebarCollapseForDrawer === 'function') {
         window.sidebarCollapseForDrawer();
       }
     },
     onClose: () => {
-      closeConfirmSheet({ immediate: true });
+      closeConfirmSheet({ immediate: true, force: true });
       closeInfoOverlay();
       showFormView();
       if (typeof window.sidebarRestoreForDrawer === 'function') {
@@ -400,18 +477,18 @@ function openDrawer() {
   });
 }
 
-function closeDrawer() {
-  hideDrawer();
+function closeLimitDrawer() {
+  closeDrawer();
 }
 
 openBtn?.addEventListener('click', (event) => {
   event.preventDefault();
   event.stopPropagation();
-  openDrawer();
+  openLimitDrawer();
 });
 
 closeBtn?.addEventListener('click', () => {
-  closeDrawer();
+  closeLimitDrawer();
 });
 
 confirmBtn?.addEventListener('click', (event) => {
@@ -420,7 +497,30 @@ confirmBtn?.addEventListener('click', (event) => {
   const newValue = getInputValue();
   if (Number.isNaN(newValue)) return;
 
-  openConfirmSheet(newValue);
+  openConfirmSheet(newValue, {
+    onOpen: () => {
+      hideOtpError();
+    },
+    onCancel: () => {
+      hideOtpError();
+    },
+    onConfirm: async ({ previousLimit, newLimit, otp }) => {
+      console.log(
+        'OTP submitted for limit change:',
+        otp,
+        'previous limit:',
+        formatCurrency(previousLimit),
+        'new limit:',
+        formatCurrency(newLimit),
+      );
+      currentLimit = newLimit;
+      persistLimit();
+      updateDisplays();
+      showSuccessMessage('Batas transaksi harian berhasil diperbarui.');
+      showFormView();
+      return true;
+    },
+  });
 });
 
 input?.addEventListener('input', () => {
@@ -465,40 +565,45 @@ document.addEventListener('click', (event) => {
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
   if (confirmSheetOpen) {
+    confirmSheetClosingReason = 'cancel';
     closeConfirmSheet();
     return;
   }
   if (drawer?.classList.contains('open')) {
-    closeDrawer();
+    closeLimitDrawer();
   }
 });
 
-confirmElements.cancelBtn?.addEventListener('click', () => {
+confirmElements?.cancelBtn?.addEventListener('click', (event) => {
+  event.preventDefault();
+  confirmSheetClosingReason = 'cancel';
   closeConfirmSheet();
-});
-
-confirmElements.overlay?.addEventListener('click', (event) => {
-  if (event.target === confirmElements.overlay) {
-    closeConfirmSheet();
-  }
 });
 
 const otpFlow = ensureOtpFlow();
 resetOtpFlow();
 
-confirmElements.proceedBtn?.addEventListener('click', (event) => {
+confirmElements?.proceedBtn?.addEventListener('click', async (event) => {
   event.preventDefault();
+
+  if (!confirmElements?.proceedBtn) return;
 
   if (otpState !== 'active') {
     activateOtpFlow();
     return;
   }
 
-  if (!confirmElements.proceedBtn || confirmElements.proceedBtn.disabled) {
+  if (confirmElements.proceedBtn.disabled) {
     return;
   }
 
-  const otpValue = otpFlow.getValue();
+  const flow = ensureOtpFlow();
+  if (!flow) {
+    closeConfirmSheet({ force: true, immediate: true });
+    return;
+  }
+
+  const otpValue = flow.getValue();
   if (otpValue.length < otpElements.inputs.length) {
     showOtpError('Masukkan kode OTP lengkap.');
     confirmElements.proceedBtn.disabled = true;
@@ -506,7 +611,7 @@ confirmElements.proceedBtn?.addEventListener('click', (event) => {
   }
 
   if (typeof pendingNewLimit !== 'number' || Number.isNaN(pendingNewLimit)) {
-    closeConfirmSheet({ immediate: true });
+    closeConfirmSheet({ force: true, immediate: true });
     return;
   }
 
@@ -515,16 +620,36 @@ confirmElements.proceedBtn?.addEventListener('click', (event) => {
   const previousLimitValue = currentLimit;
   const newLimitValue = pendingNewLimit;
 
-  console.log('OTP submitted:', otpValue);
+  confirmElements.proceedBtn.disabled = true;
 
-  closeConfirmSheet();
-  showPendingView(previousLimitValue, newLimitValue);
+  try {
+    const result = await Promise.resolve(
+      confirmSheetCallbacks.onConfirm?.({
+        previousLimit: previousLimitValue,
+        newLimit: newLimitValue,
+        otp: otpValue,
+      }) ?? true,
+    );
+
+    if (result === false) {
+      confirmElements.proceedBtn.disabled = false;
+      return;
+    }
+
+    confirmSheetClosingReason = 'confirm';
+    await closeConfirmSheet();
+    closeLimitDrawer();
+  } catch (error) {
+    const message = error?.message || 'Terjadi kesalahan. Silakan coba lagi.';
+    showOtpError(message);
+    confirmElements.proceedBtn.disabled = false;
+  }
 });
 
 
 pendingCloseBtn?.addEventListener('click', (event) => {
   event.preventDefault();
-  closeDrawer();
+  closeLimitDrawer();
 });
 
 updateDisplays();
