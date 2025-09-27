@@ -282,8 +282,8 @@
         <button type="submit" id="confirmAddAccountBtn" form="addAccountForm" class="w-full rounded-xl bg-cyan-600 py-3 text-center font-semibold text-white transition hover:bg-cyan-700 disabled:opacity-50" disabled>Konfirmasi Tambah Rekening</button>
       </div>
       <div class="pointer-events-none absolute inset-0">
-        <div id="addAccountConfirmOverlay" class="hidden absolute inset-0 bg-slate-900/30 opacity-0 transition-opacity duration-200 z-40 pointer-events-auto"></div>
-        <div id="addAccountConfirmSheet" class="absolute inset-x-0 bottom-0 z-50 h-full bg-white rounded-t-3xl shadow-2xl translate-y-full transition-transform duration-300 flex flex-col pointer-events-auto">
+        <div id="addAccountConfirmOverlay" data-bottom-sheet-overlay class="hidden absolute inset-0 bg-slate-900/30 opacity-0 transition-opacity duration-200 z-40 pointer-events-auto"></div>
+        <div id="addAccountConfirmSheet" data-bottom-sheet class="absolute inset-x-0 bottom-0 z-50 h-full bg-white rounded-t-3xl shadow-2xl translate-y-full transition-transform duration-300 flex flex-col pointer-events-auto">
           <div class="sticky top-0 p-4 pb-4 text-center border-b border-slate-200 bg-white rounded-t-3xl">
             <h3 class="text-base font-semibold">Konfirmasi Tambah Rekening</h3>
           </div>
@@ -770,10 +770,11 @@
           </div>
         </div>
 
-        <div id="mutasiDetailOverlay" class="hidden absolute inset-0 bg-black/20 opacity-0 transition-opacity duration-200 z-10"></div>
+        <div id="mutasiDetailOverlay" data-bottom-sheet-overlay class="hidden absolute inset-0 bg-black/20 opacity-0 transition-opacity duration-200 z-10"></div>
 
         <div
           id="mutasiDetailSheet"
+          data-bottom-sheet
           class="absolute inset-x-0 bottom-0 w-full h-full bg-white rounded-t-2xl shadow-lg translate-y-full transition-transform duration-200 z-20 flex flex-col overflow-hidden"
         >
           <div class="relative px-4 pt-6 pb-4 border-b border-slate-200">

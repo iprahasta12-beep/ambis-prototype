@@ -6,7 +6,51 @@ const state = {
   closeButtons: [],
   escHandler: null,
   overlayClickHandler: null,
+  sheetInitialStyles: null,
 };
+
+function toCssProperty(name) {
+  return name.replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`);
+}
+
+function setInlineStyle(element, property, value) {
+  if (!element) return;
+  if (typeof value === 'string' && value.length > 0) {
+    element.style[property] = value;
+  } else {
+    element.style.removeProperty(toCssProperty(property));
+  }
+}
+
+function rememberSheetStyles(sheet) {
+  if (!sheet) return;
+  state.sheetInitialStyles = {
+    transition: sheet.style.transition || '',
+    transitionDuration: sheet.style.transitionDuration || '',
+    transform: sheet.style.transform || '',
+    opacity: sheet.style.opacity || '',
+    zIndex: sheet.style.zIndex || '',
+  };
+}
+
+function restoreSheetStyles(sheet) {
+  if (!sheet) return;
+  const previous = state.sheetInitialStyles;
+  if (previous) {
+    setInlineStyle(sheet, 'transition', previous.transition);
+    setInlineStyle(sheet, 'transitionDuration', previous.transitionDuration);
+    setInlineStyle(sheet, 'transform', previous.transform);
+    setInlineStyle(sheet, 'opacity', previous.opacity);
+    setInlineStyle(sheet, 'zIndex', previous.zIndex);
+  } else {
+    setInlineStyle(sheet, 'transition', '');
+    setInlineStyle(sheet, 'transitionDuration', '');
+    setInlineStyle(sheet, 'transform', '');
+    setInlineStyle(sheet, 'opacity', '');
+    setInlineStyle(sheet, 'zIndex', '');
+  }
+  state.sheetInitialStyles = null;
+}
 
 function resolveElement(target, fallbackSelector) {
   if (!target && fallbackSelector) {
@@ -79,19 +123,18 @@ function ensureOverlay(container, { className = '', zIndex = 60 } = {}) {
   if (!overlay) {
     overlay = document.createElement('div');
     overlay.dataset.bottomSheetOverlay = 'true';
-    overlay.style.position = 'absolute';
-    overlay.style.inset = '0';
-    overlay.style.backgroundColor = 'rgba(15, 23, 42, 0.35)';
-    overlay.style.opacity = '0';
+    overlay.className =
+      className && className.length > 0
+        ? className
+        : 'absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200';
     overlay.style.pointerEvents = 'none';
-    overlay.style.transition = 'opacity 200ms ease';
     overlay.setAttribute('aria-hidden', 'true');
     container.insertBefore(overlay, container.firstChild || null);
-  }
-
-  if (typeof className === 'string' && className.length > 0) {
+  } else if (typeof className === 'string' && className.length > 0) {
     overlay.className = className;
   }
+
+  overlay.dataset.bottomSheetPrevZIndex = overlay.style.zIndex || '';
   overlay.style.zIndex = String(zIndex);
 
   return overlay;
@@ -100,12 +143,35 @@ function ensureOverlay(container, { className = '', zIndex = 60 } = {}) {
 function showOverlay(overlay, { closeOnOverlay = true } = {}) {
   if (!overlay) return;
 
-  overlay.style.pointerEvents = 'auto';
-  overlay.setAttribute('aria-hidden', 'false');
+  const hadHiddenClass = overlay.classList.contains('hidden');
+  overlay.dataset.bottomSheetHiddenClass = hadHiddenClass ? '1' : '0';
+  if (hadHiddenClass) {
+    overlay.classList.remove('hidden');
+  }
 
-  requestAnimationFrame(() => {
-    overlay.style.opacity = '1';
-  });
+  const usesOpacityClass =
+    overlay.classList.contains('opacity-0') || overlay.classList.contains('opacity-100');
+  overlay.dataset.bottomSheetUsesOpacity = usesOpacityClass ? '1' : '0';
+  overlay.dataset.bottomSheetPrevPointerEvents = overlay.style.pointerEvents || '';
+  overlay.dataset.bottomSheetPrevOpacity = overlay.style.opacity || '';
+
+  overlay.setAttribute('aria-hidden', 'false');
+  setInlineStyle(overlay, 'pointerEvents', 'auto');
+
+  if (usesOpacityClass) {
+    overlay.classList.remove('opacity-100');
+    overlay.classList.remove('opacity-0');
+    overlay.classList.add('opacity-0');
+    requestAnimationFrame(() => {
+      overlay.classList.remove('opacity-0');
+      overlay.classList.add('opacity-100');
+    });
+  } else {
+    setInlineStyle(overlay, 'opacity', '0');
+    requestAnimationFrame(() => {
+      setInlineStyle(overlay, 'opacity', '1');
+    });
+  }
 
   if (closeOnOverlay) {
     const handler = (event) => {
@@ -125,15 +191,54 @@ function hideOverlay() {
     overlay.removeEventListener('click', overlayClickHandler);
   }
 
-  overlay.style.opacity = '0';
-  overlay.style.pointerEvents = 'none';
+  const usesOpacityClass = overlay.dataset.bottomSheetUsesOpacity === '1';
+  const hadHiddenClass = overlay.dataset.bottomSheetHiddenClass === '1';
+  const prevPointerEvents = overlay.dataset.bottomSheetPrevPointerEvents || '';
+  const prevOpacity = overlay.dataset.bottomSheetPrevOpacity || '';
+  const prevZIndex = overlay.dataset.bottomSheetPrevZIndex || '';
+
   overlay.setAttribute('aria-hidden', 'true');
+  overlay.style.pointerEvents = 'none';
+
+  if (usesOpacityClass) {
+    overlay.classList.remove('opacity-100');
+    overlay.classList.add('opacity-0');
+  } else {
+    setInlineStyle(overlay, 'opacity', '0');
+  }
 
   state.overlayClickHandler = null;
   state.overlay = null;
+
+  const duration = getTransitionDurationMs(overlay);
+
+  const cleanup = () => {
+    if (hadHiddenClass) {
+      overlay.classList.add('hidden');
+    }
+    if (usesOpacityClass) {
+      overlay.classList.remove('opacity-0');
+    } else {
+      setInlineStyle(overlay, 'opacity', prevOpacity);
+    }
+    setInlineStyle(overlay, 'pointerEvents', prevPointerEvents);
+    setInlineStyle(overlay, 'zIndex', prevZIndex);
+    overlay.dataset.bottomSheetHiddenClass = '';
+    overlay.dataset.bottomSheetUsesOpacity = '';
+    overlay.dataset.bottomSheetPrevPointerEvents = '';
+    overlay.dataset.bottomSheetPrevOpacity = '';
+    overlay.dataset.bottomSheetPrevZIndex = '';
+  };
+
+  if (duration > 0) {
+    setTimeout(cleanup, duration + 50);
+  } else {
+    cleanup();
+  }
 }
 
 function applyAnimation(sheet, { openDuration = 250, closeDuration = 200 } = {}) {
+  rememberSheetStyles(sheet);
   sheet.style.transition = `transform ${openDuration}ms ease, opacity ${openDuration}ms ease`;
   sheet.style.transform = 'translateY(100%)';
   sheet.style.opacity = '0';
@@ -256,6 +361,8 @@ export async function closeBottomSheet({ immediate = false } = {}) {
     hideOverlay();
   }
 
+  restoreSheetStyles(sheet);
+
   const onClose = options?.onClose;
   if (typeof onClose === 'function') {
     onClose({ sheet, container });
@@ -266,6 +373,27 @@ export async function closeBottomSheet({ immediate = false } = {}) {
   state.options = null;
   state.overlay = null;
   state.overlayClickHandler = null;
+}
+
+function getTransitionDurationMs(element) {
+  if (!element) return 0;
+  const style = window.getComputedStyle(element);
+  const durations = style.transitionDuration.split(',');
+  const delays = style.transitionDelay.split(',');
+  const total = durations.map((duration, index) => {
+    const delay = delays[index] || delays[delays.length - 1] || '0s';
+    return parseTimeToMs(duration) + parseTimeToMs(delay);
+  });
+  return total.length ? Math.max(...total) : 0;
+}
+
+function parseTimeToMs(value) {
+  const trimmed = (value || '').trim();
+  if (!trimmed) return 0;
+  const multiplier = trimmed.endsWith('ms') ? 1 : 1000;
+  const numeric = parseFloat(trimmed);
+  if (Number.isNaN(numeric)) return 0;
+  return numeric * multiplier;
 }
 
 export default {
