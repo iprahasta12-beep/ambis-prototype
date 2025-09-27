@@ -1,4 +1,15 @@
-(function() {
+export function initFilter(config = {}) {
+  const {
+    root = document,
+    defaults = {},
+    onChange = null,
+  } = config;
+
+  const scopeRoot = root instanceof Element ? root : document;
+  const defaultDateLabel = defaults.date || 'Semua tanggal';
+  const defaultCategoryLabel = defaults.category || 'Semua kategori';
+
+
   const MONTH_NAMES = [
     'Januari',
     'Februari',
@@ -115,7 +126,7 @@
     }
   }
 
-  const allFilters = document.querySelectorAll('.filter');
+  const allFilters = scopeRoot.querySelectorAll('.filter');
   let openPanel = null;
 
   allFilters.forEach(filter => {
@@ -182,10 +193,10 @@
     }
 
     if (isDate) {
-      defaultLabel = 'Tanggal';
+      defaultLabel = defaultDateLabel;
       filter.dataset.default = defaultLabel;
     } else if (!defaultLabel) {
-      defaultLabel = name || '';
+      defaultLabel = name || defaultCategoryLabel;
       if (defaultLabel) {
         filter.dataset.default = defaultLabel;
       }
@@ -435,7 +446,11 @@
     }
 
     function emitChange() {
-      document.dispatchEvent(new CustomEvent('filter-change', { detail: { groupId } }));
+      const detail = { groupId, filter, name, value: filter.dataset.applied || '' };
+      document.dispatchEvent(new CustomEvent('filter-change', { detail }));
+      if (typeof onChange === 'function') {
+        onChange(detail);
+      }
     }
 
     function getSelected() {
@@ -591,7 +606,7 @@
         Array.from(groupFilters).forEach(f => {
           f.dataset.applied = '';
           const span = f.querySelector('.filter-label');
-          span.textContent = f.dataset.default;
+          span.textContent = f.dataset.default || (f.dataset.filter === 'date' ? defaultDateLabel : defaultCategoryLabel);
           f.querySelectorAll('input').forEach(inp => {
             if (inp.type === 'radio' || inp.type === 'checkbox') inp.checked = false;
             else {
@@ -659,4 +674,10 @@
       }
     });
   });
-})();
+}
+
+if (typeof window !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initFilter();
+  });
+}

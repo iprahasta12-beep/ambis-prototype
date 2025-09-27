@@ -1,3 +1,5 @@
+import { openDrawer as showDrawer, closeDrawer as hideDrawer } from './ui-components.js';
+
 const accountSelect = document.getElementById('accountSelect');
 const balanceEl = document.getElementById('dashBalanceValue');
 const transactionListEl = document.getElementById('transactionList');
@@ -186,26 +188,33 @@ function updateDashboardLayout() {
 
 updateDashboardLayout();
 
-function openDrawer() {
+function handleDrawerOpen() {
   tempSelectedAkses = [...selectedAkses];
   renderDrawer();
-  drawer.classList.add('open');
-  updateDashboardLayout();
-  if (typeof window.sidebarCollapseForDrawer === 'function') {
-    window.sidebarCollapseForDrawer();
-  }
+  showDrawer({
+    drawer,
+    closeSelectors: ['#drawerCloseBtn'],
+    focusTarget: '#saveAksesBtn',
+    onOpen: () => {
+      updateDashboardLayout();
+      if (typeof window.sidebarCollapseForDrawer === 'function') {
+        window.sidebarCollapseForDrawer();
+      }
+    },
+    onClose: () => {
+      updateDashboardLayout();
+      if (typeof window.sidebarRestoreForDrawer === 'function') {
+        window.sidebarRestoreForDrawer();
+      }
+    },
+  });
 }
 
-function closeDrawer() {
-  drawer.classList.remove('open');
-  updateDashboardLayout();
-  if (typeof window.sidebarRestoreForDrawer === 'function') {
-    window.sidebarRestoreForDrawer();
-  }
+function handleDrawerClose() {
+  hideDrawer();
 }
 
-openBtn?.addEventListener('click', openDrawer);
-closeBtn?.addEventListener('click', closeDrawer);
+openBtn?.addEventListener('click', handleDrawerOpen);
 
 // Quick access configuration
 const aksesContainer = document.getElementById('aksesCepatContainer');
@@ -327,5 +336,5 @@ renderQuickAccess();
 saveBtn?.addEventListener('click', () => {
   selectedAkses = [...tempSelectedAkses];
   renderQuickAccess();
-  closeDrawer();
+  handleDrawerClose();
 });
