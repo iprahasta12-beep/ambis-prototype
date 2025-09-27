@@ -347,7 +347,6 @@ async function openConfirmSheet(newLimitValue) {
     sheet,
     closeSelectors: ['#limitConfirmCancelBtn'],
     focusTarget: '#limitConfirmProceedBtn',
-    overlayRoot: container || drawer,
     onOpen: () => {
       confirmSheetOpen = true;
       disableDrawerTransition();

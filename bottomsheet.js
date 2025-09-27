@@ -106,12 +106,13 @@ export async function openBottomSheet(options = {}) {
     closeOnOverlay = true,
     overlayClass = '',
     overlayRoot = document.body,
+    useOverlay = true,
     animation = {},
   } = options;
 
   state.container = container;
   state.sheet = sheet;
-  state.options = { onClose, focusTarget, animation };
+  state.options = { onClose, focusTarget, animation, useOverlay };
 
   applyAnimation(sheet, animation);
 
@@ -121,11 +122,13 @@ export async function openBottomSheet(options = {}) {
     container.style.pointerEvents = 'auto';
   }
 
-  showOverlay({
-    className: overlayClass,
-    root: overlayRoot,
-    onClick: closeOnOverlay ? () => closeBottomSheet() : null,
-  });
+  if (useOverlay) {
+    showOverlay({
+      className: overlayClass,
+      root: overlayRoot,
+      onClick: closeOnOverlay ? () => closeBottomSheet() : null,
+    });
+  }
 
   state.closeButtons = addCloseHandlers(container || sheet, closeSelectors, closeBottomSheet);
   bindEscHandler();
@@ -165,7 +168,9 @@ export async function closeBottomSheet({ immediate = false } = {}) {
     container.classList.add('hidden');
   }
 
-  hideOverlay();
+  if (options?.useOverlay) {
+    hideOverlay();
+  }
 
   const onClose = options?.onClose;
   if (typeof onClose === 'function') {
