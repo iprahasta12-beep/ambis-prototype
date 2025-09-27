@@ -556,6 +556,20 @@
   </div>
   </div>
 
+  <script type="module">
+    import { openDrawer, closeDrawer } from './ui/drawer.js';
+    import { openBottomSheet, closeBottomSheet } from './ui/bottomsheet.js';
+    import { initOtpFlow } from './ui/otp.js';
+
+    const globalAmbis = (window.AMBIS = window.AMBIS || {});
+    globalAmbis.ui = Object.assign(globalAmbis.ui || {}, {
+      openDrawer,
+      closeDrawer,
+      openBottomSheet,
+      closeBottomSheet,
+      initOtpFlow,
+    });
+  </script>
   <script src="data/rekening-data.js"></script>
   <script src="biller.js"></script>
   <script src="sidebar.js"></script>
