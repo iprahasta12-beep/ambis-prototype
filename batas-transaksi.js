@@ -1,4 +1,6 @@
-import { openDrawer as showDrawer, closeDrawer as hideDrawer, openBottomSheet, closeBottomSheet, createOtpFlow } from './ui-components.js';
+import { openDrawer, closeDrawer } from './drawer.js';
+import { openBottomSheet, closeBottomSheet } from './bottomsheet.js';
+import { createOtpFlow } from './otp.js';
 
 const MAX_LIMIT = 200_000_000;
 const STORAGE_KEY = 'ambis:batas-transaksi-limit';
@@ -362,7 +364,7 @@ async function closeConfirmSheet(options = {}) {
   container?.classList.add('pointer-events-none');
 }
 
-function openDrawer() {
+function openLimitDrawer() {
   if (!drawer) return;
 
   closeConfirmSheet({ immediate: true });
@@ -380,10 +382,19 @@ function openDrawer() {
 
   updateDisplays();
 
-  showDrawer({
+  openDrawer({
     drawer,
+    title: 'Ubah Batas Transaksi Harian',
+    contentTarget: '[data-drawer-content]',
+    content: (contentEl) => {
+      if (contentEl) {
+        contentEl.classList.add('drawer-content-ready');
+      }
+    },
     closeSelectors: ['#limitDrawerCloseBtn'],
     focusTarget: '#newLimitInput',
+    overlay: true,
+    closeOnOverlay: true,
     onOpen: () => {
       if (typeof window.sidebarCollapseForDrawer === 'function') {
         window.sidebarCollapseForDrawer();
@@ -400,18 +411,18 @@ function openDrawer() {
   });
 }
 
-function closeDrawer() {
-  hideDrawer();
+function closeLimitDrawer() {
+  closeDrawer();
 }
 
 openBtn?.addEventListener('click', (event) => {
   event.preventDefault();
   event.stopPropagation();
-  openDrawer();
+  openLimitDrawer();
 });
 
 closeBtn?.addEventListener('click', () => {
-  closeDrawer();
+  closeLimitDrawer();
 });
 
 confirmBtn?.addEventListener('click', (event) => {
@@ -469,7 +480,7 @@ document.addEventListener('keydown', (event) => {
     return;
   }
   if (drawer?.classList.contains('open')) {
-    closeDrawer();
+    closeLimitDrawer();
   }
 });
 
@@ -524,7 +535,7 @@ confirmElements.proceedBtn?.addEventListener('click', (event) => {
 
 pendingCloseBtn?.addEventListener('click', (event) => {
   event.preventDefault();
-  closeDrawer();
+  closeLimitDrawer();
 });
 
 updateDisplays();
