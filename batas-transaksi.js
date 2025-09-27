@@ -1,5 +1,4 @@
 import { openDrawer, closeDrawer } from './drawer.js';
-import { openBottomSheet, closeBottomSheet } from './bottomsheet.js';
 import { createOtpFlow } from './otp.js';
 
 const MAX_LIMIT = 200_000_000;
@@ -62,6 +61,9 @@ let confirmSheetOpen = false;
 let successTimer = null;
 let drawerTransitionDisabled = false;
 let drawerPreviousTransition = '';
+let confirmOverlayClickHandler = null;
+
+const CONFIRM_Z_INDEX_BASE = 60;
 
 try {
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -249,6 +251,84 @@ function getOtpValue() {
   return ensureOtpFlow().getValue();
 }
 
+function showConfirmContainer() {
+  const { container, overlay, sheet } = confirmElements;
+  if (!container || !sheet) return;
+
+  container.classList.remove('hidden');
+  container.classList.remove('pointer-events-none');
+  container.setAttribute('aria-hidden', 'false');
+  container.style.pointerEvents = 'auto';
+  container.style.zIndex = String(CONFIRM_Z_INDEX_BASE);
+
+  if (overlay) {
+    overlay.classList.remove('opacity-0');
+    overlay.classList.add('opacity-100');
+    overlay.setAttribute('aria-hidden', 'false');
+    overlay.style.pointerEvents = 'auto';
+    overlay.style.zIndex = String(CONFIRM_Z_INDEX_BASE);
+
+    if (!confirmOverlayClickHandler) {
+      confirmOverlayClickHandler = (event) => {
+        if (event.target === overlay) {
+          event.preventDefault();
+          closeConfirmSheet();
+        }
+      };
+      overlay.addEventListener('click', confirmOverlayClickHandler);
+    }
+  }
+
+  sheet.setAttribute('aria-hidden', 'false');
+  sheet.style.opacity = '1';
+  sheet.style.transform = 'none';
+  sheet.style.transition = 'none';
+  sheet.style.transitionDuration = '0ms';
+  sheet.style.pointerEvents = 'auto';
+  sheet.style.zIndex = String(CONFIRM_Z_INDEX_BASE + 1);
+
+  requestAnimationFrame(() => {
+    if (confirmSheetOpen) {
+      confirmElements.proceedBtn?.focus?.();
+    }
+  });
+}
+
+function hideConfirmContainer() {
+  const { container, overlay, sheet } = confirmElements;
+
+  if (overlay) {
+    overlay.classList.remove('opacity-100');
+    overlay.classList.add('opacity-0');
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.style.pointerEvents = 'none';
+    overlay.style.zIndex = '';
+
+    if (confirmOverlayClickHandler) {
+      overlay.removeEventListener('click', confirmOverlayClickHandler);
+      confirmOverlayClickHandler = null;
+    }
+  }
+
+  if (sheet) {
+    sheet.setAttribute('aria-hidden', 'true');
+    sheet.style.opacity = '';
+    sheet.style.transform = '';
+    sheet.style.transition = '';
+    sheet.style.transitionDuration = '';
+    sheet.style.pointerEvents = 'none';
+    sheet.style.zIndex = '';
+  }
+
+  if (container) {
+    container.classList.add('pointer-events-none');
+    container.classList.add('hidden');
+    container.setAttribute('aria-hidden', 'true');
+    container.style.pointerEvents = 'none';
+    container.style.zIndex = '';
+  }
+}
+
 function sanitizeInputValue(rawValue) {
   const digitsOnly = rawValue.replace(/\D/g, '');
   if (!digitsOnly) return '';
@@ -328,7 +408,7 @@ function validateInput() {
 }
 
 async function openConfirmSheet(newLimitValue) {
-  const { container, sheet, previousValue, newValue } = confirmElements;
+  const { sheet, previousValue, newValue } = confirmElements;
   if (!sheet) return;
 
   pendingNewLimit = newLimitValue;
@@ -343,31 +423,12 @@ async function openConfirmSheet(newLimitValue) {
     newValue.textContent = formatCurrency(newLimitValue);
   }
 
-  await openBottomSheet({
-    container,
-    sheet,
-    drawerRoot: drawer,
-    closeSelectors: ['#limitConfirmCancelBtn'],
-    focusTarget: '#limitConfirmProceedBtn',
-    onOpen: () => {
-      confirmSheetOpen = true;
-      disableDrawerTransition();
-      container?.classList.remove('pointer-events-none');
-      container?.setAttribute('aria-hidden', 'false');
-    },
-    onClose: () => {
-      confirmSheetOpen = false;
-      pendingNewLimit = null;
-      resetOtpFlow();
-      restoreDrawerTransition();
-      container?.classList.add('pointer-events-none');
-      container?.setAttribute('aria-hidden', 'true');
-    },
-  });
+  disableDrawerTransition();
+  showConfirmContainer();
 }
 
 async function closeConfirmSheet(options = {}) {
-  const { container, sheet } = confirmElements;
+  const { sheet } = confirmElements;
   if (!sheet) return;
   if (!confirmSheetOpen && !options.force) return;
 
@@ -375,10 +436,7 @@ async function closeConfirmSheet(options = {}) {
   pendingNewLimit = null;
   resetOtpFlow();
 
-  await closeBottomSheet({ immediate: Boolean(options.immediate) });
-
-  container?.classList.add('pointer-events-none');
-  container?.setAttribute('aria-hidden', 'true');
+  hideConfirmContainer();
   restoreDrawerTransition();
 }
 
