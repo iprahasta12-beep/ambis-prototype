@@ -448,8 +448,8 @@
           </div>
         </div>
 
-      <div id="sheetOverlay" class="hidden absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200 z-10"></div>
-      <div id="bottomSheet" class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col h-3/4 z-20">
+      <div id="sheetOverlay" data-bottom-sheet-overlay class="hidden absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200 z-10"></div>
+      <div id="bottomSheet" data-bottom-sheet class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col h-3/4 z-20">
         <div class="p-4 border-b flex items-center justify-between">
           <h3 class="text-base font-semibold text-slate-900">Sumber Rekening</h3>
           <button id="sheetClose" type="button" class="text-2xl leading-none text-slate-500 hover:text-slate-700 focus:outline-none" aria-label="Tutup pilihan sumber rekening">&times;</button>
@@ -462,8 +462,8 @@
           <button id="sheetConfirm" type="button" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 text-sm font-semibold opacity-50 cursor-not-allowed focus:outline-none" disabled>Pilih</button>
         </div>
       </div>
-      <div id="savedSheetOverlay" class="hidden absolute inset-0 bg-slate-900/30 opacity-0 transition-opacity duration-200 z-20"></div>
-      <div id="savedBottomSheet" class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col h-3/4 z-30">
+      <div id="savedSheetOverlay" data-bottom-sheet-overlay class="hidden absolute inset-0 bg-slate-900/30 opacity-0 transition-opacity duration-200 z-20"></div>
+      <div id="savedBottomSheet" data-bottom-sheet class="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col h-3/4 z-30">
         <div class="relative flex items-center justify-center px-5 pt-5 pb-4 border-b border-slate-100">
           <h3 class="text-base font-semibold text-slate-900 text-center">Nomor Tersimpan</h3>
           <button id="savedSheetClose" type="button" class="absolute right-5 top-5 text-2xl leading-none text-slate-500 hover:text-slate-700 focus:outline-none" aria-label="Tutup pilihan nomor tersimpan">&times;</button>
@@ -477,8 +477,8 @@
           <button id="savedSheetConfirm" type="button" class="flex-1 rounded-xl bg-cyan-500 text-white py-3 text-sm font-semibold opacity-50 cursor-not-allowed" disabled>Pilih Nomor</button>
         </div>
       </div>
-      <div id="paymentSheetOverlay" class="hidden absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200 z-40"></div>
-      <div id="paymentBottomSheet" class="absolute inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col h-full z-50">
+      <div id="paymentSheetOverlay" data-bottom-sheet-overlay class="hidden absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity duration-200 z-40"></div>
+      <div id="paymentBottomSheet" data-bottom-sheet class="absolute inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-xl translate-y-full transition-transform duration-200 max-h-full flex flex-col h-full z-50">
         <div class="p-4 pb-4 border-b border-slate-100">
           <div class="text-center justify-between">
             <h3 id="paymentSheetTitle" class="text-lg text-center font-semibold text-slate-900">Konfirmasi Pembayaran</h3>
