@@ -188,17 +188,18 @@
     <!-- ============ /MAIN ============ -->
 
     <!-- Drawer -->
-    <div id="drawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100">
+    <div id="drawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100" aria-hidden="true">
       <div class="flex items-start justify-between gap-4 border-b px-6 py-5">
         <div>
-          <h2 class="text-xl font-semibold">Ubah Batas Transaksi Harian</h2>
+          <h2 class="text-xl font-semibold" data-drawer-title>Ubah Batas Transaksi Harian</h2>
         </div>
-        <button type="button" id="limitDrawerCloseBtn" class="text-2xl leading-none" aria-label="Tutup">
+        <button type="button" id="limitDrawerCloseBtn" class="text-2xl leading-none" aria-label="Tutup" data-drawer-close>
           &times;
         </button>
       </div>
 
-      <div id="limitFormSection" class="flex-1 flex flex-col">
+        <div data-drawer-content class="relative flex-1 flex flex-col">
+          <div id="limitFormSection" class="flex-1 flex flex-col">
         <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
           <div class="space-y-2">
             <label class="block text-sm text-slate-500">Batas Transaksi Harian Maksimum</label>
@@ -231,7 +232,7 @@
         </div>
       </div>
 
-      <div id="limitPendingSection" class="hidden flex-1 flex-col">
+          <div id="limitPendingSection" class="hidden flex-1 flex-col">
         <div class="flex-1 overflow-y-auto px-6 py-6 h-full">
           <div class="flex flex-col items-center text-center gap-4">
             <img src="img/illustration-2.svg" alt="Menunggu persetujuan" class="w-16 h-auto" />
@@ -260,7 +261,7 @@
         </div>
       </div>
 
-      <div id="limitConfirmContainer" class="pointer-events-none absolute inset-0">
+          <div id="limitConfirmContainer" class="pointer-events-none absolute inset-0">
         <div
           id="limitConfirmOverlay"
           class="hidden absolute inset-0 bg-slate-900/30 opacity-0 transition-opacity duration-200 z-40 pointer-events-auto"
@@ -353,6 +354,7 @@
             >
               Lanjut Ubah Batas Transaksi
             </button>
+          </div>
           </div>
         </div>
       </div>
