@@ -28,6 +28,7 @@ const successMessageEl = document.getElementById('limitSuccessMessage');
 const confirmElements = {
   container: document.getElementById('limitConfirmContainer'),
   sheet: document.getElementById('limitConfirmSheet'),
+  overlay: document.querySelector('#limitConfirmContainer [data-bottom-sheet-overlay]'),
   previousValue: document.getElementById('limitConfirmPreviousValue'),
   newValue: document.getElementById('limitConfirmNewValue'),
   cancelBtn: document.getElementById('limitConfirmCancelBtn'),
@@ -345,6 +346,7 @@ async function openConfirmSheet(newLimitValue) {
   await openBottomSheet({
     container,
     sheet,
+    drawerRoot: drawer,
     closeSelectors: ['#limitConfirmCancelBtn'],
     focusTarget: '#limitConfirmProceedBtn',
     onOpen: () => {
@@ -499,12 +501,6 @@ document.addEventListener('keydown', (event) => {
 
 confirmElements.cancelBtn?.addEventListener('click', () => {
   closeConfirmSheet();
-});
-
-confirmElements.overlay?.addEventListener('click', (event) => {
-  if (event.target === confirmElements.overlay) {
-    closeConfirmSheet();
-  }
 });
 
 const otpFlow = ensureOtpFlow();

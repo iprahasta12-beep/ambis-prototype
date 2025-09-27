@@ -262,9 +262,14 @@
       </div>
     <div
       id="limitConfirmContainer"
-      class="hidden pointer-events-none absolute inset-0"
+      class="hidden pointer-events-none absolute inset-0 z-50"
       aria-hidden="true"
     >
+      <div
+        data-bottom-sheet-overlay
+        class="absolute inset-0 bg-slate-900/40 opacity-0 transition-opacity"
+        aria-hidden="true"
+      ></div>
       <div
         id="limitConfirmSheet"
         role="dialog"
