@@ -1,5 +1,13 @@
-(function () {
+(async function () {
   'use strict';
+
+  const {
+    openDrawer: openUIDrawer,
+    closeDrawer: closeUIDrawer,
+    openBottomSheet: openUIBottomSheet,
+    closeBottomSheet: closeUIBottomSheet,
+    initOtpFlow,
+  } = await import('./ui/ui-components.js');
 
   const ambis = window.AMBIS || {};
   const sanitizeNumber = (value = '') => value.toString().replace(/\D+/g, '');
@@ -597,7 +605,7 @@
     }
 
     function openAccountSheet() {
-      if (!moveSourceButton || !accountSheetOverlay || !accountBottomSheet) return;
+      if (!moveSourceButton || !accountBottomSheet) return;
       const selectionChanged = rebuildAccountCollections();
       if (selectionChanged || appliedAccountId || !pendingAccountId) {
         applyAccountSelection(appliedAccountId);
@@ -608,31 +616,36 @@
       }
       renderAccountOptions(pendingAccountId);
       setAccountSheetConfirmState(Boolean(pendingAccountId));
-      accountSheetOverlay.classList.remove('hidden');
-      requestAnimationFrame(() => {
-        accountSheetOverlay.classList.add('opacity-100');
-        accountBottomSheet.classList.remove('translate-y-full');
+
+      accountSheetState = openUIBottomSheet({
+        sheet: accountBottomSheet,
+        overlayKey: drawerOverlayKey,
+        overlayContainer: drawer,
+        closeSelectors: [accountSheetClose, accountSheetCancel],
+        trapFocus: true,
+        initialFocus: accountSheetConfirm,
+        onOpen: () => {
+          accountSheetOpen = true;
+        },
+        onClose: () => {
+          accountSheetOpen = false;
+          accountSheetState = null;
+          pendingAccountId = appliedAccountId;
+        },
       });
-      accountSheetOpen = true;
     }
 
     function closeAccountSheet(options = {}) {
-      if (!accountSheetOverlay || !accountBottomSheet) return;
+      if (!accountSheetState) return;
       const immediate = Boolean(options.immediate);
       accountSheetOpen = false;
       if (immediate) {
-        accountSheetOverlay.classList.remove('opacity-100');
-        accountSheetOverlay.classList.add('hidden');
-        accountBottomSheet.classList.add('translate-y-full');
+        closeUIBottomSheet({ immediate: true });
+        accountSheetState = null;
         pendingAccountId = appliedAccountId;
         return;
       }
-      accountSheetOverlay.classList.remove('opacity-100');
-      accountBottomSheet.classList.add('translate-y-full');
-      setTimeout(() => {
-        accountSheetOverlay.classList.add('hidden');
-        pendingAccountId = appliedAccountId;
-      }, 220);
+      closeUIBottomSheet();
     }
 
     function selectAccount(accountId) {
@@ -788,8 +801,7 @@
     }
 
     function openSavedSheet() {
-      if (!savedSheetOverlay || !savedBottomSheet) return;
-      if (!activeKey) return;
+      if (!savedBottomSheet || !activeKey) return;
       closeAccountSheet({ immediate: true });
       closePaymentSheet({ immediate: true });
       pendingSavedId = savedSelections.get(activeKey)?.id || '';
@@ -797,31 +809,36 @@
       if (savedSheetList && !savedSheetList.children.length) {
         setSavedSheetConfirmState(false);
       }
-      savedSheetOverlay.classList.remove('hidden');
-      requestAnimationFrame(() => {
-        savedSheetOverlay.classList.add('opacity-100');
-        savedBottomSheet.classList.remove('translate-y-full');
+
+      savedSheetState = openUIBottomSheet({
+        sheet: savedBottomSheet,
+        overlayKey: drawerOverlayKey,
+        overlayContainer: drawer,
+        closeSelectors: [savedSheetClose, savedSheetCancel],
+        trapFocus: true,
+        initialFocus: savedSheetConfirm,
+        onOpen: () => {
+          savedSheetOpen = true;
+        },
+        onClose: () => {
+          savedSheetOpen = false;
+          savedSheetState = null;
+          pendingSavedId = savedSelections.get(activeKey)?.id || '';
+        },
       });
-      savedSheetOpen = true;
     }
 
     function closeSavedSheet(options = {}) {
-      if (!savedSheetOverlay || !savedBottomSheet) return;
+      if (!savedSheetState) return;
       const immediate = Boolean(options.immediate);
       savedSheetOpen = false;
       if (immediate) {
-        savedSheetOverlay.classList.remove('opacity-100');
-        savedSheetOverlay.classList.add('hidden');
-        savedBottomSheet.classList.add('translate-y-full');
+        closeUIBottomSheet({ immediate: true });
+        savedSheetState = null;
         pendingSavedId = savedSelections.get(activeKey)?.id || '';
         return;
       }
-      savedSheetOverlay.classList.remove('opacity-100');
-      savedBottomSheet.classList.add('translate-y-full');
-      setTimeout(() => {
-        savedSheetOverlay.classList.add('hidden');
-        pendingSavedId = savedSelections.get(activeKey)?.id || '';
-      }, 220);
+      closeUIBottomSheet();
     }
 
     function selectSavedNumber(optionId) {
@@ -880,6 +897,11 @@
     let paymentSheetOpen = false;
     let accountSheetOpen = false;
     let savedSheetOpen = false;
+    const drawerOverlayKey = 'biller-drawer-overlay';
+    let drawerState = null;
+    let paymentSheetState = null;
+    let accountSheetState = null;
+    let savedSheetState = null;
     let appliedAccountId = '';
     let pendingAccountId = '';
     let pendingSavedId = '';
@@ -910,10 +932,9 @@
     const SUCCESS_STATUS_SEQUENCE = ['processing', 'success', 'failed'];
     const SUCCESS_STATUS_PILL_BASE = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold';
 
-    let paymentOtpActive = false;
-    let paymentOtpIntervalId = null;
-    let paymentOtpTimeLeft = PAYMENT_OTP_DURATION_SECONDS;
+    let otpFlowActive = false;
     let paymentSheetDefaultCta = 'Bayar Sekarang';
+    let otpController = null;
     let successDrawerOpen = false;
     let successStatusLoading = false;
     let currentSuccessStatusKey = 'processing';
@@ -1040,24 +1061,16 @@
     }
 
     function closePaymentSheet(options = {}) {
-      if (!paymentSheetOverlay || !paymentBottomSheet) return;
-      if (paymentSheetOverlay.classList.contains('hidden') && !paymentSheetOpen) {
-        return;
-      }
+      if (!paymentSheetState) return;
       resetPaymentOtpState();
       const immediate = Boolean(options.immediate);
       paymentSheetOpen = false;
       if (immediate) {
-        paymentSheetOverlay.classList.remove('opacity-100');
-        paymentSheetOverlay.classList.add('hidden');
-        paymentBottomSheet.classList.add('translate-y-full');
+        closeUIBottomSheet({ immediate: true });
+        paymentSheetState = null;
         return;
       }
-      paymentSheetOverlay.classList.remove('opacity-100');
-      paymentBottomSheet.classList.add('translate-y-full');
-      setTimeout(() => {
-        paymentSheetOverlay.classList.add('hidden');
-      }, 220);
+      closeUIBottomSheet();
     }
 
     function renderPaymentDynamic(fields) {
@@ -1307,7 +1320,7 @@
     }
 
     function closeSuccessDrawerAndPanel() {
-      hideSuccessDrawer({ onHidden: () => closeDrawer() });
+      hideSuccessDrawer({ onHidden: () => closeBillerDrawer() });
     }
 
     function getNextSuccessStatusKey(currentKey) {
@@ -1355,107 +1368,52 @@
     function showPaymentOtpError(message) {
       if (!paymentOtpError) return;
       paymentOtpError.textContent = message;
-      paymentOtpError.classList.remove('hidden');
+      paymentOtpError.classList.toggle('hidden', !message);
     }
 
     function resetPaymentOtpInputs() {
-      if (!paymentOtpInputs.length) return;
-      paymentOtpInputs.forEach((input) => {
-        input.value = '';
-      });
-    }
-
-    function formatPaymentOtpTime(seconds) {
-      const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
-      const secs = String(seconds % 60).padStart(2, '0');
-      return `${mins}:${secs}`;
-    }
-
-    function updatePaymentOtpCountdownDisplay() {
-      if (!paymentOtpTimer) return;
-      paymentOtpTimer.textContent = formatPaymentOtpTime(paymentOtpTimeLeft);
-    }
-
-    function showPaymentOtpCountdownDefaultMessage() {
-      if (paymentOtpCountdownMessage) {
-        paymentOtpCountdownMessage.textContent = paymentOtpCountdownDefaultMessage;
-      }
-      if (paymentOtpTimer) {
-        paymentOtpTimer.classList.remove('hidden');
-      }
-    }
-
-    function showPaymentOtpExpiredMessage() {
-      if (paymentOtpCountdownMessage) {
-        paymentOtpCountdownMessage.textContent = PAYMENT_OTP_EXPIRED_MESSAGE;
-      }
-      if (paymentOtpTimer) {
-        paymentOtpTimer.classList.add('hidden');
-      }
-    }
-
-    function clearPaymentOtpTimer() {
-      if (paymentOtpIntervalId) {
-        clearInterval(paymentOtpIntervalId);
-        paymentOtpIntervalId = null;
+      if (otpController) {
+        otpController.clear();
+      } else {
+        paymentOtpInputs.forEach((input) => {
+          input.value = '';
+        });
       }
     }
 
     function isPaymentOtpFilled() {
       if (!paymentOtpInputs.length) return false;
-      return paymentOtpInputs.every((input) => input.value && input.value.trim() !== '');
-    }
-
-    function getPaymentOtpValue() {
-      if (!paymentOtpInputs.length) return '';
-      return paymentOtpInputs.map((input) => input.value).join('');
+      return paymentOtpInputs.every((input) => input.value && input.value.trim().length === 1);
     }
 
     function updatePaymentOtpVerifyState() {
-      if (!paymentOtpActive) return;
-      const canVerify = isPaymentOtpFilled() && paymentOtpTimeLeft > 0;
+      if (!otpFlowActive) return;
+      const canVerify = isPaymentOtpFilled();
       setPaymentSheetConfirmEnabled(canVerify);
     }
 
-    function startPaymentOtpTimer() {
-      if (paymentOtpCountdown) {
-        paymentOtpCountdown.classList.remove('hidden');
-      }
-      showPaymentOtpCountdownDefaultMessage();
-      paymentOtpResend?.classList.add('hidden');
-      paymentOtpTimeLeft = PAYMENT_OTP_DURATION_SECONDS;
-      updatePaymentOtpCountdownDisplay();
-      clearPaymentOtpTimer();
-      paymentOtpIntervalId = setInterval(() => {
-        paymentOtpTimeLeft -= 1;
-        if (paymentOtpTimeLeft <= 0) {
-          paymentOtpTimeLeft = 0;
-          updatePaymentOtpCountdownDisplay();
-          clearPaymentOtpTimer();
-          showPaymentOtpExpiredMessage();
-          paymentOtpResend?.classList.remove('hidden');
-          setPaymentSheetConfirmEnabled(false);
-          return;
-        }
-        updatePaymentOtpCountdownDisplay();
-      }, 1000);
+    function formatOtpCountdown(seconds) {
+      const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const secs = String(seconds % 60).padStart(2, '0');
+      return `${mins}:${secs}`;
     }
 
     function resetPaymentOtpState() {
-      paymentOtpActive = false;
-      clearPaymentOtpTimer();
-      paymentOtpTimeLeft = PAYMENT_OTP_DURATION_SECONDS;
+      otpFlowActive = false;
+      resetPaymentOtpInputs();
+      hidePaymentOtpError();
       if (paymentOtpSection) {
         paymentOtpSection.classList.add('hidden');
       }
-      resetPaymentOtpInputs();
-      hidePaymentOtpError();
       if (paymentOtpCountdown) {
         paymentOtpCountdown.classList.remove('hidden');
       }
-      showPaymentOtpCountdownDefaultMessage();
+      if (paymentOtpCountdownMessage) {
+        paymentOtpCountdownMessage.textContent = paymentOtpCountdownDefaultMessage;
+      }
       if (paymentOtpTimer) {
-        paymentOtpTimer.textContent = formatPaymentOtpTime(PAYMENT_OTP_DURATION_SECONDS);
+        paymentOtpTimer.classList.remove('hidden');
+        paymentOtpTimer.textContent = formatOtpCountdown(PAYMENT_OTP_DURATION_SECONDS);
       }
       paymentOtpResend?.classList.add('hidden');
       setPaymentSheetConfirmText(paymentSheetDefaultCta);
@@ -1463,7 +1421,7 @@
     }
 
     function startPaymentOtpFlow() {
-      paymentOtpActive = true;
+      otpFlowActive = true;
       hidePaymentOtpError();
       resetPaymentOtpInputs();
       if (paymentOtpSection) {
@@ -1471,13 +1429,37 @@
       }
       setPaymentSheetConfirmText('Verifikasi');
       setPaymentSheetConfirmEnabled(false);
-      startPaymentOtpTimer();
+      if (paymentOtpCountdownMessage) {
+        paymentOtpCountdownMessage.textContent = 'Kode verifikasi telah dikirim ke perangkat Anda.';
+      }
+      paymentOtpTimer?.classList.remove('hidden');
+      otpController?.start();
       updatePaymentOtpVerifyState();
       paymentOtpInputs[0]?.focus();
     }
 
+    if (paymentOtpInputs.length) {
+      otpController = initOtpFlow({
+        inputs: paymentOtpInputs,
+        resendButton: paymentOtpResend,
+        timerElement: paymentOtpTimer,
+        messageElement: paymentOtpCountdownMessage,
+        errorElement: paymentOtpError,
+        duration: PAYMENT_OTP_DURATION_SECONDS,
+        onExpire: () => {
+          otpFlowActive = false;
+          showPaymentOtpError(PAYMENT_OTP_EXPIRED_MESSAGE);
+          setPaymentSheetConfirmEnabled(false);
+          paymentOtpResend?.classList.remove('hidden');
+        },
+        onValidate: (value) => value.length === paymentOtpInputs.length,
+      });
+    }
+
+    resetPaymentOtpState();
+
     function openPaymentSheet() {
-      if (!paymentSheetOverlay || !paymentBottomSheet || !activeKey) return;
+      if (!paymentBottomSheet || !activeKey) return;
       const config = BILLER_CONFIG[activeKey];
       if (!config) return;
 
@@ -1559,15 +1541,24 @@
         heroSubtitle: displayName,
       };
 
-      paymentSheetOverlay.classList.remove('hidden');
-      requestAnimationFrame(() => {
-        paymentSheetOverlay.classList.add('opacity-100');
-        paymentBottomSheet.classList.remove('translate-y-full');
+      paymentSheetState = openUIBottomSheet({
+        sheet: paymentBottomSheet,
+        overlayKey: drawerOverlayKey,
+        overlayContainer: drawer,
+        closeSelectors: [paymentSheetClose, paymentSheetCancel],
+        trapFocus: true,
+        initialFocus: paymentSheetConfirm,
+        onOpen: () => {
+          paymentSheetOpen = true;
+        },
+        onClose: () => {
+          paymentSheetOpen = false;
+          paymentSheetState = null;
+        },
       });
-      paymentSheetOpen = true;
     }
 
-    function openDrawer(key, button) {
+    function openBillerDrawer(key, button) {
       const config = BILLER_CONFIG[key];
       if (!config) return;
       closeSavedSheet({ immediate: true });
@@ -1575,53 +1566,64 @@
       closePaymentSheet({ immediate: true });
       hideSuccessDrawer({ immediate: true });
       setActiveButton(button);
-      const wasClosed = !drawer.classList.contains('open');
       applyConfig(key, config);
-      if (wasClosed) {
-        drawer.classList.add('open');
-        drawerInner.classList.remove('opacity-0', 'translate-x-4');
-        drawerInner.classList.add('opacity-100', 'translate-x-0');
-        if (typeof window.sidebarCollapseForDrawer === 'function') {
-          window.sidebarCollapseForDrawer();
-        }
-      } else {
-        drawerInner.classList.remove('opacity-0', 'translate-x-4');
-        drawerInner.classList.add('opacity-100', 'translate-x-0');
-      }
+
+      drawerState = openUIDrawer({
+        drawer,
+        inner: drawerInner,
+        title: config.title,
+        titleElement: drawerTitle,
+        closeSelectors: [closeBtn],
+        closeOnOverlay: false,
+        onOpen: () => {
+          if (typeof window.sidebarCollapseForDrawer === 'function') {
+            window.sidebarCollapseForDrawer();
+          }
+        },
+        onClose: () => {
+          if (typeof window.sidebarRestoreForDrawer === 'function') {
+            window.sidebarRestoreForDrawer();
+          }
+          setActiveButton(null);
+          drawerState = null;
+        },
+        autoFocus: idInput,
+      });
     }
 
-    function closeDrawer() {
-      if (!drawer.classList.contains('open')) return;
+    function closeBillerDrawer(options = {}) {
+      if (!drawerState && !drawer.classList.contains('open')) return;
       hideSuccessDrawer({ immediate: true });
-      drawerInner.classList.remove('opacity-100', 'translate-x-0');
-      drawerInner.classList.add('opacity-0', 'translate-x-4');
       closeSavedSheet({ immediate: true });
       closeAccountSheet({ immediate: true });
       closePaymentSheet({ immediate: true });
-      setTimeout(() => {
+      if (options.immediate) {
         drawer.classList.remove('open');
+        drawerInner.classList.add('opacity-0', 'translate-x-4');
         if (typeof window.sidebarRestoreForDrawer === 'function') {
           window.sidebarRestoreForDrawer();
         }
         setActiveButton(null);
-      }, 220);
+        drawerState = null;
+        return;
+      }
+      closeUIDrawer();
     }
 
     billerButtons.forEach((button) => {
       button.addEventListener('click', (event) => {
         event.preventDefault();
         const key = button.getAttribute('data-biller');
-        openDrawer(key, button);
+        openBillerDrawer(key, button);
       });
     });
 
     closeBtn?.addEventListener('click', () => {
-      closeDrawer();
+      closeBillerDrawer();
     });
 
     moveSourceButton?.addEventListener('click', openAccountSheet);
 
-    accountSheetOverlay?.addEventListener('click', () => closeAccountSheet());
     accountSheetClose?.addEventListener('click', () => closeAccountSheet());
     accountSheetCancel?.addEventListener('click', () => closeAccountSheet());
     accountSheetConfirm?.addEventListener('click', confirmAccount);
@@ -1669,7 +1671,6 @@
       openSavedSheet();
     });
 
-    savedSheetOverlay?.addEventListener('click', () => closeSavedSheet());
     savedSheetClose?.addEventListener('click', () => closeSavedSheet());
     savedSheetCancel?.addEventListener('click', () => closeSavedSheet());
     savedSheetConfirm?.addEventListener('click', () => {
@@ -1694,78 +1695,30 @@
 
     paymentOtpResend?.addEventListener('click', (event) => {
       event.preventDefault();
-      if (!paymentOtpActive) return;
+      if (!otpFlowActive) return;
+      otpController?.resend();
       resetPaymentOtpInputs();
       hidePaymentOtpError();
-      startPaymentOtpTimer();
-      updatePaymentOtpVerifyState();
+      setPaymentSheetConfirmEnabled(false);
       paymentOtpInputs[0]?.focus();
     });
 
-    paymentOtpInputs.forEach((input, index) => {
-      input.addEventListener('input', (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLInputElement)) return;
-        const digits = target.value.replace(/\D/g, '');
-        target.value = digits.slice(-1);
-        if (target.value && index < paymentOtpInputs.length - 1) {
-          paymentOtpInputs[index + 1]?.focus();
-        }
+    paymentOtpInputs.forEach((input) => {
+      input.addEventListener('input', () => {
         hidePaymentOtpError();
         updatePaymentOtpVerifyState();
       });
-
-      input.addEventListener('keydown', (event) => {
-        if (event.key === 'Backspace' && !input.value && index > 0) {
-          event.preventDefault();
-          const previous = paymentOtpInputs[index - 1];
-          previous.value = '';
-          previous.focus();
+      input.addEventListener('keydown', () => {
+        setTimeout(updatePaymentOtpVerifyState, 0);
+      });
+      input.addEventListener('paste', () => {
+        setTimeout(() => {
+          hidePaymentOtpError();
           updatePaymentOtpVerifyState();
-          return;
-        }
-        if (event.key === 'ArrowLeft' && index > 0) {
-          event.preventDefault();
-          paymentOtpInputs[index - 1]?.focus();
-          return;
-        }
-        if (event.key === 'ArrowRight' && index < paymentOtpInputs.length - 1) {
-          event.preventDefault();
-          paymentOtpInputs[index + 1]?.focus();
-        }
-      });
-
-      input.addEventListener('paste', (event) => {
-        event.preventDefault();
-        const clipboard = event.clipboardData || window.clipboardData;
-        const text = clipboard?.getData('text') || '';
-        const digits = text.replace(/\D/g, '');
-        if (!digits) return;
-        resetPaymentOtpInputs();
-        const chars = digits.split('').slice(0, paymentOtpInputs.length);
-        chars.forEach((char, charIndex) => {
-          paymentOtpInputs[charIndex].value = char;
-        });
-        const focusIndex = Math.min(chars.length - 1, paymentOtpInputs.length - 1);
-        if (focusIndex >= 0) {
-          paymentOtpInputs[focusIndex].focus();
-        }
-        hidePaymentOtpError();
-        updatePaymentOtpVerifyState();
-      });
-
-      input.addEventListener('focus', () => {
-        if (input.value) {
-          input.select();
-        }
+        }, 0);
       });
     });
 
-    paymentSheetOverlay?.addEventListener('click', (event) => {
-      if (event.target === paymentSheetOverlay) {
-        closePaymentSheet();
-      }
-    });
     paymentSheetClose?.addEventListener('click', () => closePaymentSheet());
     paymentSheetCancel?.addEventListener('click', () => closePaymentSheet());
     paymentSheetConfirm?.addEventListener('click', (event) => {
@@ -1774,14 +1727,8 @@
         return;
       }
 
-      if (!paymentOtpActive) {
+      if (!otpFlowActive) {
         startPaymentOtpFlow();
-        return;
-      }
-
-      if (paymentOtpTimeLeft <= 0) {
-        showPaymentOtpError(PAYMENT_OTP_EXPIRED_MESSAGE);
-        setPaymentSheetConfirmEnabled(false);
         return;
       }
 
@@ -1791,9 +1738,13 @@
         return;
       }
 
-      const otpValue = getPaymentOtpValue();
+      const valid = otpController ? otpController.validate() : true;
+      if (!valid) {
+        setPaymentSheetConfirmEnabled(false);
+        return;
+      }
+
       hidePaymentOtpError();
-      console.info('OTP pembayaran diverifikasi:', otpValue);
       closePaymentSheet();
       console.info('Konfirmasi pembayaran diproses (mock).');
       const successDetails = buildSuccessDetailsFromContext(lastConfirmationContext);
@@ -1827,7 +1778,7 @@
         } else if (successDrawerOpen) {
           closeSuccessDrawerAndPanel();
         } else {
-          closeDrawer();
+          closeBillerDrawer();
         }
       }
     });
