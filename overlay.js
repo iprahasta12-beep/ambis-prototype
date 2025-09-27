@@ -51,6 +51,10 @@ export function showOverlay(options = {}) {
     root.appendChild(overlay);
   }
 
+  const isDocumentRoot = root === document.body || root === document.documentElement;
+  overlay.style.position = isDocumentRoot ? 'fixed' : 'absolute';
+  overlay.style.inset = '0';
+
   overlay.style.zIndex = String(zIndex);
   overlay.style.pointerEvents = 'auto';
   overlay.setAttribute('aria-hidden', 'false');

@@ -59,6 +59,8 @@ let currentLimit = 150_000_000;
 let pendingNewLimit = null;
 let confirmSheetOpen = false;
 let successTimer = null;
+let drawerTransitionDisabled = false;
+let drawerPreviousTransition = '';
 
 try {
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -192,6 +194,20 @@ function showOtpError(message) {
 
 function hideOtpError() {
   ensureOtpFlow().setError('');
+}
+
+function disableDrawerTransition() {
+  if (!drawer || drawerTransitionDisabled) return;
+  drawerPreviousTransition = drawer.style.transition;
+  drawer.style.transition = 'none';
+  drawerTransitionDisabled = true;
+}
+
+function restoreDrawerTransition() {
+  if (!drawer || !drawerTransitionDisabled) return;
+  drawer.style.transition = drawerPreviousTransition || '';
+  drawerPreviousTransition = '';
+  drawerTransitionDisabled = false;
 }
 
 function activateOtpFlow() {
@@ -331,13 +347,20 @@ async function openConfirmSheet(newLimitValue) {
     sheet,
     closeSelectors: ['#limitConfirmCancelBtn'],
     focusTarget: '#limitConfirmProceedBtn',
+    overlayRoot: container || drawer,
     onOpen: () => {
       confirmSheetOpen = true;
+      disableDrawerTransition();
+      container?.classList.remove('pointer-events-none');
+      container?.setAttribute('aria-hidden', 'false');
     },
     onClose: () => {
       confirmSheetOpen = false;
       pendingNewLimit = null;
       resetOtpFlow();
+      restoreDrawerTransition();
+      container?.classList.add('pointer-events-none');
+      container?.setAttribute('aria-hidden', 'true');
     },
   });
 }
@@ -354,6 +377,8 @@ async function closeConfirmSheet(options = {}) {
   await closeBottomSheet({ immediate: Boolean(options.immediate) });
 
   container?.classList.add('pointer-events-none');
+  container?.setAttribute('aria-hidden', 'true');
+  restoreDrawerTransition();
 }
 
 function openLimitDrawer() {
