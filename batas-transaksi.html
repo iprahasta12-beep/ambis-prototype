@@ -359,6 +359,17 @@
     </div>
   </div>
 
+  <script type="module">
+    import { openDrawer, closeDrawer } from './ui/drawer.js';
+    import { initOtpFlow } from './ui/otp.js';
+
+    const globalAmbis = (window.AMBIS = window.AMBIS || {});
+    globalAmbis.ui = Object.assign(globalAmbis.ui || {}, {
+      openDrawer,
+      closeDrawer,
+      initOtpFlow,
+    });
+  </script>
   <script src="batas-transaksi.js"></script>
   <script src="sidebar.js"></script>
 </body>
