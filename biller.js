@@ -337,7 +337,7 @@
     return { ...DEFAULT_VALIDATION, ...config.validation };
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function initBillerPage() {
     const drawer = document.getElementById('drawer');
     const drawerInner = document.getElementById('drawerInner');
     const drawerTitle = document.getElementById('drawerTitle');
@@ -1782,5 +1782,11 @@
         }
       }
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBillerPage);
+  } else {
+    initBillerPage();
+  }
 })();
