@@ -142,12 +142,9 @@
         </div>
 
         <!-- Subheader -->
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h2 class="font-semibold text-lg">Pilih Layanan</h2>
-            <p class="text-slate-600">Akses catatan transaksi terkini melalui menu <span class="font-medium">Riwayat</span>.</p>
-          </div>
-          <button id="openHistoryDrawerBtn" type="button" class="h-9 px-4 rounded-lg border border-cyan-500 text-cyan-600 bg-white hover:bg-cyan-50">Riwayat</button>
+        <div class="mb-6">
+          <h2 class="font-semibold text-lg">Pilih Layanan</h2>
+          <p class="text-slate-600">Akses catatan transaksi terkini melalui menu <span class="font-medium">Riwayat</span>.</p>
         </div>
 
         <!-- Listrik PLN -->
@@ -215,122 +212,6 @@
       </div>
     </main>
     <!-- ============ /MAIN ============ -->
-
-    <!-- History Drawer -->
-    <div
-      id="historyDrawerOverlay"
-      class="fixed inset-0 z-40 bg-slate-900/40 opacity-0 transition-opacity duration-200 hidden pointer-events-none"
-      aria-hidden="true"
-    ></div>
-    <aside
-      id="historyDrawer"
-      class="fixed top-0 right-0 z-50 h-full w-full max-w-[460px] bg-white shadow-xl translate-x-full transition-transform duration-200 flex flex-col"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="historyDrawerTitle"
-      tabindex="-1"
-    >
-      <div class="flex items-center justify-between px-6 py-5 border-b border-slate-200">
-        <h2 id="historyDrawerTitle" class="text-lg font-semibold text-slate-900">Riwayat</h2>
-        <button id="historyDrawerCloseBtn" type="button" class="text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup riwayat">&times;</button>
-      </div>
-
-      <div class="px-6 pt-4">
-        <div class="bg-slate-100 rounded-2xl p-1 flex items-center gap-2">
-          <button
-            type="button"
-            data-history-tab="processing"
-            class="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-900 bg-white shadow-sm"
-            aria-selected="true"
-          >
-            Dalam Proses
-          </button>
-          <button
-            type="button"
-            data-history-tab="completed"
-            class="flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-500 hover:text-slate-700"
-            aria-selected="false"
-          >
-            Selesai
-          </button>
-        </div>
-      </div>
-
-      <div class="px-6 py-4 border-b border-slate-100" data-filter-group="history">
-        <div class="flex flex-wrap gap-3">
-          <div class="filter relative" data-filter="date" data-name="Tanggal" data-default="Semua Tanggal">
-            <button class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[200px] w-[220px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold">
-              <img src="img/icon/date-picker.svg" class="w-5 h-5 flex-none" alt="Filter tanggal" />
-              <span class="filter-label flex-1 text-left leading-tight">Semua Tanggal</span>
-            </button>
-            <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[320px]">
-              <div class="flex flex-col gap-3">
-                <label class="flex items-start gap-3 text-sm text-slate-700">
-                  <input type="radio" name="history-date" value="Semua Tanggal" class="mt-1.5">
-                  <span class="font-medium leading-tight">Semua Tanggal</span>
-                </label>
-                <label class="flex items-start gap-3 text-sm text-slate-700">
-                  <input type="radio" name="history-date" value="Sabtu, 2 Agustus 2025" class="mt-1.5">
-                  <span class="font-medium leading-tight">Sabtu, 2 Agustus 2025</span>
-                </label>
-                <label class="flex items-start gap-3 text-sm text-slate-700">
-                  <input type="radio" name="history-date" value="Jumat, 1 Agustus 2025" class="mt-1.5">
-                  <span class="font-medium leading-tight">Jumat, 1 Agustus 2025</span>
-                </label>
-                <label class="flex items-start gap-3 text-sm text-slate-700">
-                  <input type="radio" name="history-date" value="Kamis, 31 Juli 2025" class="mt-1.5">
-                  <span class="font-medium leading-tight">Kamis, 31 Juli 2025</span>
-                </label>
-                <label class="flex items-start gap-3 text-sm text-slate-700">
-                  <input type="radio" name="history-date" value="Rabu, 30 Juli 2025" class="mt-1.5">
-                  <span class="font-medium leading-tight">Rabu, 30 Juli 2025</span>
-                </label>
-              </div>
-              <div class="flex justify-end gap-2 mt-4">
-                <button type="button" class="cancel px-3 py-2 rounded-lg border text-slate-600 w-1/2">Batalkan</button>
-                <button type="button" class="apply px-3 py-2 rounded-lg bg-cyan-500 text-white font-semibold w-1/2" disabled>Terapkan</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="filter relative" data-filter="category" data-name="Kategori" data-default="Semua Kategori">
-            <button class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[200px] w-[220px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold">
-              <img src="img/icon/filter.svg" class="w-5 h-5 flex-none" alt="Filter kategori" />
-              <span class="filter-label flex-1 text-left leading-tight">Semua Kategori</span>
-            </button>
-            <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[320px]">
-              <div class="flex flex-col gap-3">
-                <label class="flex items-start gap-3 text-sm text-slate-700">
-                  <input type="radio" name="history-category" value="Semua Kategori" class="mt-1.5">
-                  <span class="font-medium leading-tight">Semua Kategori</span>
-                </label>
-                <label class="flex items-start gap-3 text-sm text-slate-700">
-                  <input type="radio" name="history-category" value="Listrik PLN" class="mt-1.5">
-                  <span class="font-medium leading-tight">Listrik PLN</span>
-                </label>
-                <label class="flex items-start gap-3 text-sm text-slate-700">
-                  <input type="radio" name="history-category" value="Internet" class="mt-1.5">
-                  <span class="font-medium leading-tight">Internet</span>
-                </label>
-                <label class="flex items-start gap-3 text-sm text-slate-700">
-                  <input type="radio" name="history-category" value="BPJS" class="mt-1.5">
-                  <span class="font-medium leading-tight">BPJS</span>
-                </label>
-              </div>
-              <div class="flex justify-end gap-2 mt-4">
-                <button type="button" class="cancel px-3 py-2 rounded-lg border text-slate-600 w-1/2">Batalkan</button>
-                <button type="button" class="apply px-3 py-2 rounded-lg bg-cyan-500 text-white font-semibold w-1/2" disabled>Terapkan</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex-1 overflow-y-auto px-6 pb-8 pt-5 space-y-6" id="historyListContainer">
-        <div id="historyList" class="space-y-6"></div>
-        <div id="historyEmptyState" class="hidden text-sm text-slate-500 text-center py-10">Tidak ada transaksi yang cocok dengan filter yang dipilih.</div>
-      </div>
-    </aside>
 
     <!-- Drawer -->
     <div id="drawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100">
