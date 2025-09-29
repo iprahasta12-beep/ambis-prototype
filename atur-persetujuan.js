@@ -26,6 +26,8 @@
 
   const numberFormatter = new Intl.NumberFormat('id-ID');
 
+  let nextId = 1;
+
   const state = {
     approvals: [],
     mode: 'create',
@@ -34,7 +36,16 @@
   };
 
   let currentInitial = { min: MIN_LIMIT, max: null, approvers: null };
-  let nextId = 1;
+
+  state.approvals = [
+    {
+      id: `matrix-${nextId}`,
+      min: MIN_LIMIT,
+      max: MAX_LIMIT,
+      approvers: 2,
+    },
+  ];
+  nextId += 1;
 
   function formatNumber(value) {
     if (typeof value !== 'number' || Number.isNaN(value)) return '';
@@ -618,7 +629,6 @@
   function init() {
     renderAll();
     setModeCreate();
-    openDrawer();
     updateButtonStates();
   }
 
