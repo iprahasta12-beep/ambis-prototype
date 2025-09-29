@@ -158,7 +158,7 @@
 
         <!-- Table -->
         <div class="overflow-x-auto rounded-xl border border-slate-200">
-          <table class="min-w-full  ">
+          <table class="min-w-full">
             <thead class="bg-slate-50 text-slate-600">
               <tr>
                 <th class="text-left px-4 py-3 font-medium">Nominal Transaksi</th>
@@ -167,18 +167,35 @@
               </tr>
             </thead>
             <tbody class="divide-y">
-              <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3">Rp0 - 200.000.000</td>
-                <td class="px-4 py-3">2 Approver</td>
+              <tr class="hover:bg-slate-50" data-approval-row="top">
+                <td class="px-4 py-3" data-range-cell>Rp 1 – Rp 200.000.000</td>
+                <td class="px-4 py-3" data-approver-cell>2 Penyetuju</td>
                 <td class="px-4 py-3 text-right">
-                  <button class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50">Ubah</button>
+                  <button
+                    type="button"
+                    class="approval-edit-btn px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50"
+                    data-requires-confirm="true"
+                    data-min="1"
+                    data-max="200000000"
+                    data-approvers="2"
+                  >
+                    Ubah
+                  </button>
                 </td>
               </tr>
               <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3">Rp200.000.001 - 500.000.000</td>
-                <td class="px-4 py-3">3 Approver</td>
+                <td class="px-4 py-3">Rp 200.000.001 – Rp 500.000.000</td>
+                <td class="px-4 py-3">3 Penyetuju</td>
                 <td class="px-4 py-3 text-right">
-                  <button class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50">Ubah</button>
+                  <button
+                    type="button"
+                    class="approval-edit-btn px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50"
+                    data-min="200000001"
+                    data-max="500000000"
+                    data-approvers="3"
+                  >
+                    Ubah
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -188,8 +205,114 @@
       </div>
     </main>
     <!-- ============ /MAIN ============ -->
+    
+    <!-- Drawer -->
+    <div id="drawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100" aria-hidden="true">
+      <div id="approvalPane" class="h-full flex flex-col">
+        <div class="flex items-center justify-between px-6 py-4 border-b">
+          <h2 class="text-lg font-semibold">Ubah Persetujuan Transfer</h2>
+          <button id="approvalDrawerClose" type="button" class="text-2xl leading-none">&times;</button>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+          <div class="flex items-start gap-3 px-4 py-3 rounded-xl border border-sky-100 bg-sky-50 text-sky-800">
+            <span aria-hidden="true" class="text-xl">ℹ️</span>
+            <p class="text-sm leading-relaxed">
+              Buat aturan persetujuan sesuai nominal transaksi, atau tetapkan langsung untuk limit harian Rp500.000.000.
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <div class="grid gap-4 md:grid-cols-2">
+              <div>
+                <label for="minLimitInput" class="block mb-2 font-medium text-slate-700">Batas Minimal</label>
+                <input
+                  id="minLimitInput"
+                  type="text"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-right text-slate-500"
+                  placeholder="Rp 1"
+                  value="Rp 1"
+                  disabled
+                />
+              </div>
+              <div>
+                <label for="maxLimitInput" class="block mb-2 font-medium text-slate-700">Batas Maksimal</label>
+                <div class="relative">
+                  <input
+                    id="maxLimitInput"
+                    type="text"
+                    inputmode="numeric"
+                    class="w-full rounded-xl border border-slate-200 px-4 py-3 text-right focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    placeholder="Rp Maks. 500.000.000"
+                  />
+                </div>
+                <p id="maxLimitError" class="mt-2 text-sm text-red-500 hidden"></p>
+              </div>
+            </div>
+
+            <div>
+              <label for="approverCountInput" class="block mb-2 font-medium text-slate-700">Jumlah Penyetuju</label>
+              <input
+                id="approverCountInput"
+                type="text"
+                inputmode="numeric"
+                class="w-full rounded-xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                placeholder="Minimal 1 penyetuju"
+              />
+              <div class="mt-2 space-y-1">
+                <p class="flex items-start gap-2 text-sm text-slate-500">
+                  <span aria-hidden="true" class="mt-[3px] inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-[12px] font-semibold text-slate-500">i</span>
+                  <span>Jumlah penyetuju harus sesuai dengan yang tersedia di perusahaan Anda.</span>
+                </p>
+                <p id="approverCountError" class="text-sm text-red-500 hidden"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 border-t border-slate-200">
+            <button id="saveChangesBtn" type="button" class="w-full rounded-xl border border-cyan-500 text-cyan-600 font-semibold py-3 hover:bg-cyan-50" disabled>
+              Simpan Perubahan
+            </button>
+          </div>
+        </div>
+        <div class="border-t px-6 py-5 bg-white">
+          <button id="confirmApprovalBtn" type="button" class="w-full rounded-xl bg-cyan-500 text-white font-semibold py-3" disabled>
+            Konfirmasi Persetujuan Transfer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Dialog -->
+  <div
+    id="topApprovalDialogContainer"
+    class="hidden fixed inset-0 z-40"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="topApprovalDialogTitle"
+  >
+    <div id="topApprovalDialogOverlay" class="absolute inset-0 bg-slate-900/40"></div>
+    <div class="relative flex h-full items-center justify-center px-4">
+      <div id="topApprovalDialog" class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+        <div class="space-y-2">
+          <h3 id="topApprovalDialogTitle" class="text-lg font-semibold text-slate-900">Ubah Persetujuan Teratas?</h3>
+          <p class="text-sm text-slate-600">
+            Jika Anda mengubah penyetuju di urutan teratas, urutan dan rentang persetujuan harus diatur ulang dari awal.
+          </p>
+        </div>
+        <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button id="topApprovalDialogCancel" type="button" class="w-full rounded-xl border border-slate-200 px-4 py-2 text-slate-700 sm:w-auto">
+            Batal
+          </button>
+          <button id="topApprovalDialogProceed" type="button" class="w-full rounded-xl bg-cyan-500 px-4 py-2 font-semibold text-white sm:w-auto">
+            Ubah Sekarang
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="sidebar.js"></script>
+  <script src="atur-persetujuan.js"></script>
 </body>
 </html>
