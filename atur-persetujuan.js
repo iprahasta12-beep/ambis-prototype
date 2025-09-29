@@ -322,9 +322,11 @@
     });
   }
 
-  function renderAll() {
+  function renderAll({ includeTable = true } = {}) {
     recomputeSequentialRanges();
-    renderTable();
+    if (includeTable) {
+      renderTable();
+    }
     renderMatrixCards();
     updateConfirmState();
     updateAddButtonState();
@@ -627,7 +629,7 @@
       matrixGenerated = true;
     }
 
-    renderAll();
+    renderAll({ includeTable: false });
     setModeCreate();
     openDrawer();
     resetErrors();

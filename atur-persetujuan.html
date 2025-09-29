@@ -188,70 +188,72 @@
           <h2 id="approvalDrawerTitle" class="text-lg font-semibold">Ubah Persetujuan Transfer</h2>
           <button id="approvalDrawerClose" type="button" class="text-2xl leading-none">&times;</button>
         </div>
-        <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-          <div class="flex items-start gap-3 px-4 py-3 rounded-xl border border-sky-100 bg-sky-50 text-sky-800">
-            <span aria-hidden="true" class="text-xl">ℹ️</span>
-            <p class="text-sm leading-relaxed">
-              Buat aturan persetujuan sesuai nominal transaksi, atau tetapkan langsung untuk limit harian Rp500.000.000.
-            </p>
-          </div>
+        <div class="flex-1 overflow-y-auto px-6 py-6">
+          <div id="approvalDrawerContent" class="flex flex-col gap-6">
+            <div id="approvalDrawerNote" class="flex items-start gap-3 px-4 py-3 rounded-xl border border-sky-100 bg-sky-50 text-sky-800">
+              <span aria-hidden="true" class="text-xl">ℹ️</span>
+              <p class="text-sm leading-relaxed">
+                Buat aturan persetujuan sesuai nominal transaksi, atau tetapkan langsung untuk limit harian Rp500.000.000.
+              </p>
+            </div>
 
-          <div id="approvalMatrixSection" class="hidden space-y-4">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Daftar Approval Matrix</h3>
-            <div id="approvalMatrixList" class="space-y-3"></div>
-          </div>
+            <section id="approvalMatrixSection" class="hidden space-y-4">
+              <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Daftar Approval Matrix</h3>
+              <div id="approvalMatrixList" class="space-y-3"></div>
+            </section>
 
-          <div id="approvalFormFields" class="space-y-6">
-            <div class="grid gap-4 md:grid-cols-2">
-              <div>
-                <label for="minLimitInput" class="block mb-2 font-medium text-slate-700">Batas Minimal</label>
-                <input
-                  id="minLimitInput"
-                  type="text"
-                  inputmode="numeric"
-                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                  placeholder="Rp 1"
-                />
-                <p id="minLimitError" class="mt-2 text-sm text-red-500 hidden"></p>
-              </div>
-              <div>
-                <label for="maxLimitInput" class="block mb-2 font-medium text-slate-700">Batas Maksimal</label>
-                <div class="relative">
+            <div id="approvalFormFields" class="space-y-6">
+              <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label for="minLimitInput" class="block mb-2 font-medium text-slate-700">Batas Minimal</label>
                   <input
-                    id="maxLimitInput"
+                    id="minLimitInput"
                     type="text"
                     inputmode="numeric"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-3 text-left focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                    placeholder="Rp Maks. 500.000.000"
+                    class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    placeholder="Rp 1"
                   />
+                  <p id="minLimitError" class="mt-2 text-sm text-red-500 hidden"></p>
                 </div>
-                <p id="maxLimitError" class="mt-2 text-sm text-red-500 hidden"></p>
+                <div>
+                  <label for="maxLimitInput" class="block mb-2 font-medium text-slate-700">Batas Maksimal</label>
+                  <div class="relative">
+                    <input
+                      id="maxLimitInput"
+                      type="text"
+                      inputmode="numeric"
+                      class="w-full rounded-xl border border-slate-200 px-4 py-3 text-left focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                      placeholder="Rp Maks. 500.000.000"
+                    />
+                  </div>
+                  <p id="maxLimitError" class="mt-2 text-sm text-red-500 hidden"></p>
+                </div>
+              </div>
+
+              <div>
+                <label for="approverCountInput" class="block mb-2 font-medium text-slate-700">Jumlah Penyetuju</label>
+                <input
+                  id="approverCountInput"
+                  type="text"
+                  inputmode="numeric"
+                  class="w-full rounded-xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                  placeholder="Minimal 1 penyetuju"
+                />
+                <div class="mt-2 space-y-1">
+                  <p class="flex items-start gap-2 text-sm text-slate-500">
+                    <span aria-hidden="true" class="mt-[3px] inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-[12px] font-semibold text-slate-500">i</span>
+                    <span>Jumlah penyetuju harus sesuai dengan yang tersedia di perusahaan Anda.</span>
+                  </p>
+                  <p id="approverCountError" class="text-sm text-red-500 hidden"></p>
+                </div>
               </div>
             </div>
 
-            <div>
-              <label for="approverCountInput" class="block mb-2 font-medium text-slate-700">Jumlah Penyetuju</label>
-              <input
-                id="approverCountInput"
-                type="text"
-                inputmode="numeric"
-                class="w-full rounded-xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                placeholder="Minimal 1 penyetuju"
-              />
-              <div class="mt-2 space-y-1">
-                <p class="flex items-start gap-2 text-sm text-slate-500">
-                  <span aria-hidden="true" class="mt-[3px] inline-flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 text-[12px] font-semibold text-slate-500">i</span>
-                  <span>Jumlah penyetuju harus sesuai dengan yang tersedia di perusahaan Anda.</span>
-                </p>
-                <p id="approverCountError" class="text-sm text-red-500 hidden"></p>
-              </div>
+            <div class="pt-6 border-t border-slate-200">
+              <button id="saveChangesBtn" type="button" class="w-full rounded-xl border border-cyan-500 text-cyan-600 font-semibold py-3 hover:bg-cyan-50" disabled>
+                Simpan Perubahan
+              </button>
             </div>
-          </div>
-
-          <div class="pt-6 border-t border-slate-200">
-            <button id="saveChangesBtn" type="button" class="w-full rounded-xl border border-cyan-500 text-cyan-600 font-semibold py-3 hover:bg-cyan-50" disabled>
-              Simpan Perubahan
-            </button>
           </div>
         </div>
         <div class="border-t px-6 py-5 bg-white">
