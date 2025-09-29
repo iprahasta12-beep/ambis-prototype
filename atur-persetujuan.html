@@ -205,21 +205,21 @@
                 <input
                   id="minLimitInput"
                   type="text"
+                  inputmode="numeric"
                   class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-right text-slate-500"
-                  placeholder="Rp 1"
-                  value="Rp 1"
                   disabled
                 />
               </div>
               <div>
                 <label for="maxLimitInput" class="block mb-2 font-medium text-slate-700">Batas Maksimal</label>
                 <div class="relative">
+                  <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500">Rp</span>
                   <input
                     id="maxLimitInput"
                     type="text"
                     inputmode="numeric"
-                    class="w-full rounded-xl border border-slate-200 px-4 py-3 text-right focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                    placeholder="Rp Maks. 500.000.000"
+                    class="w-full rounded-xl border border-slate-200 pl-12 pr-4 py-3 text-right focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                    placeholder="maks Rp500.000.000"
                   />
                 </div>
                 <p id="maxLimitError" class="mt-2 text-sm text-red-500 hidden"></p>
@@ -233,7 +233,7 @@
                 type="text"
                 inputmode="numeric"
                 class="w-full rounded-xl border border-slate-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                placeholder="Minimal 1 penyetuju"
+                placeholder="minimal 1 penyetuju"
               />
               <div class="mt-2 space-y-1">
                 <p class="flex items-start gap-2 text-sm text-slate-500">

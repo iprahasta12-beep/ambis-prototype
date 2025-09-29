@@ -38,7 +38,12 @@
 
   function formatCurrency(value) {
     if (typeof value !== 'number' || Number.isNaN(value)) return '';
-    return `Rp ${value.toLocaleString('id-ID')}`;
+    return `Rp${value.toLocaleString('id-ID')}`;
+  }
+
+  function formatNumber(value) {
+    if (typeof value !== 'number' || Number.isNaN(value)) return '';
+    return value.toLocaleString('id-ID');
   }
 
   function parseCurrency(value) {
@@ -77,7 +82,7 @@
     if (value === null || typeof value === 'undefined') {
       minInput.value = '';
     } else {
-      minInput.value = formatCurrency(value);
+      minInput.value = formatNumber(value);
     }
   }
 
@@ -86,7 +91,7 @@
     if (value === null || typeof value === 'undefined') {
       maxInput.value = '';
     } else {
-      maxInput.value = formatCurrency(value);
+      maxInput.value = formatNumber(value);
       requestAnimationFrame(() => {
         maxInput.setSelectionRange(maxInput.value.length, maxInput.value.length);
       });
@@ -272,8 +277,8 @@
 
       const range = document.createElement('p');
       range.className = 'text-sm text-slate-700 text-left';
-      const minText = formatCurrency(rule.min).replace('Rp ', 'Rp');
-      const maxText = formatCurrency(rule.max).replace('Rp ', 'Rp');
+      const minText = formatCurrency(rule.min);
+      const maxText = formatCurrency(rule.max);
       range.textContent = `${minText} – ${maxText}`;
 
       const approverDetail = document.createElement('p');
@@ -451,7 +456,7 @@
       maxInput.value = '';
     } else {
       const parsed = parseInt(digits, 10);
-      maxInput.value = formatCurrency(parsed);
+      maxInput.value = formatNumber(parsed);
       requestAnimationFrame(() => {
         maxInput.setSelectionRange(maxInput.value.length, maxInput.value.length);
       });
