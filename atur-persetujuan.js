@@ -14,7 +14,7 @@
   const approverInput = document.getElementById('approverCountInput');
   const approverError = document.getElementById('approverCountError');
   const addRuleBtn = document.getElementById('addApprovalRuleBtn');
-  const cardsContainer = document.getElementById('approvalCardsContainer');
+  const cardsContainer = document.getElementById('approvalRowsContainer');
   const emptyState = document.getElementById('approvalEmptyState');
   const limitNotice = document.getElementById('approvalLimitNotice');
 
@@ -266,50 +266,36 @@
     cardsContainer.innerHTML = '';
 
     approvals.forEach((rule, index) => {
-      const card = document.createElement('article');
-      card.className = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm';
-      card.dataset.id = rule.id;
+      const row = document.createElement('div');
+      row.className = 'grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] items-center gap-4 px-6 py-4';
+      row.dataset.id = rule.id;
 
-      const header = document.createElement('div');
-      header.className = 'flex items-start justify-between gap-4';
+      const range = document.createElement('p');
+      range.className = 'text-sm text-slate-700 text-left';
+      const minText = formatCurrency(rule.min).replace('Rp ', 'Rp');
+      const maxText = formatCurrency(rule.max).replace('Rp ', 'Rp');
+      range.textContent = `${minText} – ${maxText}`;
 
-      const title = document.createElement('h3');
-      title.className = 'text-base font-semibold text-slate-900';
-      title.textContent = `Jumlah Approval ${rule.approvers}`;
+      const approverDetail = document.createElement('p');
+      approverDetail.className = 'text-sm font-semibold text-slate-500 text-center';
+      approverDetail.textContent = `${rule.approvers} Penyetuju`;
+
+      const action = document.createElement('div');
+      action.className = 'flex justify-end';
 
       const editBtn = document.createElement('button');
       editBtn.type = 'button';
-      editBtn.className = 'approval-edit-btn rounded-lg border border-cyan-500 px-4 py-1.5 text-sm font-semibold text-cyan-600 hover:bg-cyan-50';
+      editBtn.className = 'approval-edit-btn inline-flex items-center justify-center rounded-lg border border-cyan-500 bg-white px-4 py-2 text-sm font-semibold text-cyan-600 transition hover:bg-cyan-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400/60';
       editBtn.textContent = 'Ubah';
       editBtn.addEventListener('click', () => openDrawerForEdit(index));
 
-      header.appendChild(title);
-      header.appendChild(editBtn);
+      action.appendChild(editBtn);
 
-      const content = document.createElement('div');
-      content.className = 'mt-4 space-y-2';
+      row.appendChild(range);
+      row.appendChild(approverDetail);
+      row.appendChild(action);
 
-      const label = document.createElement('p');
-      label.className = 'text-xs font-medium uppercase tracking-wide text-slate-500';
-      label.textContent = 'Nominal Transaksi';
-
-      const range = document.createElement('p');
-      range.className = 'text-sm text-slate-600';
-      range.innerHTML = `Min. <span class="font-semibold text-slate-900">${formatCurrency(rule.min)}</span> » Max. <span class="font-semibold text-slate-900">${formatCurrency(rule.max)}</span>`;
-
-      const approverDetail = document.createElement('p');
-      approverDetail.className = 'text-sm text-slate-500';
-      const suffix = rule.approvers === 1 ? 'Penyetuju' : 'Penyetuju';
-      approverDetail.textContent = `${rule.approvers} ${suffix}`;
-
-      content.appendChild(label);
-      content.appendChild(range);
-      content.appendChild(approverDetail);
-
-      card.appendChild(header);
-      card.appendChild(content);
-
-      cardsContainer.appendChild(card);
+      cardsContainer.appendChild(row);
     });
 
     updateEmptyState();

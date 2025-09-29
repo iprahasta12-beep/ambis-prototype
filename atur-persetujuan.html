@@ -156,38 +156,26 @@
           <button class="px-4 py-2 text-slate-600 hover:text-slate-900">Beli &amp; Bayar</button>
         </div>
 
-        <!-- Table -->
-        <section class="space-y-6">
-          <div class="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h3 class="text-lg font-semibold text-slate-900">Daftar Persetujuan Transfer</h3>
-              <p class="text-sm text-slate-500">Aturan persetujuan yang tersimpan akan muncul sebagai kartu di bawah ini.</p>
-            </div>
-            <button
-              id="addApprovalRuleBtn"
-              type="button"
-              class="rounded-xl border border-cyan-500 px-4 py-2 text-sm font-semibold text-cyan-600 hover:bg-cyan-50"
-            >
-              Tambah Aturan
-            </button>
-          </div>
-
+        <!-- Persetujuan Transfer Table -->
+        <section class="space-y-4">
           <div
             id="approvalLimitNotice"
             class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
           ></div>
 
-          <div id="approvalCardsContainer" class="space-y-4"></div>
-
-          <div
-            id="approvalEmptyState"
-            class="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center text-slate-500"
-          >
-            <p class="text-sm">
-              Belum ada persetujuan transfer. Klik
-              <span class="font-semibold text-slate-700">Tambah Aturan</span>
-              untuk membuatnya.
-            </p>
+          <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+            <div class="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] items-center gap-4 bg-[#F8F8F8] px-6 py-3 text-sm font-semibold text-slate-700">
+              <span class="text-left">Nominal Transaksi</span>
+              <span class="text-center">Jumlah Persetujuan</span>
+              <span class="text-right"></span>
+            </div>
+            <div id="approvalRowsContainer" class="divide-y divide-slate-100"></div>
+            <div
+              id="approvalEmptyState"
+              class="hidden px-6 py-10 text-center text-sm text-slate-500"
+            >
+              Belum ada persetujuan transfer.
+            </div>
           </div>
         </section>
 
