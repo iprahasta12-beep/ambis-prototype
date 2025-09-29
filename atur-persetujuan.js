@@ -29,6 +29,8 @@
 
   let nextId = 1;
 
+  let isDrawerOpen = drawer?.getAttribute('aria-hidden') === 'false';
+
   const state = {
     approvals: [],
     mode: 'create',
@@ -182,14 +184,31 @@
 
   function updateConfirmState() {
     if (!confirmBtn) return;
-    confirmBtn.disabled = !isCoverageComplete();
+    const canConfirm = matrixGenerated && isCoverageComplete() && !isDrawerOpen;
+    confirmBtn.disabled = !canConfirm;
   }
 
   function updateAddButtonState() {
     if (!addRuleBtn) return;
-    addRuleBtn.disabled = computeNextMin() > MAX_LIMIT;
+    const nextMin = computeNextMin();
+    const disabled = isDrawerOpen || nextMin > MAX_LIMIT;
+    addRuleBtn.disabled = disabled;
     addRuleBtn.classList.toggle('opacity-50', addRuleBtn.disabled);
     addRuleBtn.classList.toggle('cursor-not-allowed', addRuleBtn.disabled);
+  }
+
+  function updateEditButtonsState() {
+    const disabled = isDrawerOpen;
+    if (rowsContainer) {
+      rowsContainer.querySelectorAll('button').forEach((button) => {
+        button.disabled = disabled;
+      });
+    }
+    if (matrixList) {
+      matrixList.querySelectorAll('button').forEach((button) => {
+        button.disabled = disabled;
+      });
+    }
   }
 
   function hideLimitNotice() {
@@ -328,6 +347,7 @@
     renderMatrixCards();
     updateConfirmState();
     updateAddButtonState();
+    updateEditButtonsState();
     updateLimitNotice();
   }
 
@@ -340,12 +360,17 @@
     if (!drawer) return;
     drawer.classList.add('open');
     drawer.setAttribute('aria-hidden', 'false');
+    isDrawerOpen = true;
+    updateConfirmState();
+    updateAddButtonState();
+    updateEditButtonsState();
   }
 
   function closeDrawer() {
     if (!drawer) return;
     drawer.classList.remove('open');
     drawer.setAttribute('aria-hidden', 'true');
+    isDrawerOpen = false;
     state.mode = 'create';
     state.editingIndex = null;
     state.requiredMin = computeNextMin();
@@ -356,6 +381,9 @@
     resetErrors();
     updateDrawerTitle();
     updateButtonStates();
+    updateConfirmState();
+    updateAddButtonState();
+    updateEditButtonsState();
   }
 
   function prepareFormForMode() {
