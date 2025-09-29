@@ -157,50 +157,39 @@
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto rounded-xl border border-slate-200">
-          <table class="min-w-full">
-            <thead class="bg-slate-50 text-slate-600">
-              <tr>
-                <th class="text-left px-4 py-3 font-medium">Nominal Transaksi</th>
-                <th class="text-left px-4 py-3 font-medium">Jumlah Persetujuan</th>
-                <th class="px-4 py-3"></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y">
-              <tr class="hover:bg-slate-50" data-approval-row="top">
-                <td class="px-4 py-3" data-range-cell>Rp 1 – Rp 200.000.000</td>
-                <td class="px-4 py-3" data-approver-cell>2 Penyetuju</td>
-                <td class="px-4 py-3 text-right">
-                  <button
-                    type="button"
-                    class="approval-edit-btn px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50"
-                    data-requires-confirm="true"
-                    data-min="1"
-                    data-max="200000000"
-                    data-approvers="2"
-                  >
-                    Ubah
-                  </button>
-                </td>
-              </tr>
-              <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3">Rp 200.000.001 – Rp 500.000.000</td>
-                <td class="px-4 py-3">3 Penyetuju</td>
-                <td class="px-4 py-3 text-right">
-                  <button
-                    type="button"
-                    class="approval-edit-btn px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50"
-                    data-min="200000001"
-                    data-max="500000000"
-                    data-approvers="3"
-                  >
-                    Ubah
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <section class="space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h3 class="text-lg font-semibold text-slate-900">Daftar Persetujuan Transfer</h3>
+              <p class="text-sm text-slate-500">Aturan persetujuan yang tersimpan akan muncul sebagai kartu di bawah ini.</p>
+            </div>
+            <button
+              id="addApprovalRuleBtn"
+              type="button"
+              class="rounded-xl border border-cyan-500 px-4 py-2 text-sm font-semibold text-cyan-600 hover:bg-cyan-50"
+            >
+              Tambah Aturan
+            </button>
+          </div>
+
+          <div
+            id="approvalLimitNotice"
+            class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+          ></div>
+
+          <div id="approvalCardsContainer" class="space-y-4"></div>
+
+          <div
+            id="approvalEmptyState"
+            class="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center text-slate-500"
+          >
+            <p class="text-sm">
+              Belum ada persetujuan transfer. Klik
+              <span class="font-semibold text-slate-700">Tambah Aturan</span>
+              untuk membuatnya.
+            </p>
+          </div>
+        </section>
 
       </div>
     </main>
@@ -210,7 +199,7 @@
     <div id="drawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100" aria-hidden="true">
       <div id="approvalPane" class="h-full flex flex-col">
         <div class="flex items-center justify-between px-6 py-4 border-b">
-          <h2 class="text-lg font-semibold">Ubah Persetujuan Transfer</h2>
+          <h2 id="approvalDrawerTitle" class="text-lg font-semibold">Ubah Persetujuan Transfer</h2>
           <button id="approvalDrawerClose" type="button" class="text-2xl leading-none">&times;</button>
         </div>
         <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">

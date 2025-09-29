@@ -4,27 +4,37 @@
   const DEFAULT_MAX_APPROVERS = 10;
 
   const drawer = document.getElementById('drawer');
+  const drawerTitle = document.getElementById('approvalDrawerTitle');
   const drawerCloseBtn = document.getElementById('approvalDrawerClose');
   const saveBtn = document.getElementById('saveChangesBtn');
   const confirmBtn = document.getElementById('confirmApprovalBtn');
+  const minInput = document.getElementById('minLimitInput');
   const maxInput = document.getElementById('maxLimitInput');
   const maxError = document.getElementById('maxLimitError');
   const approverInput = document.getElementById('approverCountInput');
   const approverError = document.getElementById('approverCountError');
-  const editButtons = Array.from(document.querySelectorAll('.approval-edit-btn'));
+  const addRuleBtn = document.getElementById('addApprovalRuleBtn');
+  const cardsContainer = document.getElementById('approvalCardsContainer');
+  const emptyState = document.getElementById('approvalEmptyState');
+  const limitNotice = document.getElementById('approvalLimitNotice');
 
-  const dialogContainer = document.getElementById('topApprovalDialogContainer');
-  const dialogOverlay = document.getElementById('topApprovalDialogOverlay');
-  const dialogCancel = document.getElementById('topApprovalDialogCancel');
-  const dialogProceed = document.getElementById('topApprovalDialogProceed');
+  let approvals = [
+    { id: 'rule-1', min: MIN_LIMIT, max: 200_000_000, approvers: 2 },
+    { id: 'rule-2', min: 200_000_000 + 1, max: MAX_LIMIT, approvers: 3 },
+  ];
+  let nextId = approvals.length + 1;
 
-  let pendingButton = null;
-  let activeRowButton = null;
+  let currentInitialData = {
+    id: null,
+    index: null,
+    min: MIN_LIMIT,
+    max: null,
+    approvers: null,
+    maxApprovers: DEFAULT_MAX_APPROVERS,
+    isNew: true,
+  };
+
   let formDirty = false;
-  let formSaved = false;
-  let maxTouched = false;
-  let approverTouched = false;
-  let currentInitialData = { min: MIN_LIMIT, max: null, approvers: null, maxApprovers: DEFAULT_MAX_APPROVERS };
 
   function formatCurrency(value) {
     if (typeof value !== 'number' || Number.isNaN(value)) return '';
@@ -39,16 +49,10 @@
     return Number.isNaN(parsed) ? null : parsed;
   }
 
-  function getMaxValue() {
-    return parseCurrency(maxInput?.value || '');
-  }
-
-  function getApproverValue() {
-    if (!approverInput) return null;
-    const digits = approverInput.value.replace(/[^0-9]/g, '');
-    if (!digits) return null;
-    const parsed = parseInt(digits, 10);
-    return Number.isNaN(parsed) ? null : parsed;
+  function generateId() {
+    const id = `rule-${nextId}`;
+    nextId += 1;
+    return id;
   }
 
   function hideError(el) {
@@ -63,53 +67,18 @@
     el.classList.remove('hidden');
   }
 
-  function isMaxValid() {
-    const value = getMaxValue();
-    return value !== null && value >= MIN_LIMIT && value <= MAX_LIMIT;
-  }
-
-  function isApproverValid() {
-    const value = getApproverValue();
-    const maxAllowed = currentInitialData.maxApprovers || DEFAULT_MAX_APPROVERS;
-    return value !== null && value >= 1 && value <= maxAllowed;
-  }
-
-  function updateButtonStates() {
-    if (saveBtn) {
-      const valid = isMaxValid() && isApproverValid();
-      saveBtn.disabled = !(valid && formDirty);
-    }
-    if (confirmBtn) {
-      confirmBtn.disabled = !formSaved;
-    }
-  }
-
   function clearErrors() {
     hideError(maxError);
     hideError(approverError);
   }
 
-  function hasChanges() {
-    const currentMax = getMaxValue();
-    const currentApprovers = getApproverValue();
-    const initialMax = currentInitialData.max;
-    const initialApprovers = currentInitialData.approvers;
-    const normalizedCurrentMax = currentMax === null ? null : currentMax;
-    const normalizedInitialMax = typeof initialMax === 'number' ? initialMax : null;
-    const normalizedCurrentApprovers = currentApprovers === null ? null : currentApprovers;
-    const normalizedInitialApprovers = typeof initialApprovers === 'number' ? initialApprovers : null;
-    return (
-      normalizedCurrentMax !== normalizedInitialMax ||
-      normalizedCurrentApprovers !== normalizedInitialApprovers
-    );
-  }
-
-  function markDirty() {
-    formDirty = hasChanges();
-    if (formDirty) {
-      formSaved = false;
+  function setMinValue(value) {
+    if (!minInput) return;
+    if (value === null || typeof value === 'undefined') {
+      minInput.value = '';
+    } else {
+      minInput.value = formatCurrency(value);
     }
-    updateButtonStates();
   }
 
   function setMaxValue(value) {
@@ -133,35 +102,228 @@
     }
   }
 
+  function getMaxValue() {
+    return parseCurrency(maxInput?.value || '');
+  }
+
+  function getApproverValue() {
+    if (!approverInput) return null;
+    const digits = approverInput.value.replace(/[^0-9]/g, '');
+    if (!digits) return null;
+    const parsed = parseInt(digits, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  function hasChanges() {
+    const currentMax = getMaxValue();
+    const currentApprovers = getApproverValue();
+    const initialMax = currentInitialData.max;
+    const initialApprovers = currentInitialData.approvers;
+    const normalizedCurrentMax = currentMax === null ? null : currentMax;
+    const normalizedInitialMax = typeof initialMax === 'number' ? initialMax : null;
+    const normalizedCurrentApprovers = currentApprovers === null ? null : currentApprovers;
+    const normalizedInitialApprovers = typeof initialApprovers === 'number' ? initialApprovers : null;
+    return (
+      normalizedCurrentMax !== normalizedInitialMax ||
+      normalizedCurrentApprovers !== normalizedInitialApprovers
+    );
+  }
+
+  function getMaxValidationError() {
+    const value = getMaxValue();
+    const minValue = currentInitialData.min ?? MIN_LIMIT;
+
+    if (value === null) {
+      return 'Batas maksimal wajib diisi.';
+    }
+
+    if (value < minValue || value > MAX_LIMIT) {
+      return `Batas maksimal harus antara ${formatCurrency(minValue)} hingga ${formatCurrency(MAX_LIMIT)}.`;
+    }
+
+    if (!currentInitialData.isNew && typeof currentInitialData.index === 'number') {
+      const nextRule = approvals[currentInitialData.index + 1];
+      if (nextRule && value >= nextRule.max) {
+        return `Batas maksimal harus kurang dari ${formatCurrency(nextRule.max)}.`;
+      }
+    }
+
+    return null;
+  }
+
+  function getApproverValidationError() {
+    const value = getApproverValue();
+    const maxAllowed = currentInitialData.maxApprovers || DEFAULT_MAX_APPROVERS;
+
+    if (value === null) {
+      return 'Jumlah penyetuju wajib diisi.';
+    }
+
+    if (value < 1 || value > maxAllowed) {
+      return `Jumlah penyetuju harus antara 1 hingga ${maxAllowed}.`;
+    }
+
+    return null;
+  }
+
+  function isMaxValid() {
+    return getMaxValidationError() === null;
+  }
+
+  function isApproverValid() {
+    return getApproverValidationError() === null;
+  }
+
+  function markDirty() {
+    formDirty = hasChanges();
+    updateButtonStates();
+  }
+
   function applyInitialData(data) {
     currentInitialData = {
+      id: typeof data.id === 'string' ? data.id : null,
+      index: typeof data.index === 'number' ? data.index : null,
       min: typeof data.min === 'number' ? data.min : MIN_LIMIT,
       max: typeof data.max === 'number' ? data.max : null,
       approvers: typeof data.approvers === 'number' ? data.approvers : null,
       maxApprovers: typeof data.maxApprovers === 'number' ? data.maxApprovers : DEFAULT_MAX_APPROVERS,
+      isNew: Boolean(data.isNew),
     };
 
+    setMinValue(currentInitialData.min);
     setMaxValue(currentInitialData.max);
     setApproverValue(currentInitialData.approvers);
 
     formDirty = false;
-    formSaved = false;
-    maxTouched = false;
-    approverTouched = false;
     clearErrors();
     updateButtonStates();
   }
 
-  function openDrawer(button) {
-    if (!drawer || !button) return;
+  function recomputeSequentialMins() {
+    approvals.forEach((rule, index) => {
+      if (index === 0) {
+        rule.min = MIN_LIMIT;
+      } else {
+        rule.min = approvals[index - 1].max + 1;
+      }
+    });
+  }
 
-    activeRowButton = button;
-    const min = parseCurrency(button.getAttribute('data-min')) ?? MIN_LIMIT;
-    const max = parseCurrency(button.getAttribute('data-max'));
-    const approvers = parseCurrency(button.getAttribute('data-approvers'));
-    const maxApprovers = parseCurrency(button.getAttribute('data-max-approvers')) || DEFAULT_MAX_APPROVERS;
+  function computeNextMin() {
+    if (!approvals.length) {
+      return MIN_LIMIT;
+    }
+    return approvals[approvals.length - 1].max + 1;
+  }
 
-    applyInitialData({ min, max, approvers, maxApprovers });
+  function isCoverageComplete() {
+    if (!approvals.length) return false;
+    if (approvals[0].min !== MIN_LIMIT) return false;
+
+    for (let i = 1; i < approvals.length; i += 1) {
+      const expectedMin = approvals[i - 1].max + 1;
+      if (approvals[i].min !== expectedMin) {
+        return false;
+      }
+    }
+
+    const lastRule = approvals[approvals.length - 1];
+    return lastRule.max === MAX_LIMIT;
+  }
+
+  function updateConfirmState() {
+    if (!confirmBtn) return;
+    confirmBtn.disabled = !isCoverageComplete();
+  }
+
+  function updateEmptyState() {
+    if (!cardsContainer || !emptyState) return;
+    if (!approvals.length) {
+      emptyState.classList.remove('hidden');
+      cardsContainer.classList.add('hidden');
+    } else {
+      emptyState.classList.add('hidden');
+      cardsContainer.classList.remove('hidden');
+    }
+  }
+
+  function hideLimitNotice() {
+    if (!limitNotice) return;
+    limitNotice.classList.add('hidden');
+    limitNotice.textContent = '';
+  }
+
+  function showLimitNotice(message) {
+    if (!limitNotice) return;
+    limitNotice.textContent = message;
+    limitNotice.classList.remove('hidden');
+  }
+
+  function renderApprovals() {
+    if (!cardsContainer) return;
+
+    recomputeSequentialMins();
+    cardsContainer.innerHTML = '';
+
+    approvals.forEach((rule, index) => {
+      const card = document.createElement('article');
+      card.className = 'rounded-2xl border border-slate-200 bg-white p-5 shadow-sm';
+      card.dataset.id = rule.id;
+
+      const header = document.createElement('div');
+      header.className = 'flex items-start justify-between gap-4';
+
+      const title = document.createElement('h3');
+      title.className = 'text-base font-semibold text-slate-900';
+      title.textContent = `Jumlah Approval ${rule.approvers}`;
+
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'approval-edit-btn rounded-lg border border-cyan-500 px-4 py-1.5 text-sm font-semibold text-cyan-600 hover:bg-cyan-50';
+      editBtn.textContent = 'Ubah';
+      editBtn.addEventListener('click', () => openDrawerForEdit(index));
+
+      header.appendChild(title);
+      header.appendChild(editBtn);
+
+      const content = document.createElement('div');
+      content.className = 'mt-4 space-y-2';
+
+      const label = document.createElement('p');
+      label.className = 'text-xs font-medium uppercase tracking-wide text-slate-500';
+      label.textContent = 'Nominal Transaksi';
+
+      const range = document.createElement('p');
+      range.className = 'text-sm text-slate-600';
+      range.innerHTML = `Min. <span class="font-semibold text-slate-900">${formatCurrency(rule.min)}</span> » Max. <span class="font-semibold text-slate-900">${formatCurrency(rule.max)}</span>`;
+
+      const approverDetail = document.createElement('p');
+      approverDetail.className = 'text-sm text-slate-500';
+      const suffix = rule.approvers === 1 ? 'Penyetuju' : 'Penyetuju';
+      approverDetail.textContent = `${rule.approvers} ${suffix}`;
+
+      content.appendChild(label);
+      content.appendChild(range);
+      content.appendChild(approverDetail);
+
+      card.appendChild(header);
+      card.appendChild(content);
+
+      cardsContainer.appendChild(card);
+    });
+
+    updateEmptyState();
+    updateConfirmState();
+  }
+
+  function openDrawerWithData(data) {
+    if (!drawer) return;
+
+    applyInitialData(data);
+
+    if (drawerTitle) {
+      drawerTitle.textContent = data.isNew ? 'Tambah Persetujuan Transfer' : 'Ubah Persetujuan Transfer';
+    }
 
     drawer.classList.add('open');
     drawer.setAttribute('aria-hidden', 'false');
@@ -171,14 +333,58 @@
     });
   }
 
+  function openDrawerForEdit(index) {
+    if (index < 0 || index >= approvals.length) return;
+    const rule = approvals[index];
+    hideLimitNotice();
+    openDrawerWithData({
+      id: rule.id,
+      index,
+      min: rule.min,
+      max: rule.max,
+      approvers: rule.approvers,
+      maxApprovers: DEFAULT_MAX_APPROVERS,
+      isNew: false,
+    });
+  }
+
+  function openDrawerForCreate() {
+    hideLimitNotice();
+    recomputeSequentialMins();
+    const nextMin = computeNextMin();
+
+    if (nextMin > MAX_LIMIT) {
+      showLimitNotice('Batas maksimal persetujuan sudah tercapai (Rp500.000.000).');
+      return;
+    }
+
+    const lastRule = approvals[approvals.length - 1];
+    if (lastRule && lastRule.max >= MAX_LIMIT) {
+      showLimitNotice('Batas maksimal persetujuan sudah tercapai (Rp500.000.000).');
+      return;
+    }
+
+    openDrawerWithData({
+      id: null,
+      index: approvals.length,
+      min: nextMin,
+      max: null,
+      approvers: null,
+      maxApprovers: DEFAULT_MAX_APPROVERS,
+      isNew: true,
+    });
+  }
+
   function resetDrawerState() {
     applyInitialData({
+      id: null,
+      index: null,
       min: MIN_LIMIT,
       max: null,
       approvers: null,
       maxApprovers: DEFAULT_MAX_APPROVERS,
+      isNew: true,
     });
-    activeRowButton = null;
   }
 
   function closeDrawer({ force = false } = {}) {
@@ -191,93 +397,64 @@
     resetDrawerState();
   }
 
-  function isDialogOpen() {
-    return dialogContainer && !dialogContainer.classList.contains('hidden');
-  }
-
-  function openDialog(button) {
-    if (!dialogContainer) {
-      openDrawer(button);
-      return;
+  function updateButtonStates() {
+    if (saveBtn) {
+      const maxValid = isMaxValid();
+      const approverValid = isApproverValid();
+      const dirty = hasChanges();
+      saveBtn.disabled = !(maxValid && approverValid && dirty);
     }
-    pendingButton = button;
-    dialogContainer.classList.remove('hidden');
-  }
-
-  function closeDialog() {
-    if (!dialogContainer) return;
-    dialogContainer.classList.add('hidden');
-    pendingButton = null;
   }
 
   function handleSave() {
-    const maxValid = isMaxValid();
-    const approverValid = isApproverValid();
+    const maxErrorMessage = getMaxValidationError();
+    const approverErrorMessage = getApproverValidationError();
 
-    if (!maxValid) {
-      const message = !getMaxValue()
-        ? 'Batas maksimal wajib diisi.'
-        : `Batas maksimal harus antara Rp1 hingga Rp${MAX_LIMIT.toLocaleString('id-ID')}.`;
-      showError(maxError, message);
+    if (maxErrorMessage) {
+      showError(maxError, maxErrorMessage);
     }
 
-    if (!approverValid) {
-      const maxAllowed = currentInitialData.maxApprovers || DEFAULT_MAX_APPROVERS;
-      const message = !getApproverValue()
-        ? 'Jumlah penyetuju wajib diisi.'
-        : `Jumlah penyetuju harus antara 1 hingga ${maxAllowed}.`;
-      showError(approverError, message);
+    if (approverErrorMessage) {
+      showError(approverError, approverErrorMessage);
     }
 
-    if (!maxValid || !approverValid) {
-      maxTouched = true;
-      approverTouched = true;
+    if (maxErrorMessage || approverErrorMessage) {
       return;
     }
 
-    currentInitialData = {
-      ...currentInitialData,
-      max: getMaxValue(),
-      approvers: getApproverValue(),
-    };
-
-    formDirty = false;
-    formSaved = true;
-    updateButtonStates();
-  }
-
-  function updateRowValues() {
-    if (!activeRowButton) return;
-    const row = activeRowButton.closest('tr');
-    if (!row) return;
-    const rangeCell = row.querySelector('[data-range-cell]');
-    const approverCell = row.querySelector('[data-approver-cell]');
-
-    const minValue = currentInitialData.min ?? MIN_LIMIT;
     const maxValue = getMaxValue();
     const approverValue = getApproverValue();
 
-    if (rangeCell && maxValue !== null) {
-      rangeCell.textContent = `${formatCurrency(minValue)} – ${formatCurrency(maxValue)}`;
+    if (maxValue === null || approverValue === null) {
+      return;
     }
 
-    if (approverCell && approverValue !== null) {
-      const suffix = approverValue === 1 ? 'Penyetuju' : 'Penyetuju';
-      approverCell.textContent = `${approverValue} ${suffix}`;
+    if (currentInitialData.isNew) {
+      approvals.push({
+        id: generateId(),
+        min: currentInitialData.min,
+        max: maxValue,
+        approvers: approverValue,
+      });
+    } else if (typeof currentInitialData.index === 'number' && approvals[currentInitialData.index]) {
+      approvals[currentInitialData.index] = {
+        ...approvals[currentInitialData.index],
+        max: maxValue,
+        approvers: approverValue,
+      };
     }
 
-    if (maxValue !== null) {
-      activeRowButton.setAttribute('data-max', String(maxValue));
-    }
-    if (approverValue !== null) {
-      activeRowButton.setAttribute('data-approvers', String(approverValue));
-    }
+    renderApprovals();
+    formDirty = false;
+    closeDrawer({ force: true });
   }
 
-  function handleConfirmSubmission() {
-    if (!formSaved) return;
-    updateRowValues();
-    closeDrawer({ force: true });
+  function handleConfirm() {
+    if (!isCoverageComplete()) {
+      window.alert('Lengkapi aturan persetujuan hingga Rp500.000.000 sebelum mengkonfirmasi.');
+      return;
+    }
+    window.alert('Persetujuan transfer berhasil dikonfirmasi.');
   }
 
   function handleMaxInput(event) {
@@ -298,12 +475,9 @@
   }
 
   function handleMaxBlur() {
-    maxTouched = true;
-    if (!isMaxValid()) {
-      const message = !getMaxValue()
-        ? 'Batas maksimal wajib diisi.'
-        : `Batas maksimal harus antara Rp1 hingga Rp${MAX_LIMIT.toLocaleString('id-ID')}.`;
-      showError(maxError, message);
+    const errorMessage = getMaxValidationError();
+    if (errorMessage) {
+      showError(maxError, errorMessage);
     }
   }
 
@@ -316,41 +490,25 @@
   }
 
   function handleApproverBlur() {
-    approverTouched = true;
-    if (!isApproverValid()) {
-      const maxAllowed = currentInitialData.maxApprovers || DEFAULT_MAX_APPROVERS;
-      const message = !getApproverValue()
-        ? 'Jumlah penyetuju wajib diisi.'
-        : `Jumlah penyetuju harus antara 1 hingga ${maxAllowed}.`;
-      showError(approverError, message);
-    }
-  }
-
-  function handleEditButtonClick(button) {
-    const requiresConfirm = button.getAttribute('data-requires-confirm') === 'true';
-    if (requiresConfirm) {
-      openDialog(button);
-    } else {
-      openDrawer(button);
+    const errorMessage = getApproverValidationError();
+    if (errorMessage) {
+      showError(approverError, errorMessage);
     }
   }
 
   function handleKeyDown(event) {
     if (event.key !== 'Escape') return;
-    if (isDialogOpen()) {
-      event.preventDefault();
-      closeDialog();
-      return;
-    }
     if (drawer && drawer.classList.contains('open')) {
       event.preventDefault();
       closeDrawer();
     }
   }
 
-  editButtons.forEach((button) => {
-    button.addEventListener('click', () => handleEditButtonClick(button));
-  });
+  renderApprovals();
+
+  if (addRuleBtn) {
+    addRuleBtn.addEventListener('click', openDrawerForCreate);
+  }
 
   if (drawerCloseBtn) {
     drawerCloseBtn.addEventListener('click', () => closeDrawer());
@@ -361,7 +519,7 @@
   }
 
   if (confirmBtn) {
-    confirmBtn.addEventListener('click', handleConfirmSubmission);
+    confirmBtn.addEventListener('click', handleConfirm);
   }
 
   if (maxInput) {
@@ -372,24 +530,6 @@
   if (approverInput) {
     approverInput.addEventListener('input', handleApproverInput);
     approverInput.addEventListener('blur', handleApproverBlur);
-  }
-
-  if (dialogCancel) {
-    dialogCancel.addEventListener('click', () => closeDialog());
-  }
-
-  if (dialogOverlay) {
-    dialogOverlay.addEventListener('click', () => closeDialog());
-  }
-
-  if (dialogProceed) {
-    dialogProceed.addEventListener('click', () => {
-      const button = pendingButton;
-      closeDialog();
-      if (button) {
-        openDrawer(button);
-      }
-    });
   }
 
   document.addEventListener('keydown', handleKeyDown);
