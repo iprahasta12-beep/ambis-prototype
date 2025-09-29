@@ -38,15 +38,7 @@
 
   let currentInitial = { min: MIN_LIMIT, max: null, approvers: null };
 
-  state.approvals = [
-    {
-      id: `matrix-${nextId}`,
-      min: MIN_LIMIT,
-      max: MAX_LIMIT,
-      approvers: 2,
-    },
-  ];
-  nextId += 1;
+  state.approvals = [];
 
   let matrixGenerated = false;
 
