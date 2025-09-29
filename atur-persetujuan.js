@@ -1,6 +1,6 @@
 (function () {
   const MIN_LIMIT = 1;
-  const MAX_LIMIT = 500_000_000;
+  const MAX_LIMIT = 200_000_000;
 
   const drawer = document.getElementById('drawer');
   const drawerCloseBtn = document.getElementById('approvalDrawerClose');
@@ -27,9 +27,7 @@
 
   const state = {
     tableRows: [
-      { id: 'table-1', min: 1, max: 100_000_000, approvers: 1 },
-      { id: 'table-2', min: 100_000_001, max: 300_000_000, approvers: 2 },
-      { id: 'table-3', min: 300_000_001, max: MAX_LIMIT, approvers: 3 },
+      { id: 'table-1', min: 1, max: MAX_LIMIT, approvers: 2 },
     ],
     matrixEntries: [],
     drawerContext: null,
@@ -191,7 +189,7 @@
 
     const title = document.createElement('p');
     title.className = 'text-sm font-bold text-slate-900 mb-4';
-    title.textContent = `Jumlah Approval ${entry.approvers}`;
+    title.textContent = `Jumlah Approval = ${entry.approvers}`;
 
     const subtitle = document.createElement('p');
     subtitle.className = 'text-xs font-semibold tracking-wide text-slate-400';
@@ -269,9 +267,36 @@
     );
   }
 
+  function areValuesValid(values) {
+    if (!values) {
+      return false;
+    }
+
+    const { min, max, approvers } = values;
+
+    if (min == null || max == null || approvers == null) {
+      return false;
+    }
+
+    if (min < MIN_LIMIT || max > MAX_LIMIT) {
+      return false;
+    }
+
+    if (max < min) {
+      return false;
+    }
+
+    if (!Number.isInteger(approvers) || approvers < 1) {
+      return false;
+    }
+
+    return true;
+  }
+
   function updateSaveButtonState() {
     if (!saveBtn) return;
-    saveBtn.disabled = !hasInputChanges();
+    const current = getCurrentInputValues();
+    saveBtn.disabled = !(hasInputChanges() && areValuesValid(current));
   }
 
   function validateInputs() {
@@ -312,33 +337,30 @@
     return hasError ? null : { min, max, approvers };
   }
 
-  function computeCoverageComplete(entries) {
+  function hasSingleMatrixCoveringMax(entries) {
     if (!entries.length) {
       return false;
     }
 
-    const sorted = [...entries].sort((a, b) => a.min - b.min);
-    let nextCoverageStart = MIN_LIMIT;
-
-    for (const entry of sorted) {
-      if (entry.min > nextCoverageStart) {
+    const coveringEntries = entries.filter((entry) => {
+      if (entry == null) {
         return false;
       }
-      const entryMax = Math.max(entry.min, entry.max);
-      if (entryMax >= nextCoverageStart) {
-        nextCoverageStart = entryMax + 1;
-      }
-      if (nextCoverageStart > MAX_LIMIT) {
-        return true;
-      }
-    }
 
-    return nextCoverageStart > MAX_LIMIT;
+      const { min, max } = entry;
+      if (min == null || max == null) {
+        return false;
+      }
+
+      return min <= MAX_LIMIT && max === MAX_LIMIT;
+    });
+
+    return coveringEntries.length === 1;
   }
 
   function updateConfirmButtonState() {
     if (!confirmBtn) return;
-    confirmBtn.disabled = !computeCoverageComplete(state.matrixEntries);
+    confirmBtn.disabled = !hasSingleMatrixCoveringMax(state.matrixEntries);
   }
 
   function handleSave() {
@@ -373,10 +395,14 @@
   }
 
   function handleConfirm() {
-    if (!computeCoverageComplete(state.matrixEntries)) {
+    if (!hasSingleMatrixCoveringMax(state.matrixEntries)) {
       return;
     }
-    window.alert('Persetujuan user berhasil dikonfirmasi.');
+
+    // Placeholder for future confirmation bottom sheet integration.
+    window.dispatchEvent(new CustomEvent('approval:confirm-transfer', {
+      detail: { entries: [...state.matrixEntries] },
+    }));
   }
 
   function handleClose() {
