@@ -23,6 +23,7 @@
 
   const matrixSection = document.getElementById('approvalMatrixSection');
   const matrixList = document.getElementById('approvalMatrixList');
+  const formFieldsSection = document.getElementById('approvalFormFields');
 
   const numberFormatter = new Intl.NumberFormat('id-ID');
 
@@ -46,6 +47,8 @@
     },
   ];
   nextId += 1;
+
+  let matrixGenerated = false;
 
   function formatNumber(value) {
     if (typeof value !== 'number' || Number.isNaN(value)) return '';
@@ -254,16 +257,28 @@
     });
   }
 
+  function ensureMatrixPlacement() {
+    if (!matrixSection || !formFieldsSection) return;
+    if (matrixSection.nextElementSibling === formFieldsSection) {
+      return;
+    }
+    const parent = matrixSection.parentElement;
+    if (parent) {
+      parent.insertBefore(matrixSection, formFieldsSection);
+    }
+  }
+
   function renderMatrixCards() {
     if (!matrixSection || !matrixList) return;
 
     matrixList.innerHTML = '';
 
-    if (!state.approvals.length) {
+    if (!matrixGenerated || !state.approvals.length) {
       matrixSection.classList.add('hidden');
       return;
     }
 
+    ensureMatrixPlacement();
     matrixSection.classList.remove('hidden');
 
     state.approvals.forEach((rule, index) => {
@@ -587,6 +602,7 @@
 
     const maxValue = getMaxValue();
     const approverValue = getApproverValue();
+    const hadChanges = hasChanges();
 
     if (maxValue == null || approverValue == null) {
       return;
@@ -605,6 +621,10 @@
         max: maxValue,
         approvers: approverValue,
       });
+    }
+
+    if (hadChanges) {
+      matrixGenerated = true;
     }
 
     renderAll();
