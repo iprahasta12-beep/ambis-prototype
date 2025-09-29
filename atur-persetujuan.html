@@ -163,6 +163,17 @@
             class="hidden rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
           ></div>
 
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-base font-semibold text-slate-800">Daftar Persetujuan Transfer</h3>
+            <button
+              id="addApprovalRuleBtn"
+              type="button"
+              class="inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-500 px-4 py-2 text-sm font-semibold text-cyan-600 transition hover:bg-cyan-50"
+            >
+              Tambah Persetujuan
+            </button>
+          </div>
+
           <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
             <div class="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] items-center gap-4 bg-[#F8F8F8] px-6 py-3 text-sm font-semibold text-slate-700">
               <span class="text-left">Nominal Transaksi</span>
@@ -198,6 +209,11 @@
             </p>
           </div>
 
+          <div id="approvalMatrixSection" class="hidden space-y-4">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Daftar Approval Matrix</h3>
+            <div id="approvalMatrixList" class="space-y-3"></div>
+          </div>
+
           <div class="space-y-6">
             <div class="grid gap-4 md:grid-cols-2">
               <div>
@@ -205,11 +221,11 @@
                 <input
                   id="minLimitInput"
                   type="text"
-                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left text-slate-500"
+                  inputmode="numeric"
+                  class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-left focus:outline-none focus:ring-2 focus:ring-cyan-400"
                   placeholder="Rp 1"
-                  value="Rp 1"
-                  disabled
                 />
+                <p id="minLimitError" class="mt-2 text-sm text-red-500 hidden"></p>
               </div>
               <div>
                 <label for="maxLimitInput" class="block mb-2 font-medium text-slate-700">Batas Maksimal</label>
@@ -247,7 +263,7 @@
 
           <div class="pt-6 border-t border-slate-200">
             <button id="saveChangesBtn" type="button" class="w-full rounded-xl border border-cyan-500 text-cyan-600 font-semibold py-3 hover:bg-cyan-50" disabled>
-              Simpan Perubahan
+              Simpan
             </button>
           </div>
         </div>
