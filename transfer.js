@@ -60,6 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const summaryFee = document.getElementById('summaryFee');
   const summaryTotal = document.getElementById('summaryTotal');
 
+  // approval list
+  const approvalRowsContainer = document.getElementById('transferApprovalRows');
+
   // generic bottom sheet
   const sheetOverlay = document.getElementById('sheetOverlay');
   const sheet       = document.getElementById('bottomSheet');
@@ -197,6 +200,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const formatter = new Intl.NumberFormat('id-ID');
 
+  const transferApprovalRules = [
+    { id: 'transfer-approval-1', min: 1, max: 200_000_000, approvers: 2 },
+    { id: 'transfer-approval-2', min: 200_000_001, max: 500_000_000, approvers: 3 },
+  ];
+
+  function formatApprovalRange(min, max) {
+    const minText = `Rp${formatter.format(min)}`;
+    if (!max) {
+      return `${minText} ke atas`;
+    }
+    const maxText = `Rp${formatter.format(max)}`;
+    return `${minText} – ${maxText}`;
+  }
+
+  function renderTransferApprovalRules() {
+    if (!approvalRowsContainer) return;
+
+    approvalRowsContainer.innerHTML = '';
+
+    transferApprovalRules.forEach((rule, index) => {
+      const row = document.createElement('div');
+      row.className = 'grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_180px_auto] items-center gap-3 px-6 py-4';
+      if (index !== transferApprovalRules.length - 1) {
+        row.classList.add('border-b', 'border-slate-200');
+      }
+
+      const amountEl = document.createElement('p');
+      amountEl.className = 'text-sm text-slate-900';
+      amountEl.textContent = formatApprovalRange(rule.min, rule.max);
+
+      const approverEl = document.createElement('p');
+      approverEl.className = 'text-sm font-semibold text-slate-500 md:text-center';
+      approverEl.textContent = `${rule.approvers} Penyetuju`;
+
+      const actionWrapper = document.createElement('div');
+      actionWrapper.className = 'md:text-right md:justify-self-end';
+
+      const actionBtn = document.createElement('button');
+      actionBtn.type = 'button';
+      actionBtn.className = 'rounded-lg border border-cyan-500 px-4 py-2 text-sm font-semibold text-cyan-600 transition-colors hover:bg-cyan-500 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400';
+      actionBtn.textContent = 'Ubah';
+      actionBtn.dataset.approvalId = rule.id;
+      actionBtn.addEventListener('click', () => {
+        const event = new CustomEvent('transfer-approval:edit', { detail: rule });
+        window.dispatchEvent(event);
+      });
+
+      actionWrapper.appendChild(actionBtn);
+
+      row.appendChild(amountEl);
+      row.appendChild(approverEl);
+      row.appendChild(actionWrapper);
+
+      approvalRowsContainer.appendChild(row);
+    });
+  }
+
+  renderTransferApprovalRules();
 
   function isBusinessDay(date) {
     const day = date.getDay();

@@ -184,6 +184,38 @@
           </div>
         </div>
 
+        <!-- Persetujuan Transaksi -->
+        <section class="mt-10 space-y-4">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">Persetujuan Transaksi</h2>
+            <p class="text-sm text-slate-500">
+              Jumlah penyetuju per kisaran nominal transfer yang berlaku saat ini.
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+            <div class="flex items-center border-b border-slate-200">
+              <button type="button" class="relative px-6 py-3 text-sm font-semibold text-slate-900">
+                Transfer
+                <span class="absolute inset-x-0 bottom-0 h-[2px] bg-cyan-500"></span>
+              </button>
+              <button type="button" class="px-6 py-3 text-sm font-semibold text-slate-500 hover:text-slate-900">
+                Beli &amp; Bayar
+              </button>
+            </div>
+
+            <div class="bg-[#F8F8F8] text-sm font-semibold text-slate-700">
+              <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_180px_auto] items-center gap-3 px-6 py-3">
+                <span class="text-left">Nominal Transaksi</span>
+                <span class="md:text-center">Jumlah Persetujuan</span>
+                <span class="md:text-right">&nbsp;</span>
+              </div>
+            </div>
+
+            <div id="transferApprovalRows" class="bg-white text-sm text-slate-600"></div>
+          </div>
+        </section>
+
       </div>
     </main>
     <!-- ============ /MAIN ============ -->
