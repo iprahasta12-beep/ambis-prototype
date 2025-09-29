@@ -17,6 +17,10 @@
   const cardsContainer = document.getElementById('approvalRowsContainer');
   const emptyState = document.getElementById('approvalEmptyState');
   const limitNotice = document.getElementById('approvalLimitNotice');
+  const topDialogContainer = document.getElementById('topApprovalDialogContainer');
+  const topDialogOverlay = document.getElementById('topApprovalDialogOverlay');
+  const topDialogCancel = document.getElementById('topApprovalDialogCancel');
+  const topDialogProceed = document.getElementById('topApprovalDialogProceed');
 
   let approvals = [
     { id: 'rule-1', min: MIN_LIMIT, max: 200_000_000, approvers: 2 },
@@ -35,6 +39,7 @@
   };
 
   let formDirty = false;
+  let pendingTopEditIndex = null;
 
   function formatCurrency(value) {
     if (typeof value !== 'number' || Number.isNaN(value)) return '';
@@ -179,7 +184,7 @@
     updateButtonStates();
   }
 
-  function applyInitialData(data) {
+  function applyInitialData(data, { fillInputs = true } = {}) {
     currentInitialData = {
       id: typeof data.id === 'string' ? data.id : null,
       index: typeof data.index === 'number' ? data.index : null,
@@ -190,9 +195,15 @@
       isNew: Boolean(data.isNew),
     };
 
-    setMinValue(currentInitialData.min);
-    setMaxValue(currentInitialData.max);
-    setApproverValue(currentInitialData.approvers);
+    if (fillInputs) {
+      setMinValue(currentInitialData.min);
+      setMaxValue(currentInitialData.max);
+      setApproverValue(currentInitialData.approvers);
+    } else {
+      setMinValue(null);
+      setMaxValue(null);
+      setApproverValue(null);
+    }
 
     formDirty = false;
     clearErrors();
@@ -287,7 +298,13 @@
       editBtn.type = 'button';
       editBtn.className = 'approval-edit-btn inline-flex items-center justify-center rounded-lg border border-cyan-500 bg-white px-4 py-2 text-sm font-semibold text-cyan-600 transition hover:bg-cyan-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400/60';
       editBtn.textContent = 'Ubah';
-      editBtn.addEventListener('click', () => openDrawerForEdit(index));
+      editBtn.addEventListener('click', () => {
+        if (index === 0) {
+          openTopApprovalDialog(index);
+        } else {
+          openDrawerForEdit(index);
+        }
+      });
 
       action.appendChild(editBtn);
 
@@ -302,10 +319,12 @@
     updateConfirmState();
   }
 
-  function openDrawerWithData(data) {
+  function openDrawerWithData(data, options = {}) {
     if (!drawer) return;
 
-    applyInitialData(data);
+    const { fillInputs = true, autoFocus = true } = options;
+
+    applyInitialData(data, { fillInputs });
 
     if (drawerTitle) {
       drawerTitle.textContent = data.isNew ? 'Tambah Persetujuan Transfer' : 'Ubah Persetujuan Transfer';
@@ -315,11 +334,13 @@
     drawer.setAttribute('aria-hidden', 'false');
 
     requestAnimationFrame(() => {
-      maxInput?.focus();
+      if (autoFocus) {
+        maxInput?.focus();
+      }
     });
   }
 
-  function openDrawerForEdit(index) {
+  function openDrawerForEdit(index, options = {}) {
     if (index < 0 || index >= approvals.length) return;
     const rule = approvals[index];
     hideLimitNotice();
@@ -331,7 +352,7 @@
       approvers: rule.approvers,
       maxApprovers: DEFAULT_MAX_APPROVERS,
       isNew: false,
-    });
+    }, options);
   }
 
   function openDrawerForCreate() {
@@ -381,6 +402,34 @@
     drawer.classList.remove('open');
     drawer.setAttribute('aria-hidden', 'true');
     resetDrawerState();
+  }
+
+  function openTopApprovalDialog(index) {
+    if (!topDialogContainer) {
+      openDrawerForEdit(index, { fillInputs: false, autoFocus: false });
+      return;
+    }
+    pendingTopEditIndex = index;
+    topDialogContainer.classList.remove('hidden');
+    topDialogContainer.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeTopApprovalDialog({ clearPending = true } = {}) {
+    if (!topDialogContainer) return;
+    topDialogContainer.classList.add('hidden');
+    topDialogContainer.setAttribute('aria-hidden', 'true');
+    if (clearPending) {
+      pendingTopEditIndex = null;
+    }
+  }
+
+  function proceedTopApprovalChange() {
+    const index = pendingTopEditIndex;
+    closeTopApprovalDialog({ clearPending: false });
+    pendingTopEditIndex = null;
+    if (typeof index === 'number') {
+      openDrawerForEdit(index, { fillInputs: false, autoFocus: false });
+    }
   }
 
   function updateButtonStates() {
@@ -484,6 +533,11 @@
 
   function handleKeyDown(event) {
     if (event.key !== 'Escape') return;
+    if (topDialogContainer && !topDialogContainer.classList.contains('hidden')) {
+      event.preventDefault();
+      closeTopApprovalDialog();
+      return;
+    }
     if (drawer && drawer.classList.contains('open')) {
       event.preventDefault();
       closeDrawer();
@@ -516,6 +570,18 @@
   if (approverInput) {
     approverInput.addEventListener('input', handleApproverInput);
     approverInput.addEventListener('blur', handleApproverBlur);
+  }
+
+  if (topDialogCancel) {
+    topDialogCancel.addEventListener('click', () => closeTopApprovalDialog());
+  }
+
+  if (topDialogOverlay) {
+    topDialogOverlay.addEventListener('click', () => closeTopApprovalDialog());
+  }
+
+  if (topDialogProceed) {
+    topDialogProceed.addEventListener('click', proceedTopApprovalChange);
   }
 
   document.addEventListener('keydown', handleKeyDown);
