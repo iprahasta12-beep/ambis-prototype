@@ -289,11 +289,11 @@
       content.className = 'space-y-1';
 
       const title = document.createElement('p');
-      title.className = 'text-sm font-semibold text-slate-700';
+      title.className = 'text-sm font-bold text-slate-900 mb-4';
       title.textContent = `Jumlah Approval ${rule.approvers}`;
 
       const subtitle = document.createElement('p');
-      subtitle.className = 'text-xs font-semibold uppercase tracking-wide text-slate-400';
+      subtitle.className = 'text-xs font-semibold tracking-wide text-slate-400';
       subtitle.textContent = 'Nominal Transaksi';
 
       const body = document.createElement('p');
