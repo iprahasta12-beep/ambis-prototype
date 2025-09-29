@@ -3,11 +3,14 @@
   const MAX_LIMIT = 500_000_000;
 
   const drawer = document.getElementById('drawer');
-  const drawerTitle = document.getElementById('approvalDrawerTitle');
   const drawerCloseBtn = document.getElementById('approvalDrawerClose');
-  const saveBtn = document.getElementById('saveChangesBtn');
-  const confirmBtn = document.getElementById('confirmApprovalBtn');
-  const addRuleBtn = document.getElementById('addApprovalRuleBtn');
+  const drawerTitle = document.getElementById('approvalDrawerTitle');
+
+  const rowsContainer = document.getElementById('approvalRowsContainer');
+  const emptyState = document.getElementById('approvalEmptyState');
+
+  const matrixSection = document.getElementById('approvalMatrixSection');
+  const matrixList = document.getElementById('approvalMatrixList');
 
   const minInput = document.getElementById('minLimitInput');
   const maxInput = document.getElementById('maxLimitInput');
@@ -17,73 +20,68 @@
   const maxError = document.getElementById('maxLimitError');
   const approverError = document.getElementById('approverCountError');
 
-  const limitNotice = document.getElementById('approvalLimitNotice');
-  const rowsContainer = document.getElementById('approvalRowsContainer');
-  const emptyState = document.getElementById('approvalEmptyState');
-
-  const matrixSection = document.getElementById('approvalMatrixSection');
-  const matrixList = document.getElementById('approvalMatrixList');
-  const formFieldsSection = document.getElementById('approvalFormFields');
+  const saveBtn = document.getElementById('saveChangesBtn');
+  const confirmBtn = document.getElementById('confirmApprovalBtn');
 
   const numberFormatter = new Intl.NumberFormat('id-ID');
 
-  let nextId = 1;
-
-  let isDrawerOpen = drawer?.getAttribute('aria-hidden') === 'false';
-
   const state = {
-    approvals: [],
-    mode: 'create',
-    editingIndex: null,
-    requiredMin: MIN_LIMIT,
+    tableRows: [
+      { id: 'table-1', min: 1, max: 100_000_000, approvers: 1 },
+      { id: 'table-2', min: 100_000_001, max: 300_000_000, approvers: 2 },
+      { id: 'table-3', min: 300_000_001, max: MAX_LIMIT, approvers: 3 },
+    ],
+    matrixEntries: [],
+    drawerContext: null,
+    editingMatrixIndex: null,
+    initialValues: { min: null, max: null, approvers: null },
+    isDrawerOpen: false,
+    nextMatrixId: 1,
   };
 
-  let currentInitial = { min: MIN_LIMIT, max: null, approvers: null };
-
-    state.approvals = [
-    {
-      id: `matrix-${nextId}`,
-      min: MIN_LIMIT,
-      max: MAX_LIMIT,
-      approvers: 2,
-    },
-  ];
-  nextId += 1;
-
-  let matrixGenerated = false;
-
-  function formatNumber(value) {
-    if (typeof value !== 'number' || Number.isNaN(value)) return '';
-    return numberFormatter.format(value);
-  }
-
-  function formatCurrency(value, { withSpace = true } = {}) {
-    if (typeof value !== 'number' || Number.isNaN(value)) return '';
-    return `Rp${withSpace ? ' ' : ''}${formatNumber(value)}`;
+  function formatCurrency(value) {
+    if (typeof value !== 'number' || Number.isNaN(value)) {
+      return '';
+    }
+    return `Rp ${numberFormatter.format(value)}`;
   }
 
   function parseCurrency(value) {
-    if (typeof value !== 'string' || value.trim() === '') return null;
+    if (typeof value !== 'string') {
+      return null;
+    }
     const digits = value.replace(/[^0-9]/g, '');
-    if (!digits) return null;
+    if (!digits) {
+      return null;
+    }
     const parsed = parseInt(digits, 10);
     return Number.isNaN(parsed) ? null : parsed;
   }
 
-  function hideElement(el) {
-    if (!el) return;
-    el.classList.add('hidden');
+  function setInputValue(input, value) {
+    if (!input) return;
+    if (value == null) {
+      input.value = '';
+    } else if (input === approverInput) {
+      input.value = String(value);
+    } else {
+      input.value = formatCurrency(value);
+    }
   }
 
-  function showElement(el) {
-    if (!el) return;
-    el.classList.remove('hidden');
-  }
-
-  function hideError(el) {
-    if (!el) return;
-    el.textContent = '';
-    el.classList.add('hidden');
+  function clearErrors() {
+    if (minError) {
+      minError.textContent = '';
+      minError.classList.add('hidden');
+    }
+    if (maxError) {
+      maxError.textContent = '';
+      maxError.classList.add('hidden');
+    }
+    if (approverError) {
+      approverError.textContent = '';
+      approverError.classList.add('hidden');
+    }
   }
 
   function showError(el, message) {
@@ -92,143 +90,46 @@
     el.classList.remove('hidden');
   }
 
-  function resetErrors() {
-    hideError(minError);
-    hideError(maxError);
-    hideError(approverError);
-  }
-
-  function setMinValue(value) {
-    if (!minInput) return;
-    minInput.value = value == null ? '' : formatCurrency(value);
-  }
-
-  function setMaxValue(value) {
-    if (!maxInput) return;
-    maxInput.value = value == null ? '' : formatCurrency(value);
-  }
-
-  function setApproverValue(value) {
-    if (!approverInput) return;
-    approverInput.value = value == null ? '' : String(value);
-  }
-
-  function getMinValue() {
-    return parseCurrency(minInput?.value ?? '');
-  }
-
-  function getMaxValue() {
-    return parseCurrency(maxInput?.value ?? '');
-  }
-
-  function getApproverValue() {
-    if (!approverInput) return null;
-    const digits = approverInput.value.replace(/[^0-9]/g, '');
-    if (!digits) return null;
-    const parsed = parseInt(digits, 10);
-    return Number.isNaN(parsed) ? null : parsed;
-  }
-
-  function hasChanges() {
-    const minValue = getMinValue();
-    const maxValue = getMaxValue();
-    const approverValue = getApproverValue();
-
-    const normalizedMin = typeof minValue === 'number' ? minValue : null;
-    const normalizedInitialMin = typeof currentInitial.min === 'number' ? currentInitial.min : null;
-
-    const normalizedMax = typeof maxValue === 'number' ? maxValue : null;
-    const normalizedInitialMax = typeof currentInitial.max === 'number' ? currentInitial.max : null;
-
-    const normalizedApprover = typeof approverValue === 'number' ? approverValue : null;
-    const normalizedInitialApprover = typeof currentInitial.approvers === 'number' ? currentInitial.approvers : null;
-
-    return (
-      normalizedMin !== normalizedInitialMin ||
-      normalizedMax !== normalizedInitialMax ||
-      normalizedApprover !== normalizedInitialApprover
-    );
-  }
-
-  function computeNextMin() {
-    if (!state.approvals.length) return MIN_LIMIT;
-    const lastRule = state.approvals[state.approvals.length - 1];
-    return lastRule.max + 1;
-  }
-
-  function recomputeSequentialRanges() {
-    state.approvals.sort((a, b) => a.min - b.min);
-    state.approvals.forEach((rule, index) => {
-      rule.min = index === 0 ? MIN_LIMIT : state.approvals[index - 1].max + 1;
-    });
-  }
-
-  function isContiguous() {
-    if (!state.approvals.length) return false;
-    if (state.approvals[0].min !== MIN_LIMIT) return false;
-    for (let i = 1; i < state.approvals.length; i += 1) {
-      const expectedMin = state.approvals[i - 1].max + 1;
-      if (state.approvals[i].min !== expectedMin) {
-        return false;
-      }
+  function ensureDrawerOpen() {
+    if (!drawer || state.isDrawerOpen) {
+      return;
     }
-    return true;
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    state.isDrawerOpen = true;
   }
 
-  function isCoverageComplete() {
-    if (!state.approvals.length) return false;
-    if (!isContiguous()) return false;
-    const lastRule = state.approvals[state.approvals.length - 1];
-    return lastRule.max === MAX_LIMIT;
-  }
-
-  function updateConfirmState() {
-    if (!confirmBtn) return;
-    const canConfirm = matrixGenerated && isCoverageComplete() && !isDrawerOpen;
-    confirmBtn.disabled = !canConfirm;
-  }
-
-  function updateAddButtonState() {
-    if (!addRuleBtn) return;
-    const nextMin = computeNextMin();
-    const disabled = isDrawerOpen || nextMin > MAX_LIMIT;
-    addRuleBtn.disabled = disabled;
-    addRuleBtn.classList.toggle('opacity-50', addRuleBtn.disabled);
-    addRuleBtn.classList.toggle('cursor-not-allowed', addRuleBtn.disabled);
-  }
-
-  function updateEditButtonsState() {
-    const disabled = isDrawerOpen;
-    if (rowsContainer) {
-      rowsContainer.querySelectorAll('button').forEach((button) => {
-        button.disabled = disabled;
-      });
+  function ensureDrawerClosed() {
+    if (!drawer || !state.isDrawerOpen) {
+      return;
     }
-    if (matrixList) {
-      matrixList.querySelectorAll('button').forEach((button) => {
-        button.disabled = disabled;
-      });
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden', 'true');
+    state.isDrawerOpen = false;
+    state.drawerContext = null;
+    state.editingMatrixIndex = null;
+    state.initialValues = { min: null, max: null, approvers: null };
+    clearErrors();
+    updateSaveButtonState();
+    updateConfirmButtonState();
+  }
+
+  function setDrawerContext(context, { min, max, approvers, editingIndex = null }) {
+    state.drawerContext = context;
+    state.editingMatrixIndex = editingIndex;
+    state.initialValues = { min, max, approvers };
+
+    if (drawerTitle) {
+      drawerTitle.textContent = context === 'matrix' ? 'Ubah Approval Matrix' : 'Ubah Persetujuan Transfer';
     }
-  }
 
-  function hideLimitNotice() {
-    if (!limitNotice) return;
-    limitNotice.textContent = '';
-    hideElement(limitNotice);
-  }
+    setInputValue(minInput, min);
+    setInputValue(maxInput, max);
+    setInputValue(approverInput, approvers);
 
-  function showLimitNotice(message) {
-    if (!limitNotice) return;
-    limitNotice.textContent = message;
-    showElement(limitNotice);
-  }
-
-  function updateLimitNotice() {
-    if (computeNextMin() > MAX_LIMIT && state.approvals.length) {
-      showLimitNotice(`Batas maksimal persetujuan sudah tercapai (Rp${formatNumber(MAX_LIMIT)}).`);
-    } else {
-      hideLimitNotice();
-    }
+    clearErrors();
+    updateSaveButtonState();
+    updateConfirmButtonState();
   }
 
   function renderTable() {
@@ -236,26 +137,26 @@
 
     rowsContainer.innerHTML = '';
 
-    if (!state.approvals.length) {
-      showElement(emptyState);
+    if (!state.tableRows.length) {
+      emptyState.classList.remove('hidden');
       rowsContainer.classList.add('hidden');
       return;
     }
 
-    hideElement(emptyState);
+    emptyState.classList.add('hidden');
     rowsContainer.classList.remove('hidden');
 
-    state.approvals.forEach((rule, index) => {
-      const row = document.createElement('div');
-      row.className = 'grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] items-center gap-4 px-6 py-4';
+    state.tableRows.forEach((row) => {
+      const container = document.createElement('div');
+      container.className = 'grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] items-center gap-4 px-6 py-4';
 
       const range = document.createElement('p');
       range.className = 'text-sm text-slate-700 text-left';
-      range.textContent = `${formatCurrency(rule.min, { withSpace: false })} – ${formatCurrency(rule.max, { withSpace: false })}`;
+      range.textContent = `${formatCurrency(row.min)} – ${formatCurrency(row.max)}`;
 
-      const approverDetail = document.createElement('p');
-      approverDetail.className = 'text-sm font-semibold text-slate-500 text-center';
-      approverDetail.textContent = `${rule.approvers} Penyetuju`;
+      const approvers = document.createElement('p');
+      approvers.className = 'text-sm font-semibold text-slate-500 text-center';
+      approvers.textContent = `${row.approvers} Penyetuju`;
 
       const action = document.createElement('div');
       action.className = 'flex justify-end';
@@ -264,427 +165,265 @@
       editBtn.type = 'button';
       editBtn.className = 'inline-flex items-center justify-center rounded-lg border border-cyan-500 bg-white px-4 py-2 text-sm font-semibold text-cyan-600 transition hover:bg-cyan-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400/60';
       editBtn.textContent = 'Ubah';
-      editBtn.addEventListener('click', () => openForEdit(index));
+      editBtn.addEventListener('click', () => {
+        ensureDrawerOpen();
+        setDrawerContext('table', {
+          min: row.min,
+          max: row.max,
+          approvers: row.approvers,
+        });
+      });
 
       action.appendChild(editBtn);
-
-      row.appendChild(range);
-      row.appendChild(approverDetail);
-      row.appendChild(action);
-
-      rowsContainer.appendChild(row);
+      container.appendChild(range);
+      container.appendChild(approvers);
+      container.appendChild(action);
+      rowsContainer.appendChild(container);
     });
   }
 
-  function ensureMatrixPlacement() {
-    if (!matrixSection || !formFieldsSection) return;
-    if (matrixSection.nextElementSibling === formFieldsSection) {
-      return;
-    }
-    const parent = matrixSection.parentElement;
-    if (parent) {
-      parent.insertBefore(matrixSection, formFieldsSection);
-    }
+  function createMatrixCard(entry, index) {
+    const card = document.createElement('article');
+    card.className = 'flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm';
+
+    const content = document.createElement('div');
+    content.className = 'space-y-1';
+
+    const title = document.createElement('p');
+    title.className = 'text-sm font-bold text-slate-900 mb-4';
+    title.textContent = `Jumlah Approval ${entry.approvers}`;
+
+    const subtitle = document.createElement('p');
+    subtitle.className = 'text-xs font-semibold tracking-wide text-slate-400';
+    subtitle.textContent = 'Nominal Transaksi';
+
+    const body = document.createElement('p');
+    body.className = 'text-sm text-slate-600';
+    body.textContent = `Min. Rp${numberFormatter.format(entry.min)} » Max. Rp${numberFormatter.format(entry.max)}`;
+
+    content.appendChild(title);
+    content.appendChild(subtitle);
+    content.appendChild(body);
+
+    const action = document.createElement('div');
+    action.className = 'flex flex-shrink-0';
+
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'inline-flex items-center justify-center rounded-lg border border-cyan-500 px-3 py-2 text-sm font-semibold text-cyan-600 transition hover:bg-cyan-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400/60';
+    editBtn.textContent = 'Ubah';
+    editBtn.addEventListener('click', () => {
+      ensureDrawerOpen();
+      setDrawerContext('matrix', {
+        min: entry.min,
+        max: entry.max,
+        approvers: entry.approvers,
+        editingIndex: index,
+      });
+    });
+
+    action.appendChild(editBtn);
+
+    card.appendChild(content);
+    card.appendChild(action);
+
+    return card;
   }
 
-  function renderMatrixCards() {
-    if (!matrixSection || !matrixList) return;
+  function renderMatrixList() {
+    if (!matrixList || !matrixSection) return;
 
     matrixList.innerHTML = '';
 
-    if (!matrixGenerated || !state.approvals.length) {
+    if (!state.matrixEntries.length) {
       matrixSection.classList.add('hidden');
+      updateConfirmButtonState();
       return;
     }
 
-    ensureMatrixPlacement();
     matrixSection.classList.remove('hidden');
 
-    state.approvals.forEach((rule, index) => {
-      const card = document.createElement('article');
-      card.className = 'flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm';
-
-      const content = document.createElement('div');
-      content.className = 'space-y-1';
-
-      const title = document.createElement('p');
-      title.className = 'text-sm font-bold text-slate-900 mb-4';
-      title.textContent = `Jumlah Approval ${rule.approvers}`;
-
-      const subtitle = document.createElement('p');
-      subtitle.className = 'text-xs font-semibold tracking-wide text-slate-400';
-      subtitle.textContent = 'Nominal Transaksi';
-
-      const body = document.createElement('p');
-      body.className = 'text-sm text-slate-600';
-      body.textContent = `Min. Rp${formatNumber(rule.min)} » Max. Rp${formatNumber(rule.max)}`;
-
-      content.appendChild(title);
-      content.appendChild(subtitle);
-      content.appendChild(body);
-
-      const action = document.createElement('div');
-      action.className = 'flex flex-shrink-0';
-
-      const editBtn = document.createElement('button');
-      editBtn.type = 'button';
-      editBtn.className = 'inline-flex items-center justify-center rounded-lg border border-cyan-500 px-3 py-2 text-sm font-semibold text-cyan-600 transition hover:bg-cyan-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400/60';
-      editBtn.textContent = 'Ubah';
-      editBtn.addEventListener('click', () => openForEdit(index));
-
-      action.appendChild(editBtn);
-
-      card.appendChild(content);
-      card.appendChild(action);
-
-      matrixList.appendChild(card);
+    state.matrixEntries.forEach((entry, index) => {
+      matrixList.appendChild(createMatrixCard(entry, index));
     });
+
+    updateConfirmButtonState();
   }
 
-  function renderAll() {
-    recomputeSequentialRanges();
-    renderTable();
-    renderMatrixCards();
-    updateConfirmState();
-    updateAddButtonState();
-    updateEditButtonsState();
-    updateLimitNotice();
+  function getCurrentInputValues() {
+    return {
+      min: parseCurrency(minInput?.value ?? ''),
+      max: parseCurrency(maxInput?.value ?? ''),
+      approvers: approverInput && approverInput.value ? parseInt(approverInput.value, 10) : null,
+    };
   }
 
-  function updateDrawerTitle() {
-    if (!drawerTitle) return;
-    drawerTitle.textContent = state.mode === 'edit' ? 'Ubah Persetujuan Transfer' : 'Tambah Persetujuan Transfer';
+  function hasInputChanges() {
+    const current = getCurrentInputValues();
+    const initial = state.initialValues;
+
+    return (
+      current.min !== initial.min ||
+      current.max !== initial.max ||
+      current.approvers !== initial.approvers
+    );
   }
 
-  function openDrawer() {
-    if (!drawer) return;
-    drawer.classList.add('open');
-    drawer.setAttribute('aria-hidden', 'false');
-    isDrawerOpen = true;
-    updateConfirmState();
-    updateAddButtonState();
-    updateEditButtonsState();
+  function updateSaveButtonState() {
+    if (!saveBtn) return;
+    saveBtn.disabled = !hasInputChanges();
   }
 
-  function closeDrawer() {
-    if (!drawer) return;
-    drawer.classList.remove('open');
-    drawer.setAttribute('aria-hidden', 'true');
-    isDrawerOpen = false;
-    state.mode = 'create';
-    state.editingIndex = null;
-    state.requiredMin = computeNextMin();
-    currentInitial = { min: state.requiredMin, max: null, approvers: null };
-    setMinValue(state.requiredMin);
-    setMaxValue(null);
-    setApproverValue(null);
-    resetErrors();
-    updateDrawerTitle();
-    updateButtonStates();
-    updateConfirmState();
-    updateAddButtonState();
-    updateEditButtonsState();
-  }
+  function validateInputs() {
+    const { min, max, approvers } = getCurrentInputValues();
+    let hasError = false;
 
-  function prepareFormForMode() {
-    updateDrawerTitle();
-    const requiredMin = state.requiredMin;
-    setMinValue(requiredMin);
-    if (state.mode === 'edit') {
-      const rule = state.approvals[state.editingIndex];
-      setMaxValue(rule?.max ?? null);
-      setApproverValue(rule?.approvers ?? null);
-      currentInitial = {
-        min: requiredMin,
-        max: rule?.max ?? null,
-        approvers: rule?.approvers ?? null,
-      };
-    } else {
-      setMaxValue(null);
-      setApproverValue(null);
-      currentInitial = { min: requiredMin, max: null, approvers: null };
-    }
-    resetErrors();
-    updateButtonStates();
-  }
+    clearErrors();
 
-  function setModeCreate() {
-    state.mode = 'create';
-    state.editingIndex = null;
-    state.requiredMin = computeNextMin();
-    prepareFormForMode();
-  }
-
-  function setModeEdit(index) {
-    state.mode = 'edit';
-    state.editingIndex = index;
-    const prevRule = index > 0 ? state.approvals[index - 1] : null;
-    state.requiredMin = prevRule ? prevRule.max + 1 : MIN_LIMIT;
-    prepareFormForMode();
-  }
-
-  function openForCreate() {
-    hideLimitNotice();
-    setModeCreate();
-    openDrawer();
-    updateButtonStates();
-    if (state.requiredMin > MAX_LIMIT) {
-      showLimitNotice(`Batas maksimal persetujuan sudah tercapai (Rp${formatNumber(MAX_LIMIT)}).`);
-    }
-  }
-
-  function openForEdit(index) {
-    if (index < 0 || index >= state.approvals.length) return;
-    hideLimitNotice();
-    setModeEdit(index);
-    openDrawer();
-  }
-
-  function getMinValidationError() {
-    if (state.requiredMin > MAX_LIMIT) {
-      return null;
+    if (min == null) {
+      showError(minError, 'Batas Minimal wajib diisi.');
+      hasError = true;
+    } else if (min < MIN_LIMIT) {
+      showError(minError, `Batas Minimal tidak boleh kurang dari Rp ${numberFormatter.format(MIN_LIMIT)}.`);
+      hasError = true;
     }
 
-    const value = getMinValue();
-    const requiredMin = state.requiredMin;
-
-    if (value === null) {
-      return `Batas Minimal harus dimulai dari Rp${formatNumber(requiredMin)}.`;
+    if (max == null) {
+      showError(maxError, 'Batas Maksimal wajib diisi.');
+      hasError = true;
+    } else if (max > MAX_LIMIT) {
+      showError(maxError, `Batas Maksimal tidak boleh melebihi Rp ${numberFormatter.format(MAX_LIMIT)}.`);
+      hasError = true;
     }
 
-    if (value !== requiredMin) {
-      return `Batas Minimal harus dimulai dari Rp${formatNumber(requiredMin)}.`;
+    if (min != null && max != null && max < min) {
+      showError(maxError, 'Batas Maksimal harus lebih besar atau sama dengan Batas Minimal.');
+      hasError = true;
     }
 
-    return null;
+    if (approvers == null || Number.isNaN(approvers)) {
+      showError(approverError, 'Jumlah penyetuju wajib diisi.');
+      hasError = true;
+    } else if (approvers < 1) {
+      showError(approverError, 'Jumlah penyetuju minimal 1.');
+      hasError = true;
+    }
+
+    return hasError ? null : { min, max, approvers };
   }
 
-  function getMaxValidationError() {
-    if (state.requiredMin > MAX_LIMIT) {
-      return null;
+  function computeCoverageComplete(entries) {
+    if (!entries.length) {
+      return false;
     }
 
-    const value = getMaxValue();
-    const minValue = state.requiredMin;
+    const sorted = [...entries].sort((a, b) => a.min - b.min);
+    let nextCoverageStart = MIN_LIMIT;
 
-    if (value === null) {
-      return 'Batas Maksimal wajib diisi.';
-    }
-
-    if (value < minValue) {
-      return 'Batas Minimal tidak boleh lebih besar dari Batas Maksimal.';
-    }
-
-    if (value > MAX_LIMIT) {
-      return `Batas Maksimal tidak boleh melebihi Rp${formatNumber(MAX_LIMIT)}.`;
-    }
-
-    if (state.mode === 'edit') {
-      const nextRule = state.approvals[state.editingIndex + 1];
-      if (nextRule) {
-        const maxAllowed = nextRule.max - 1;
-        if (value > maxAllowed) {
-          return `Batas Maksimal harus kurang dari Rp${formatNumber(nextRule.max)}.`;
-        }
+    for (const entry of sorted) {
+      if (entry.min > nextCoverageStart) {
+        return false;
+      }
+      const entryMax = Math.max(entry.min, entry.max);
+      if (entryMax >= nextCoverageStart) {
+        nextCoverageStart = entryMax + 1;
+      }
+      if (nextCoverageStart > MAX_LIMIT) {
+        return true;
       }
     }
 
-    return null;
+    return nextCoverageStart > MAX_LIMIT;
   }
 
-  function getApproverValidationError() {
-    const value = getApproverValue();
-
-    if (value === null) {
-      return 'Jumlah penyetuju wajib diisi.';
-    }
-
-    if (value < 1) {
-      return 'Jumlah penyetuju harus minimal 1.';
-    }
-
-    return null;
+  function updateConfirmButtonState() {
+    if (!confirmBtn) return;
+    confirmBtn.disabled = !computeCoverageComplete(state.matrixEntries);
   }
 
-  function areInputsValid() {
-    const minErrorMessage = getMinValidationError();
-    const maxErrorMessage = getMaxValidationError();
-    const approverErrorMessage = getApproverValidationError();
-
-    return !minErrorMessage && !maxErrorMessage && !approverErrorMessage;
-  }
-
-  function updateButtonStates() {
-    if (!saveBtn) return;
-
-    if (state.requiredMin > MAX_LIMIT) {
-      saveBtn.disabled = true;
+  function handleSave() {
+    if (!saveBtn || saveBtn.disabled) {
       return;
     }
 
-    const canSave = areInputsValid() && (state.mode === 'create' || hasChanges());
-    saveBtn.disabled = !canSave;
+    const values = validateInputs();
+    if (!values) {
+      return;
+    }
+
+    if (state.drawerContext === 'matrix' && state.editingMatrixIndex != null) {
+      const target = state.matrixEntries[state.editingMatrixIndex];
+      if (target) {
+        state.matrixEntries[state.editingMatrixIndex] = { ...target, ...values };
+      }
+    } else {
+      state.matrixEntries.push({
+        id: `matrix-${state.nextMatrixId}`,
+        ...values,
+      });
+      state.nextMatrixId += 1;
+    }
+
+    state.initialValues = { ...values };
+    updateSaveButtonState();
+    renderMatrixList();
+    const nextContext = state.drawerContext === 'matrix' ? 'matrix' : 'table';
+    const nextEditingIndex = nextContext === 'matrix' ? state.editingMatrixIndex : null;
+    setDrawerContext(nextContext, { ...values, editingIndex: nextEditingIndex });
   }
 
-  function markDirty() {
-    updateButtonStates();
+  function handleConfirm() {
+    if (!computeCoverageComplete(state.matrixEntries)) {
+      return;
+    }
+    window.alert('Persetujuan user berhasil dikonfirmasi.');
+  }
+
+  function handleClose() {
+    ensureDrawerClosed();
   }
 
   function handleMinInput(event) {
     if (!minInput) return;
     const digits = event.target.value.replace(/[^0-9]/g, '');
-    if (!digits) {
-      minInput.value = '';
-    } else {
-      const parsed = parseInt(digits, 10);
-      minInput.value = formatCurrency(parsed);
+    minInput.value = digits ? formatCurrency(parseInt(digits, 10)) : '';
+    if (minError) {
+      minError.textContent = '';
+      minError.classList.add('hidden');
     }
-    hideError(minError);
-    markDirty();
-  }
-
-  function handleMinBlur() {
-    const errorMessage = getMinValidationError();
-    if (errorMessage) {
-      showError(minError, errorMessage);
-    }
-    updateButtonStates();
+    updateSaveButtonState();
   }
 
   function handleMaxInput(event) {
     if (!maxInput) return;
     const digits = event.target.value.replace(/[^0-9]/g, '');
-    if (!digits) {
-      maxInput.value = '';
-    } else {
-      let parsed = parseInt(digits, 10);
-      if (parsed > MAX_LIMIT) {
-        parsed = MAX_LIMIT;
-      }
-      maxInput.value = formatCurrency(parsed);
+    maxInput.value = digits ? formatCurrency(parseInt(digits, 10)) : '';
+    if (maxError) {
+      maxError.textContent = '';
+      maxError.classList.add('hidden');
     }
-    hideError(maxError);
-    markDirty();
-  }
-
-  function handleMaxFocus() {
-    if (!maxInput) return;
-    if (!maxInput.value) {
-      maxInput.value = formatCurrency(MAX_LIMIT);
-    }
-  }
-
-  function handleMaxBlur() {
-    const errorMessage = getMaxValidationError();
-    if (errorMessage) {
-      showError(maxError, errorMessage);
-    }
-    updateButtonStates();
+    updateSaveButtonState();
   }
 
   function handleApproverInput(event) {
     if (!approverInput) return;
     const digits = event.target.value.replace(/[^0-9]/g, '');
     approverInput.value = digits;
-    hideError(approverError);
-    markDirty();
-  }
-
-  function handleApproverBlur() {
-    const errorMessage = getApproverValidationError();
-    if (errorMessage) {
-      showError(approverError, errorMessage);
+    if (approverError) {
+      approverError.textContent = '';
+      approverError.classList.add('hidden');
     }
-    updateButtonStates();
-  }
-
-  function generateId() {
-    const id = `matrix-${nextId}`;
-    nextId += 1;
-    return id;
-  }
-
-  function handleSave() {
-    if (state.requiredMin > MAX_LIMIT) {
-      updateButtonStates();
-      return;
-    }
-
-    const minErrorMessage = getMinValidationError();
-    const maxErrorMessage = getMaxValidationError();
-    const approverErrorMessage = getApproverValidationError();
-
-    if (minErrorMessage) {
-      showError(minError, minErrorMessage);
-    }
-    if (maxErrorMessage) {
-      showError(maxError, maxErrorMessage);
-    }
-    if (approverErrorMessage) {
-      showError(approverError, approverErrorMessage);
-    }
-
-    if (minErrorMessage || maxErrorMessage || approverErrorMessage) {
-      return;
-    }
-
-    const maxValue = getMaxValue();
-    const approverValue = getApproverValue();
-    const hadChanges = hasChanges();
-
-    if (maxValue == null || approverValue == null) {
-      return;
-    }
-
-    if (state.mode === 'edit' && typeof state.editingIndex === 'number') {
-      const target = state.approvals[state.editingIndex];
-      if (!target) return;
-      target.min = state.requiredMin;
-      target.max = maxValue;
-      target.approvers = approverValue;
-    } else {
-      state.approvals.push({
-        id: generateId(),
-        min: state.requiredMin,
-        max: maxValue,
-        approvers: approverValue,
-      });
-    }
-
-    if (hadChanges) {
-      matrixGenerated = true;
-    }
-
-    renderAll();
-    setModeCreate();
-    openDrawer();
-    resetErrors();
-    updateButtonStates();
-  }
-
-  function handleConfirm() {
-    if (!isCoverageComplete()) {
-      window.alert(`Lengkapi aturan persetujuan hingga Rp${formatNumber(MAX_LIMIT)} sebelum mengonfirmasi.`);
-      return;
-    }
-    window.alert('Persetujuan transfer berhasil dikonfirmasi.');
-  }
-
-  function handleClose() {
-    closeDrawer();
+    updateSaveButtonState();
   }
 
   function init() {
-    renderAll();
-    setModeCreate();
-    updateButtonStates();
+    renderTable();
+    renderMatrixList();
+    updateSaveButtonState();
+    updateConfirmButtonState();
   }
 
   init();
-
-  if (addRuleBtn) {
-    addRuleBtn.addEventListener('click', openForCreate);
-  }
 
   if (saveBtn) {
     saveBtn.addEventListener('click', handleSave);
@@ -700,17 +439,11 @@
 
   if (minInput) {
     minInput.addEventListener('input', handleMinInput);
-    minInput.addEventListener('blur', handleMinBlur);
   }
-
   if (maxInput) {
     maxInput.addEventListener('input', handleMaxInput);
-    maxInput.addEventListener('focus', handleMaxFocus);
-    maxInput.addEventListener('blur', handleMaxBlur);
   }
-
   if (approverInput) {
     approverInput.addEventListener('input', handleApproverInput);
-    approverInput.addEventListener('blur', handleApproverBlur);
   }
 })();
