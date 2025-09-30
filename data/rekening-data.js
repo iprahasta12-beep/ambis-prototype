@@ -1,6 +1,32 @@
 (function () {
+  function readInitialBrandName() {
+    const sessionBrand =
+      typeof window.AMBIS_SESSION === 'object' && typeof window.AMBIS_SESSION.brandName === 'string'
+        ? window.AMBIS_SESSION.brandName.trim()
+        : '';
+    if (sessionBrand) return sessionBrand;
+
+    const datasetBrand =
+      document?.documentElement?.dataset?.ambisBrandName &&
+      document.documentElement.dataset.ambisBrandName.trim();
+    if (datasetBrand) return datasetBrand;
+
+    try {
+      const stored =
+        (localStorage.getItem('ambis:brand-name') || localStorage.getItem('ambis:company-name') || '').trim();
+      if (stored) return stored;
+    } catch (error) {
+      /* Ignore storage errors */
+    }
+
+    const nodeText = document.querySelector('[data-brand-name], #brandName')?.textContent?.trim();
+    if (nodeText) return nodeText;
+
+    return 'Brand Anda';
+  }
+
   const initialData = {
-    brandName: 'PT Sarana Pancing Indonesia',
+    brandName: readInitialBrandName(),
     accounts: [
       {
         id: 'utama',
