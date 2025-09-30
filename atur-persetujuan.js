@@ -73,6 +73,7 @@
   };
 
   let isConfirmSheetOpen = false;
+  const CONFIRM_SHEET_TRANSITION_MS = 300;
 
   function formatCurrency(value) {
     if (typeof value !== 'number' || Number.isNaN(value)) {
@@ -414,32 +415,6 @@
     if (!confirmSheet || isConfirmSheetOpen) {
       return;
     }
-
-    confirmSheet.classList.remove('pointer-events-none');
-
-    if (confirmSheetOverlay) {
-      confirmSheetOverlay.classList.remove('hidden');
-      confirmSheetOverlay.classList.remove('pointer-events-none');
-      confirmSheetOverlay.classList.add('opacity-0');
-      confirmSheetOverlay.classList.remove('opacity-100');
-    }
-
-    if (confirmSheetPanel) {
-      confirmSheetPanel.setAttribute('aria-hidden', 'false');
-      confirmSheetPanel.classList.add('translate-y-full');
-      confirmSheetPanel.classList.remove('translate-y-0');
-    }
-
-    requestAnimationFrame(() => {
-      if (confirmSheetOverlay) {
-        confirmSheetOverlay.classList.remove('opacity-0');
-        confirmSheetOverlay.classList.add('opacity-100');
-      }
-
-      if (confirmSheetPanel) {
-        confirmSheetPanel.classList.remove('translate-y-full');
-        confirmSheetPanel.classList.add('translate-y-0');
-      }
     });
 
     isConfirmSheetOpen = true;
@@ -454,29 +429,7 @@
       return;
     }
 
-    const finalize = () => {
-      confirmSheet.classList.add('pointer-events-none');
 
-      if (confirmSheetOverlay) {
-        confirmSheetOverlay.classList.add('hidden');
-        confirmSheetOverlay.classList.add('pointer-events-none');
-      }
-
-      confirmSheetPanel.setAttribute('aria-hidden', 'true');
-    };
-
-    if (immediate) {
-      if (confirmSheetOverlay) {
-        confirmSheetOverlay.classList.add('opacity-0');
-        confirmSheetOverlay.classList.remove('opacity-100');
-        confirmSheetOverlay.classList.add('pointer-events-none');
-        confirmSheetOverlay.classList.add('hidden');
-      }
-
-      confirmSheetPanel.classList.add('translate-y-full');
-      confirmSheetPanel.classList.remove('translate-y-0');
-
-      finalize();
       isConfirmSheetOpen = false;
       return;
     }
@@ -485,26 +438,6 @@
       return;
     }
 
-    if (confirmSheetOverlay) {
-      confirmSheetOverlay.classList.remove('opacity-100');
-      confirmSheetOverlay.classList.add('opacity-0');
-      confirmSheetOverlay.classList.add('pointer-events-none');
-    }
-
-    confirmSheetPanel.classList.add('translate-y-full');
-    confirmSheetPanel.classList.remove('translate-y-0');
-
-    const handleTransitionEnd = (event) => {
-      if (event.target !== confirmSheetPanel) {
-        return;
-      }
-
-      confirmSheetPanel.removeEventListener('transitionend', handleTransitionEnd);
-
-      finalize();
-    };
-
-    confirmSheetPanel.addEventListener('transitionend', handleTransitionEnd);
 
     isConfirmSheetOpen = false;
   }
