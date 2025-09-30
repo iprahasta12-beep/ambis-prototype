@@ -115,13 +115,26 @@
   function setDrawerContext(context, { min, max, approvers, editingIndex = null }) {
     state.drawerContext = context;
     state.editingMatrixIndex = editingIndex;
-    state.initialValues = { min, max, approvers };
+
+    let derivedMin = min;
+    if (
+      context === 'table' &&
+      editingIndex == null &&
+      state.matrixEntries.length > 0
+    ) {
+      const lastEntry = state.matrixEntries[state.matrixEntries.length - 1];
+      if (lastEntry && typeof lastEntry.max === 'number') {
+        derivedMin = lastEntry.max;
+      }
+    }
+
+    state.initialValues = { min: derivedMin, max, approvers };
 
     if (drawerTitle) {
       drawerTitle.textContent = context === 'matrix' ? 'Ubah Approval Matrix' : 'Ubah Persetujuan Transfer';
     }
 
-    setInputValue(minInput, min);
+    setInputValue(minInput, derivedMin);
     setInputValue(maxInput, max);
     setInputValue(approverInput, approvers);
 
