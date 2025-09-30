@@ -15,6 +15,7 @@
   let accountGridNode = null;
   let emptyStateNode = null;
   let drawerNode = null;
+  let drawerController = null;
   let addAccountPaneNode = null;
   let formNode = null;
   let giroAccordionButton = null;
@@ -649,9 +650,13 @@
     }
     showDrawerPane('addAccount');
     if (drawerNode) {
-      drawerNode.classList.remove('open');
-      if (typeof window.sidebarRestoreForDrawer === 'function') {
-        window.sidebarRestoreForDrawer();
+      if (drawerController) {
+        drawerController.close({ trigger: 'pending' });
+      } else if (drawerNode.classList.contains('open')) {
+        drawerNode.classList.remove('open');
+        if (typeof window.sidebarRestoreForDrawer === 'function') {
+          window.sidebarRestoreForDrawer();
+        }
       }
     }
     if (pendingPaneLastFocusedElement && typeof pendingPaneLastFocusedElement.focus === 'function') {
@@ -1422,9 +1427,11 @@
     }
   }
 
-  function ensureDrawerOpen() {
+  function ensureDrawerOpen(trigger) {
     if (!drawerNode) return;
-    if (!drawerNode.classList.contains('open')) {
+    if (drawerController) {
+      drawerController.open({ trigger: trigger || null });
+    } else if (!drawerNode.classList.contains('open')) {
       drawerNode.classList.add('open');
       if (typeof window.sidebarCollapseForDrawer === 'function') {
         window.sidebarCollapseForDrawer();
@@ -1525,11 +1532,14 @@
 
   function openDrawer() {
     if (!drawerNode) return;
-    if (!drawerNode.classList.contains('open')) {
+    const wasClosed = drawerController
+      ? !drawerController.isOpen()
+      : !drawerNode.classList.contains('open');
+    if (wasClosed) {
       resetFormState();
     }
     showDrawerPane('addAccount');
-    ensureDrawerOpen();
+    ensureDrawerOpen('addAccount');
     if (formNode) {
       const focusTarget = formNode.querySelector('input, textarea, select');
       if (focusTarget) {
@@ -1547,9 +1557,13 @@
     const wasTransferActive = activeDrawerPane === 'transfer';
     const wasMutasiActive = activeDrawerPane === 'mutasi';
     showDrawerPane('addAccount');
-    drawerNode.classList.remove('open');
-    if (typeof window.sidebarRestoreForDrawer === 'function') {
-      window.sidebarRestoreForDrawer();
+    if (drawerController) {
+      drawerController.close({ trigger: 'drawer' });
+    } else if (drawerNode.classList.contains('open')) {
+      drawerNode.classList.remove('open');
+      if (typeof window.sidebarRestoreForDrawer === 'function') {
+        window.sidebarRestoreForDrawer();
+      }
     }
     resetFormState();
 
@@ -1612,6 +1626,9 @@
     accountGridNode = document.getElementById('accountGrid');
     emptyStateNode = document.getElementById('accountEmptyState');
     drawerNode = document.getElementById('drawer');
+    if (drawerNode && window.drawerManager && typeof window.drawerManager.register === 'function') {
+      drawerController = window.drawerManager.register(drawerNode);
+    }
     addAccountPaneNode = document.getElementById('addAccountPane');
     formNode = document.getElementById('addAccountForm');
     giroAccordionButton = document.getElementById('giroSpecToggle');

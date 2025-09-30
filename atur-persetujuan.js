@@ -31,6 +31,10 @@
   const resolvedDailyMaxLimit = resolveDailyMaxLimit();
 
   const drawer = document.getElementById('drawer');
+  const drawerController =
+    window.drawerManager && typeof window.drawerManager.register === 'function'
+      ? window.drawerManager.register(drawer, { manageAria: true })
+      : null;
   const approvalPane = document.getElementById('approvalPane');
   const drawerCloseBtn = document.getElementById('approvalDrawerClose');
   const drawerTitle = document.getElementById('approvalDrawerTitle');
@@ -154,7 +158,15 @@
     if (!drawer || state.isDrawerOpen) {
       return;
     }
-    drawer.classList.add('open');
+    if (drawerController) {
+      drawerController.open();
+    } else {
+      drawer.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      if (typeof window.sidebarCollapseForDrawer === 'function') {
+        window.sidebarCollapseForDrawer();
+      }
+    }
     drawer.setAttribute('aria-hidden', 'false');
     state.isDrawerOpen = true;
   }
@@ -170,7 +182,15 @@
     if (approvalPane) {
       approvalPane.classList.remove('hidden');
     }
-    drawer.classList.remove('open');
+    if (drawerController) {
+      drawerController.close();
+    } else {
+      drawer.classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+      if (typeof window.sidebarRestoreForDrawer === 'function') {
+        window.sidebarRestoreForDrawer();
+      }
+    }
     drawer.setAttribute('aria-hidden', 'true');
     state.isDrawerOpen = false;
     state.drawerContext = null;

@@ -3,6 +3,10 @@
   const STORAGE_KEY = 'ambis:batas-transaksi-limit';
 
   const drawer = document.getElementById('drawer');
+  const drawerController =
+    window.drawerManager && typeof window.drawerManager.register === 'function'
+      ? window.drawerManager.register(drawer)
+      : null;
   const openBtn = document.getElementById('openLimitDrawerBtn');
   const closeBtn = document.getElementById('limitDrawerCloseBtn');
   const confirmBtn = document.getElementById('confirmLimitBtn');
@@ -474,22 +478,29 @@
     if (confirmBtn) confirmBtn.disabled = true;
 
     updateDisplays();
-    drawer.classList.add('open');
-
-    if (typeof window.sidebarCollapseForDrawer === 'function') {
-      window.sidebarCollapseForDrawer();
+    if (drawerController) {
+      drawerController.open();
+    } else {
+      drawer.classList.add('open');
+      if (typeof window.sidebarCollapseForDrawer === 'function') {
+        window.sidebarCollapseForDrawer();
+      }
     }
   }
 
   function closeDrawer() {
     if (!drawer) return;
     closeConfirmSheet({ immediate: true });
-    drawer.classList.remove('open');
+    if (drawerController) {
+      drawerController.close();
+    } else {
+      drawer.classList.remove('open');
+      if (typeof window.sidebarRestoreForDrawer === 'function') {
+        window.sidebarRestoreForDrawer();
+      }
+    }
     closeInfoOverlay();
     showFormView();
-    if (typeof window.sidebarRestoreForDrawer === 'function') {
-      window.sidebarRestoreForDrawer();
-    }
   }
 
   openBtn?.addEventListener('click', (event) => {

@@ -1567,6 +1567,11 @@
       paymentSheetOpen = true;
     }
 
+    const drawerController =
+      window.drawerManager && typeof window.drawerManager.register === 'function'
+        ? window.drawerManager.register(drawer)
+        : null;
+
     function openDrawer(key, button) {
       const config = BILLER_CONFIG[key];
       if (!config) return;
@@ -1575,15 +1580,21 @@
       closePaymentSheet({ immediate: true });
       hideSuccessDrawer({ immediate: true });
       setActiveButton(button);
-      const wasClosed = !drawer.classList.contains('open');
+      const wasClosed = drawerController
+        ? !drawerController.isOpen()
+        : !drawer.classList.contains('open');
       applyConfig(key, config);
       if (wasClosed) {
-        drawer.classList.add('open');
+        if (drawerController) {
+          drawerController.open({ trigger: button });
+        } else {
+          drawer.classList.add('open');
+          if (typeof window.sidebarCollapseForDrawer === 'function') {
+            window.sidebarCollapseForDrawer();
+          }
+        }
         drawerInner.classList.remove('opacity-0', 'translate-x-4');
         drawerInner.classList.add('opacity-100', 'translate-x-0');
-        if (typeof window.sidebarCollapseForDrawer === 'function') {
-          window.sidebarCollapseForDrawer();
-        }
       } else {
         drawerInner.classList.remove('opacity-0', 'translate-x-4');
         drawerInner.classList.add('opacity-100', 'translate-x-0');
@@ -1599,9 +1610,13 @@
       closeAccountSheet({ immediate: true });
       closePaymentSheet({ immediate: true });
       setTimeout(() => {
-        drawer.classList.remove('open');
-        if (typeof window.sidebarRestoreForDrawer === 'function') {
-          window.sidebarRestoreForDrawer();
+        if (drawerController) {
+          drawerController.close({ trigger: 'animation' });
+        } else {
+          drawer.classList.remove('open');
+          if (typeof window.sidebarRestoreForDrawer === 'function') {
+            window.sidebarRestoreForDrawer();
+          }
         }
         setActiveButton(null);
       }, 220);
