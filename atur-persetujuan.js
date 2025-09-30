@@ -411,40 +411,28 @@
   }
 
   function openConfirmSheet() {
-    if (!confirmSheet || !confirmSheetPanel || !confirmSheetOverlay) {
+    if (!confirmSheet) {
       return;
     }
 
     confirmSheet.classList.remove('hidden');
     isConfirmSheetOpen = true;
 
-    requestAnimationFrame(() => {
-      confirmSheet.classList.remove('pointer-events-none');
-      confirmSheetOverlay.classList.add('opacity-100');
-      confirmSheetOverlay.classList.remove('opacity-0');
-      confirmSheetPanel.classList.remove('translate-y-full');
-      if (confirmSheetProceedBtn) {
-        confirmSheetProceedBtn.focus();
-      }
-    });
+    confirmSheet.classList.remove('pointer-events-none');
+    if (confirmSheetProceedBtn) {
+      confirmSheetProceedBtn.focus();
+    }
   }
 
   function closeConfirmSheet({ immediate = false } = {}) {
-    if (!confirmSheet || !confirmSheetPanel || !confirmSheetOverlay) {
+    if (!confirmSheet) {
       return;
     }
 
-    const finalize = () => {
+    if (immediate) {
       confirmSheet.classList.add('hidden');
       confirmSheet.classList.add('pointer-events-none');
-      confirmSheetOverlay.classList.remove('opacity-100');
-      confirmSheetOverlay.classList.add('opacity-0');
-      confirmSheetPanel.classList.add('translate-y-full');
       isConfirmSheetOpen = false;
-    };
-
-    if (immediate) {
-      finalize();
       return;
     }
 
@@ -453,24 +441,8 @@
     }
 
     confirmSheet.classList.add('pointer-events-none');
-    confirmSheetOverlay.classList.remove('opacity-100');
-    confirmSheetOverlay.classList.add('opacity-0');
-    confirmSheetPanel.classList.add('translate-y-full');
-
-    const onTransitionEnd = (event) => {
-      if (event.target !== confirmSheetPanel) {
-        return;
-      }
-      confirmSheetPanel.removeEventListener('transitionend', onTransitionEnd);
-      finalize();
-    };
-
-    confirmSheetPanel.addEventListener('transitionend', onTransitionEnd);
-
-    setTimeout(() => {
-      confirmSheetPanel.removeEventListener('transitionend', onTransitionEnd);
-      finalize();
-    }, 350);
+    confirmSheet.classList.add('hidden');
+    isConfirmSheetOpen = false;
   }
 
   function getCurrentInputValues() {
