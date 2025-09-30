@@ -291,6 +291,36 @@
                 </div>
               </section>
             </div>
+            <div id="approvalConfirmOtpSection" class="hidden border-t border-slate-200 px-6 py-6 space-y-4">
+              <div class="space-y-2 text-center">
+                <h4 class="text-lg font-semibold text-slate-900">Masukkan kode verifikasi</h4>
+                <p class="text-sm text-slate-600">
+                  Silakan buka aplikasi Amar Bank Bisnis pada ponsel Anda untuk mendapatkan kode verifikasi.
+                </p>
+              </div>
+              <div class="grid grid-cols-8 gap-2">
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              </div>
+              <p id="approvalConfirmOtpError" class="hidden text-center text-sm text-rose-600"></p>
+              <p id="approvalConfirmOtpCountdown" class="text-sm text-slate-500 text-center">
+                <span id="approvalConfirmOtpCountdownMessage">Sesi akan berakhir dalam</span>
+                <span id="approvalConfirmOtpTimer" class="text-cyan-500 font-semibold">00:30</span>
+              </p>
+              <button
+                id="approvalConfirmOtpResend"
+                type="button"
+                class="hidden mx-auto rounded-lg border border-cyan-300 px-4 py-2 text-sm font-medium text-cyan-500 hover:bg-slate-50"
+              >
+                Kirim Ulang Kode Verifikasi
+              </button>
+            </div>
             <div class="sticky bottom-0 border-t border-slate-200 bg-white px-6 py-5">
               <div class="flex items-center gap-3">
                 <button
