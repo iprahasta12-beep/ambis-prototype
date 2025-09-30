@@ -4,249 +4,22 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AMBIS — Masuk</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
   <style>
-    :root {
-      color-scheme: light;
-      --background-start: #0f172a;
-      --background-end: #022c43;
-      --card-bg: #ffffff;
-      --card-shadow: 0 30px 80px rgba(8, 15, 40, 0.55);
-      --text-primary: #0f172a;
-      --text-muted: #64748b;
-      --border-muted: rgba(148, 163, 184, 0.45);
-      --error: #ef4444;
-      --brand-teal: #009faf;
-      --brand-teal-hover: #02818f;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Mulish', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: linear-gradient(140deg, var(--background-start) 0%, #11263d 40%, var(--background-end) 100%);
-      color: #fff;
-      position: relative;
-      overflow: hidden;
-      padding: 32px 16px;
-    }
-
-    body::before,
-    body::after {
-      content: "";
-      position: absolute;
-      border-radius: 45% 55% 60% 40% / 50% 35% 65% 50%;
-      filter: blur(0px);
-      opacity: 0.55;
-      z-index: 0;
-    }
-
-    body::before {
-      width: 620px;
-      height: 620px;
-      background: radial-gradient(circle at 30% 30%, rgba(8, 172, 213, 0.35), transparent 65%);
-      top: -220px;
-      right: -140px;
-    }
-
-    body::after {
-      width: 540px;
-      height: 540px;
-      background: radial-gradient(circle at 70% 70%, rgba(16, 185, 129, 0.28), transparent 70%);
-      bottom: -200px;
-      left: -160px;
-    }
-
-    .login-layout {
-      position: relative;
-      z-index: 1;
-      width: min(100%, 420px);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 28px;
-    }
-
-    .brand {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      text-align: center;
-    }
-
-    .brand img {
-      width: 120px;
-      height: auto;
-    }
-
-    .brand h1 {
-      margin: 0;
-      font-size: clamp(24px, 4vw, 30px);
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-
-    .brand p {
-      margin: 0;
-      color: rgba(226, 232, 240, 0.8);
-      font-size: 16px;
-    }
-
-    .card {
-      width: 100%;
-      background: var(--card-bg);
-      color: var(--text-primary);
-      border-radius: 24px;
-      padding: clamp(28px, 5vw, 36px);
-      box-shadow: var(--card-shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .card h2 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 600;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--text-muted);
-      font-size: 16px;
-      line-height: 1.6;
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .field label {
-      font-weight: 600;
-      font-size: 15px;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .field label .required {
-      color: var(--error);
-      font-size: 16px;
-      line-height: 1;
-    }
-
-    .input {
-      width: 100%;
-      padding: 14px 16px;
-      border-radius: 14px;
-      border: 1px solid var(--border-muted);
-      background-color: #f8fafc;
-      font-size: 16px;
-      font-weight: 500;
-      color: var(--text-primary);
-      transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-    }
-
-    .input::placeholder {
-      color: rgba(100, 116, 139, 0.8);
-      font-style: italic;
-    }
-
-    .input:focus {
-      outline: none;
-      border-color: rgba(2, 132, 199, 0.7);
-      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
-      background-color: #fff;
-    }
-
-    .input.is-invalid {
-      border-color: rgba(239, 68, 68, 0.85);
-      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
-      background-color: #fff5f5;
-    }
-
-    .error-text {
+    .error-text:not(.is-visible),
+    .form-error:not(.is-visible) {
       display: none;
-      font-size: 14px;
-      color: var(--error);
-    }
-
-    .error-text.is-visible {
-      display: block;
-    }
-
-    .form-error {
-      display: none;
-      border-radius: 14px;
-      background: rgba(239, 68, 68, 0.08);
-      color: var(--error);
-      padding: 14px 16px;
-      font-weight: 600;
-      font-size: 15px;
-    }
-
-    .form-error.is-visible {
-      display: block;
-    }
-
-    .actions {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .login-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      padding: 14px 18px;
-      border: none;
-      border-radius: 999px;
-      background: var(--brand-teal);
-      color: #fff;
-      font-size: 17px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-    }
-
-    .login-button:hover {
-      background: var(--brand-teal-hover);
-      box-shadow: 0 16px 35px rgba(2, 132, 199, 0.35);
-      transform: translateY(-1px);
-    }
-
-    .login-button:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.35);
-    }
-
-    .login-button:disabled {
-      cursor: not-allowed;
-      background: rgba(0, 159, 175, 0.5);
-      box-shadow: none;
-      transform: none;
     }
 
     .login-button.is-loading::after {
       content: '';
       width: 18px;
       height: 18px;
-      border-radius: 50%;
+      border-radius: 9999px;
       border: 3px solid rgba(255, 255, 255, 0.45);
       border-top-color: #fff;
       animation: spin 0.9s linear infinite;
@@ -262,57 +35,80 @@
         transform: rotate(360deg);
       }
     }
-
-    @media (max-width: 520px) {
-      body {
-        padding: 24px 18px;
-      }
-
-      .card {
-        border-radius: 20px;
-        padding: 24px;
-      }
-
-      .brand img {
-        width: 104px;
-      }
-    }
   </style>
 </head>
-<body>
-  <div class="login-layout">
-    <header class="brand">
-      <img src="img/logo.svg" alt="Amar Bank Bisnis" width="132" height="82" />
-      <h1>Amar Bank Bisnis</h1>
-      <p>Masuk untuk mengelola keuangan perusahaan Anda dengan aman.</p>
+<body class="relative min-h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8 text-slate-100 font-[Mulish]">
+  <div class="pointer-events-none absolute -top-40 -right-32 h-[520px] w-[520px] rounded-full bg-cyan-500/40 blur-3xl"></div>
+  <div class="pointer-events-none absolute -bottom-44 -left-36 h-[460px] w-[460px] rounded-full bg-emerald-400/35 blur-3xl"></div>
+
+  <div class="relative z-10 mx-auto flex w-full max-w-md flex-col items-center gap-8 text-center">
+    <header class="flex w-full flex-col items-center gap-4">
+      <img src="img/logo.svg" alt="Amar Bank Bisnis" class="h-auto w-28">
+      <div class="space-y-2">
+        <h1 class="text-3xl font-semibold tracking-tight text-white">Amar Bank Bisnis</h1>
+        <p class="text-base text-slate-300">Masuk untuk mengelola keuangan perusahaan Anda dengan aman.</p>
+      </div>
     </header>
 
-    <main class="card" aria-labelledby="loginTitle">
-      <div class="intro">
-        <h2 id="loginTitle">Masuk ke Dashboard</h2>
-        <p>Silakan masukkan nama dan nama perusahaan yang terdaftar di Amar Bank Bisnis.</p>
+    <main class="w-full rounded-3xl bg-white/95 px-8 py-10 text-left text-slate-900 shadow-[0_32px_80px_rgba(8,15,40,0.45)] backdrop-blur">
+      <div class="space-y-3 text-left">
+        <h2 id="loginTitle" class="text-2xl font-semibold text-slate-900">Masuk ke Dashboard</h2>
+        <p class="text-base text-slate-500">Silakan masukkan nama dan nama perusahaan yang terdaftar di Amar Bank Bisnis.</p>
       </div>
 
-      <form id="loginForm" novalidate>
-        <div class="field">
-          <label for="inputNama">Nama<span class="required" aria-hidden="true">*</span></label>
-          <input id="inputNama" name="nama" class="input" type="text" placeholder="Masukan nama Anda" autocomplete="name" aria-describedby="errorNama" aria-invalid="false" required />
-          <p id="errorNama" class="error-text" role="alert" aria-live="assertive"></p>
+      <form id="loginForm" class="mt-8 space-y-6" novalidate>
+        <div class="space-y-2">
+          <label for="inputNama" class="flex items-center gap-1 text-sm font-semibold text-slate-700">
+            Nama
+            <span class="text-base leading-none text-rose-500" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="inputNama"
+            name="nama"
+            type="text"
+            placeholder="Masukan nama Anda"
+            autocomplete="name"
+            aria-describedby="errorNama"
+            aria-invalid="false"
+            required
+            class="block w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"
+          />
+          <p id="errorNama" class="error-text text-sm font-medium text-rose-500" role="alert" aria-live="assertive"></p>
         </div>
 
-        <div class="field">
-          <label for="inputPerusahaan">Nama Perusahaan<span class="required" aria-hidden="true">*</span></label>
-          <input id="inputPerusahaan" name="perusahaan" class="input" type="text" placeholder="Masukkan nama perusahaan" autocomplete="organization" aria-describedby="errorPerusahaan" aria-invalid="false" required />
-          <p id="errorPerusahaan" class="error-text" role="alert" aria-live="assertive"></p>
+        <div class="space-y-2">
+          <label for="inputPerusahaan" class="flex items-center gap-1 text-sm font-semibold text-slate-700">
+            Nama Perusahaan
+            <span class="text-base leading-none text-rose-500" aria-hidden="true">*</span>
+          </label>
+          <input
+            id="inputPerusahaan"
+            name="perusahaan"
+            type="text"
+            placeholder="Masukkan nama perusahaan"
+            autocomplete="organization"
+            aria-describedby="errorPerusahaan"
+            aria-invalid="false"
+            required
+            class="block w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base font-medium text-slate-900 outline-none transition focus:border-cyan-400 focus:bg-white focus:ring-4 focus:ring-cyan-100"
+          />
+          <p id="errorPerusahaan" class="error-text text-sm font-medium text-rose-500" role="alert" aria-live="assertive"></p>
         </div>
 
-        <div class="actions">
-          <button type="submit" class="login-button" id="loginButton">Masuk</button>
-          <p id="formError" class="form-error" role="alert" aria-live="assertive"></p>
+        <div class="space-y-4">
+          <button
+            type="submit"
+            id="loginButton"
+            class="login-button inline-flex w-full items-center justify-center rounded-full bg-cyan-600 px-5 py-3.5 text-base font-semibold text-white shadow-lg shadow-cyan-600/30 transition hover:-translate-y-[1px] hover:bg-cyan-500 hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-cyan-200 disabled:cursor-not-allowed disabled:bg-cyan-400/60 disabled:shadow-none"
+          >
+            Masuk
+          </button>
+          <p id="formError" class="form-error rounded-2xl bg-rose-100/70 px-4 py-3 text-sm font-semibold text-rose-600" role="alert" aria-live="assertive"></p>
         </div>
       </form>
     </main>
   </div>
+
   <script src="login.js" defer></script>
 </body>
 </html>
