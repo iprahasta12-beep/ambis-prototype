@@ -2,6 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('mutasiAccountGrid');
 
   const drawer = document.getElementById('drawer');
+  const drawerController =
+    window.drawerManager && typeof window.drawerManager.register === 'function'
+      ? window.drawerManager.register(drawer)
+      : null;
   const drawerInner = document.getElementById('mutasiDrawerInner');
   const closeBtn = document.getElementById('mutasiDrawerClose');
   const drawerTitle = document.getElementById('mutasiDrawerTitle');
@@ -13,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const listEl = document.getElementById('mutasiTransactionList');
   const retryBtn = document.getElementById('mutasiRetry');
   const filterGroup = document.querySelector('[data-filter-group="mutasi"]');
-  const sidebar = document.getElementById('sidebar');
   const detailOverlay = document.getElementById('mutasiDetailOverlay');
   const detailSheet = document.getElementById('mutasiDetailSheet');
   const detailContent = document.getElementById('mutasiDetailView');
@@ -93,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeAccount = null;
   let activeData = null;
   let detailIsOpen = false;
-  let sidebarWasCollapsed = false;
   let loadTimer = null;
   let activeTab = 'mutasi';
   let eStatementYear = '';
@@ -469,21 +471,6 @@ document.addEventListener('DOMContentLoaded', () => {
         detailOverlay.classList.add('hidden');
       }
     }, 200);
-  }
-
-  function collapseSidebar() {
-    if (!sidebar) return;
-    sidebarWasCollapsed = sidebar.classList.contains('collapsed');
-    if (!sidebarWasCollapsed) {
-      sidebar.classList.add('collapsed');
-    }
-  }
-
-  function restoreSidebar() {
-    if (!sidebar) return;
-    if (!sidebarWasCollapsed) {
-      sidebar.classList.remove('collapsed');
-    }
   }
 
   function showState(state) {
@@ -880,8 +867,17 @@ document.addEventListener('DOMContentLoaded', () => {
     showState('loading');
 
     if (autoOpen) {
-      drawer.classList.add('open');
-      collapseSidebar();
+      if (drawerController) {
+        drawerController.open({ trigger: account || null });
+      } else {
+        const wasClosed = !drawer.classList.contains('open');
+        if (wasClosed) {
+          drawer.classList.add('open');
+          if (typeof window.sidebarCollapseForDrawer === 'function') {
+            window.sidebarCollapseForDrawer();
+          }
+        }
+      }
     }
 
     if (drawerInner) {
@@ -904,8 +900,14 @@ document.addEventListener('DOMContentLoaded', () => {
       closeDropdownMenu(openDropdown);
     }
     closeDetailSheet(true);
-    drawer.classList.remove('open');
-    restoreSidebar();
+    if (drawerController) {
+      drawerController.close({ trigger: 'mutasi' });
+    } else if (drawer.classList.contains('open')) {
+      drawer.classList.remove('open');
+      if (typeof window.sidebarRestoreForDrawer === 'function') {
+        window.sidebarRestoreForDrawer();
+      }
+    }
     activeAccount = null;
     activeData = null;
     if (loadTimer) {

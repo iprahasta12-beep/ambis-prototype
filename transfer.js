@@ -3,6 +3,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   const openBtn  = document.getElementById('openTransferDrawer');
   const drawer   = document.getElementById('drawer');
+  const drawerController =
+    window.drawerManager && typeof window.drawerManager.register === 'function'
+      ? window.drawerManager.register(drawer)
+      : null;
   const transferPane = document.getElementById('transferPane');
   const movePane = document.getElementById('movePane');
   const successPane = document.getElementById('successPane');
@@ -653,7 +657,17 @@ document.addEventListener('DOMContentLoaded', () => {
     transferPane?.classList.add('hidden');
     movePane?.classList.add('hidden');
     successPane?.classList.remove('hidden');
-    drawer.classList.add('open');
+    if (drawerController) {
+      drawerController.open({ trigger: 'success' });
+    } else if (drawer) {
+      const wasClosed = !drawer.classList.contains('open');
+      if (wasClosed) {
+        drawer.classList.add('open');
+        if (typeof window.sidebarCollapseForDrawer === 'function') {
+          window.sidebarCollapseForDrawer();
+        }
+      }
+    }
     updateCardGridLayout();
     successCloseBtn?.focus();
     const activeType = lastTransactionDetails.type === 'move' ? 'move' : 'transfer';
@@ -1121,15 +1135,19 @@ document.addEventListener('DOMContentLoaded', () => {
     movePane.classList.add('hidden');
     transferPane.classList.remove('hidden');
     successPane?.classList.add('hidden');
-    drawer.classList.add('open');
+    if (drawerController) {
+      drawerController.open({ trigger: 'transfer' });
+    } else if (drawer && !drawer.classList.contains('open')) {
+      drawer.classList.add('open');
+      if (typeof window.sidebarCollapseForDrawer === 'function') {
+        window.sidebarCollapseForDrawer();
+      }
+    }
     updateCardGridLayout();
     sourceLocked = false;
     setButtonLocked(sourceBtn, false);
     activePaneType = 'transfer';
     updateConfirmSheetContent(activePaneType);
-    if (typeof window.sidebarCollapseForDrawer === 'function') {
-      window.sidebarCollapseForDrawer();
-    }
     setActiveActivityCard('transfer');
   }
 
@@ -1137,7 +1155,14 @@ document.addEventListener('DOMContentLoaded', () => {
     transferPane.classList.add('hidden');
     movePane.classList.add('hidden');
     successPane?.classList.add('hidden');
-    drawer.classList.remove('open');
+    if (drawerController) {
+      drawerController.close({ trigger: 'close' });
+    } else if (drawer && drawer.classList.contains('open')) {
+      drawer.classList.remove('open');
+      if (typeof window.sidebarRestoreForDrawer === 'function') {
+        window.sidebarRestoreForDrawer();
+      }
+    }
     updateCardGridLayout();
     closeSheet();
     closeDestSheet();
@@ -1145,9 +1170,6 @@ document.addEventListener('DOMContentLoaded', () => {
     lastTransactionDetails = null;
     activePaneType = DEFAULT_ACTIVITY_TYPE;
     updateConfirmSheetContent(activePaneType);
-    if (typeof window.sidebarRestoreForDrawer === 'function') {
-      window.sidebarRestoreForDrawer();
-    }
     clearActiveActivityCard();
     if (isEmbedded && window.parent && window.parent !== window) {
       try {
@@ -1162,7 +1184,14 @@ document.addEventListener('DOMContentLoaded', () => {
     transferPane.classList.add('hidden');
     movePane.classList.remove('hidden');
     successPane?.classList.add('hidden');
-    drawer.classList.add('open');
+    if (drawerController) {
+      drawerController.open({ trigger: 'move' });
+    } else if (drawer && !drawer.classList.contains('open')) {
+      drawer.classList.add('open');
+      if (typeof window.sidebarCollapseForDrawer === 'function') {
+        window.sidebarCollapseForDrawer();
+      }
+    }
     updateCardGridLayout();
     moveSourceLocked = false;
     setButtonLocked(moveSourceBtn, false);
@@ -1189,9 +1218,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateMoveConfirmState();
     activePaneType = 'move';
     updateConfirmSheetContent(activePaneType);
-    if (typeof window.sidebarCollapseForDrawer === 'function') {
-      window.sidebarCollapseForDrawer();
-    }
     setActiveActivityCard('move');
   }
 

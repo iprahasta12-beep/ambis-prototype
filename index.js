@@ -167,6 +167,10 @@ balanceToggleBtn?.addEventListener('click', () => {
 const drawer = document.getElementById('drawer');
 const openBtn = document.getElementById('ubahAksesBtn');
 const closeBtn = document.getElementById('drawerCloseBtn');
+const drawerController =
+  window.drawerManager && typeof window.drawerManager.register === 'function'
+    ? window.drawerManager.register(drawer)
+    : null;
 const dashboardGrid = document.getElementById('dashboardGrid');
 const pendingSection = document.getElementById('pendingSection');
 
@@ -189,19 +193,32 @@ updateDashboardLayout();
 function openDrawer() {
   tempSelectedAkses = [...selectedAkses];
   renderDrawer();
-  drawer.classList.add('open');
-  updateDashboardLayout();
-  if (typeof window.sidebarCollapseForDrawer === 'function') {
-    window.sidebarCollapseForDrawer();
+  if (drawerController) {
+    drawerController.open();
+  } else if (drawer) {
+    const wasClosed = !drawer.classList.contains('open');
+    if (wasClosed) {
+      drawer.classList.add('open');
+      if (typeof window.sidebarCollapseForDrawer === 'function') {
+        window.sidebarCollapseForDrawer();
+      }
+    }
   }
+  updateDashboardLayout();
 }
 
 function closeDrawer() {
-  drawer.classList.remove('open');
-  updateDashboardLayout();
-  if (typeof window.sidebarRestoreForDrawer === 'function') {
-    window.sidebarRestoreForDrawer();
+  if (drawerController) {
+    drawerController.close();
+  } else if (drawer) {
+    if (drawer.classList.contains('open')) {
+      drawer.classList.remove('open');
+      if (typeof window.sidebarRestoreForDrawer === 'function') {
+        window.sidebarRestoreForDrawer();
+      }
+    }
   }
+  updateDashboardLayout();
 }
 
 openBtn?.addEventListener('click', openDrawer);
