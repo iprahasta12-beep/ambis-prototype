@@ -112,35 +112,53 @@
     updateConfirmButtonState();
   }
 
-  function setDrawerContext(context, { min, max, approvers, editingIndex = null }) {
+  function setDrawerContext(
+    context,
+    {
+      min = null,
+      max = null,
+      approvers = null,
+      editingIndex = null,
+      resetForNext = false,
+    } = {}
+  ) {
     state.drawerContext = context;
     state.editingMatrixIndex = editingIndex;
 
     let derivedMin = min;
-    if (
-      context === 'table' &&
-      editingIndex == null &&
-      state.matrixEntries.length > 0
-    ) {
+    let derivedMax = max;
+    let derivedApprovers = approvers;
+
+    if (context === 'table' && editingIndex == null) {
       const lastEntry = state.matrixEntries[state.matrixEntries.length - 1];
-      if (lastEntry && typeof lastEntry.max === 'number') {
+
+      if (derivedMin == null && lastEntry && typeof lastEntry.max === 'number') {
         if (lastEntry.max >= MAX_LIMIT) {
           derivedMin = MAX_LIMIT;
         } else {
           derivedMin = lastEntry.max + 1;
         }
       }
+
+      if (resetForNext) {
+        derivedMax = null;
+        derivedApprovers = null;
+      }
     }
 
-    state.initialValues = { min: derivedMin, max, approvers };
+    state.initialValues = {
+      min: derivedMin,
+      max: derivedMax,
+      approvers: derivedApprovers,
+    };
 
     if (drawerTitle) {
       drawerTitle.textContent = context === 'matrix' ? 'Ubah Approval Matrix' : 'Ubah Persetujuan Transfer';
     }
 
     setInputValue(minInput, derivedMin);
-    setInputValue(maxInput, max);
-    setInputValue(approverInput, approvers);
+    setInputValue(maxInput, derivedMax);
+    setInputValue(approverInput, derivedApprovers);
 
     clearErrors();
     updateSaveButtonState();
@@ -334,7 +352,7 @@
       showError(maxError, 'Batas Maksimal wajib diisi.');
       hasError = true;
     } else if (max > MAX_LIMIT) {
-      showError(maxError, `Batas Maksimal tidak boleh melebihi Rp ${numberFormatter.format(MAX_LIMIT)}.`);
+      showError(maxError, 'Jumlah melebihi batas harian Anda.');
       hasError = true;
     }
 
@@ -403,12 +421,19 @@
       state.nextMatrixId += 1;
     }
 
-    state.initialValues = { ...values };
-    updateSaveButtonState();
     renderMatrixList();
-    const nextContext = state.drawerContext === 'matrix' ? 'matrix' : 'table';
-    const nextEditingIndex = nextContext === 'matrix' ? state.editingMatrixIndex : null;
-    setDrawerContext(nextContext, { ...values, editingIndex: nextEditingIndex });
+
+    if (state.drawerContext === 'matrix' && state.editingMatrixIndex != null) {
+      const updatedEntry = state.matrixEntries[state.editingMatrixIndex];
+      setDrawerContext('matrix', {
+        ...updatedEntry,
+        editingIndex: state.editingMatrixIndex,
+      });
+    } else {
+      setDrawerContext('table', { min: null, max: null, approvers: null, resetForNext: true });
+    }
+
+    updateSaveButtonState();
   }
 
   function handleConfirm() {
