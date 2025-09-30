@@ -1,6 +1,34 @@
 (function () {
   const MIN_LIMIT = 1;
-  const MAX_LIMIT = 200_000_000;
+  const DEFAULT_DAILY_MAX_LIMIT = 200_000_000;
+
+  const dailyMaxLimitDisplay = document.getElementById('dailyMaxLimitValue');
+
+  function toIntegerAmount(value) {
+    if (typeof value !== 'string') {
+      return null;
+    }
+
+    const digits = value.replace(/[^0-9]/g, '');
+    if (!digits) {
+      return null;
+    }
+
+    const parsed = parseInt(digits, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+
+  function resolveDailyMaxLimit() {
+    const fallbackValue = dailyMaxLimitDisplay ? toIntegerAmount(dailyMaxLimitDisplay.textContent ?? '') : null;
+
+    if (typeof fallbackValue === 'number') {
+      return fallbackValue;
+    }
+
+    return DEFAULT_DAILY_MAX_LIMIT;
+  }
+
+  const resolvedDailyMaxLimit = resolveDailyMaxLimit();
 
   const drawer = document.getElementById('drawer');
   const drawerCloseBtn = document.getElementById('approvalDrawerClose');
@@ -26,8 +54,9 @@
   const numberFormatter = new Intl.NumberFormat('id-ID');
 
   const state = {
+    dailyMaxLimit: resolvedDailyMaxLimit,
     tableRows: [
-      { id: 'table-1', min: 1, max: MAX_LIMIT, approvers: 2 },
+      { id: 'table-1', min: 1, max: resolvedDailyMaxLimit, approvers: 2 },
     ],
     matrixEntries: [],
     drawerContext: null,
@@ -45,15 +74,15 @@
   }
 
   function parseCurrency(value) {
+    if (typeof value === 'number') {
+      return value;
+    }
+
     if (typeof value !== 'string') {
       return null;
     }
-    const digits = value.replace(/[^0-9]/g, '');
-    if (!digits) {
-      return null;
-    }
-    const parsed = parseInt(digits, 10);
-    return Number.isNaN(parsed) ? null : parsed;
+
+    return toIntegerAmount(value);
   }
 
   function setInputValue(input, value) {
@@ -133,10 +162,10 @@
       const lastEntry = state.matrixEntries[state.matrixEntries.length - 1];
 
       if (derivedMin == null && lastEntry && typeof lastEntry.max === 'number') {
-        if (lastEntry.max >= MAX_LIMIT) {
-          derivedMin = MAX_LIMIT;
+        if (lastEntry.max >= state.dailyMaxLimit) {
+          derivedMin = state.dailyMaxLimit;
         } else {
-          derivedMin = lastEntry.max + 1;
+          derivedMin = Math.min(lastEntry.max + 1, state.dailyMaxLimit);
         }
       }
 
@@ -313,7 +342,7 @@
       return false;
     }
 
-    if (min < MIN_LIMIT || max > MAX_LIMIT) {
+    if (min < MIN_LIMIT || max > state.dailyMaxLimit) {
       return false;
     }
 
@@ -351,8 +380,9 @@
     if (max == null) {
       showError(maxError, 'Batas Maksimal wajib diisi.');
       hasError = true;
-    } else if (max > MAX_LIMIT) {
-      showError(maxError, 'Jumlah melebihi batas harian Anda.');
+    } else if (max > state.dailyMaxLimit) {
+      const formattedDailyLimit = formatCurrency(state.dailyMaxLimit);
+      showError(maxError, `Batas Maksimal tidak boleh lebih dari ${formattedDailyLimit}.`);
       hasError = true;
     }
 
@@ -387,7 +417,7 @@
         return false;
       }
 
-      return min <= MAX_LIMIT && max === MAX_LIMIT;
+      return min <= state.dailyMaxLimit && max === state.dailyMaxLimit;
     });
 
     return coveringEntries.length === 1;
@@ -465,10 +495,17 @@
   function handleMaxInput(event) {
     if (!maxInput) return;
     const digits = event.target.value.replace(/[^0-9]/g, '');
-    maxInput.value = digits ? formatCurrency(parseInt(digits, 10)) : '';
+    const numericValue = digits ? parseInt(digits, 10) : null;
+    maxInput.value = digits ? formatCurrency(numericValue) : '';
+
     if (maxError) {
-      maxError.textContent = '';
-      maxError.classList.add('hidden');
+      if (numericValue != null && numericValue > state.dailyMaxLimit) {
+        const formattedDailyLimit = formatCurrency(state.dailyMaxLimit);
+        showError(maxError, `Batas Maksimal tidak boleh lebih dari ${formattedDailyLimit}.`);
+      } else {
+        maxError.textContent = '';
+        maxError.classList.add('hidden');
+      }
     }
     updateSaveButtonState();
   }
@@ -485,6 +522,10 @@
   }
 
   function init() {
+    if (dailyMaxLimitDisplay) {
+      dailyMaxLimitDisplay.textContent = formatCurrency(state.dailyMaxLimit);
+    }
+
     renderTable();
     renderMatrixList();
     updateSaveButtonState();
