@@ -124,7 +124,11 @@
     ) {
       const lastEntry = state.matrixEntries[state.matrixEntries.length - 1];
       if (lastEntry && typeof lastEntry.max === 'number') {
-        derivedMin = lastEntry.max;
+        if (lastEntry.max >= MAX_LIMIT) {
+          derivedMin = MAX_LIMIT;
+        } else {
+          derivedMin = lastEntry.max + 1;
+        }
       }
     }
 
