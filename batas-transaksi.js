@@ -35,6 +35,23 @@
     cancelBtn: document.getElementById('limitConfirmCancelBtn'),
     proceedBtn: document.getElementById('limitConfirmProceedBtn'),
   };
+  const confirmSheetState = {};
+  const confirmSheetController = window.bottomSheetManager?.create({
+    overlay: confirmElements.overlay,
+    sheet: confirmElements.sheet,
+    state: confirmSheetState,
+    sheetVisibleClass: 'translate-y-0',
+    openDuration: 300,
+    closeDuration: 300,
+    onBeforeOpen: () => {
+      confirmElements.sheet?.setAttribute('aria-hidden', 'false');
+      confirmElements.container?.classList.remove('pointer-events-none');
+    },
+    onAfterClose: () => {
+      confirmElements.container?.classList.add('pointer-events-none');
+      confirmElements.sheet?.setAttribute('aria-hidden', 'true');
+    },
+  });
 
   const otpElements = {
     section: document.getElementById('limitOtpSection'),
@@ -404,23 +421,23 @@
       newValue.textContent = formatCurrency(newLimitValue);
     }
 
-    sheet.setAttribute('aria-hidden', 'false');
-
-    container?.classList.remove('pointer-events-none');
-
-    overlay.classList.remove('hidden');
-    overlay.classList.add('opacity-0');
-    overlay.classList.remove('opacity-100');
-
-    sheet.classList.add('translate-y-full');
-    sheet.classList.remove('translate-y-0');
-
-    requestAnimationFrame(() => {
-      overlay.classList.remove('opacity-0');
-      overlay.classList.add('opacity-100');
-      sheet.classList.remove('translate-y-full');
-      sheet.classList.add('translate-y-0');
-    });
+    if (confirmSheetController) {
+      confirmSheetController.open();
+    } else {
+      sheet.setAttribute('aria-hidden', 'false');
+      container?.classList.remove('pointer-events-none');
+      overlay.classList.remove('hidden');
+      overlay.classList.add('opacity-0');
+      overlay.classList.remove('opacity-100');
+      sheet.classList.add('translate-y-full');
+      sheet.classList.remove('translate-y-0');
+      requestAnimationFrame(() => {
+        overlay.classList.remove('opacity-0');
+        overlay.classList.add('opacity-100');
+        sheet.classList.remove('translate-y-full');
+        sheet.classList.add('translate-y-0');
+      });
+    }
   }
 
   function closeConfirmSheet(options = {}) {
@@ -431,6 +448,11 @@
     confirmSheetOpen = false;
     pendingNewLimit = null;
     resetOtpState();
+    if (confirmSheetController) {
+      confirmSheetController.close({ immediate: Boolean(options.immediate) });
+      return;
+    }
+
     sheet.setAttribute('aria-hidden', 'true');
 
     const finishClose = () => {

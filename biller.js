@@ -404,6 +404,36 @@
     const successStatusButtonDefaultText = successStatusButton?.textContent?.trim() || 'Cek Status';
     const billerButtons = document.querySelectorAll('[data-biller]');
 
+    const accountSheetState = {};
+    const accountSheetController = window.bottomSheetManager?.create({
+      overlay: accountSheetOverlay,
+      sheet: accountBottomSheet,
+      state: accountSheetState,
+      closeDuration: 220,
+      onAfterClose: () => {
+        pendingAccountId = appliedAccountId;
+      },
+    });
+
+    const savedSheetState = {};
+    const savedSheetController = window.bottomSheetManager?.create({
+      overlay: savedSheetOverlay,
+      sheet: savedBottomSheet,
+      state: savedSheetState,
+      closeDuration: 220,
+      onAfterClose: () => {
+        pendingSavedId = savedSelections.get(activeKey)?.id || '';
+      },
+    });
+
+    const paymentSheetState = {};
+    const paymentSheetController = window.bottomSheetManager?.create({
+      overlay: paymentSheetOverlay,
+      sheet: paymentBottomSheet,
+      state: paymentSheetState,
+      closeDuration: 220,
+    });
+
     function normaliseAccount(account, index) {
       if (!account) return null;
       const id = account.id || account.accountId || account.numberRaw || account.number || `acc-${index}`;
@@ -608,11 +638,15 @@
       }
       renderAccountOptions(pendingAccountId);
       setAccountSheetConfirmState(Boolean(pendingAccountId));
-      accountSheetOverlay.classList.remove('hidden');
-      requestAnimationFrame(() => {
-        accountSheetOverlay.classList.add('opacity-100');
-        accountBottomSheet.classList.remove('translate-y-full');
-      });
+      if (accountSheetController) {
+        accountSheetController.open();
+      } else {
+        accountSheetOverlay.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          accountSheetOverlay.classList.add('opacity-100');
+          accountBottomSheet.classList.remove('translate-y-full');
+        });
+      }
       accountSheetOpen = true;
     }
 
@@ -620,6 +654,10 @@
       if (!accountSheetOverlay || !accountBottomSheet) return;
       const immediate = Boolean(options.immediate);
       accountSheetOpen = false;
+      if (accountSheetController) {
+        accountSheetController.close({ immediate });
+        return;
+      }
       if (immediate) {
         accountSheetOverlay.classList.remove('opacity-100');
         accountSheetOverlay.classList.add('hidden');
@@ -797,11 +835,15 @@
       if (savedSheetList && !savedSheetList.children.length) {
         setSavedSheetConfirmState(false);
       }
-      savedSheetOverlay.classList.remove('hidden');
-      requestAnimationFrame(() => {
-        savedSheetOverlay.classList.add('opacity-100');
-        savedBottomSheet.classList.remove('translate-y-full');
-      });
+      if (savedSheetController) {
+        savedSheetController.open();
+      } else {
+        savedSheetOverlay.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          savedSheetOverlay.classList.add('opacity-100');
+          savedBottomSheet.classList.remove('translate-y-full');
+        });
+      }
       savedSheetOpen = true;
     }
 
@@ -809,6 +851,10 @@
       if (!savedSheetOverlay || !savedBottomSheet) return;
       const immediate = Boolean(options.immediate);
       savedSheetOpen = false;
+      if (savedSheetController) {
+        savedSheetController.close({ immediate });
+        return;
+      }
       if (immediate) {
         savedSheetOverlay.classList.remove('opacity-100');
         savedSheetOverlay.classList.add('hidden');
@@ -1047,6 +1093,10 @@
       resetPaymentOtpState();
       const immediate = Boolean(options.immediate);
       paymentSheetOpen = false;
+      if (paymentSheetController) {
+        paymentSheetController.close({ immediate });
+        return;
+      }
       if (immediate) {
         paymentSheetOverlay.classList.remove('opacity-100');
         paymentSheetOverlay.classList.add('hidden');
@@ -1559,11 +1609,15 @@
         heroSubtitle: displayName,
       };
 
-      paymentSheetOverlay.classList.remove('hidden');
-      requestAnimationFrame(() => {
-        paymentSheetOverlay.classList.add('opacity-100');
-        paymentBottomSheet.classList.remove('translate-y-full');
-      });
+      if (paymentSheetController) {
+        paymentSheetController.open();
+      } else {
+        paymentSheetOverlay.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          paymentSheetOverlay.classList.add('opacity-100');
+          paymentBottomSheet.classList.remove('translate-y-full');
+        });
+      }
       paymentSheetOpen = true;
     }
 

@@ -19,6 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterGroup = document.querySelector('[data-filter-group="mutasi"]');
   const detailOverlay = document.getElementById('mutasiDetailOverlay');
   const detailSheet = document.getElementById('mutasiDetailSheet');
+  const detailSheetState = {};
+  const detailSheetController = window.bottomSheetManager?.create({
+    overlay: detailOverlay,
+    sheet: detailSheet,
+    state: detailSheetState,
+  });
   const detailContent = document.getElementById('mutasiDetailView');
   const detailCloseButtons = document.querySelectorAll('[data-mutasi-detail-close]');
   const detailElements = {
@@ -443,14 +449,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!detailSheet || !detailOverlay) return;
     fillDetailSheet(transaction || {}, { time: generateMockTime() });
     detailIsOpen = true;
-    detailOverlay.classList.remove('hidden');
     if (detailContent) {
       detailContent.scrollTo({ top: 0, behavior: 'auto' });
     }
-    requestAnimationFrame(() => {
-      detailOverlay.classList.add('opacity-100');
-      detailSheet.classList.remove('translate-y-full');
-    });
+    if (detailSheetController) {
+      detailSheetController.open();
+    } else if (detailOverlay && detailSheet) {
+      detailOverlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        detailOverlay.classList.add('opacity-100');
+        detailSheet.classList.remove('translate-y-full');
+      });
+    }
   }
 
   function closeDetailSheet(immediate = false) {
@@ -458,19 +468,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!detailIsOpen && !immediate) return;
 
     detailIsOpen = false;
-    detailSheet.classList.add('translate-y-full');
-    detailOverlay.classList.remove('opacity-100');
-
-    if (immediate) {
-      detailOverlay.classList.add('hidden');
-      return;
-    }
-
-    setTimeout(() => {
-      if (!detailIsOpen) {
+    if (detailSheetController) {
+      detailSheetController.close({ immediate });
+    } else if (detailSheet && detailOverlay) {
+      detailSheet.classList.add('translate-y-full');
+      detailOverlay.classList.remove('opacity-100');
+      if (immediate) {
         detailOverlay.classList.add('hidden');
+      } else {
+        setTimeout(() => {
+          if (!detailIsOpen) {
+            detailOverlay.classList.add('hidden');
+          }
+        }, 200);
       }
-    }, 200);
+    }
   }
 
   function showState(state) {
