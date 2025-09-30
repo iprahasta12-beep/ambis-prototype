@@ -47,7 +47,11 @@
 
         <!-- text may wrap to 2 lines; hidden when sidebar collapses via .sb-label -->
         <div class="sb-label min-w-0 pr-2">
-          <p id="brandName" class="text-slate-400 text-[18px] leading-tight whitespace-normal break-words">
+          <p
+            id="brandName"
+            class="text-slate-400 text-[18px] leading-tight whitespace-normal break-words"
+            data-brand-name
+          >
             PT Sarana Pancing Indonesia
           </p>
 
@@ -128,12 +132,16 @@
               <h1 class="text-[24px] leading-none tracking-tight font-semibold">Beli &amp; Bayar </h1>
           </div>
           <div class="flex items-center gap-2">
+            <div class="hidden sm:flex items-center gap-2 pr-3 mr-2 border-r border-slate-200">
+              <div class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-700 flex items-center justify-center font-semibold" data-user-initials>RC</div>
+              <span class="font-semibold text-slate-700" data-user-name>Ramero Carlo</span>
+            </div>
             <button class="px-4 py-2 rounded-xl border text-base bg-white hover:bg-slate-50 flex items-center gap-2">
               <!-- bell icon -->
               <img src="img/dashboard/bantuan.svg" alt="Notifikasi" class="w-5 h-5 object-contain" />
               <span class="text-slate-700 font-medium">Bantuan</span>
             </button>
-            <button class="px-4 py-2 rounded-xl border text-base bg-white hover:bg-slate-50 flex items-center gap-2">
+            <button class="px-4 py-2 rounded-xl border text-base bg-white hover:bg-slate-50 flex items-center gap-2" data-logout-button>
               <!-- bell icon -->
               <img src="img/dashboard/keluar.svg" alt="Notifikasi" class="w-5 h-5 object-contain" />
               <span class="text-slate-700 font-medium">Keluar</span>
@@ -556,6 +564,7 @@
   </div>
   </div>
 
+  <script src="session.js"></script>
   <script src="data/rekening-data.js"></script>
   <script src="drawer.js"></script>
   <script src="bottomsheet.js"></script>
