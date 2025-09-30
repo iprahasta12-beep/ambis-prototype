@@ -260,6 +260,57 @@
             Konfirmasi Persetujuan Transfer
           </button>
         </div>
+        <div class="pointer-events-none absolute inset-0 flex flex-col">
+          <div
+            id="approvalConfirmOverlay"
+            class="hidden absolute inset-0 bg-slate-900/30 opacity-0 transition-opacity duration-200 z-40 pointer-events-auto"
+          ></div>
+          <div
+            id="approvalConfirmSheet"
+            class="absolute inset-x-0 bottom-0 z-50 h-full bg-white rounded-t-3xl shadow-2xl translate-y-full transition-transform duration-300 flex flex-col pointer-events-auto"
+          >
+            <div class="sticky top-0 px-6 py-5 text-center border-b border-slate-200 bg-white rounded-t-3xl">
+              <h3 class="text-base font-semibold">Konfirmasi Ubah Persetujuan Transfer</h3>
+            </div>
+            <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+              <div class="flex items-start gap-3 px-4 py-3 rounded-xl border border-amber-200 bg-amber-50 text-amber-800">
+                <span aria-hidden="true" class="text-xl leading-none">⚠️</span>
+                <p class="text-sm leading-relaxed">
+                  Pastikan kombinasi limit transaksi dan jumlah penyetuju yang Anda tetapkan sudah sesuai demi keamanan perusahaan.
+                </p>
+              </div>
+
+              <section class="space-y-4">
+                <p class="text-xs font-semibold tracking-[.18em] text-slate-500">DAFTAR PERSETUJUAN TRANSFER</p>
+                <div class="rounded-2xl border border-slate-200 overflow-hidden">
+                  <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[.12em] text-slate-500">
+                    <span class="text-left">Nominal Transaksi</span>
+                    <span class="text-right">Jumlah Persetujuan</span>
+                  </div>
+                  <div id="approvalConfirmList" class="divide-y divide-slate-100"></div>
+                </div>
+              </section>
+            </div>
+            <div class="sticky bottom-0 border-t border-slate-200 bg-white px-6 py-5">
+              <div class="flex items-center gap-3">
+                <button
+                  id="approvalConfirmBack"
+                  type="button"
+                  class="flex-1 rounded-xl border border-slate-200 py-3 font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  Kembali
+                </button>
+                <button
+                  id="approvalConfirmProceed"
+                  type="button"
+                  class="flex-1 rounded-xl bg-cyan-500 text-white py-3 font-semibold transition hover:bg-cyan-600"
+                >
+                  Lanjut Ubah Persetujuan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -50,6 +50,11 @@
 
   const saveBtn = document.getElementById('saveChangesBtn');
   const confirmBtn = document.getElementById('confirmApprovalBtn');
+  const confirmOverlay = document.getElementById('approvalConfirmOverlay');
+  const confirmSheet = document.getElementById('approvalConfirmSheet');
+  const confirmList = document.getElementById('approvalConfirmList');
+  const confirmBackBtn = document.getElementById('approvalConfirmBack');
+  const confirmProceedBtn = document.getElementById('approvalConfirmProceed');
 
   const numberFormatter = new Intl.NumberFormat('id-ID');
 
@@ -65,6 +70,9 @@
     isDrawerOpen: false,
     nextMatrixId: 1,
   };
+
+  let confirmOverlayHideTimeout = null;
+  let isConfirmSheetOpen = false;
 
   function formatCurrency(value) {
     if (typeof value !== 'number' || Number.isNaN(value)) {
@@ -130,6 +138,7 @@
     if (!drawer || !state.isDrawerOpen) {
       return;
     }
+    closeConfirmSheet({ focusTrigger: false });
     drawer.classList.remove('open');
     drawer.setAttribute('aria-hidden', 'true');
     state.isDrawerOpen = false;
@@ -428,6 +437,94 @@
     confirmBtn.disabled = !hasSingleMatrixCoveringMax(state.matrixEntries);
   }
 
+  function getSortedMatrixEntries() {
+    return state.matrixEntries
+      .filter((entry) => entry && typeof entry.min === 'number' && typeof entry.max === 'number' && typeof entry.approvers === 'number')
+      .slice()
+      .sort((a, b) => a.min - b.min);
+  }
+
+  function formatApproverLabel(count) {
+    if (count == null || Number.isNaN(count)) {
+      return '-';
+    }
+
+    return `${count} Penyetuju`;
+  }
+
+  function renderConfirmList(entries) {
+    if (!confirmList) return;
+
+    if (!entries.length) {
+      confirmList.innerHTML = '<div class="px-4 py-6 text-center text-sm text-slate-500">Belum ada persetujuan transfer.</div>';
+      return;
+    }
+
+    const html = entries
+      .map((entry) => {
+        const minLabel = formatCurrency(entry.min);
+        const maxLabel = formatCurrency(entry.max);
+        const approverLabel = formatApproverLabel(entry.approvers);
+        return `
+          <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 min-h-[56px] px-4 py-4 text-sm">
+            <span class="font-semibold text-slate-900">${minLabel} – ${maxLabel}</span>
+            <span class="text-right text-sm font-semibold text-slate-700">${approverLabel}</span>
+          </div>
+        `;
+      })
+      .join('');
+
+    confirmList.innerHTML = html;
+  }
+
+  function openConfirmSheet() {
+    if (!confirmOverlay || !confirmSheet || isConfirmSheetOpen) {
+      return;
+    }
+
+    renderConfirmList(getSortedMatrixEntries());
+
+    window.clearTimeout(confirmOverlayHideTimeout);
+    confirmOverlayHideTimeout = null;
+
+    confirmOverlay.classList.remove('hidden');
+    confirmOverlay.classList.remove('opacity-100');
+    confirmOverlay.classList.add('opacity-0');
+
+    requestAnimationFrame(() => {
+      confirmOverlay.classList.remove('opacity-0');
+      confirmOverlay.classList.add('opacity-100');
+      confirmSheet.classList.remove('translate-y-full');
+    });
+
+    isConfirmSheetOpen = true;
+
+    if (confirmProceedBtn) {
+      confirmProceedBtn.focus({ preventScroll: true });
+    }
+  }
+
+  function closeConfirmSheet({ focusTrigger = true } = {}) {
+    if (!confirmOverlay || !confirmSheet || !isConfirmSheetOpen) {
+      return;
+    }
+
+    isConfirmSheetOpen = false;
+
+    confirmSheet.classList.add('translate-y-full');
+    confirmOverlay.classList.remove('opacity-100');
+    confirmOverlay.classList.add('opacity-0');
+
+    confirmOverlayHideTimeout = window.setTimeout(() => {
+      confirmOverlay.classList.add('hidden');
+      confirmOverlayHideTimeout = null;
+    }, 200);
+
+    if (focusTrigger && confirmBtn) {
+      confirmBtn.focus({ preventScroll: true });
+    }
+  }
+
   function handleSave() {
     if (!saveBtn || saveBtn.disabled) {
       return;
@@ -471,10 +568,7 @@
       return;
     }
 
-    // Placeholder for future confirmation bottom sheet integration.
-    window.dispatchEvent(new CustomEvent('approval:confirm-transfer', {
-      detail: { entries: [...state.matrixEntries] },
-    }));
+    openConfirmSheet();
   }
 
   function handleClose() {
@@ -540,6 +634,34 @@
 
   if (confirmBtn) {
     confirmBtn.addEventListener('click', handleConfirm);
+  }
+
+  if (confirmBackBtn) {
+    confirmBackBtn.addEventListener('click', () => {
+      closeConfirmSheet();
+    });
+  }
+
+  if (confirmOverlay) {
+    confirmOverlay.addEventListener('click', (event) => {
+      if (event.target === confirmOverlay) {
+        closeConfirmSheet();
+      }
+    });
+  }
+
+  if (confirmProceedBtn) {
+    confirmProceedBtn.addEventListener('click', () => {
+      if (!hasSingleMatrixCoveringMax(state.matrixEntries)) {
+        return;
+      }
+
+      window.dispatchEvent(new CustomEvent('approval:confirm-transfer', {
+        detail: { entries: [...state.matrixEntries] },
+      }));
+
+      closeConfirmSheet();
+    });
   }
 
   if (drawerCloseBtn) {
