@@ -1,6 +1,7 @@
 (function () {
   const MIN_LIMIT = 1;
   const DEFAULT_DAILY_MAX_LIMIT = 200_000_000;
+  const CONFIRM_OVERLAY_TRANSITION_MS = 200;
 
   const dailyMaxLimitDisplay = document.getElementById('dailyMaxLimitValue');
 
@@ -50,6 +51,11 @@
 
   const saveBtn = document.getElementById('saveChangesBtn');
   const confirmBtn = document.getElementById('confirmApprovalBtn');
+  const confirmOverlay = document.getElementById('approvalConfirmOverlay');
+  const confirmSheet = document.getElementById('approvalConfirmSheet');
+  const confirmList = document.getElementById('approvalConfirmList');
+  const confirmBackBtn = document.getElementById('approvalConfirmBack');
+  const confirmSubmitBtn = document.getElementById('approvalConfirmSubmit');
 
   const numberFormatter = new Intl.NumberFormat('id-ID');
 
@@ -65,6 +71,9 @@
     isDrawerOpen: false,
     nextMatrixId: 1,
   };
+
+  let isConfirmSheetVisible = false;
+  let confirmOverlayHideTimeoutId = null;
 
   function formatCurrency(value) {
     if (typeof value !== 'number' || Number.isNaN(value)) {
@@ -312,6 +321,113 @@
     updateConfirmButtonState();
   }
 
+  function renderConfirmSheetList(entries) {
+    if (!confirmList) {
+      return;
+    }
+
+    confirmList.innerHTML = '';
+
+    if (!entries.length) {
+      const emptyMessage = document.createElement('div');
+      emptyMessage.className = 'px-4 py-6 text-sm text-slate-500 text-center';
+      emptyMessage.textContent = 'Belum ada persetujuan transfer.';
+      confirmList.appendChild(emptyMessage);
+      return;
+    }
+
+    const sortedEntries = [...entries].sort((a, b) => {
+      const minA = typeof a?.min === 'number' ? a.min : 0;
+      const minB = typeof b?.min === 'number' ? b.min : 0;
+      return minA - minB;
+    });
+
+    sortedEntries.forEach((entry) => {
+      const row = document.createElement('div');
+      row.className = 'grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] items-center gap-4 px-4 py-4 min-h-[56px] bg-white';
+
+      const range = document.createElement('p');
+      range.className = 'text-sm font-semibold text-slate-900';
+      const formattedMin = formatCurrency(entry?.min ?? 0);
+      const formattedMax = formatCurrency(entry?.max ?? 0);
+      range.textContent = `${formattedMin} – ${formattedMax}`;
+
+      const approvers = document.createElement('p');
+      approvers.className = 'text-sm font-semibold text-slate-900 text-right';
+      const approverCount = typeof entry?.approvers === 'number' ? entry.approvers : 0;
+      approvers.textContent = `${approverCount} Penyetuju`;
+
+      row.appendChild(range);
+      row.appendChild(approvers);
+      confirmList.appendChild(row);
+    });
+  }
+
+  function clearConfirmOverlayHideTimeout() {
+    if (confirmOverlayHideTimeoutId) {
+      window.clearTimeout(confirmOverlayHideTimeoutId);
+      confirmOverlayHideTimeoutId = null;
+    }
+  }
+
+  function openConfirmSheet() {
+    if (!confirmOverlay || !confirmSheet) {
+      return;
+    }
+
+    renderConfirmSheetList(state.matrixEntries);
+    clearConfirmOverlayHideTimeout();
+
+    isConfirmSheetVisible = true;
+
+    confirmOverlay.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      confirmOverlay.classList.remove('opacity-0');
+      confirmOverlay.classList.add('opacity-100');
+    });
+
+    confirmSheet.classList.remove('pointer-events-none');
+    confirmSheet.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(() => {
+      confirmSheet.classList.remove('translate-y-full');
+      confirmSheet.classList.add('translate-y-0');
+    });
+
+    document.body.classList.add('overflow-hidden');
+
+    if (confirmSubmitBtn) {
+      confirmSubmitBtn.focus({ preventScroll: true });
+    }
+  }
+
+  function closeConfirmSheet({ restoreFocus = true } = {}) {
+    if (!confirmOverlay || !confirmSheet || !isConfirmSheetVisible) {
+      return;
+    }
+
+    isConfirmSheetVisible = false;
+
+    confirmOverlay.classList.remove('opacity-100');
+    confirmOverlay.classList.add('opacity-0');
+    clearConfirmOverlayHideTimeout();
+    confirmOverlayHideTimeoutId = window.setTimeout(() => {
+      if (!isConfirmSheetVisible && confirmOverlay) {
+        confirmOverlay.classList.add('hidden');
+      }
+    }, CONFIRM_OVERLAY_TRANSITION_MS);
+
+    confirmSheet.classList.add('translate-y-full');
+    confirmSheet.classList.remove('translate-y-0');
+    confirmSheet.classList.add('pointer-events-none');
+    confirmSheet.setAttribute('aria-hidden', 'true');
+
+    document.body.classList.remove('overflow-hidden');
+
+    if (restoreFocus && confirmBtn) {
+      confirmBtn.focus({ preventScroll: true });
+    }
+  }
+
   function getCurrentInputValues() {
     return {
       min: parseCurrency(minInput?.value ?? ''),
@@ -471,10 +587,32 @@
       return;
     }
 
-    // Placeholder for future confirmation bottom sheet integration.
+    openConfirmSheet();
+  }
+
+  function handleConfirmSubmit() {
+    if (!hasSingleMatrixCoveringMax(state.matrixEntries)) {
+      return;
+    }
+
     window.dispatchEvent(new CustomEvent('approval:confirm-transfer', {
       detail: { entries: [...state.matrixEntries] },
     }));
+
+    closeConfirmSheet({ restoreFocus: false });
+    ensureDrawerClosed();
+  }
+
+  function handleConfirmOverlayClick() {
+    if (isConfirmSheetVisible) {
+      closeConfirmSheet();
+    }
+  }
+
+  function handleDocumentKeydown(event) {
+    if (event.key === 'Escape' && isConfirmSheetVisible) {
+      closeConfirmSheet();
+    }
   }
 
   function handleClose() {
@@ -540,6 +678,24 @@
 
   if (confirmBtn) {
     confirmBtn.addEventListener('click', handleConfirm);
+  }
+
+  if (confirmBackBtn) {
+    confirmBackBtn.addEventListener('click', () => {
+      closeConfirmSheet();
+    });
+  }
+
+  if (confirmSubmitBtn) {
+    confirmSubmitBtn.addEventListener('click', handleConfirmSubmit);
+  }
+
+  if (confirmOverlay) {
+    confirmOverlay.addEventListener('click', handleConfirmOverlayClick);
+  }
+
+  if (confirmSheet) {
+    document.addEventListener('keydown', handleDocumentKeydown);
   }
 
   if (drawerCloseBtn) {
