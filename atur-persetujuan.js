@@ -50,6 +50,12 @@
 
   const saveBtn = document.getElementById('saveChangesBtn');
   const confirmBtn = document.getElementById('confirmApprovalBtn');
+  const confirmSheet = document.getElementById('confirmApprovalSheet');
+  const confirmSheetOverlay = document.getElementById('confirmApprovalSheetOverlay');
+  const confirmSheetPanel = document.getElementById('confirmApprovalSheetPanel');
+  const confirmSheetList = document.getElementById('confirmApprovalSheetList');
+  const confirmSheetBackBtn = document.getElementById('confirmApprovalSheetBack');
+  const confirmSheetProceedBtn = document.getElementById('confirmApprovalSheetProceed');
 
   const numberFormatter = new Intl.NumberFormat('id-ID');
 
@@ -66,11 +72,25 @@
     nextMatrixId: 1,
   };
 
+  let isConfirmSheetOpen = false;
+
   function formatCurrency(value) {
     if (typeof value !== 'number' || Number.isNaN(value)) {
       return '';
     }
     return `Rp ${numberFormatter.format(value)}`;
+  }
+
+  function formatCurrencyCompact(value) {
+    const formatted = formatCurrency(value);
+    return formatted.replace(/^Rp\s+/, 'Rp');
+  }
+
+  function formatApproverLabel(count) {
+    if (typeof count !== 'number' || Number.isNaN(count)) {
+      return '';
+    }
+    return `${count} Penyetuju`;
   }
 
   function parseCurrency(value) {
@@ -130,6 +150,7 @@
     if (!drawer || !state.isDrawerOpen) {
       return;
     }
+    closeConfirmSheet({ immediate: true });
     drawer.classList.remove('open');
     drawer.setAttribute('aria-hidden', 'true');
     state.isDrawerOpen = false;
@@ -312,6 +333,146 @@
     updateConfirmButtonState();
   }
 
+  function getSortedMatrixEntries() {
+    const validEntries = state.matrixEntries.filter((entry) => {
+      if (!entry) {
+        return false;
+      }
+
+      const { min, max, approvers } = entry;
+      return (
+        typeof min === 'number' &&
+        typeof max === 'number' &&
+        typeof approvers === 'number' &&
+        !Number.isNaN(min) &&
+        !Number.isNaN(max) &&
+        !Number.isNaN(approvers)
+      );
+    });
+
+    return [...validEntries].sort((a, b) => {
+      if (a.min == null && b.min == null) return 0;
+      if (a.min == null) return 1;
+      if (b.min == null) return -1;
+      return a.min - b.min;
+    });
+  }
+
+  function renderConfirmSheetList(entries = getSortedMatrixEntries()) {
+    if (!confirmSheetList) return;
+
+    confirmSheetList.innerHTML = '';
+
+    if (!entries.length) {
+      const empty = document.createElement('p');
+      empty.className = 'text-sm text-slate-500';
+      empty.textContent = 'Belum ada persetujuan transfer.';
+      confirmSheetList.appendChild(empty);
+      return;
+    }
+
+    entries.forEach((entry) => {
+      const row = document.createElement('article');
+      row.className = 'flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3';
+
+      const left = document.createElement('div');
+      left.className = 'flex flex-col gap-1';
+
+      const leftLabel = document.createElement('p');
+      leftLabel.className = 'text-[11px] font-semibold uppercase tracking-wide text-slate-500';
+      leftLabel.textContent = 'Nominal Transaksi';
+
+      const leftValue = document.createElement('p');
+      leftValue.className = 'text-sm font-medium text-slate-700';
+      leftValue.textContent = `${formatCurrencyCompact(entry.min)} - ${formatCurrencyCompact(entry.max)}`;
+
+      left.appendChild(leftLabel);
+      left.appendChild(leftValue);
+
+      const right = document.createElement('div');
+      right.className = 'flex flex-col items-end gap-1 text-right';
+
+      const rightLabel = document.createElement('p');
+      rightLabel.className = 'text-[11px] font-semibold uppercase tracking-wide text-slate-500';
+      rightLabel.textContent = 'Jumlah Penyetuju';
+
+      const rightValue = document.createElement('p');
+      rightValue.className = 'text-sm font-semibold text-slate-700';
+      rightValue.textContent = formatApproverLabel(entry.approvers);
+
+      right.appendChild(rightLabel);
+      right.appendChild(rightValue);
+
+      row.appendChild(left);
+      row.appendChild(right);
+
+      confirmSheetList.appendChild(row);
+    });
+  }
+
+  function openConfirmSheet() {
+    if (!confirmSheet || !confirmSheetPanel || !confirmSheetOverlay) {
+      return;
+    }
+
+    confirmSheet.classList.remove('hidden');
+    isConfirmSheetOpen = true;
+
+    requestAnimationFrame(() => {
+      confirmSheet.classList.remove('pointer-events-none');
+      confirmSheetOverlay.classList.add('opacity-100');
+      confirmSheetOverlay.classList.remove('opacity-0');
+      confirmSheetPanel.classList.remove('translate-y-full');
+      if (confirmSheetProceedBtn) {
+        confirmSheetProceedBtn.focus();
+      }
+    });
+  }
+
+  function closeConfirmSheet({ immediate = false } = {}) {
+    if (!confirmSheet || !confirmSheetPanel || !confirmSheetOverlay) {
+      return;
+    }
+
+    const finalize = () => {
+      confirmSheet.classList.add('hidden');
+      confirmSheet.classList.add('pointer-events-none');
+      confirmSheetOverlay.classList.remove('opacity-100');
+      confirmSheetOverlay.classList.add('opacity-0');
+      confirmSheetPanel.classList.add('translate-y-full');
+      isConfirmSheetOpen = false;
+    };
+
+    if (immediate) {
+      finalize();
+      return;
+    }
+
+    if (!isConfirmSheetOpen) {
+      return;
+    }
+
+    confirmSheet.classList.add('pointer-events-none');
+    confirmSheetOverlay.classList.remove('opacity-100');
+    confirmSheetOverlay.classList.add('opacity-0');
+    confirmSheetPanel.classList.add('translate-y-full');
+
+    const onTransitionEnd = (event) => {
+      if (event.target !== confirmSheetPanel) {
+        return;
+      }
+      confirmSheetPanel.removeEventListener('transitionend', onTransitionEnd);
+      finalize();
+    };
+
+    confirmSheetPanel.addEventListener('transitionend', onTransitionEnd);
+
+    setTimeout(() => {
+      confirmSheetPanel.removeEventListener('transitionend', onTransitionEnd);
+      finalize();
+    }, 350);
+  }
+
   function getCurrentInputValues() {
     return {
       min: parseCurrency(minInput?.value ?? ''),
@@ -471,9 +632,46 @@
       return;
     }
 
-    // Placeholder for future confirmation bottom sheet integration.
+    const entries = getSortedMatrixEntries();
+    if (!entries.length) {
+      return;
+    }
+
+    renderConfirmSheetList(entries);
+    openConfirmSheet();
+  }
+
+  function handleConfirmBack() {
+    closeConfirmSheet();
+  }
+
+  function handleConfirmProceed() {
+    const entries = getSortedMatrixEntries();
+    if (!entries.length) {
+      closeConfirmSheet({ immediate: true });
+      return;
+    }
+
+    closeConfirmSheet({ immediate: true });
+
+    state.tableRows = entries.map((entry, index) => ({
+      id: `table-${index + 1}`,
+      min: entry.min,
+      max: entry.max,
+      approvers: entry.approvers,
+    }));
+
+    state.matrixEntries = entries.map((entry) => ({ ...entry }));
+
+    renderTable();
+    renderMatrixList();
+    updateConfirmButtonState();
+
+    ensureDrawerClosed();
+
+    const payloadEntries = entries.map((entry) => ({ ...entry }));
     window.dispatchEvent(new CustomEvent('approval:confirm-transfer', {
-      detail: { entries: [...state.matrixEntries] },
+      detail: { entries: payloadEntries },
     }));
   }
 
@@ -540,6 +738,18 @@
 
   if (confirmBtn) {
     confirmBtn.addEventListener('click', handleConfirm);
+  }
+
+  if (confirmSheetBackBtn) {
+    confirmSheetBackBtn.addEventListener('click', handleConfirmBack);
+  }
+
+  if (confirmSheetProceedBtn) {
+    confirmSheetProceedBtn.addEventListener('click', handleConfirmProceed);
+  }
+
+  if (confirmSheetOverlay) {
+    confirmSheetOverlay.addEventListener('click', handleConfirmBack);
   }
 
   if (drawerCloseBtn) {
