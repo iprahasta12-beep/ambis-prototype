@@ -1,4 +1,32 @@
 (function () {
+  function readBrandName() {
+    const sessionBrand =
+      typeof window.AMBIS_SESSION === 'object' && typeof window.AMBIS_SESSION.brandName === 'string'
+        ? window.AMBIS_SESSION.brandName.trim()
+        : '';
+    if (sessionBrand) return sessionBrand;
+
+    const datasetBrand =
+      document?.documentElement?.dataset?.ambisBrandName &&
+      document.documentElement.dataset.ambisBrandName.trim();
+    if (datasetBrand) return datasetBrand;
+
+    try {
+      const stored =
+        (localStorage.getItem('ambis:brand-name') || localStorage.getItem('ambis:company-name') || '').trim();
+      if (stored) return stored;
+    } catch (error) {
+      /* Ignore storage errors */
+    }
+
+    const nodeText = document.querySelector('[data-brand-name], #brandName')?.textContent?.trim();
+    if (nodeText) return nodeText;
+
+    return 'Brand Anda';
+  }
+
+  const companyName = readBrandName();
+
   const dataset = {
     utama: {
       status: 'success',
@@ -86,7 +114,7 @@
                 },
                 destination: {
                   name: 'Utama',
-                  subtitle: 'PT Sarana Pancing Indonesia',
+                  subtitle: companyName,
                   account: 'Amar Indonesia - 000967895410'
                 }
               }
@@ -118,12 +146,12 @@
                 total: 1000000000000,
                 source: {
                   name: 'Operasional',
-                  subtitle: 'PT Sarana Pancing Indonesia',
+                  subtitle: companyName,
                   account: 'Amar Indonesia - 000967895483'
                 },
                 destination: {
                   name: 'Rekening Investasi',
-                  subtitle: 'PT Sarana Pancing Indonesia',
+                  subtitle: companyName,
                   account: 'BCA - 8899001122'
                 }
               }
@@ -144,12 +172,12 @@
                 total: 1000000000000,
                 source: {
                   name: 'Rekening Investasi',
-                  subtitle: 'PT Sarana Pancing Indonesia',
+                  subtitle: companyName,
                   account: 'BCA - 8899001122'
                 },
                 destination: {
                   name: 'Operasional',
-                  subtitle: 'PT Sarana Pancing Indonesia',
+                  subtitle: companyName,
                   account: 'Amar Indonesia - 000967895483'
                 }
               }
@@ -176,7 +204,7 @@
                 total: 850000000,
                 source: {
                   name: 'Operasional',
-                  subtitle: 'PT Sarana Pancing Indonesia',
+                  subtitle: companyName,
                   account: 'Amar Indonesia - 000967895483'
                 },
                 destination: {
@@ -213,7 +241,7 @@
                 total: 420000000,
                 source: {
                   name: 'Pembayaran Distributor',
-                  subtitle: 'PT Sarana Pancing Indonesia',
+                  subtitle: companyName,
                   account: 'Amar Indonesia - 000967895450'
                 },
                 destination: {
@@ -244,7 +272,7 @@
                 },
                 destination: {
                   name: 'Pembayaran Distributor',
-                  subtitle: 'PT Sarana Pancing Indonesia',
+                  subtitle: companyName,
                   account: 'Amar Indonesia - 000967895450'
                 }
               }
