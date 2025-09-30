@@ -31,8 +31,14 @@
   const resolvedDailyMaxLimit = resolveDailyMaxLimit();
 
   const drawer = document.getElementById('drawer');
+  const approvalPane = document.getElementById('approvalPane');
   const drawerCloseBtn = document.getElementById('approvalDrawerClose');
   const drawerTitle = document.getElementById('approvalDrawerTitle');
+  const pendingPane = document.getElementById('approvalPendingPane');
+  const pendingCloseBtn = document.getElementById('approvalPendingClose');
+  const pendingDismissBtn = document.getElementById('approvalPendingDismiss');
+  const pendingViewProcessBtn = document.getElementById('approvalPendingViewProcess');
+  const pendingList = document.getElementById('approvalPendingList');
 
   const rowsContainer = document.getElementById('approvalRowsContainer');
   const emptyState = document.getElementById('approvalEmptyState');
@@ -158,6 +164,12 @@
       return;
     }
     closeConfirmSheet({ focusTrigger: false });
+    if (pendingPane) {
+      pendingPane.classList.add('hidden');
+    }
+    if (approvalPane) {
+      approvalPane.classList.remove('hidden');
+    }
     drawer.classList.remove('open');
     drawer.setAttribute('aria-hidden', 'true');
     state.isDrawerOpen = false;
@@ -494,6 +506,59 @@
       .join('');
 
     confirmList.innerHTML = html;
+  }
+
+  function renderPendingList(entries) {
+    if (!pendingList) return;
+
+    if (!entries.length) {
+      pendingList.innerHTML =
+        '<div class="px-5 py-6 text-center text-sm text-slate-500">Belum ada persetujuan transfer.</div>';
+      return;
+    }
+
+    const html = entries
+      .map((entry) => {
+        const minLabel = formatCurrency(entry.min);
+        const maxLabel = formatCurrency(entry.max);
+        const approverLabel = formatApproverLabel(entry.approvers);
+        return `
+          <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 min-h-[56px] px-5 py-4 text-sm">
+            <span class="font-semibold text-slate-900">${minLabel} – ${maxLabel}</span>
+            <span class="text-right text-sm font-semibold text-slate-700">${approverLabel}</span>
+          </div>
+        `;
+      })
+      .join('');
+
+    pendingList.innerHTML = html;
+  }
+
+  function openPendingPane(entries = []) {
+    if (!pendingPane) {
+      return;
+    }
+
+    const safeEntries = Array.isArray(entries) && entries.length ? entries : getSortedMatrixEntries();
+    renderPendingList(safeEntries);
+
+    if (approvalPane) {
+      approvalPane.classList.add('hidden');
+    }
+    pendingPane.classList.remove('hidden');
+    ensureDrawerOpen();
+  }
+
+  function closePendingPane({ closeDrawer = false } = {}) {
+    if (pendingPane) {
+      pendingPane.classList.add('hidden');
+    }
+    if (approvalPane) {
+      approvalPane.classList.remove('hidden');
+    }
+    if (closeDrawer) {
+      ensureDrawerClosed();
+    }
   }
 
   function formatOtpTime(value) {
@@ -942,8 +1007,32 @@
     });
   }
 
+  window.addEventListener('approval:confirm-transfer', (event) => {
+    const entries = event?.detail?.entries ?? [];
+    openPendingPane(entries);
+  });
+
   if (drawerCloseBtn) {
     drawerCloseBtn.addEventListener('click', handleClose);
+  }
+
+  if (pendingCloseBtn) {
+    pendingCloseBtn.addEventListener('click', () => {
+      closePendingPane({ closeDrawer: true });
+    });
+  }
+
+  if (pendingDismissBtn) {
+    pendingDismissBtn.addEventListener('click', () => {
+      closePendingPane({ closeDrawer: true });
+    });
+  }
+
+  if (pendingViewProcessBtn) {
+    pendingViewProcessBtn.addEventListener('click', () => {
+      closePendingPane({ closeDrawer: true });
+      window.location.href = 'persetujuan-transaksi.html#proses-persetujuan';
+    });
   }
 
   if (minInput) {
