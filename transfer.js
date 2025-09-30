@@ -124,6 +124,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const otpCountdownDefaultMessage = otpCountdownMessage?.textContent?.trim() || 'Sesi akan berakhir dalam';
   const OTP_EXPIRED_MESSAGE = 'Sesi Anda telah berakhir.';
 
+  const sheetState = {};
+  const sourceSheetController = window.bottomSheetManager?.create({
+    overlay: sheetOverlay,
+    sheet,
+    state: sheetState,
+    closeDuration: 200,
+  });
+  const destSheetController = window.bottomSheetManager?.create({
+    overlay: sheetOverlay,
+    sheet: destSheet,
+    state: sheetState,
+    closeDuration: 200,
+  });
+  const confirmSheetController = window.bottomSheetManager?.create({
+    overlay: sheetOverlay,
+    sheet: confirmSheet,
+    state: sheetState,
+    closeDuration: 200,
+  });
+
   // move drawer elements
   const openMoveBtn = document.getElementById('openMoveDrawer');
   const moveCloseBtn = document.getElementById('moveDrawerCloseBtn');
@@ -683,11 +703,15 @@ document.addEventListener('DOMContentLoaded', () => {
     renderList(currentData);
     sheetChoose.disabled = true;
     sheetChoose.classList.add('opacity-50','cursor-not-allowed');
-    sheetOverlay.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      sheetOverlay.classList.add('opacity-100');
-      sheet.classList.remove('translate-y-full');
-    });
+    if (sourceSheetController) {
+      sourceSheetController.open();
+    } else if (sheetOverlay && sheet) {
+      sheetOverlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        sheetOverlay.classList.add('opacity-100');
+        sheet.classList.remove('translate-y-full');
+      });
+    }
   }
 
   function openMoveSourceSheet() {
@@ -699,11 +723,15 @@ document.addEventListener('DOMContentLoaded', () => {
     renderList(currentData);
     sheetChoose.disabled = true;
     sheetChoose.classList.add('opacity-50','cursor-not-allowed');
-    sheetOverlay.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      sheetOverlay.classList.add('opacity-100');
-      sheet.classList.remove('translate-y-full');
-    });
+    if (sourceSheetController) {
+      sourceSheetController.open();
+    } else if (sheetOverlay && sheet) {
+      sheetOverlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        sheetOverlay.classList.add('opacity-100');
+        sheet.classList.remove('translate-y-full');
+      });
+    }
   }
 
   function openMoveDestSheet() {
@@ -721,11 +749,15 @@ document.addEventListener('DOMContentLoaded', () => {
     renderList(currentData);
     sheetChoose.disabled = true;
     sheetChoose.classList.add('opacity-50','cursor-not-allowed');
-    sheetOverlay.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      sheetOverlay.classList.add('opacity-100');
-      sheet.classList.remove('translate-y-full');
-    });
+    if (sourceSheetController) {
+      sourceSheetController.open();
+    } else if (sheetOverlay && sheet) {
+      sheetOverlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        sheetOverlay.classList.add('opacity-100');
+        sheet.classList.remove('translate-y-full');
+      });
+    }
   }
 
   function openMethodSheet() {
@@ -737,19 +769,27 @@ document.addEventListener('DOMContentLoaded', () => {
     renderMethodList(currentData);
     sheetChoose.disabled = true;
     sheetChoose.classList.add('opacity-50','cursor-not-allowed');
-    sheetOverlay.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      sheetOverlay.classList.add('opacity-100');
-      sheet.classList.remove('translate-y-full');
-    });
+    if (sourceSheetController) {
+      sourceSheetController.open();
+    } else if (sheetOverlay && sheet) {
+      sheetOverlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        sheetOverlay.classList.add('opacity-100');
+        sheet.classList.remove('translate-y-full');
+      });
+    }
   }
 
   function closeSheet() {
-    sheetOverlay.classList.remove('opacity-100');
-    sheet.classList.add('translate-y-full');
-    setTimeout(() => {
-      sheetOverlay.classList.add('hidden');
-    }, 200);
+    if (sourceSheetController) {
+      sourceSheetController.close();
+    } else if (sheetOverlay && sheet) {
+      sheetOverlay.classList.remove('opacity-100');
+      sheet.classList.add('translate-y-full');
+      setTimeout(() => {
+        sheetOverlay.classList.add('hidden');
+      }, 200);
+    }
   }
 
   function resetDestForm() {
@@ -776,19 +816,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function openDestSheet() {
     resetDestForm();
-    sheetOverlay.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      sheetOverlay.classList.add('opacity-100');
-      destSheet.classList.remove('translate-y-full');
-    });
+    if (destSheetController) {
+      destSheetController.open();
+    } else if (sheetOverlay && destSheet) {
+      sheetOverlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        sheetOverlay.classList.add('opacity-100');
+        destSheet.classList.remove('translate-y-full');
+      });
+    }
   }
 
   function closeDestSheet() {
-    destSheet.classList.add('translate-y-full');
-    sheetOverlay.classList.remove('opacity-100');
-    setTimeout(() => {
-      sheetOverlay.classList.add('hidden');
-    }, 200);
+    if (destSheetController) {
+      destSheetController.close();
+    } else if (destSheet && sheetOverlay) {
+      destSheet.classList.add('translate-y-full');
+      sheetOverlay.classList.remove('opacity-100');
+      setTimeout(() => {
+        sheetOverlay.classList.add('hidden');
+      }, 200);
+    }
   }
 
   function setConfirmProceedEnabled(enabled) {
@@ -904,11 +952,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function closeConfirmSheet() {
     resetOtpState();
-    confirmSheet.classList.add('translate-y-full');
-    sheetOverlay.classList.remove('opacity-100');
-    setTimeout(() => {
-      sheetOverlay.classList.add('hidden');
-    }, 200);
+    if (confirmSheetController) {
+      confirmSheetController.close();
+    } else if (confirmSheet && sheetOverlay) {
+      confirmSheet.classList.add('translate-y-full');
+      sheetOverlay.classList.remove('opacity-100');
+      setTimeout(() => {
+        sheetOverlay.classList.add('hidden');
+      }, 200);
+    }
   }
 
   function handleParentMessage(event) {
@@ -1446,11 +1498,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     updateConfirmSheetContent('transfer');
     setConfirmProceedEnabled(true);
-    sheetOverlay.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      sheetOverlay.classList.add('opacity-100');
-      confirmSheet.classList.remove('translate-y-full');
-    });
+    if (confirmSheetController) {
+      confirmSheetController.open();
+    } else if (sheetOverlay && confirmSheet) {
+      sheetOverlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        sheetOverlay.classList.add('opacity-100');
+        confirmSheet.classList.remove('translate-y-full');
+      });
+    }
   });
 
   moveConfirmBtn?.addEventListener('click', () => {
@@ -1493,11 +1549,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     updateConfirmSheetContent('move');
     setConfirmProceedEnabled(true);
-    sheetOverlay.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      sheetOverlay.classList.add('opacity-100');
-      confirmSheet.classList.remove('translate-y-full');
-    });
+    if (confirmSheetController) {
+      confirmSheetController.open();
+    } else if (sheetOverlay && confirmSheet) {
+      sheetOverlay.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        sheetOverlay.classList.add('opacity-100');
+        confirmSheet.classList.remove('translate-y-full');
+      });
+    }
   });
 
   function restoreSheetSelection() {

@@ -298,43 +298,49 @@ document.addEventListener('DOMContentLoaded', () => {
     sheetChoose.classList.toggle('hover:bg-cyan-700', enable);
   }
 
+  const rekeningSheetState = {};
+  const rekeningSheetController = window.bottomSheetManager?.create({
+    overlay: sheetBackdrop,
+    sheet: sheetPanel,
+    state: rekeningSheetState,
+    openDuration: 200,
+    closeDuration: 110,
+    onBeforeOpen: () => {
+      ignoreNextOutside = true;
+      sheetPanel.classList.remove('duration-100');
+      sheetPanel.classList.add('duration-200');
+      sheetBackdrop.classList.remove('duration-100');
+      sheetBackdrop.classList.add('duration-200');
+      inner?.classList.add('overflow-hidden');
+      sheet?.classList.remove('hidden');
+      enableChoose(false);
+      sheet?.querySelectorAll('input[name="rek"]').forEach((r) => { r.checked = false; });
+    },
+    onAfterOpen: () => {
+      ignoreNextOutside = false;
+    },
+    onBeforeClose: () => {
+      sheetPanel.classList.remove('duration-200');
+      sheetPanel.classList.add('duration-100');
+      sheetBackdrop.classList.remove('duration-200');
+      sheetBackdrop.classList.add('duration-100');
+    },
+    onAfterClose: () => {
+      sheet?.classList.add('hidden');
+      inner?.classList.remove('overflow-hidden');
+      sheetPanel.classList.remove('duration-100');
+      sheetPanel.classList.add('duration-200');
+      sheetBackdrop.classList.remove('duration-100');
+      sheetBackdrop.classList.add('duration-200');
+    },
+  });
+
   function openSheet() {
-    ignoreNextOutside = true;
-
-    // normal (longer) duration on open
-    sheetPanel.classList.remove('duration-100'); sheetPanel.classList.add('duration-200');
-    sheetBackdrop.classList.remove('duration-100'); sheetBackdrop.classList.add('duration-200');
-
-    inner.classList.add('overflow-hidden'); // lock drawer scroll
-    sheet.classList.remove('hidden');
-
-    // reset state
-    enableChoose(false);
-    sheet.querySelectorAll('input[name="rek"]').forEach(r => { r.checked = false; });
-
-    requestAnimationFrame(() => {
-      sheetBackdrop.classList.remove('opacity-0');     // fade in
-      sheetPanel.classList.remove('translate-y-full'); // slide up
-      setTimeout(() => { ignoreNextOutside = false; }, 0); // allow outside-close next tick
-    });
+    rekeningSheetController?.open();
   }
 
   function closeSheet() {
-    // faster close
-    sheetPanel.classList.remove('duration-200'); sheetPanel.classList.add('duration-100');
-    sheetBackdrop.classList.remove('duration-200'); sheetBackdrop.classList.add('duration-100');
-
-    sheetBackdrop.classList.add('opacity-0');      // fade out
-    sheetPanel.classList.add('translate-y-full');  // slide down
-
-    setTimeout(() => {
-      sheet.classList.add('hidden');
-      inner.classList.remove('overflow-hidden');   // unlock drawer scroll
-
-      // restore normal duration for next open
-      sheetPanel.classList.remove('duration-100'); sheetPanel.classList.add('duration-200');
-      sheetBackdrop.classList.remove('duration-100'); sheetBackdrop.classList.add('duration-200');
-    }, 110);
+    rekeningSheetController?.close();
   }
 
   // Open (prevent immediate outside-close)

@@ -41,6 +41,7 @@
   let confirmSheetPurposeNode = null;
   let confirmSheetGiroToggleNode = null;
   let confirmSheetGiroContentNode = null;
+  let confirmSheetController = null;
   let otpSectionNode = null;
   let otpInputs = [];
   let otpCountdownNode = null;
@@ -466,18 +467,22 @@
     resetOtpState();
     setConfirmSheetAccordionExpanded(false);
 
-    if (confirmOverlayNode) {
-      confirmOverlayNode.classList.remove('hidden');
-      confirmOverlayNode.classList.remove('opacity-100');
-      confirmOverlayNode.classList.add('opacity-0');
-      requestAnimationFrame(() => {
-        confirmOverlayNode.classList.remove('opacity-0');
-        confirmOverlayNode.classList.add('opacity-100');
-      });
-    }
+    if (confirmSheetController) {
+      confirmSheetController.open();
+    } else {
+      if (confirmOverlayNode) {
+        confirmOverlayNode.classList.remove('hidden');
+        confirmOverlayNode.classList.remove('opacity-100');
+        confirmOverlayNode.classList.add('opacity-0');
+        requestAnimationFrame(() => {
+          confirmOverlayNode.classList.remove('opacity-0');
+          confirmOverlayNode.classList.add('opacity-100');
+        });
+      }
 
-    if (confirmSheetNode) {
-      confirmSheetNode.classList.remove('translate-y-full');
+      if (confirmSheetNode) {
+        confirmSheetNode.classList.remove('translate-y-full');
+      }
     }
 
     if (confirmSheetSubmitButton) {
@@ -493,20 +498,24 @@
 
   function closeConfirmSheet({ resetPending = true, immediate = false } = {}) {
     resetOtpState();
-    if (confirmSheetNode) {
-      confirmSheetNode.classList.add('translate-y-full');
-    }
+    if (confirmSheetController) {
+      confirmSheetController.close({ immediate });
+    } else {
+      if (confirmSheetNode) {
+        confirmSheetNode.classList.add('translate-y-full');
+      }
 
-    if (confirmOverlayNode) {
-      confirmOverlayNode.classList.remove('opacity-100');
-      confirmOverlayNode.classList.add('opacity-0');
-      const hideOverlay = () => {
-        confirmOverlayNode.classList.add('hidden');
-      };
-      if (immediate) {
-        hideOverlay();
-      } else {
-        setTimeout(hideOverlay, CONFIRM_SHEET_TRANSITION_MS);
+      if (confirmOverlayNode) {
+        confirmOverlayNode.classList.remove('opacity-100');
+        confirmOverlayNode.classList.add('opacity-0');
+        const hideOverlay = () => {
+          confirmOverlayNode.classList.add('hidden');
+        };
+        if (immediate) {
+          hideOverlay();
+        } else {
+          setTimeout(hideOverlay, CONFIRM_SHEET_TRANSITION_MS);
+        }
       }
     }
 
@@ -1654,6 +1663,17 @@
     confirmSheetPurposeNode = document.getElementById('addAccountConfirmPurpose');
     confirmSheetGiroToggleNode = document.getElementById('addAccountConfirmGiroToggle');
     confirmSheetGiroContentNode = document.getElementById('addAccountConfirmGiroContent');
+    confirmSheetController = window.bottomSheetManager?.create({
+      overlay: confirmOverlayNode,
+      sheet: confirmSheetNode,
+      closeDuration: CONFIRM_SHEET_TRANSITION_MS,
+      onBeforeOpen: () => {
+        confirmSheetNode?.setAttribute('aria-hidden', 'false');
+      },
+      onAfterClose: () => {
+        confirmSheetNode?.setAttribute('aria-hidden', 'true');
+      },
+    });
     otpSectionNode = document.getElementById('addAccountOtpSection');
     otpInputs = otpSectionNode ? Array.from(otpSectionNode.querySelectorAll('.otp-input')) : [];
     otpCountdownNode = document.getElementById('addAccountOtpCountdown');

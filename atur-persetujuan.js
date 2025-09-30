@@ -73,6 +73,14 @@
   const confirmOtpResendBtn = document.getElementById('approvalConfirmOtpResend');
   const confirmOtpError = document.getElementById('approvalConfirmOtpError');
 
+  const confirmSheetState = {};
+  const confirmSheetController = window.bottomSheetManager?.create({
+    overlay: confirmOverlay,
+    sheet: confirmSheet,
+    state: confirmSheetState,
+    closeDuration: 200,
+  });
+
   const numberFormatter = new Intl.NumberFormat('id-ID');
 
   const CONFIRM_BACK_DEFAULT_LABEL = 'Kembali';
@@ -752,15 +760,19 @@
     window.clearTimeout(confirmOverlayHideTimeout);
     confirmOverlayHideTimeout = null;
 
-    confirmOverlay.classList.remove('hidden');
-    confirmOverlay.classList.remove('opacity-100');
-    confirmOverlay.classList.add('opacity-0');
+    if (confirmSheetController) {
+      confirmSheetController.open();
+    } else {
+      confirmOverlay.classList.remove('hidden');
+      confirmOverlay.classList.remove('opacity-100');
+      confirmOverlay.classList.add('opacity-0');
 
-    requestAnimationFrame(() => {
-      confirmOverlay.classList.remove('opacity-0');
-      confirmOverlay.classList.add('opacity-100');
-      confirmSheet.classList.remove('translate-y-full');
-    });
+      requestAnimationFrame(() => {
+        confirmOverlay.classList.remove('opacity-0');
+        confirmOverlay.classList.add('opacity-100');
+        confirmSheet.classList.remove('translate-y-full');
+      });
+    }
 
     isConfirmSheetOpen = true;
 
@@ -777,14 +789,19 @@
     resetConfirmOtpState();
     isConfirmSheetOpen = false;
 
-    confirmSheet.classList.add('translate-y-full');
-    confirmOverlay.classList.remove('opacity-100');
-    confirmOverlay.classList.add('opacity-0');
-
-    confirmOverlayHideTimeout = window.setTimeout(() => {
-      confirmOverlay.classList.add('hidden');
+    if (confirmSheetController) {
+      confirmSheetController.close();
       confirmOverlayHideTimeout = null;
-    }, 200);
+    } else {
+      confirmSheet.classList.add('translate-y-full');
+      confirmOverlay.classList.remove('opacity-100');
+      confirmOverlay.classList.add('opacity-0');
+
+      confirmOverlayHideTimeout = window.setTimeout(() => {
+        confirmOverlay.classList.add('hidden');
+        confirmOverlayHideTimeout = null;
+      }, 200);
+    }
 
     if (focusTrigger && confirmBtn) {
       confirmBtn.focus({ preventScroll: true });
