@@ -73,6 +73,7 @@
   };
 
   let isConfirmSheetOpen = false;
+  const CONFIRM_SHEET_TRANSITION_MS = 300;
 
   function formatCurrency(value) {
     if (typeof value !== 'number' || Number.isNaN(value)) {
@@ -411,14 +412,36 @@
   }
 
   function openConfirmSheet() {
-    if (!confirmSheet) {
+    if (!confirmSheet || isConfirmSheetOpen) {
       return;
     }
 
     confirmSheet.classList.remove('hidden');
+    confirmSheet.classList.remove('pointer-events-none');
+
+    if (confirmSheetOverlay) {
+      confirmSheetOverlay.classList.remove('pointer-events-none');
+    }
+
+    if (confirmSheetPanel) {
+      confirmSheetPanel.classList.add('translate-y-full');
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (confirmSheetOverlay) {
+          confirmSheetOverlay.classList.remove('opacity-0');
+          confirmSheetOverlay.classList.add('opacity-100');
+        }
+
+        if (confirmSheetPanel) {
+          confirmSheetPanel.classList.remove('translate-y-full');
+        }
+      });
+    });
+
     isConfirmSheetOpen = true;
 
-    confirmSheet.classList.remove('pointer-events-none');
     if (confirmSheetProceedBtn) {
       confirmSheetProceedBtn.focus();
     }
@@ -429,9 +452,24 @@
       return;
     }
 
-    if (immediate) {
+    const resetState = () => {
       confirmSheet.classList.add('hidden');
       confirmSheet.classList.add('pointer-events-none');
+
+      if (confirmSheetOverlay) {
+        confirmSheetOverlay.classList.add('pointer-events-none');
+        confirmSheetOverlay.classList.remove('opacity-100');
+        confirmSheetOverlay.classList.add('opacity-0');
+      }
+
+      if (confirmSheetPanel) {
+        confirmSheetPanel.classList.add('translate-y-full');
+      }
+    };
+
+    if (immediate) {
+      resetState();
+
       isConfirmSheetOpen = false;
       return;
     }
@@ -440,8 +478,52 @@
       return;
     }
 
-    confirmSheet.classList.add('pointer-events-none');
-    confirmSheet.classList.add('hidden');
+    let hasReset = false;
+    let timeoutId = null;
+
+    const finalize = () => {
+      if (hasReset) {
+        return;
+      }
+
+      hasReset = true;
+
+      if (confirmSheetPanel) {
+        confirmSheetPanel.removeEventListener('transitionend', handlePanelTransitionEnd);
+      }
+
+      if (timeoutId != null) {
+        window.clearTimeout(timeoutId);
+      }
+
+      resetState();
+    };
+
+    function handlePanelTransitionEnd(event) {
+      if (event && event.target !== confirmSheetPanel) {
+        return;
+      }
+
+      finalize();
+    }
+
+    if (confirmSheetPanel) {
+      confirmSheetPanel.addEventListener('transitionend', handlePanelTransitionEnd);
+    } else {
+      finalize();
+    }
+
+    if (confirmSheetOverlay) {
+      confirmSheetOverlay.classList.remove('opacity-100');
+      confirmSheetOverlay.classList.add('opacity-0');
+    }
+
+    if (confirmSheetPanel) {
+      confirmSheetPanel.classList.add('translate-y-full');
+    }
+
+    timeoutId = window.setTimeout(finalize, CONFIRM_SHEET_TRANSITION_MS + 50);
+
     isConfirmSheetOpen = false;
   }
 
