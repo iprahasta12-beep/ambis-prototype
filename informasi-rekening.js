@@ -77,6 +77,8 @@
   const transferTriggerAccountData = new WeakMap();
   let pendingTransferInitialData = null;
   let lastTransferAccountPayload = null;
+  let activeAccountCardNode = null;
+  let activeAccountId = null;
 
   const ACCOUNT_GRID_DEFAULT_COLUMNS_CLASS = 'xl:grid-cols-3';
   const ACCOUNT_GRID_DRAWER_COLUMNS_CLASS = 'xl:grid-cols-2';
@@ -88,6 +90,9 @@
   const OTP_DEFAULT_COUNTDOWN_MESSAGE = 'Sesi akan berakhir dalam';
   const OTP_EXPIRED_MESSAGE = 'Sesi Anda telah berakhir.';
   const MUTASI_DRAWER_DEFAULT_TITLE = 'Mutasi Rekening';
+  const ACCOUNT_CARD_ACTIVE_CLASS = 'border-cyan-500';
+  const ACCOUNT_CARD_INACTIVE_CLASS = 'border-slate-200';
+  const ACCOUNT_CARD_ACTIVE_ATTRIBUTE = 'data-account-card-active';
 
   const touchedState = {
     name: false,
@@ -193,6 +198,48 @@
       typeof isOpenOverride === 'boolean' ? isOpenOverride : isDrawerCurrentlyOpen();
     accountGridNode.classList.toggle(ACCOUNT_GRID_DRAWER_COLUMNS_CLASS, isOpen);
     accountGridNode.classList.toggle(ACCOUNT_GRID_DEFAULT_COLUMNS_CLASS, !isOpen);
+  }
+
+  function findAccountCardByAccountId(accountId) {
+    if (!accountGridNode || typeof accountId !== 'string' || !accountId) {
+      return null;
+    }
+    const cards = accountGridNode.querySelectorAll('article[data-account-id]');
+    for (let index = 0; index < cards.length; index += 1) {
+      const card = cards[index];
+      if (card && card.dataset.accountId === accountId) {
+        return card;
+      }
+    }
+    return null;
+  }
+
+  function setActiveAccountCard(card, accountId) {
+    const targetCard = card instanceof HTMLElement ? card : null;
+    const previousCard = activeAccountCardNode;
+    if (!targetCard) {
+      if (previousCard instanceof HTMLElement) {
+        previousCard.classList.remove(ACCOUNT_CARD_ACTIVE_CLASS);
+        previousCard.classList.add(ACCOUNT_CARD_INACTIVE_CLASS);
+        previousCard.removeAttribute(ACCOUNT_CARD_ACTIVE_ATTRIBUTE);
+      }
+      activeAccountCardNode = null;
+      activeAccountId = null;
+      return;
+    }
+
+    if (previousCard && previousCard !== targetCard) {
+      previousCard.classList.remove(ACCOUNT_CARD_ACTIVE_CLASS);
+      previousCard.classList.add(ACCOUNT_CARD_INACTIVE_CLASS);
+      previousCard.removeAttribute(ACCOUNT_CARD_ACTIVE_ATTRIBUTE);
+    }
+
+    activeAccountCardNode = targetCard;
+    activeAccountId = typeof accountId === 'string' && accountId ? accountId : targetCard.dataset.accountId || null;
+
+    targetCard.classList.add(ACCOUNT_CARD_ACTIVE_CLASS);
+    targetCard.classList.remove(ACCOUNT_CARD_INACTIVE_CLASS);
+    targetCard.setAttribute(ACCOUNT_CARD_ACTIVE_ATTRIBUTE, 'true');
   }
 
   function sanitizeNumber(value) {
@@ -1293,6 +1340,7 @@
     const card = document.createElement('article');
     card.className = 'rounded-2xl border border-slate-200 p-5 bg-white flex flex-col gap-4';
     card.dataset.accountId = account.id || '';
+    const cardAccountId = typeof account.id === 'string' ? account.id : '';
 
     const header = document.createElement('div');
     header.className = 'flex items-start justify-between gap-3';
@@ -1358,6 +1406,12 @@
     const transferBtn = createTransferActionButton(account);
     actions.append(mutasiBtn, transferBtn);
 
+    const activateCard = () => {
+      setActiveAccountCard(card, cardAccountId);
+    };
+    mutasiBtn.addEventListener('click', activateCard);
+    transferBtn.addEventListener('click', activateCard);
+
     card.append(header, numberRow, balanceWrap, actions);
     return card;
   }
@@ -1376,6 +1430,7 @@
     if (!accountGridNode) return;
     closeTransferPopover({ restoreFocus: false });
     const accounts = getAccounts();
+    const previousActiveAccountId = activeAccountId;
     accountGridNode.innerHTML = '';
     balanceElements.clear();
 
@@ -1388,13 +1443,23 @@
     if (!accounts.length) {
       accountGridNode.classList.add('hidden');
       if (emptyStateNode) emptyStateNode.classList.remove('hidden');
+      setActiveAccountCard(null);
     } else {
       accountGridNode.classList.remove('hidden');
       if (emptyStateNode) emptyStateNode.classList.add('hidden');
+      let restoredActiveCard = null;
       accounts.forEach((account) => {
         const card = createAccountCard(account);
         accountGridNode.appendChild(card);
+        if (!restoredActiveCard && previousActiveAccountId && account.id === previousActiveAccountId) {
+          restoredActiveCard = card;
+        }
       });
+      if (restoredActiveCard) {
+        setActiveAccountCard(restoredActiveCard, previousActiveAccountId);
+      } else if (previousActiveAccountId) {
+        setActiveAccountCard(null);
+      }
     }
 
     updateToggleState();
@@ -1497,6 +1562,12 @@
   }
 
   function openMutasiPane(account) {
+    if (account && typeof account.id === 'string' && account.id) {
+      const cardNode = findAccountCardByAccountId(account.id);
+      if (cardNode) {
+        setActiveAccountCard(cardNode, account.id);
+      }
+    }
     const title = getMutasiDrawerTitle(account);
     if (window.AMBIS_MUTASI && typeof window.AMBIS_MUTASI.prepareDrawerForAccount === 'function') {
       window.AMBIS_MUTASI.prepareDrawerForAccount(account, { titleOverride: title });
@@ -1528,6 +1599,12 @@
     const resolvedAccountPayload = accountPayload || lastTransferAccountPayload || null;
     if (resolvedAccountPayload) {
       lastTransferAccountPayload = resolvedAccountPayload;
+      if (typeof resolvedAccountPayload.id === 'string' && resolvedAccountPayload.id) {
+        const cardNode = findAccountCardByAccountId(resolvedAccountPayload.id);
+        if (cardNode) {
+          setActiveAccountCard(cardNode, resolvedAccountPayload.id);
+        }
+      }
     }
     pendingTransferInitialData = { paneType, account: resolvedAccountPayload };
     const title = getTransferPaneTitle(paneType);
