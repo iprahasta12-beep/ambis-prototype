@@ -581,11 +581,6 @@ function render(tab) {
       </td>
       <td class="px-4 py-3">
         <p class="text-sm font-semibold text-slate-900">${descriptionLine}</p>
-        <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
-          <span>ID: ${item.id || '-'}</span>
-          <span class="${statusClass}">${item.status || '-'}</span>
-          <span class="text-slate-400">Sumber: ${sourceLabel}</span>
-        </div>
       </td>
       <td class="px-4 py-3 text-right align-top">
         <button type="button" class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50" data-role="detail-button">${actionLabel}</button>
