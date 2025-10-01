@@ -78,6 +78,9 @@
   let pendingTransferInitialData = null;
   let lastTransferAccountPayload = null;
 
+  const ACCOUNT_GRID_DEFAULT_COLUMNS_CLASS = 'xl:grid-cols-3';
+  const ACCOUNT_GRID_DRAWER_COLUMNS_CLASS = 'xl:grid-cols-2';
+
   const MAX_ACCOUNT_NAME_LENGTH = 15;
   const PURPOSE_OPTION_ACTIVE_CLASSES = ['bg-cyan-50', 'border-l-2', 'border-dashed', 'border-cyan-500'];
   const CONFIRM_SHEET_TRANSITION_MS = 300;
@@ -171,6 +174,25 @@
       return CURRENCY_FORMATTER.format(0).replace(/\s+/g, '');
     }
     return CURRENCY_FORMATTER.format(value).replace(/\s+/g, '');
+  }
+
+  function isDrawerCurrentlyOpen() {
+    if (drawerController && typeof drawerController.isOpen === 'function') {
+      try {
+        return Boolean(drawerController.isOpen());
+      } catch (err) {
+        return Boolean(drawerNode && drawerNode.classList.contains('open'));
+      }
+    }
+    return Boolean(drawerNode && drawerNode.classList.contains('open'));
+  }
+
+  function updateAccountGridLayoutForDrawer(isOpenOverride) {
+    if (!accountGridNode) return;
+    const isOpen =
+      typeof isOpenOverride === 'boolean' ? isOpenOverride : isDrawerCurrentlyOpen();
+    accountGridNode.classList.toggle(ACCOUNT_GRID_DRAWER_COLUMNS_CLASS, isOpen);
+    accountGridNode.classList.toggle(ACCOUNT_GRID_DEFAULT_COLUMNS_CLASS, !isOpen);
   }
 
   function sanitizeNumber(value) {
@@ -1446,6 +1468,7 @@
         window.sidebarCollapseForDrawer();
       }
     }
+    updateAccountGridLayoutForDrawer(true);
   }
 
   function isMutasiPaneOpen() {
@@ -1574,6 +1597,7 @@
         window.sidebarRestoreForDrawer();
       }
     }
+    updateAccountGridLayoutForDrawer(false);
     resetFormState();
 
     let focusTarget = null;
@@ -1637,7 +1661,28 @@
     drawerNode = document.getElementById('drawer');
     if (drawerNode && window.drawerManager && typeof window.drawerManager.register === 'function') {
       drawerController = window.drawerManager.register(drawerNode);
+      if (drawerController) {
+        if (typeof drawerController.onOpen === 'function') {
+          drawerController.onOpen(() => {
+            updateAccountGridLayoutForDrawer(true);
+          });
+        }
+        if (typeof drawerController.onClose === 'function') {
+          drawerController.onClose(() => {
+            updateAccountGridLayoutForDrawer(false);
+          });
+        }
+      }
     }
+    if (drawerNode) {
+      drawerNode.addEventListener('drawer:open', () => {
+        updateAccountGridLayoutForDrawer(true);
+      });
+      drawerNode.addEventListener('drawer:close', () => {
+        updateAccountGridLayoutForDrawer(false);
+      });
+    }
+    updateAccountGridLayoutForDrawer();
     addAccountPaneNode = document.getElementById('addAccountPane');
     formNode = document.getElementById('addAccountForm');
     giroAccordionButton = document.getElementById('giroSpecToggle');
