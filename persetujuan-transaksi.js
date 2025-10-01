@@ -12,6 +12,7 @@ const approvalsData = {
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
       method: 'BI Fast',
       reference: 'TRX-20240817-01',
+      sourceAccountKey: 'operasional',
       sourceAccount: {
         initial: 'O',
         title: 'Operasional',
@@ -37,6 +38,7 @@ const approvalsData = {
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
       method: 'RTGS',
       reference: 'TRX-20240817-02',
+      sourceAccountKey: 'utama',
       sourceAccount: {
         initial: 'U',
         title: 'Rekening Utama',
@@ -60,6 +62,7 @@ const approvalsData = {
       status: 'Butuh Persetujuan',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      sourceAccountKey: 'operasional',
       sourceAccount: 'Operasional • BCA 1234567890',
       customerId: '14123123123',
       customerName: 'PT Ambis Sejahtera',
@@ -78,6 +81,7 @@ const approvalsData = {
       status: 'Butuh Persetujuan',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      sourceAccountKey: 'operasional',
       sourceAccount: 'Operasional • BNI 1122334455',
       customerId: '1929393939',
       customerName: 'PT Ambis Nusantara',
@@ -96,6 +100,7 @@ const approvalsData = {
       status: 'Butuh Persetujuan',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      sourceAccountKey: 'operasional',
       sourceAccount: 'Operasional • Permata 6677889900',
       customerId: '8877665544',
       customerName: 'CV Sentosa Mandiri',
@@ -141,6 +146,7 @@ const approvalsData = {
       status: 'Menunggu Persetujuan',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      sourceAccountKey: 'operasional',
       sourceAccount: 'Operasional • BCA 1234567890',
       customerId: '8899776655',
       customerName: 'PT Sumber Abadi',
@@ -161,6 +167,7 @@ const approvalsData = {
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
       method: 'BI Fast',
       reference: 'TRX-20240813-01',
+      sourceAccountKey: 'operasional',
       sourceAccount: {
         initial: 'O',
         title: 'Operasional',
@@ -188,6 +195,7 @@ const approvalsData = {
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
       method: 'RTGS',
       reference: 'TRX-20240810-01',
+      sourceAccountKey: 'utama',
       sourceAccount: {
         initial: 'U',
         title: 'Rekening Utama',
@@ -211,6 +219,7 @@ const approvalsData = {
       status: 'Selesai',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      sourceAccountKey: 'operasional',
       sourceAccount: 'Operasional • BCA 1234567890',
       customerId: 'PLG-773311',
       customerName: 'PT Ambis Sejahtera',
@@ -246,6 +255,7 @@ const approvalsData = {
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
       method: 'BI Fast',
       reference: 'TRX-20240808-01',
+      sourceAccountKey: 'operasional',
       sourceAccount: {
         initial: 'O',
         title: 'Operasional',
@@ -330,6 +340,260 @@ const RANDOM_NOTE_WORDS = [
 ];
 
 const templateCache = new Map();
+
+function getRekeningApi() {
+  if (typeof window === 'undefined') return null;
+  return window.AMBIS || null;
+}
+
+function getRekeningAccounts(api) {
+  if (!api) return [];
+  if (typeof api.getAccounts === 'function') {
+    try {
+      const accounts = api.getAccounts({ clone: false });
+      if (Array.isArray(accounts)) return accounts;
+    } catch (error) {
+      try {
+        const fallback = api.getAccounts();
+        if (Array.isArray(fallback)) return fallback;
+      } catch (err) {
+        /* ignore */
+      }
+    }
+  }
+
+  if (Array.isArray(api.accounts)) {
+    return api.accounts;
+  }
+
+  return [];
+}
+
+function sanitizeAccountNumber(value) {
+  if (!value) return '';
+  return String(value).replace(/\D+/g, '');
+}
+
+function formatAccountNumberFromData(value) {
+  const digits = sanitizeAccountNumber(value);
+  if (!digits) {
+    return typeof value === 'string' ? value.trim() : '';
+  }
+
+  const api = getRekeningApi();
+  if (api && typeof api.formatAccountNumber === 'function') {
+    try {
+      return api.formatAccountNumber(digits);
+    } catch (error) {
+      /* ignore formatting errors */
+    }
+  }
+
+  return digits.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+}
+
+function resolveAccountFromRekeningData(reference) {
+  const api = getRekeningApi();
+  if (!api) return null;
+
+  const accounts = getRekeningAccounts(api);
+  const candidates = [];
+
+  const pushCandidate = value => {
+    if (typeof value === 'string' && value.trim()) {
+      candidates.push(value.trim());
+    }
+  };
+
+  if (reference && typeof reference === 'object' && !Array.isArray(reference)) {
+    pushCandidate(reference.accountId);
+    pushCandidate(reference.sourceAccountId);
+    pushCandidate(reference.sourceAccountKey);
+    pushCandidate(reference.id);
+    pushCandidate(reference.key);
+    pushCandidate(reference.name);
+    pushCandidate(reference.displayName);
+    pushCandidate(reference.numberRaw);
+    pushCandidate(reference.number);
+  } else {
+    pushCandidate(reference);
+  }
+
+  for (const candidate of candidates) {
+    if (typeof api.findAccountById === 'function') {
+      const direct = api.findAccountById(candidate);
+      if (direct) return direct;
+
+      const lower = candidate.toLowerCase();
+      if (lower !== candidate) {
+        const lowerMatch = api.findAccountById(lower);
+        if (lowerMatch) return lowerMatch;
+      }
+    }
+
+    const numeric = sanitizeAccountNumber(candidate);
+    if (numeric && typeof api.findAccountByNumber === 'function') {
+      const numberMatch = api.findAccountByNumber(numeric);
+      if (numberMatch) return numberMatch;
+    }
+
+    const lowerCandidate = candidate.toLowerCase();
+    const byName = accounts.find(account => {
+      const idMatch = account.id && account.id.toLowerCase() === lowerCandidate;
+      const nameMatch = account.name && account.name.toLowerCase() === lowerCandidate;
+      const displayMatch = account.displayName && account.displayName.toLowerCase() === lowerCandidate;
+      if (idMatch || nameMatch || displayMatch) return true;
+
+      const accountLabel = (account.displayName || account.name || '').toLowerCase();
+      if (!accountLabel) return false;
+
+      if (lowerCandidate.includes(accountLabel)) {
+        return true;
+      }
+
+      const parts = lowerCandidate
+        .split(/[•–\-]/)
+        .map(part => part.trim())
+        .filter(Boolean);
+
+      return parts.some(part => accountLabel.includes(part));
+    });
+
+    if (byName) return byName;
+  }
+
+  return null;
+}
+
+function buildTransferSourceAccount(item) {
+  const fallback =
+    item && item.sourceAccount && typeof item.sourceAccount === 'object' && !Array.isArray(item.sourceAccount)
+      ? { ...item.sourceAccount }
+      : {};
+
+  const keyCandidate =
+    (item && item.sourceAccountKey) ||
+    (item && item.sourceAccountId) ||
+    (typeof item?.sourceAccount === 'string' ? item.sourceAccount : '') ||
+    fallback.accountId ||
+    fallback.id ||
+    '';
+
+  const account = resolveAccountFromRekeningData(keyCandidate);
+
+  if (!account) {
+    return fallback;
+  }
+
+  const formattedNumber = formatAccountNumberFromData(account.numberRaw || account.number);
+  const subtitleParts = [];
+  if (account.bank) subtitleParts.push(account.bank);
+  if (formattedNumber) subtitleParts.push(formattedNumber);
+
+  const subtitle = subtitleParts.join(' • ') || fallback.subtitle || '-';
+
+  const initialSource =
+    account.initial ||
+    fallback.initial ||
+    (account.displayName ? account.displayName.charAt(0).toUpperCase() : '') ||
+    (account.name ? account.name.charAt(0).toUpperCase() : '') ||
+    (fallback.title ? fallback.title.charAt(0).toUpperCase() : '');
+
+  return {
+    initial: initialSource,
+    title: account.displayName || account.name || fallback.title || '-',
+    subtitle,
+    color: account.color || fallback.color || 'bg-cyan-100 text-cyan-600',
+  };
+}
+
+function resolveSourceAccountDisplay(item) {
+  if (!item) return '-';
+
+  const keyCandidate =
+    (item && item.sourceAccountKey) ||
+    (item && item.sourceAccountId) ||
+    (typeof item?.sourceAccount === 'string' ? item.sourceAccount : '') ||
+    '';
+
+  const account = resolveAccountFromRekeningData(keyCandidate);
+
+  if (account) {
+    const formattedNumber = formatAccountNumberFromData(account.numberRaw || account.number);
+    const name = account.displayName || account.name || '';
+    if (name && formattedNumber) {
+      return `${name} – ${formattedNumber}`;
+    }
+    if (name) return name;
+    if (formattedNumber) return formattedNumber;
+  }
+
+  if (typeof item.sourceAccount === 'string' && item.sourceAccount.trim()) {
+    return item.sourceAccount.trim();
+  }
+
+  return '-';
+}
+
+function stripPaneChrome(pane) {
+  if (!pane) return;
+
+  const headerSelectors = ['#successHeaderClose', '#successTitle', '#approvalPendingClose'];
+  headerSelectors.forEach(selector => {
+    const node = pane.querySelector(selector);
+    if (!node) return;
+    const bordered = node.closest('.border-b');
+    if (bordered && bordered.parentElement === pane) {
+      bordered.remove();
+      return;
+    }
+    const parentDiv = node.closest('div');
+    if (parentDiv && parentDiv !== pane && parentDiv.parentElement === pane) {
+      parentDiv.remove();
+    }
+  });
+
+  const footerSelectors = [
+    '#successCloseBtn',
+    '#successDrawerCloseButton',
+    '#successDrawerStatusButton',
+    '#approvalPendingDismiss',
+    '#approvalPendingViewProcess',
+  ];
+
+  const removed = new Set();
+
+  footerSelectors.forEach(selector => {
+    const node = pane.querySelector(selector);
+    if (!node) return;
+
+    const sticky = node.closest('.sticky');
+    if (sticky && sticky.parentElement === pane && !removed.has(sticky)) {
+      sticky.remove();
+      removed.add(sticky);
+      return;
+    }
+
+    const bordered = node.closest('.border-t');
+    if (bordered && bordered.parentElement === pane && !removed.has(bordered)) {
+      bordered.remove();
+      removed.add(bordered);
+      return;
+    }
+
+    const container = node.closest('div');
+    if (container && container !== pane && container.parentElement === pane && !removed.has(container)) {
+      container.remove();
+      removed.add(container);
+      return;
+    }
+
+    if (!removed.has(node)) {
+      node.remove();
+      removed.add(node);
+    }
+  });
+}
 
 const LEGACY_MONTH_MAP = {
   Jan: 0,
@@ -655,7 +919,7 @@ async function loadTemplateElement(config) {
 function fillTransferPane(pane, item, displayDate, noteText) {
   if (!pane) return;
 
-  const source = item && item.sourceAccount ? item.sourceAccount : {};
+  const source = buildTransferSourceAccount(item);
   const destination = item && item.destinationAccount ? item.destinationAccount : {};
   const reference = (item && item.reference) || (item && item.id) || '-';
   const method = (item && item.method) || 'BI Fast';
@@ -690,6 +954,8 @@ function fillTransferPane(pane, item, displayDate, noteText) {
   setTextContent(pane.querySelector('#successCategory'), item?.category || '-');
   setTextContent(pane.querySelector('#successNote'), noteDisplay);
   setTextContent(pane.querySelector('#successMethod'), method);
+
+  stripPaneChrome(pane);
 }
 
 function fillBillerPane(pane, item, displayDate, noteText) {
@@ -700,7 +966,7 @@ function fillBillerPane(pane, item, displayDate, noteText) {
   setTextContent(pane.querySelector('#successHeroTitle'), item?.title || 'Transaksi Beli & Bayar');
   setTextContent(pane.querySelector('#successHeroCategory'), item?.category || 'Beli & Bayar');
   setTextContent(pane.querySelector('#successPaymentValue'), item?.paymentLabel || item?.counterpart || '-');
-  setTextContent(pane.querySelector('#successAccountValue'), item?.sourceAccount || '-');
+  setTextContent(pane.querySelector('#successAccountValue'), resolveSourceAccountDisplay(item));
   setTextContent(pane.querySelector('#successIdValue'), item?.customerId || '-');
   setTextContent(pane.querySelector('#successCustomerName'), item?.customerName || '-');
   setTextContent(pane.querySelector('#successStatusPill'), item?.statusLabel || item?.status || '-');
@@ -716,6 +982,8 @@ function fillBillerPane(pane, item, displayDate, noteText) {
     appendDynamicRow(dynamicSection, 'Tanggal & Waktu', displayDate || '-');
     appendDynamicRow(dynamicSection, 'Catatan', capitalizeSentence(noteText));
   }
+
+  stripPaneChrome(pane);
 }
 
 function fillApprovalPane(pane, item) {
@@ -728,6 +996,8 @@ function fillApprovalPane(pane, item) {
     heroHeading.textContent = item?.status || 'Menunggu Persetujuan Admin Lain';
   }
   renderApprovalMatrixList(pane.querySelector('#approvalPendingList'), item?.approvalMatrix || []);
+
+  stripPaneChrome(pane);
 }
 
 async function renderDetailPane(item) {
