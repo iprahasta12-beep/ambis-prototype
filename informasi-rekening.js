@@ -1676,6 +1676,7 @@
     }
     updateAccountGridLayoutForDrawer(false);
     resetFormState();
+    setActiveAccountCard(null);
 
     let focusTarget = null;
     if (restoreFocus) {
