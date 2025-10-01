@@ -10,6 +10,20 @@ const approvalsData = {
       status: 'Butuh Persetujuan',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      method: 'BI Fast',
+      reference: 'TRX-20240817-01',
+      sourceAccount: {
+        initial: 'O',
+        title: 'Operasional',
+        subtitle: 'PT Ambis Sejahtera',
+        color: 'bg-cyan-100 text-cyan-600',
+      },
+      destinationAccount: {
+        initial: 'Q',
+        title: 'PT Queen Japan',
+        subtitle: 'BCA • 1234567890',
+        color: 'bg-amber-100 text-amber-600',
+      },
     },
     {
       id: 'TRX-20240817-02',
@@ -21,39 +35,74 @@ const approvalsData = {
       status: 'Butuh Persetujuan',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      method: 'RTGS',
+      reference: 'TRX-20240817-02',
+      sourceAccount: {
+        initial: 'U',
+        title: 'Rekening Utama',
+        subtitle: 'PT Ambis Sejahtera',
+        color: 'bg-emerald-100 text-emerald-600',
+      },
+      destinationAccount: {
+        initial: 'O',
+        title: 'Rekening Operasional',
+        subtitle: 'Mandiri • 9876543210',
+        color: 'bg-sky-100 text-sky-600',
+      },
     },
     {
       id: 'BLR-20240817-02',
       category: 'Beli Bayar',
-      title: 'Beli & Bayar',
+      title: 'Pembayaran Tagihan',
       counterpart: 'Tagihan Listrik',
       amount: 'Rp1.200.000',
       date: '2024-08-17T16:06:00',
       status: 'Butuh Persetujuan',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      sourceAccount: 'Operasional • BCA 1234567890',
+      customerId: '14123123123',
+      customerName: 'PT Ambis Sejahtera',
+      adminFee: 'Rp5.000',
+      totalAmount: 'Rp1.205.000',
+      paymentLabel: 'Tagihan Listrik PLN',
+      statusLabel: 'Menunggu Persetujuan',
     },
     {
       id: 'BLR-20240817-03',
       category: 'Beli Bayar',
-      title: 'Beli & Bayar',
+      title: 'Pembayaran Internet',
       counterpart: 'Indihome',
       amount: 'Rp350.000',
       date: '2024-08-17T13:12:00',
       status: 'Butuh Persetujuan',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      sourceAccount: 'Operasional • BNI 1122334455',
+      customerId: '1929393939',
+      customerName: 'PT Ambis Nusantara',
+      adminFee: 'Rp3.500',
+      totalAmount: 'Rp353.500',
+      paymentLabel: 'Internet Indihome',
+      statusLabel: 'Menunggu Persetujuan',
     },
     {
       id: 'BLR-20240817-05',
       category: 'Beli Bayar',
-      title: 'Beli & Bayar',
+      title: 'Pembayaran Internet',
       counterpart: 'CBN',
       amount: 'Rp350.000',
       date: '2024-08-17T10:10:00',
       status: 'Butuh Persetujuan',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      sourceAccount: 'Operasional • Permata 6677889900',
+      customerId: '8877665544',
+      customerName: 'CV Sentosa Mandiri',
+      adminFee: 'Rp2.500',
+      totalAmount: 'Rp352.500',
+      paymentLabel: 'Internet CBN',
+      statusLabel: 'Menunggu Persetujuan',
     },
   ],
   menunggu: [
@@ -67,17 +116,38 @@ const approvalsData = {
       status: 'Menunggu Persetujuan',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      method: 'SWIFT',
+      reference: 'TRX-20240815-01',
+      sourceAccount: {
+        initial: 'V',
+        title: 'Valas USD',
+        subtitle: 'PT Ambis Sejahtera',
+        color: 'bg-purple-100 text-purple-600',
+      },
+      destinationAccount: {
+        initial: 'M',
+        title: 'PT Mega Finance',
+        subtitle: 'HSBC • 4455667711',
+        color: 'bg-amber-100 text-amber-600',
+      },
     },
     {
       id: 'BLR-20240814-01',
       category: 'Beli Bayar',
-      title: 'Beli & Bayar',
+      title: 'Pembayaran Layanan',
       counterpart: 'Langganan Internet',
       amount: 'Rp1.500.000',
       date: '2024-08-14T09:20:00',
       status: 'Menunggu Persetujuan',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      sourceAccount: 'Operasional • BCA 1234567890',
+      customerId: '8899776655',
+      customerName: 'PT Sumber Abadi',
+      adminFee: 'Rp4.500',
+      totalAmount: 'Rp1.504.500',
+      paymentLabel: 'Internet Bisnis',
+      statusLabel: 'Menunggu Persetujuan',
     },
     {
       id: 'TRX-20240813-01',
@@ -89,6 +159,20 @@ const approvalsData = {
       status: 'Menunggu Persetujuan',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      method: 'BI Fast',
+      reference: 'TRX-20240813-01',
+      sourceAccount: {
+        initial: 'O',
+        title: 'Operasional',
+        subtitle: 'PT Ambis Sejahtera',
+        color: 'bg-cyan-100 text-cyan-600',
+      },
+      destinationAccount: {
+        initial: 'C',
+        title: 'PT Cipta Mandiri',
+        subtitle: 'BCA • 9988776655',
+        color: 'bg-amber-100 text-amber-600',
+      },
     },
   ],
   selesai: [
@@ -102,17 +186,38 @@ const approvalsData = {
       status: 'Selesai',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      method: 'RTGS',
+      reference: 'TRX-20240810-01',
+      sourceAccount: {
+        initial: 'U',
+        title: 'Rekening Utama',
+        subtitle: 'PT Ambis Sejahtera',
+        color: 'bg-emerald-100 text-emerald-600',
+      },
+      destinationAccount: {
+        initial: 'P',
+        title: 'PT Prima Utama',
+        subtitle: 'BCA • 1122003344',
+        color: 'bg-amber-100 text-amber-600',
+      },
     },
     {
       id: 'BLR-20240811-01',
       category: 'Beli Bayar',
-      title: 'Beli & Bayar',
+      title: 'Pembayaran Air',
       counterpart: 'Tagihan PDAM',
       amount: 'Rp750.000',
       date: '2024-08-11T08:15:00',
       status: 'Selesai',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      sourceAccount: 'Operasional • BCA 1234567890',
+      customerId: 'PLG-773311',
+      customerName: 'PT Ambis Sejahtera',
+      adminFee: 'Rp2.000',
+      totalAmount: 'Rp752.000',
+      paymentLabel: 'Tagihan PDAM',
+      statusLabel: 'Berhasil',
     },
     {
       id: 'APR-20240809-01',
@@ -124,6 +229,10 @@ const approvalsData = {
       status: 'Selesai',
       sourcePage: 'atur-persetujuan.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      approvalMatrix: [
+        { min: 0, max: 100_000_000, approvers: 1 },
+        { min: 100_000_001, max: 200_000_000, approvers: 2 },
+      ],
     },
     {
       id: 'TRX-20240808-01',
@@ -135,6 +244,20 @@ const approvalsData = {
       status: 'Selesai',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
+      method: 'BI Fast',
+      reference: 'TRX-20240808-01',
+      sourceAccount: {
+        initial: 'O',
+        title: 'Operasional',
+        subtitle: 'PT Ambis Sejahtera',
+        color: 'bg-cyan-100 text-cyan-600',
+      },
+      destinationAccount: {
+        initial: 'N',
+        title: 'PT Nusantara',
+        subtitle: 'Mandiri • 6677889900',
+        color: 'bg-amber-100 text-amber-600',
+      },
     },
   ],
 };
@@ -143,13 +266,6 @@ const tabButtons = document.querySelectorAll('.tab-btn');
 const tabPanels = document.querySelectorAll('[data-tab-panel]');
 let activeTab = 'butuh';
 
-const SOURCE_LABELS = {
-  'transfer.html': 'Halaman Transfer',
-  'biller.html': 'Halaman Beli & Bayar',
-  'batas-transaksi.html': 'Halaman Limit Management',
-  'atur-persetujuan.html': 'Halaman Approval Matrix',
-};
-
 const CATEGORY_CLASS_MAP = {
   Transfer: '',
   'Beli Bayar': '',
@@ -157,17 +273,8 @@ const CATEGORY_CLASS_MAP = {
   'Approval Matrix': '',
 };
 
-const STATUS_CLASS_MAP = {
-  'Butuh Persetujuan': 'bg-amber-50 text-amber-700 border-amber-200',
-  'Menunggu Persetujuan': 'bg-sky-50 text-sky-800 border-sky-200',
-  Selesai: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-};
-
 const CATEGORY_BADGE_BASE = 'inline-flex items-center px-3 py-1';
-const STATUS_BADGE_BASE = 'inline-flex items-center px-3 py-0.5';
-const LINK_DISABLED_CLASSES = ['pointer-events-none', 'opacity-50'];
 
-const TRANSFER_FEE_VALUE = 2500;
 const CURRENCY_FORMATTER = new Intl.NumberFormat('id-ID', {
   style: 'currency',
   currency: 'IDR',
@@ -181,30 +288,48 @@ const detailState = {
 
 const drawer = document.getElementById('drawer');
 const drawerCloseBtn = document.getElementById('approvalDrawerClose');
-const drawerElements = {
-  title: document.getElementById('approvalDrawerTitle'),
-  counterpart: document.getElementById('approvalDrawerCounterpart'),
-  id: document.getElementById('approvalDrawerId'),
-  category: document.getElementById('approvalDrawerCategory'),
-  status: document.getElementById('approvalDrawerStatus'),
-  date: document.getElementById('approvalDrawerDate'),
-  amount: document.getElementById('approvalDrawerAmount'),
-  fee: document.getElementById('approvalDrawerFee'),
-  total: document.getElementById('approvalDrawerTotal'),
-  method: document.getElementById('approvalDrawerMethod'),
-  reference: document.getElementById('approvalDrawerReference'),
-  dateTime: document.getElementById('approvalDrawerDateTime'),
-  sourceLabel: document.getElementById('approvalDrawerSourceLabel'),
-  note: document.getElementById('approvalDrawerNote'),
-  sourceLink: document.getElementById('approvalDrawerSourceLink'),
-  creator: document.getElementById('approvalDrawerCreator'),
-  creatorTime: document.getElementById('approvalDrawerCreatorTime'),
-};
+const paneHost = document.getElementById('detailPaneHost');
+const paneCreator = document.getElementById('detailPaneCreator');
+const paneDate = document.getElementById('detailPaneDate');
 
 const drawerController =
   drawer && window.drawerManager && typeof window.drawerManager.register === 'function'
     ? window.drawerManager.register(drawer, { manageAria: true })
     : null;
+
+const TEMPLATE_SOURCES = {
+  transfer: { url: 'transfer.html', selector: '#successPane', type: 'transfer' },
+  'beli bayar': { url: 'biller.html', selector: '#paymentSuccessInner', type: 'biller' },
+  'approval matrix': { url: 'atur-persetujuan.html', selector: '#approvalPendingPane', type: 'approval' },
+};
+
+const RANDOM_NAMES = [
+  'Nadia Paramitha',
+  'Reyhan Alfaro',
+  'Hanna Saputra',
+  'Mira Pradipta',
+  'Rizky Narendra',
+  'Fajar Maheswara',
+  'Alika Rachman',
+  'Sari Widyaningrum',
+];
+
+const RANDOM_NOTE_WORDS = [
+  'cek',
+  'ulang',
+  'lampiran',
+  'sudah',
+  'selesai',
+  'verifikasi',
+  'menunggu',
+  'konfirmasi',
+  'detail',
+  'transaksi',
+  'internal',
+  'dokumen',
+];
+
+const templateCache = new Map();
 
 const LEGACY_MONTH_MAP = {
   Jan: 0,
@@ -316,6 +441,22 @@ function formatCurrencyValue(value) {
   return CURRENCY_FORMATTER.format(Math.round(value));
 }
 
+function formatCurrencyDisplay(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return formatCurrencyValue(value);
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = parseCurrencyValue(value);
+    if (!Number.isNaN(parsed)) {
+      return formatCurrencyValue(parsed);
+    }
+    return value.trim();
+  }
+
+  return '-';
+}
+
 function getItemDateValue(item) {
   if (!item) return null;
   return item.date || item.time || null;
@@ -327,6 +468,12 @@ function getItemTimeValue(item) {
     return item.time.trim();
   }
   return formatTime(getItemDateValue(item));
+}
+
+function getDashboardDisplayDateTime(item) {
+  const displayDate = formatDateShort(getItemDateValue(item));
+  const displayTime = getItemTimeValue(item);
+  return displayTime && displayTime !== '-' ? `${displayDate} - ${displayTime}` : displayDate;
 }
 
 function getDescriptionParts(item) {
@@ -343,128 +490,289 @@ function getDescriptionLine(item) {
   return parts.length ? parts.join(' – ') : '-';
 }
 
-function getSourceLabel(sourcePage) {
-  if (!sourcePage) return 'Halaman Sumber';
-  return SOURCE_LABELS[sourcePage] || sourcePage;
+function getCategoryKey(category) {
+  return typeof category === 'string' ? category.trim().toLowerCase() : '';
+}
+
+function getTemplateConfig(category) {
+  const key = getCategoryKey(category);
+  return TEMPLATE_SOURCES[key] || null;
+}
+
+function getRandomFrom(list, fallback = '') {
+  if (!Array.isArray(list) || list.length === 0) return fallback;
+  const index = Math.floor(Math.random() * list.length);
+  return list[index] ?? fallback;
+}
+
+function getRandomName() {
+  return getRandomFrom(RANDOM_NAMES, 'Admin AMBIS');
+}
+
+function generateRandomNote() {
+  if (!Array.isArray(RANDOM_NOTE_WORDS) || RANDOM_NOTE_WORDS.length === 0) {
+    return 'catatan transaksi';
+  }
+
+  const pool = [...RANDOM_NOTE_WORDS];
+  const count = Math.floor(Math.random() * 2) + 3; // 3 or 4 words
+  const words = [];
+
+  while (words.length < count && pool.length) {
+    const index = Math.floor(Math.random() * pool.length);
+    const [word] = pool.splice(index, 1);
+    if (word) {
+      words.push(word);
+    }
+  }
+
+  return words.join(' ');
+}
+
+function capitalizeSentence(text) {
+  if (typeof text !== 'string') return '-';
+  const trimmed = text.trim();
+  if (!trimmed) return '-';
+  return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+}
+
+function preparePaneElement(element) {
+  if (!element) return element;
+
+  element.classList.remove('hidden');
+  element.classList.remove('opacity-0');
+  element.classList.remove('translate-x-8');
+  element.classList.remove('translate-x-full');
+  element.classList.remove('translate-y-full');
+
+  return element;
+}
+
+function applyBadgeStyles(element, colorClass) {
+  if (!element) return;
+  const base = 'w-10 h-10 rounded-full flex items-center justify-center font-semibold';
+  element.className = `${base} ${colorClass || 'bg-cyan-100 text-cyan-600'}`.trim();
+}
+
+function setTextContent(element, value) {
+  if (!element) return;
+  element.textContent = value;
+}
+
+function appendDynamicRow(container, label, value) {
+  if (!container) return;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'flex items-start justify-between gap-4';
+
+  const labelSpan = document.createElement('span');
+  labelSpan.className = 'text-sm text-slate-500';
+  labelSpan.textContent = label;
+
+  const valueSpan = document.createElement('span');
+  valueSpan.className = 'max-w-[60%] text-right text-sm font-semibold text-slate-900';
+  valueSpan.textContent = value;
+
+  wrapper.append(labelSpan, valueSpan);
+  container.appendChild(wrapper);
+}
+
+function formatApproverLabel(count) {
+  if (count == null || Number.isNaN(count)) {
+    return '-';
+  }
+  return `${count} Penyetuju`;
+}
+
+function renderApprovalMatrixList(container, entries) {
+  if (!container) return;
+
+  if (!Array.isArray(entries) || entries.length === 0) {
+    container.innerHTML =
+      '<div class="px-5 py-6 text-center text-sm text-slate-500">Belum ada persetujuan transfer.</div>';
+    return;
+  }
+
+  const html = entries
+    .map(entry => {
+      const minValue =
+        typeof entry.min === 'number' && Number.isFinite(entry.min)
+          ? entry.min
+          : parseCurrencyValue(entry.min);
+      const maxValue =
+        typeof entry.max === 'number' && Number.isFinite(entry.max)
+          ? entry.max
+          : parseCurrencyValue(entry.max);
+      const minLabel = Number.isNaN(minValue) ? '-' : formatCurrencyValue(minValue);
+      const maxLabel = Number.isNaN(maxValue) ? '-' : formatCurrencyValue(maxValue);
+      const approverLabel = formatApproverLabel(entry.approvers);
+      return `
+        <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 min-h-[56px] px-5 py-4 text-sm">
+          <span class="font-semibold text-slate-900">${minLabel} – ${maxLabel}</span>
+          <span class="text-right text-sm font-semibold text-slate-700">${approverLabel}</span>
+        </div>
+      `;
+    })
+    .join('');
+
+  container.innerHTML = html;
+}
+
+function bindPaneClosers(element, selectors = []) {
+  if (!element) return;
+  selectors.forEach(selector => {
+    const target = element.querySelector(selector);
+    if (target) {
+      target.addEventListener('click', () => {
+        closeDetailDrawer({ trigger: 'pane-button' });
+      });
+    }
+  });
+}
+
+async function loadTemplateElement(config) {
+  if (!config) return null;
+  const cacheKey = `${config.url}|${config.selector}`;
+
+  if (!templateCache.has(cacheKey)) {
+    try {
+      const response = await fetch(config.url);
+      if (!response.ok) throw new Error(`Gagal memuat template: ${config.url}`);
+      const text = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/html');
+      const element = doc.querySelector(config.selector);
+      templateCache.set(cacheKey, element ? element.cloneNode(true) : null);
+    } catch (error) {
+      console.error(error);
+      templateCache.set(cacheKey, null);
+    }
+  }
+
+  const cached = templateCache.get(cacheKey);
+  return cached ? cached.cloneNode(true) : null;
+}
+
+function fillTransferPane(pane, item, displayDate, noteText) {
+  if (!pane) return;
+
+  const source = item && item.sourceAccount ? item.sourceAccount : {};
+  const destination = item && item.destinationAccount ? item.destinationAccount : {};
+  const reference = (item && item.reference) || (item && item.id) || '-';
+  const method = (item && item.method) || 'BI Fast';
+  const amountDisplay = formatCurrencyDisplay(item?.amount);
+  const totalDisplay = formatCurrencyDisplay(item?.totalAmount || item?.amount);
+  const noteDisplay = capitalizeSentence(noteText);
+
+  preparePaneElement(pane);
+
+  setTextContent(pane.querySelector('#successTitle'), item?.title || 'Detail Transfer');
+
+  applyBadgeStyles(pane.querySelector('#successSourceBadge'), source.color);
+  setTextContent(
+    pane.querySelector('#successSourceBadge'),
+    source.initial || (source.title ? source.title.charAt(0).toUpperCase() : '')
+  );
+  setTextContent(pane.querySelector('#successSourceName'), source.title || '-');
+  setTextContent(pane.querySelector('#successSourceSubtitle'), source.subtitle || '-');
+
+  applyBadgeStyles(pane.querySelector('#successDestBadge'), destination.color);
+  setTextContent(
+    pane.querySelector('#successDestBadge'),
+    destination.initial || (destination.title ? destination.title.charAt(0).toUpperCase() : '')
+  );
+  setTextContent(pane.querySelector('#successDestName'), destination.title || '-');
+  setTextContent(pane.querySelector('#successDestSubtitle'), destination.subtitle || '-');
+
+  setTextContent(pane.querySelector('#successNominal'), amountDisplay);
+  setTextContent(pane.querySelector('#successTotal'), totalDisplay);
+  setTextContent(pane.querySelector('#successReference'), reference);
+  setTextContent(pane.querySelector('#successDate'), displayDate || '-');
+  setTextContent(pane.querySelector('#successCategory'), item?.category || '-');
+  setTextContent(pane.querySelector('#successNote'), noteDisplay);
+  setTextContent(pane.querySelector('#successMethod'), method);
+}
+
+function fillBillerPane(pane, item, displayDate, noteText) {
+  if (!pane) return;
+
+  preparePaneElement(pane);
+
+  setTextContent(pane.querySelector('#successHeroTitle'), item?.title || 'Transaksi Beli & Bayar');
+  setTextContent(pane.querySelector('#successHeroCategory'), item?.category || 'Beli & Bayar');
+  setTextContent(pane.querySelector('#successPaymentValue'), item?.paymentLabel || item?.counterpart || '-');
+  setTextContent(pane.querySelector('#successAccountValue'), item?.sourceAccount || '-');
+  setTextContent(pane.querySelector('#successIdValue'), item?.customerId || '-');
+  setTextContent(pane.querySelector('#successCustomerName'), item?.customerName || '-');
+  setTextContent(pane.querySelector('#successStatusPill'), item?.statusLabel || item?.status || '-');
+
+  setTextContent(pane.querySelector('#successNominal'), formatCurrencyDisplay(item?.amount));
+  setTextContent(pane.querySelector('#successAdmin'), formatCurrencyDisplay(item?.adminFee));
+  setTextContent(pane.querySelector('#successTotal'), formatCurrencyDisplay(item?.totalAmount || item?.amount));
+
+  const dynamicSection = pane.querySelector('#successDynamicSection');
+  if (dynamicSection) {
+    dynamicSection.innerHTML = '';
+    dynamicSection.classList.remove('hidden');
+    appendDynamicRow(dynamicSection, 'Tanggal & Waktu', displayDate || '-');
+    appendDynamicRow(dynamicSection, 'Catatan', capitalizeSentence(noteText));
+  }
+}
+
+function fillApprovalPane(pane, item) {
+  if (!pane) return;
+
+  preparePaneElement(pane);
+  setTextContent(pane.querySelector('h2'), item?.title || 'Approval Matrix');
+  const heroHeading = pane.querySelector('h3');
+  if (heroHeading) {
+    heroHeading.textContent = item?.status || 'Menunggu Persetujuan Admin Lain';
+  }
+  renderApprovalMatrixList(pane.querySelector('#approvalPendingList'), item?.approvalMatrix || []);
+}
+
+async function renderDetailPane(item) {
+  if (!paneHost) return;
+
+  paneHost.innerHTML = '';
+
+  const config = getTemplateConfig(item?.category);
+  const displayDate = item?.__displayDateTime || getDashboardDisplayDateTime(item);
+  const note = generateRandomNote();
+  const creatorName = getRandomName();
+
+  if (paneCreator) {
+    paneCreator.textContent = creatorName;
+  }
+  if (paneDate) {
+    paneDate.textContent = displayDate || '-';
+  }
+
+  const paneElement = await loadTemplateElement(config);
+
+  if (!paneElement) {
+    const fallback = document.createElement('div');
+    fallback.className = 'p-6 text-sm text-slate-600';
+    fallback.textContent = 'Detail transaksi tidak tersedia.';
+    paneHost.appendChild(fallback);
+    return;
+  }
+
+  paneHost.appendChild(paneElement);
+
+  if (config?.type === 'transfer') {
+    fillTransferPane(paneElement, item, displayDate, note);
+    bindPaneClosers(paneElement, ['#successHeaderClose', '#successCloseBtn']);
+  } else if (config?.type === 'biller') {
+    fillBillerPane(paneElement, item, displayDate, note);
+    bindPaneClosers(paneElement, ['#successDrawerCloseButton']);
+  } else if (config?.type === 'approval') {
+    fillApprovalPane(paneElement, item);
+    bindPaneClosers(paneElement, ['#approvalPendingClose', '#approvalPendingDismiss']);
+  }
 }
 
 function getCategoryClass(category) {
   return CATEGORY_CLASS_MAP[category] || '';
-}
-
-function getStatusClass(status) {
-  return STATUS_CLASS_MAP[status] || 'bg-slate-100 text-slate-600 border-slate-200';
-}
-
-function setDrawerLinkState(enabled, label, href) {
-  const link = drawerElements.sourceLink;
-  if (!link) return;
-
-  if (enabled && href) {
-    link.href = href;
-    link.textContent = label || 'Buka halaman sumber';
-    link.setAttribute('target', '_blank');
-    link.setAttribute('rel', 'noopener');
-    link.setAttribute('aria-disabled', 'false');
-    LINK_DISABLED_CLASSES.forEach(cls => link.classList.remove(cls));
-  } else {
-    link.href = '#';
-    link.textContent = label || 'Halaman sumber tidak tersedia';
-    link.removeAttribute('target');
-    link.removeAttribute('rel');
-    link.setAttribute('aria-disabled', 'true');
-    LINK_DISABLED_CLASSES.forEach(cls => link.classList.add(cls));
-  }
-}
-
-function updateDrawerContent(item) {
-  const {
-    title: titleEl,
-    counterpart: counterpartEl,
-    id: idEl,
-    category: categoryEl,
-    status: statusEl,
-    date: dateEl,
-    amount: amountEl,
-    fee: feeEl,
-    total: totalEl,
-    method: methodEl,
-    reference: referenceEl,
-    dateTime: dateTimeEl,
-    sourceLabel: sourceLabelEl,
-    note: noteEl,
-    creator: creatorEl,
-    creatorTime: creatorTimeEl,
-  } = drawerElements;
-
-  const defaultFeeDisplay = formatCurrencyValue(TRANSFER_FEE_VALUE);
-
-  if (!item) {
-    if (titleEl) titleEl.textContent = 'Detail Persetujuan';
-    if (counterpartEl) counterpartEl.textContent = '-';
-    if (idEl) idEl.textContent = '-';
-    if (categoryEl) categoryEl.textContent = '-';
-    if (statusEl) {
-      statusEl.textContent = '-';
-      statusEl.className = `${STATUS_BADGE_BASE} bg-slate-100 text-slate-600 border-slate-200`;
-    }
-    if (dateEl) dateEl.textContent = '-';
-    if (amountEl) amountEl.textContent = '-';
-    if (feeEl) feeEl.textContent = defaultFeeDisplay;
-    if (totalEl) totalEl.textContent = '-';
-    if (methodEl) methodEl.textContent = 'BI Fast';
-    if (referenceEl) referenceEl.textContent = '-';
-    if (dateTimeEl) dateTimeEl.textContent = '-';
-    if (sourceLabelEl) sourceLabelEl.textContent = '-';
-    if (noteEl) noteEl.textContent = 'Generate by Datta';
-    if (creatorEl) creatorEl.textContent = 'Hanna Saputra';
-    if (creatorTimeEl) creatorTimeEl.textContent = '-';
-    setDrawerLinkState(false, 'Halaman sumber tidak tersedia');
-    return;
-  }
-
-  const sourceLabel = getSourceLabel(item.sourcePage);
-  const dateValue = getItemDateValue(item);
-  const formattedDate = formatDateLong(dateValue);
-  const formattedDateTime = formatDateWithTime(dateValue);
-  const statusClass = `${STATUS_BADGE_BASE} ${getStatusClass(item.status)}`;
-  const descriptionLine = getDescriptionLine(item);
-  const amountValue = item.amount && item.amount.trim() ? item.amount.trim() : '-';
-  const amountNumber = parseCurrencyValue(item.amount);
-  const totalDisplay = Number.isNaN(amountNumber)
-    ? '-'
-    : formatCurrencyValue(amountNumber + TRANSFER_FEE_VALUE);
-
-  if (titleEl) titleEl.textContent = item.title || 'Detail Persetujuan';
-  if (counterpartEl) counterpartEl.textContent = item.counterpart || '-';
-  if (idEl) idEl.textContent = item.id || '-';
-  if (categoryEl) categoryEl.textContent = item.category || '-';
-  if (statusEl) {
-    statusEl.textContent = item.status || '-';
-    statusEl.className = statusClass;
-  }
-  if (dateEl) dateEl.textContent = formattedDate;
-  if (amountEl) amountEl.textContent = amountValue;
-  if (feeEl) feeEl.textContent = defaultFeeDisplay;
-  if (totalEl) totalEl.textContent = totalDisplay;
-  if (methodEl) methodEl.textContent = item.method || 'BI Fast';
-  if (referenceEl) referenceEl.textContent = item.reference || item.id || '-';
-  if (dateTimeEl) dateTimeEl.textContent = formattedDateTime;
-  if (sourceLabelEl) sourceLabelEl.textContent = sourceLabel;
-
-  if (noteEl) {
-    const noteParts = [];
-    if (descriptionLine && descriptionLine !== '-') noteParts.push(`${descriptionLine}.`);
-    if (item.status) noteParts.push(`Status saat ini: ${item.status}.`);
-    if (sourceLabel) noteParts.push(`Diajukan melalui ${sourceLabel}.`);
-    noteEl.textContent = noteParts.length ? noteParts.join(' ') : 'Generate by Datta';
-  }
-
-  if (creatorEl) creatorEl.textContent = item.createdBy || 'Hanna Saputra';
-  if (creatorTimeEl) creatorTimeEl.textContent = formattedDateTime;
-
-  const linkLabel = sourceLabel ? `Lihat ${sourceLabel}` : 'Buka halaman sumber';
-  setDrawerLinkState(Boolean(item.sourcePage), linkLabel, item.sourcePage || '#');
 }
 
 function highlightActiveRow(itemId, tab) {
@@ -479,11 +787,17 @@ function highlightActiveRow(itemId, tab) {
   });
 }
 
-function openDetailDrawer(item) {
+async function openDetailDrawer(item) {
   if (!item || !drawer) return;
 
   detailState.currentItemId = item.id || null;
-  updateDrawerContent(item);
+
+  try {
+    await renderDetailPane(item);
+  } catch (error) {
+    console.error(error);
+  }
+
   highlightActiveRow(detailState.currentItemId, activeTab);
 
   if (drawerController) {
@@ -615,12 +929,9 @@ function render(tab) {
     tr.className = 'hover:bg-slate-50';
     tr.dataset.itemId = item.id || '';
 
-    const displayDate = formatDateShort(getItemDateValue(item));
-    const displayTime = getItemTimeValue(item);
-    const displayDateTime = displayTime && displayTime !== '-' ? `${displayDate} - ${displayTime}` : displayDate;
+    const displayDateTime = getDashboardDisplayDateTime(item);
+    item.__displayDateTime = displayDateTime;
     const categoryClass = `${CATEGORY_BADGE_BASE} ${getCategoryClass(item.category)}`;
-    const statusClass = `${STATUS_BADGE_BASE} ${getStatusClass(item.status)}`;
-    const sourceLabel = getSourceLabel(item.sourcePage);
     const actionLabel = item.action && item.action.label ? item.action.label : 'Detail';
     const descriptionLine = getDescriptionLine(item);
 
