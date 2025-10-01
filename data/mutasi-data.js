@@ -51,7 +51,7 @@
                 total: 250000000,
                 source: {
                   name: 'Operasional',
-                  subtitle: 'PT ABC Indonesia',
+                  subtitle: companyName,
                   account: 'Amar Indonesia - 000967895483'
                 },
                 destination: {
@@ -77,7 +77,7 @@
                 total: 175000000,
                 source: {
                   name: 'Operasional',
-                  subtitle: 'PT ABC Indonesia',
+                  subtitle: companyName,
                   account: 'BCA - 0987654321'
                 },
                 destination: {
