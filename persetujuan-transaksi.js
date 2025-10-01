@@ -336,7 +336,7 @@ function getSourceLabel(sourcePage) {
 }
 
 function getCategoryClass(category) {
-  return CATEGORY_CLASS_MAP[category] || 'bg-slate-100 text-slate-600 border-slate-200';
+  return CATEGORY_CLASS_MAP[category] || '';
 }
 
 function getStatusClass(status) {
