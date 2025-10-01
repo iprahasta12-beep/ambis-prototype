@@ -167,6 +167,14 @@ const CATEGORY_BADGE_BASE = 'inline-flex items-center px-3 py-1';
 const STATUS_BADGE_BASE = 'inline-flex items-center px-3 py-0.5';
 const LINK_DISABLED_CLASSES = ['pointer-events-none', 'opacity-50'];
 
+const TRANSFER_FEE_VALUE = 2500;
+const CURRENCY_FORMATTER = new Intl.NumberFormat('id-ID', {
+  style: 'currency',
+  currency: 'IDR',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
 const detailState = {
   currentItemId: null,
 };
@@ -175,13 +183,22 @@ const drawer = document.getElementById('drawer');
 const drawerCloseBtn = document.getElementById('approvalDrawerClose');
 const drawerElements = {
   title: document.getElementById('approvalDrawerTitle'),
+  counterpart: document.getElementById('approvalDrawerCounterpart'),
   id: document.getElementById('approvalDrawerId'),
   category: document.getElementById('approvalDrawerCategory'),
   status: document.getElementById('approvalDrawerStatus'),
   date: document.getElementById('approvalDrawerDate'),
+  amount: document.getElementById('approvalDrawerAmount'),
+  fee: document.getElementById('approvalDrawerFee'),
+  total: document.getElementById('approvalDrawerTotal'),
+  method: document.getElementById('approvalDrawerMethod'),
+  reference: document.getElementById('approvalDrawerReference'),
+  dateTime: document.getElementById('approvalDrawerDateTime'),
   sourceLabel: document.getElementById('approvalDrawerSourceLabel'),
-  detail: document.getElementById('approvalDrawerDetail'),
+  note: document.getElementById('approvalDrawerNote'),
   sourceLink: document.getElementById('approvalDrawerSourceLink'),
+  creator: document.getElementById('approvalDrawerCreator'),
+  creatorTime: document.getElementById('approvalDrawerCreatorTime'),
 };
 
 const drawerController =
@@ -261,6 +278,16 @@ function formatDateLong(value) {
   return Number.isNaN(date.getTime()) ? '-' : DATE_FORMAT_LONG.format(date);
 }
 
+function formatDateWithTime(value) {
+  const datePart = formatDateLong(value);
+  const timePart = formatTime(value);
+
+  if (datePart === '-' && timePart === '-') return '-';
+  if (datePart === '-') return timePart;
+  if (timePart === '-') return datePart;
+  return `${datePart} • ${timePart}`;
+}
+
 function formatTime(value, fallback = '') {
   if (fallback) return fallback;
   const date = parseDate(value);
@@ -268,6 +295,25 @@ function formatTime(value, fallback = '') {
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
   return `${hours}:${minutes}`;
+}
+
+function parseCurrencyValue(value) {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : Number.NaN;
+  }
+
+  if (typeof value !== 'string') return Number.NaN;
+
+  const cleaned = value.replace(/[^\d,-]/g, '').replace(/,/g, '.');
+  if (!cleaned) return Number.NaN;
+
+  const numeric = Number(cleaned);
+  return Number.isFinite(numeric) ? numeric : Number.NaN;
+}
+
+function formatCurrencyValue(value) {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '-';
+  return CURRENCY_FORMATTER.format(Math.round(value));
 }
 
 function getItemDateValue(item) {
@@ -332,16 +378,30 @@ function setDrawerLinkState(enabled, label, href) {
 }
 
 function updateDrawerContent(item) {
-  const titleEl = drawerElements.title;
-  const idEl = drawerElements.id;
-  const categoryEl = drawerElements.category;
-  const statusEl = drawerElements.status;
-  const dateEl = drawerElements.date;
-  const sourceLabelEl = drawerElements.sourceLabel;
-  const detailEl = drawerElements.detail;
+  const {
+    title: titleEl,
+    counterpart: counterpartEl,
+    id: idEl,
+    category: categoryEl,
+    status: statusEl,
+    date: dateEl,
+    amount: amountEl,
+    fee: feeEl,
+    total: totalEl,
+    method: methodEl,
+    reference: referenceEl,
+    dateTime: dateTimeEl,
+    sourceLabel: sourceLabelEl,
+    note: noteEl,
+    creator: creatorEl,
+    creatorTime: creatorTimeEl,
+  } = drawerElements;
+
+  const defaultFeeDisplay = formatCurrencyValue(TRANSFER_FEE_VALUE);
 
   if (!item) {
     if (titleEl) titleEl.textContent = 'Detail Persetujuan';
+    if (counterpartEl) counterpartEl.textContent = '-';
     if (idEl) idEl.textContent = '-';
     if (categoryEl) categoryEl.textContent = '-';
     if (statusEl) {
@@ -349,18 +409,34 @@ function updateDrawerContent(item) {
       statusEl.className = `${STATUS_BADGE_BASE} bg-slate-100 text-slate-600 border-slate-200`;
     }
     if (dateEl) dateEl.textContent = '-';
+    if (amountEl) amountEl.textContent = '-';
+    if (feeEl) feeEl.textContent = defaultFeeDisplay;
+    if (totalEl) totalEl.textContent = '-';
+    if (methodEl) methodEl.textContent = 'BI Fast';
+    if (referenceEl) referenceEl.textContent = '-';
+    if (dateTimeEl) dateTimeEl.textContent = '-';
     if (sourceLabelEl) sourceLabelEl.textContent = '-';
-    if (detailEl) detailEl.textContent = '-';
+    if (noteEl) noteEl.textContent = 'Generate by Datta';
+    if (creatorEl) creatorEl.textContent = 'Hanna Saputra';
+    if (creatorTimeEl) creatorTimeEl.textContent = '-';
     setDrawerLinkState(false, 'Halaman sumber tidak tersedia');
     return;
   }
 
   const sourceLabel = getSourceLabel(item.sourcePage);
-  const formattedDate = formatDateLong(getItemDateValue(item));
+  const dateValue = getItemDateValue(item);
+  const formattedDate = formatDateLong(dateValue);
+  const formattedDateTime = formatDateWithTime(dateValue);
   const statusClass = `${STATUS_BADGE_BASE} ${getStatusClass(item.status)}`;
   const descriptionLine = getDescriptionLine(item);
+  const amountValue = item.amount && item.amount.trim() ? item.amount.trim() : '-';
+  const amountNumber = parseCurrencyValue(item.amount);
+  const totalDisplay = Number.isNaN(amountNumber)
+    ? '-'
+    : formatCurrencyValue(amountNumber + TRANSFER_FEE_VALUE);
 
   if (titleEl) titleEl.textContent = item.title || 'Detail Persetujuan';
+  if (counterpartEl) counterpartEl.textContent = item.counterpart || '-';
   if (idEl) idEl.textContent = item.id || '-';
   if (categoryEl) categoryEl.textContent = item.category || '-';
   if (statusEl) {
@@ -368,15 +444,24 @@ function updateDrawerContent(item) {
     statusEl.className = statusClass;
   }
   if (dateEl) dateEl.textContent = formattedDate;
+  if (amountEl) amountEl.textContent = amountValue;
+  if (feeEl) feeEl.textContent = defaultFeeDisplay;
+  if (totalEl) totalEl.textContent = totalDisplay;
+  if (methodEl) methodEl.textContent = item.method || 'BI Fast';
+  if (referenceEl) referenceEl.textContent = item.reference || item.id || '-';
+  if (dateTimeEl) dateTimeEl.textContent = formattedDateTime;
   if (sourceLabelEl) sourceLabelEl.textContent = sourceLabel;
 
-  if (detailEl) {
-    const detailParts = [];
-    if (descriptionLine && descriptionLine !== '-') detailParts.push(`${descriptionLine}.`);
-    if (item.status) detailParts.push(`Status saat ini: ${item.status}.`);
-    if (sourceLabel) detailParts.push(`Diajukan melalui ${sourceLabel}.`);
-    detailEl.textContent = detailParts.join(' ');
+  if (noteEl) {
+    const noteParts = [];
+    if (descriptionLine && descriptionLine !== '-') noteParts.push(`${descriptionLine}.`);
+    if (item.status) noteParts.push(`Status saat ini: ${item.status}.`);
+    if (sourceLabel) noteParts.push(`Diajukan melalui ${sourceLabel}.`);
+    noteEl.textContent = noteParts.length ? noteParts.join(' ') : 'Generate by Datta';
   }
+
+  if (creatorEl) creatorEl.textContent = item.createdBy || 'Hanna Saputra';
+  if (creatorTimeEl) creatorTimeEl.textContent = formattedDateTime;
 
   const linkLabel = sourceLabel ? `Lihat ${sourceLabel}` : 'Buka halaman sumber';
   setDrawerLinkState(Boolean(item.sourcePage), linkLabel, item.sourcePage || '#');
