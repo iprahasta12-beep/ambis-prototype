@@ -196,8 +196,8 @@ const STATUS_CLASS_MAP = {
   Selesai: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 };
 
-const CATEGORY_BADGE_BASE = 'inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border';
-const STATUS_BADGE_BASE = 'inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold border';
+const CATEGORY_BADGE_BASE = 'inline-flex items-center px-3 py-1';
+const STATUS_BADGE_BASE = 'inline-flex items-center px-3 py-0.5';
 const LINK_DISABLED_CLASSES = ['pointer-events-none', 'opacity-50'];
 
 const detailState = {
