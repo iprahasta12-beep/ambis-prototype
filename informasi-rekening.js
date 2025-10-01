@@ -1649,16 +1649,6 @@
     }
     showDrawerPane('addAccount');
     ensureDrawerOpen('addAccount');
-    if (formNode) {
-      const focusTarget = formNode.querySelector('input, textarea, select');
-      if (focusTarget) {
-        try {
-          focusTarget.focus({ preventScroll: true });
-        } catch (err) {
-          focusTarget.focus();
-        }
-      }
-    }
   }
 
   function closeDrawer({ restoreFocus = false } = {}) {
