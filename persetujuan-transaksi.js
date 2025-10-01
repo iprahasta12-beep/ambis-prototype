@@ -889,12 +889,7 @@ function renderApprovalList(listElement, steps) {
     label.className = 'text-sm font-semibold text-slate-900';
     label.textContent = (step && step.label) || 'Approval';
 
-    const caption = document.createElement('span');
-    caption.className = 'text-xs text-slate-500';
-    caption.textContent = (step && step.approver) || '-';
-
     textWrap.appendChild(label);
-    textWrap.appendChild(caption);
 
     content.appendChild(badge);
     content.appendChild(textWrap);
