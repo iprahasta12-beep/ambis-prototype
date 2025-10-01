@@ -1,75 +1,124 @@
 const approvalsData = {
   butuh: [
     {
-      id: 'T001',
+      id: 'TRX-20240817-01',
       category: 'Transfer',
-      title: 'Transfer Rp100.000.000 ke PT Maju Jaya',
-      date: '2025-09-28',
+      title: 'Transfer Saldo',
+      counterpart: 'Ke BCA PT Queen Japan',
+      amount: 'Rp250.000.000',
+      date: '2024-08-17T20:10:00',
       status: 'Butuh Persetujuan',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
     },
     {
-      id: 'B001',
+      id: 'TRX-20240817-02',
+      category: 'Transfer',
+      title: 'Pemindahan Dana',
+      counterpart: 'Dari Rekening Utama ke Operasional',
+      amount: 'Rp500.000.000',
+      date: '2024-08-17T20:10:00',
+      status: 'Butuh Persetujuan',
+      sourcePage: 'transfer.html',
+      action: { label: 'Detail', type: 'drawer', task: 'pending' },
+    },
+    {
+      id: 'BLR-20240817-01',
       category: 'Beli Bayar',
-      title: 'Pembayaran PLN Rp2.000.000',
-      date: '2025-09-29',
+      title: 'Beli & Bayar',
+      counterpart: 'Token Listrik',
+      amount: 'Rp500.000',
+      date: '2024-08-17T20:10:00',
       status: 'Butuh Persetujuan',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
     },
     {
-      id: 'T002',
-      category: 'Transfer',
-      title: 'Transfer Rp250.000.000 ke PT Sejahtera',
-      date: '2025-09-27',
+      id: 'BLR-20240817-02',
+      category: 'Beli Bayar',
+      title: 'Beli & Bayar',
+      counterpart: 'Tagihan Listrik',
+      amount: 'Rp1.200.000',
+      date: '2024-08-17T20:10:00',
       status: 'Butuh Persetujuan',
-      sourcePage: 'transfer.html',
+      sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
     },
     {
-      id: 'LM001',
-      category: 'Limit Management',
-      title: 'Perubahan Batas Transaksi Rp300.000.000',
-      date: '2025-09-25',
+      id: 'BLR-20240817-03',
+      category: 'Beli Bayar',
+      title: 'Beli & Bayar',
+      counterpart: 'Indihome',
+      amount: 'Rp350.000',
+      date: '2024-08-17T20:10:00',
       status: 'Butuh Persetujuan',
-      sourcePage: 'batas-transaksi.html',
+      sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
     },
     {
-      id: 'T003',
-      category: 'Transfer',
-      title: 'Transfer Rp50.000.000 ke CV Karya Abadi',
-      date: '2025-09-28',
+      id: 'BLR-20240817-04',
+      category: 'Beli Bayar',
+      title: 'Beli & Bayar',
+      counterpart: 'MyRepublic',
+      amount: 'Rp350.000',
+      date: '2024-08-17T20:10:00',
       status: 'Butuh Persetujuan',
-      sourcePage: 'transfer.html',
+      sourcePage: 'biller.html',
+      action: { label: 'Detail', type: 'drawer', task: 'pending' },
+    },
+    {
+      id: 'BLR-20240817-05',
+      category: 'Beli Bayar',
+      title: 'Beli & Bayar',
+      counterpart: 'CBN',
+      amount: 'Rp350.000',
+      date: '2024-08-17T20:10:00',
+      status: 'Butuh Persetujuan',
+      sourcePage: 'biller.html',
+      action: { label: 'Detail', type: 'drawer', task: 'pending' },
+    },
+    {
+      id: 'BLR-20240817-06',
+      category: 'Beli Bayar',
+      title: 'Beli & Bayar',
+      counterpart: 'Iconnet',
+      amount: 'Rp350.000',
+      date: '2024-08-17T20:10:00',
+      status: 'Butuh Persetujuan',
+      sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
     },
   ],
   menunggu: [
     {
-      id: 'T004',
+      id: 'TRX-20240815-01',
       category: 'Transfer',
-      title: 'Transfer Rp400.000.000 ke PT Mega Finance',
-      date: '2025-09-26',
+      title: 'Transfer Valas',
+      counterpart: 'Ke PT Mega Finance',
+      amount: 'Rp400.000.000',
+      date: '2024-08-15T18:45:00',
       status: 'Menunggu Persetujuan',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
     },
     {
-      id: 'B002',
+      id: 'BLR-20240814-01',
       category: 'Beli Bayar',
-      title: 'Pembayaran Internet Rp1.500.000',
-      date: '2025-09-24',
+      title: 'Beli & Bayar',
+      counterpart: 'Langganan Internet',
+      amount: 'Rp1.500.000',
+      date: '2024-08-14T09:20:00',
       status: 'Menunggu Persetujuan',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
     },
     {
-      id: 'T005',
+      id: 'TRX-20240813-01',
       category: 'Transfer',
-      title: 'Transfer Rp75.000.000 ke PT Cipta Mandiri',
-      date: '2025-09-23',
+      title: 'Transfer Saldo',
+      counterpart: 'Ke PT Cipta Mandiri',
+      amount: 'Rp75.000.000',
+      date: '2024-08-13T15:30:00',
       status: 'Menunggu Persetujuan',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
@@ -77,37 +126,45 @@ const approvalsData = {
   ],
   selesai: [
     {
-      id: 'T006',
+      id: 'TRX-20240810-01',
       category: 'Transfer',
-      title: 'Transfer Rp500.000.000 ke PT Prima Utama',
-      date: '2025-09-20',
+      title: 'Transfer Saldo',
+      counterpart: 'Ke PT Prima Utama',
+      amount: 'Rp500.000.000',
+      date: '2024-08-10T11:00:00',
       status: 'Selesai',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
     },
     {
-      id: 'B003',
+      id: 'BLR-20240811-01',
       category: 'Beli Bayar',
-      title: 'Pembayaran PDAM Rp750.000',
-      date: '2025-09-21',
+      title: 'Beli & Bayar',
+      counterpart: 'Tagihan PDAM',
+      amount: 'Rp750.000',
+      date: '2024-08-11T08:15:00',
       status: 'Selesai',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
     },
     {
-      id: 'AM001',
+      id: 'APR-20240809-01',
       category: 'Approval Matrix',
-      title: 'Ubah Persetujuan Transfer Rp200.000.000',
-      date: '2025-09-19',
+      title: 'Ubah Persetujuan Transfer',
+      counterpart: 'Limit Rp200.000.000',
+      amount: '',
+      date: '2024-08-09T14:40:00',
       status: 'Selesai',
       sourcePage: 'atur-persetujuan.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
     },
     {
-      id: 'T007',
+      id: 'TRX-20240808-01',
       category: 'Transfer',
-      title: 'Transfer Rp150.000.000 ke PT Nusantara',
-      date: '2025-09-18',
+      title: 'Transfer Saldo',
+      counterpart: 'Ke PT Nusantara',
+      amount: 'Rp150.000.000',
+      date: '2024-08-08T10:00:00',
       status: 'Selesai',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
@@ -237,9 +294,40 @@ function formatDateLong(value) {
   return Number.isNaN(date.getTime()) ? '-' : DATE_FORMAT_LONG.format(date);
 }
 
+function formatTime(value, fallback = '') {
+  if (fallback) return fallback;
+  const date = parseDate(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
 function getItemDateValue(item) {
   if (!item) return null;
   return item.date || item.time || null;
+}
+
+function getItemTimeValue(item) {
+  if (!item) return '';
+  if (typeof item.time === 'string' && item.time.trim()) {
+    return item.time.trim();
+  }
+  return formatTime(getItemDateValue(item));
+}
+
+function getDescriptionParts(item) {
+  if (!item) return [];
+  const parts = [item.title, item.counterpart, item.subtitle, item.amount, item.description]
+    .map(part => (typeof part === 'string' ? part.trim() : ''))
+    .filter(Boolean);
+
+  return parts;
+}
+
+function getDescriptionLine(item) {
+  const parts = getDescriptionParts(item);
+  return parts.length ? parts.join(' – ') : '-';
 }
 
 function getSourceLabel(sourcePage) {
@@ -303,6 +391,7 @@ function updateDrawerContent(item) {
   const sourceLabel = getSourceLabel(item.sourcePage);
   const formattedDate = formatDateLong(getItemDateValue(item));
   const statusClass = `${STATUS_BADGE_BASE} ${getStatusClass(item.status)}`;
+  const descriptionLine = getDescriptionLine(item);
 
   if (titleEl) titleEl.textContent = item.title || 'Detail Persetujuan';
   if (idEl) idEl.textContent = item.id || '-';
@@ -316,7 +405,7 @@ function updateDrawerContent(item) {
 
   if (detailEl) {
     const detailParts = [];
-    if (item.title) detailParts.push(item.title);
+    if (descriptionLine && descriptionLine !== '-') detailParts.push(`${descriptionLine}.`);
     if (item.status) detailParts.push(`Status saat ini: ${item.status}.`);
     if (sourceLabel) detailParts.push(`Diajukan melalui ${sourceLabel}.`);
     detailEl.textContent = detailParts.join(' ');
@@ -475,25 +564,28 @@ function render(tab) {
     tr.dataset.itemId = item.id || '';
 
     const displayDate = formatDateShort(getItemDateValue(item));
+    const displayTime = getItemTimeValue(item);
+    const displayDateTime = displayTime && displayTime !== '-' ? `${displayDate} - ${displayTime}` : displayDate;
     const categoryClass = `${CATEGORY_BADGE_BASE} ${getCategoryClass(item.category)}`;
     const statusClass = `${STATUS_BADGE_BASE} ${getStatusClass(item.status)}`;
     const sourceLabel = getSourceLabel(item.sourcePage);
     const actionLabel = item.action && item.action.label ? item.action.label : 'Detail';
+    const descriptionLine = getDescriptionLine(item);
 
     tr.innerHTML = `
       <td class="px-4 py-3 align-top">
-        <div class="text-sm text-slate-600">${displayDate}</div>
+        <div class="text-sm font-semibold text-slate-900">${displayDateTime}</div>
       </td>
       <td class="px-4 py-3 align-top">
         <span class="${categoryClass}">${item.category || '-'}</span>
       </td>
       <td class="px-4 py-3">
-        <p class="font-semibold text-slate-900">${item.title || '-'}</p>
-        <div class="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+        <p class="text-sm font-semibold text-slate-900">${descriptionLine}</p>
+        <div class="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
           <span>ID: ${item.id || '-'}</span>
           <span class="${statusClass}">${item.status || '-'}</span>
+          <span class="text-slate-400">Sumber: ${sourceLabel}</span>
         </div>
-        <p class="mt-2 text-sm text-slate-400">Sumber: ${sourceLabel}</p>
       </td>
       <td class="px-4 py-3 text-right align-top">
         <button type="button" class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50" data-role="detail-button">${actionLabel}</button>
