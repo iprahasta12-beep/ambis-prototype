@@ -866,7 +866,7 @@ function renderApprovalList(listElement, steps) {
 
   steps.forEach(step => {
     const item = document.createElement('li');
-    item.className = 'p4';
+    item.className = 'p-4';
 
     const content = document.createElement('div');
     content.className = 'flex items-center gap-3';
