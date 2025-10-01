@@ -21,7 +21,10 @@
       safelist: [
         "opacity-0","opacity-100","translate-y-0","translate-y-1",
         "ring-2","ring-cyan-400","bg-cyan-50","border-cyan-300",
-        "text-slate-900","text-slate-400"
+        "text-slate-900","text-slate-400","text-cyan-700",
+        "bg-amber-50","border-amber-200","text-amber-700",
+        "bg-sky-50","border-sky-200","text-sky-800",
+        "bg-emerald-50","border-emerald-200","text-emerald-700"
       ]
     };
   </script>
@@ -152,15 +155,17 @@
         <div class="flex items-center gap-6 border-b border-slate-200 mb-6">
           <button type="button" data-tab="butuh" class="tab-btn relative py-3 font-semibold text-slate-900">
             Butuh Persetujuan
-            <span class="tab-count ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
+            <span class="tab-count hidden ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
             <span class="tab-indicator absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
           <button type="button" data-tab="menunggu" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
             Menunggu Persetujuan
+            <span class="tab-count hidden ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
             <span class="tab-indicator hidden absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
           <button type="button" data-tab="selesai" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
             Selesai
+            <span class="tab-count hidden ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
             <span class="tab-indicator hidden absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
         </div>
@@ -217,26 +222,22 @@
               </button>
               <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-64">
                 <div class="flex flex-col gap-2">
-                 <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Transaksi">
-                  <span>Transaksi</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Manajemen Pengguna">
-                  <span>Manajemen Pengguna</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Batas Transaksi">
-                  <span>Batas Transaksi</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Atur Persetujuan">
-                  <span>Atur Persetujuan</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Pengaturan Rekening">
-                  <span>Pengaturan Rekening</span>
-                </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Transfer">
+                    <span>Transfer</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Beli Bayar">
+                    <span>Beli &amp; Bayar</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Limit Management">
+                    <span>Limit Management</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Approval Matrix">
+                    <span>Approval Matrix</span>
+                  </label>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
                   <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
@@ -249,9 +250,9 @@
             <table class="min-w-full">
               <thead class="bg-slate-50 text-slate-600">
                 <tr>
-                  <th class="text-left px-4 py-3 font-medium">Waktu Permintaan</th>
+                  <th class="text-left px-4 py-3 font-medium">Tanggal Permintaan</th>
                   <th class="text-left px-4 py-3 font-medium">Kategori</th>
-                  <th class="text-left px-4 py-3 font-medium">Deskripsi</th>
+                  <th class="text-left px-4 py-3 font-medium">Detail Permintaan</th>
                   <th class="px-4 py-3"></th>
                 </tr>
               </thead>
@@ -311,26 +312,22 @@
               </button>
               <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-64">
                 <div class="flex flex-col gap-2">
-                 <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Transaksi">
-                  <span>Transaksi</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Manajemen Pengguna">
-                  <span>Manajemen Pengguna</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Batas Transaksi">
-                  <span>Batas Transaksi</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Atur Persetujuan">
-                  <span>Atur Persetujuan</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Pengaturan Rekening">
-                  <span>Pengaturan Rekening</span>
-                </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Transfer">
+                    <span>Transfer</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Beli Bayar">
+                    <span>Beli &amp; Bayar</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Limit Management">
+                    <span>Limit Management</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Approval Matrix">
+                    <span>Approval Matrix</span>
+                  </label>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
                   <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
@@ -343,9 +340,9 @@
             <table class="min-w-full">
               <thead class="bg-slate-50 text-slate-600">
                 <tr>
-                  <th class="text-left px-4 py-3 font-medium">Waktu Permintaan</th>
+                  <th class="text-left px-4 py-3 font-medium">Tanggal Permintaan</th>
                   <th class="text-left px-4 py-3 font-medium">Kategori</th>
-                  <th class="text-left px-4 py-3 font-medium">Deskripsi</th>
+                  <th class="text-left px-4 py-3 font-medium">Detail Permintaan</th>
                   <th class="px-4 py-3"></th>
                 </tr>
               </thead>
@@ -406,25 +403,21 @@
               <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-64">
                 <div class="flex flex-col gap-2">
                   <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Transaksi">
-                  <span>Transaksi</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Manajemen Pengguna">
-                  <span>Manajemen Pengguna</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Batas Transaksi">
-                  <span>Batas Transaksi</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Atur Persetujuan">
-                  <span>Atur Persetujuan</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" value="Pengaturan Rekening">
-                  <span>Pengaturan Rekening</span>
-                </label>
+                    <input type="checkbox" value="Transfer">
+                    <span>Transfer</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Beli Bayar">
+                    <span>Beli &amp; Bayar</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Limit Management">
+                    <span>Limit Management</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="checkbox" value="Approval Matrix">
+                    <span>Approval Matrix</span>
+                  </label>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
                   <button class="cancel px-3 py-1 rounded-lg border text-slate-600 w-full">Batalkan</button>
@@ -437,9 +430,9 @@
             <table class="min-w-full">
               <thead class="bg-slate-50 text-slate-600">
                 <tr>
-                  <th class="text-left px-4 py-3 font-medium">Waktu Permintaan</th>
+                  <th class="text-left px-4 py-3 font-medium">Tanggal Permintaan</th>
                   <th class="text-left px-4 py-3 font-medium">Kategori</th>
-                  <th class="text-left px-4 py-3 font-medium">Deskripsi</th>
+                  <th class="text-left px-4 py-3 font-medium">Detail Permintaan</th>
                   <th class="px-4 py-3"></th>
                 </tr>
               </thead>
@@ -450,11 +443,58 @@
       </div>
     </main>
     <!-- ============ /MAIN ============ -->
+
+    <!-- Drawer -->
+    <div id="drawer" class="relative h-full flex flex-col bg-white flex-shrink-0 border-l border-slate-100" aria-hidden="true">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[.18em] text-slate-400">Detail Persetujuan</p>
+          <h2 id="approvalDrawerTitle" class="mt-1 text-lg font-semibold text-slate-900">-</h2>
+        </div>
+        <button type="button" id="approvalDrawerClose" data-drawer-close class="text-2xl leading-none text-slate-500 hover:text-slate-700" aria-label="Tutup drawer">&times;</button>
+      </div>
+      <div class="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+        <section>
+          <p class="text-xs font-semibold uppercase tracking-[.18em] text-slate-400 mb-3">Informasi Utama</p>
+          <div class="space-y-3">
+            <div>
+              <p class="text-sm text-slate-500">ID Transaksi</p>
+              <p id="approvalDrawerId" class="text-base font-semibold text-slate-900">-</p>
+            </div>
+            <div>
+              <p class="text-sm text-slate-500">Kategori</p>
+              <p id="approvalDrawerCategory" class="text-base font-semibold text-slate-900">-</p>
+            </div>
+            <div>
+              <p class="text-sm text-slate-500">Status</p>
+              <span id="approvalDrawerStatus" class="inline-flex items-center px-3 py-0.5 rounded-full text-xs font-semibold border bg-slate-100 text-slate-600 border-slate-200">-</span>
+            </div>
+            <div>
+              <p class="text-sm text-slate-500">Tanggal Permintaan</p>
+              <p id="approvalDrawerDate" class="text-base font-semibold text-slate-900">-</p>
+            </div>
+            <div>
+              <p class="text-sm text-slate-500">Sumber</p>
+              <p id="approvalDrawerSourceLabel" class="text-base font-semibold text-slate-900">-</p>
+            </div>
+          </div>
+        </section>
+        <section>
+          <p class="text-xs font-semibold uppercase tracking-[.18em] text-slate-400 mb-3">Detail</p>
+          <p id="approvalDrawerDetail" class="text-base leading-relaxed text-slate-700">-</p>
+        </section>
+        <section>
+          <p class="text-xs font-semibold uppercase tracking-[.18em] text-slate-400 mb-3">Tindakan</p>
+          <a id="approvalDrawerSourceLink" href="#" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-cyan-500 text-cyan-600 font-semibold hover:bg-cyan-50 pointer-events-none opacity-50" aria-disabled="true">Halaman sumber tidak tersedia</a>
+        </section>
+      </div>
+    </div>
   </div>
 
   <script src="https://unpkg.com/air-datepicker@3.4.0/air-datepicker.js"></script>
   <script src="session.js"></script>
   <script src="filter.js"></script>
+  <script src="drawer.js"></script>
   <script src="persetujuan-transaksi.js"></script>
   <script src="sidebar.js"></script>
 </body>
