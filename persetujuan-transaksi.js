@@ -917,7 +917,7 @@ function updateApprovalStatusText(statusElement, completed, total) {
     ? Math.min(Math.max(0, Math.floor(completedNumber)), safeTotal)
     : 0;
 
-  statusElement.textContent = `${safeCompleted}/${safeTotal} selesai`;
+  statusElement.textContent = `${safeCompleted}/${safeTotal}`;
 }
 
 function updateApprovalSection(statusElement, listElement, totalSteps = 2, completedSteps = 0) {
