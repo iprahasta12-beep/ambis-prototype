@@ -301,6 +301,8 @@ const drawerCloseBtn = document.getElementById('approvalDrawerClose');
 const paneHost = document.getElementById('detailPaneHost');
 const paneCreator = document.getElementById('detailPaneCreator');
 const paneDate = document.getElementById('detailPaneDate');
+const paneApprovalStatus = document.getElementById('detailApprovalStatus');
+const paneApprovalList = document.getElementById('detailApprovalList');
 
 const drawerController =
   drawer && window.drawerManager && typeof window.drawerManager.register === 'function'
@@ -773,6 +775,24 @@ function getRandomName() {
   return getRandomFrom(RANDOM_NAMES, 'Admin AMBIS');
 }
 
+function getRandomNameList(count) {
+  const results = [];
+  const pool = Array.isArray(RANDOM_NAMES) ? [...RANDOM_NAMES] : [];
+
+  for (let index = 0; index < count; index += 1) {
+    if (pool.length === 0) {
+      results.push(`Admin ${index + 1}`);
+      continue;
+    }
+
+    const pickIndex = Math.floor(Math.random() * pool.length);
+    const [name] = pool.splice(pickIndex, 1);
+    results.push(name || `Admin ${index + 1}`);
+  }
+
+  return results;
+}
+
 function generateRandomNote() {
   if (!Array.isArray(RANDOM_NOTE_WORDS) || RANDOM_NOTE_WORDS.length === 0) {
     return 'catatan transaksi';
@@ -816,6 +836,94 @@ function applyBadgeStyles(element, colorClass) {
   if (!element) return;
   const base = 'w-10 h-10 rounded-full flex items-center justify-center font-semibold';
   element.className = `${base} ${colorClass || 'bg-cyan-100 text-cyan-600'}`.trim();
+}
+
+function generateWaitingApprovalSteps(count) {
+  const numberCount = Number(count);
+  const total = Number.isFinite(numberCount) ? Math.max(0, Math.floor(numberCount)) : 0;
+  if (total <= 0) return [];
+
+  const approvers = getRandomNameList(total);
+
+  return approvers.map((name, index) => ({
+    label: `Approval ${index + 1}`,
+    approver: name,
+  }));
+}
+
+function renderApprovalList(listElement, steps) {
+  if (!listElement) return;
+
+  listElement.innerHTML = '';
+
+  if (!Array.isArray(steps) || steps.length === 0) {
+    const emptyItem = document.createElement('li');
+    emptyItem.className = 'text-sm text-slate-500';
+    emptyItem.textContent = 'Belum ada daftar persetujuan.';
+    listElement.appendChild(emptyItem);
+    return;
+  }
+
+  steps.forEach(step => {
+    const item = document.createElement('li');
+    item.className = 'flex items-center gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm';
+
+    const content = document.createElement('div');
+    content.className = 'flex items-center gap-3';
+
+    const badge = document.createElement('span');
+    badge.className = 'inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700';
+    badge.setAttribute('aria-label', 'Menunggu persetujuan');
+    badge.innerHTML = `
+      <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="10" cy="10" r="7" stroke="#F97316" stroke-width="1.5"></circle>
+        <path d="M10 6.5V10.25L12.5 11.75" stroke="#F97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span>Menunggu</span>
+    `;
+
+    const textWrap = document.createElement('div');
+    textWrap.className = 'flex flex-col';
+
+    const label = document.createElement('span');
+    label.className = 'text-sm font-semibold text-slate-900';
+    label.textContent = (step && step.label) || 'Approval';
+
+    const caption = document.createElement('span');
+    caption.className = 'text-xs text-slate-500';
+    caption.textContent = step && step.approver
+      ? `Menunggu persetujuan oleh ${step.approver}`
+      : 'Menunggu persetujuan';
+
+    textWrap.appendChild(label);
+    textWrap.appendChild(caption);
+
+    content.appendChild(badge);
+    content.appendChild(textWrap);
+
+    item.appendChild(content);
+
+    listElement.appendChild(item);
+  });
+}
+
+function updateApprovalStatusText(statusElement, completed, total) {
+  if (!statusElement) return;
+
+  const totalNumber = Number(total);
+  const completedNumber = Number(completed);
+  const safeTotal = Number.isFinite(totalNumber) ? Math.max(0, Math.floor(totalNumber)) : 0;
+  const safeCompleted = Number.isFinite(completedNumber)
+    ? Math.min(Math.max(0, Math.floor(completedNumber)), safeTotal)
+    : 0;
+
+  statusElement.textContent = `${safeCompleted}/${safeTotal} selesai`;
+}
+
+function updateApprovalSection(statusElement, listElement, totalSteps = 2, completedSteps = 0) {
+  const steps = generateWaitingApprovalSteps(totalSteps);
+  renderApprovalList(listElement, steps);
+  updateApprovalStatusText(statusElement, completedSteps, steps.length);
 }
 
 function setTextContent(element, value) {
@@ -1016,6 +1124,8 @@ async function renderDetailPane(item) {
   if (paneDate) {
     paneDate.textContent = displayDate || '-';
   }
+
+  updateApprovalSection(paneApprovalStatus, paneApprovalList, 2, 0);
 
   const paneElement = await loadTemplateElement(config);
 
