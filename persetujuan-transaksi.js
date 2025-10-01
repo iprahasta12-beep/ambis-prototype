@@ -184,10 +184,10 @@ const SOURCE_LABELS = {
 };
 
 const CATEGORY_CLASS_MAP = {
-  Transfer: 'bg-cyan-50 text-cyan-700 border-cyan-300',
-  'Beli Bayar': 'bg-amber-50 text-amber-700 border-amber-200',
-  'Limit Management': 'bg-sky-50 text-sky-800 border-sky-200',
-  'Approval Matrix': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  Transfer: '',
+  'Beli Bayar': '',
+  'Limit Management': '',
+  'Approval Matrix': '',
 };
 
 const STATUS_CLASS_MAP = {
