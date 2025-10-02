@@ -323,7 +323,6 @@ const APPROVAL_OTP_DURATION_SECONDS = 30;
 const APPROVAL_OTP_DEFAULT_COUNTDOWN_MESSAGE =
   approvalOtpCountdownMessage?.textContent?.trim() || 'Sesi akan berakhir dalam';
 const APPROVAL_OTP_EXPIRED_MESSAGE = 'Kode verifikasi kedaluwarsa. Silakan kirim ulang kode untuk melanjutkan.';
-const APPROVAL_VALID_OTP = '29042404';
 
 const approvalFlowState = {
   currentAction: null,
@@ -592,14 +591,6 @@ function handleApprovalVerify() {
     setApprovalPrimaryEnabled(false);
     return;
   }
-  if (otpValue !== APPROVAL_VALID_OTP) {
-    showApprovalOtpError('Kode verifikasi salah. Silakan coba lagi.');
-    resetApprovalOtpInputs();
-    setApprovalPrimaryEnabled(false);
-    approvalOtpInputs[0]?.focus();
-    return;
-  }
-
   hideApprovalOtpError();
   clearApprovalOtpInterval();
   approvalFlowState.otpActive = false;
