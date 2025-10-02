@@ -416,7 +416,7 @@ function setApprovalPrimaryEnabled(enabled) {
 
 function setApprovalButtonsToDefault() {
   if (approvalOutlineAction) {
-    approvalOutlineAction.textContent = 'Tolak';
+    approvalOutlineAction.textContent = 'Batalkan';
   }
   if (approvalPrimaryAction) {
     approvalPrimaryAction.textContent = 'Setujui';
