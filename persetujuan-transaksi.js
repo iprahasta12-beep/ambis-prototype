@@ -663,73 +663,49 @@ function mutateApprovalDataAfterDecision(itemId, action) {
   return updatedItem;
 }
 
+function resolveDrawerHeroElements() {
+  if (!paneHost) {
+    return { illustration: null, heading: null };
+  }
+
+  const illustration = paneHost.querySelector('img[src*="illustration"]');
+  let heading = null;
+
+  if (illustration) {
+    const heroContainer = illustration.closest('div');
+    if (heroContainer) {
+      heading = heroContainer.querySelector('h3');
+    }
+  }
+
+  if (!heading) {
+    heading = paneHost.querySelector('h3.text-2xl, h3[class*="text-2xl"]');
+  }
+
+  return { illustration, heading };
+}
+
 function renderApprovalResultView(action, item) {
   const isApprove = action === 'approve';
-  if (paneApprovalStatus) {
-    paneApprovalStatus.textContent = isApprove ? '2/2' : 'Ditolak';
-  }
-  if (paneApprovalList) {
-    paneApprovalList.innerHTML = '';
-    const li = document.createElement('li');
-    li.className = 'px-5 py-4 text-sm rounded-xl border';
-    if (isApprove) {
-      li.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-700');
-      li.textContent = 'Semua tahapan persetujuan selesai.';
-    } else {
-      li.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-700');
-      li.textContent = 'Transaksi ini ditolak dan tidak akan diproses.';
-    }
-    paneApprovalList.appendChild(li);
+  const { illustration, heading } = resolveDrawerHeroElements();
+
+  if (illustration) {
+    illustration.src = isApprove ? 'img/illustration-4.svg' : 'img/illustration-3.svg';
+    illustration.alt = isApprove ? 'Transaksi berhasil' : 'Transaksi dibatalkan';
   }
 
-  if (!paneHost) return;
-
-  const title = isApprove ? 'Transaksi Berhasil Disetujui' : 'Transaksi Berhasil Ditolak';
-  const description = isApprove
-    ? 'Anda telah menyetujui transaksi berikut. Proses akan dilanjutkan sesuai jadwal.'
-    : 'Anda telah menolak transaksi berikut. Transaksi tidak akan dilanjutkan.';
-
-  const summaryTitle = item?.title || 'Detail transaksi';
-  const summaryCounterpart = item?.counterpart || '';
-
-  paneHost.innerHTML = '';
-
-  const wrapper = document.createElement('div');
-  wrapper.className = 'p-6 space-y-6 text-center';
-
-  const icon = document.createElement('div');
-  icon.className = `mx-auto flex h-16 w-16 items-center justify-center rounded-full ${
-    isApprove ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
-  }`;
-  icon.innerHTML = isApprove
-    ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12.5L9.5 17L19 7" /></svg>'
-    : '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M8 8L16 16"/><path stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M16 8L8 16"/></svg>';
-
-  const heading = document.createElement('div');
-  heading.className = 'space-y-2';
-  const headingTitle = document.createElement('h3');
-  headingTitle.className = 'text-xl font-semibold text-slate-900';
-  headingTitle.textContent = title;
-  const headingDesc = document.createElement('p');
-  headingDesc.className = 'text-sm text-slate-600';
-  headingDesc.textContent = description;
-  heading.append(headingTitle, headingDesc);
-
-  const summary = document.createElement('div');
-  summary.className = 'rounded-xl border border-slate-200 bg-slate-50 p-4 text-left';
-  const summaryTitleEl = document.createElement('p');
-  summaryTitleEl.className = 'text-sm font-semibold text-slate-700';
-  summaryTitleEl.textContent = summaryTitle;
-  summary.appendChild(summaryTitleEl);
-  if (summaryCounterpart) {
-    const counterpartEl = document.createElement('p');
-    counterpartEl.className = 'text-sm text-slate-500';
-    counterpartEl.textContent = summaryCounterpart;
-    summary.appendChild(counterpartEl);
+  if (heading) {
+    heading.textContent = isApprove ? 'Transaksi berhasil' : 'Transaksi dibatalkan';
   }
 
-  wrapper.append(icon, heading, summary);
-  paneHost.appendChild(wrapper);
+  if (!paneHost || !item) {
+    return;
+  }
+
+  const statusPill = paneHost.querySelector('#successStatusPill');
+  if (statusPill && item.statusLabel) {
+    statusPill.textContent = item.statusLabel;
+  }
 }
 
 if (approvalOtpInputs.length) {
