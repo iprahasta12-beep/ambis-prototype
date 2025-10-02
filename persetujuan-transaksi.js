@@ -1722,6 +1722,9 @@ function render(tab) {
   const tbody = panel.querySelector('[data-role="table-body"]');
   if (!tbody) return;
 
+  const isActionlessTab = tab === 'menunggu' || tab === 'selesai';
+  const columnCount = isActionlessTab ? 3 : 4;
+
   const filters = getFilters(tab);
   let list = approvalsData[tab] ? [...approvalsData[tab]] : [];
 
@@ -1740,7 +1743,7 @@ function render(tab) {
   if (list.length === 0) {
     const empty = document.createElement('tr');
     empty.innerHTML = `
-      <td class="px-4 py-6 text-center text-slate-500" colspan="4">Tidak ada data pada rentang ini.</td>
+      <td class="px-4 py-6 text-center text-slate-500" colspan="${columnCount}">Tidak ada data pada rentang ini.</td>
     `;
     tbody.appendChild(empty);
     return;
@@ -1754,8 +1757,18 @@ function render(tab) {
     const displayDateTime = getDashboardDisplayDateTime(item);
     item.__displayDateTime = displayDateTime;
     const categoryClass = `${CATEGORY_BADGE_BASE} ${getCategoryClass(item.category)}`;
-    const actionLabel = item.action && item.action.label ? item.action.label : 'Detail';
     const descriptionLine = getDescriptionLine(item);
+
+    let actionCell = '';
+
+    if (!isActionlessTab) {
+      const actionLabel = item.action && item.action.label ? item.action.label : 'Detail';
+      actionCell = `
+        <td class="px-4 py-3 text-right align-top">
+          <button type="button" class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50" data-role="detail-button">${actionLabel}</button>
+        </td>
+      `;
+    }
 
     tr.innerHTML = `
       <td class="px-4 py-3 align-top">
@@ -1767,22 +1780,22 @@ function render(tab) {
       <td class="px-4 py-3">
         <p class="text-sm font-semibold text-slate-900">${descriptionLine}</p>
       </td>
-      <td class="px-4 py-3 text-right align-top">
-        <button type="button" class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50" data-role="detail-button">${actionLabel}</button>
-      </td>
+      ${actionCell}
     `;
 
-    const detailButton = tr.querySelector('[data-role="detail-button"]');
-    if (detailButton) {
-      detailButton.addEventListener('click', () => {
-        if (item.action && item.action.type && item.action.type !== 'drawer') {
-          if (item.sourcePage) {
-            window.location.href = item.sourcePage;
+    if (!isActionlessTab) {
+      const detailButton = tr.querySelector('[data-role="detail-button"]');
+      if (detailButton) {
+        detailButton.addEventListener('click', () => {
+          if (item.action && item.action.type && item.action.type !== 'drawer') {
+            if (item.sourcePage) {
+              window.location.href = item.sourcePage;
+            }
+            return;
           }
-          return;
-        }
-        openDetailDrawer(item);
-      });
+          openDetailDrawer(item);
+        });
+      }
     }
 
     tbody.appendChild(tr);
