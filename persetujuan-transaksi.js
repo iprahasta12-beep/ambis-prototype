@@ -373,11 +373,11 @@ function setApprovalPrimaryEnabled(enabled) {
   approvalPrimaryAction.classList.toggle('cursor-not-allowed', !enabled);
   approvalPrimaryAction.classList.toggle('opacity-50', !enabled);
   if (enabled) {
-    approvalPrimaryAction.classList.add('bg-cyan-500', 'hover:bg-cyan-600', 'text-white');
-    approvalPrimaryAction.classList.remove('bg-slate-200', 'text-slate-400');
+    approvalPrimaryAction.classList.add('border-cyan-500', 'text-cyan-600');
+    approvalPrimaryAction.classList.remove('border-slate-200', 'text-slate-400', 'bg-slate-200', 'text-white', 'bg-cyan-500', 'hover:bg-cyan-600');
   } else {
-    approvalPrimaryAction.classList.remove('bg-cyan-500', 'hover:bg-cyan-600', 'text-white');
-    approvalPrimaryAction.classList.add('bg-slate-200', 'text-slate-400');
+    approvalPrimaryAction.classList.remove('border-cyan-500', 'text-cyan-600', 'bg-cyan-500', 'hover:bg-cyan-600');
+    approvalPrimaryAction.classList.add('border-slate-200', 'text-slate-400');
   }
 }
 
