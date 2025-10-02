@@ -410,7 +410,6 @@ function setApprovalPrimaryEnabled(enabled) {
   approvalPrimaryAction.classList.toggle('cursor-not-allowed', !enabled);
   approvalPrimaryAction.classList.toggle('opacity-50', !enabled);
   if (enabled) {
-    approvalPrimaryAction.classList.remove('border-slate-200', 'text-slate-400');
   }
   applyApprovalPrimaryVariant(enabled);
 }
