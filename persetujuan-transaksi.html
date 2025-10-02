@@ -560,27 +560,29 @@
         </div>
 
         <div class="sticky bottom-0 left-0 right-0 border-t border-slate-200 bg-white px-6 py-4 space-y-4">
-          <div id="approvalOtpSection" class="hidden space-y-4">
-            <div class="space-y-1">
-              <h4 class="text-lg font-semibold text-slate-900">Masukkan kode verifikasi</h4>
-              <p class="text-sm text-slate-500">Kode verifikasi dikirim melalui aplikasi Amar Bank Bisnis Anda.</p>
-            </div>
+          <div id="approvalOtpSection" class="hidden border-t border-slate-200 p-4 space-y-4">
+            <h4 class="text-lg font-semibold text-slate-900">Masukkan kode verifikasi</h4>
             <div class="grid grid-cols-8 gap-2">
-              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
-              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-12 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-input w-full h-14 rounded-xl border text-center text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400" />
             </div>
-            <p id="approvalOtpError" class="hidden text-center text-sm text-rose-600"></p>
+            <p class="text-sm text-slate-500 text-center">
+              Silakan login &amp; cek aplikasi Amar Bank Bisnis pada handphone Anda untuk mendapatkan kode verifikasi.
+            </p>
             <p id="approvalOtpCountdown" class="text-sm text-slate-500 text-center">
               <span id="approvalOtpCountdownMessage">Sesi akan berakhir dalam</span>
               <span id="approvalOtpTimer" class="text-cyan-500 font-semibold">00:30</span>
             </p>
-            <button id="approvalOtpResend" type="button" class="hidden mx-auto rounded-lg border border-cyan-300 px-4 py-2 text-sm font-medium text-cyan-600 hover:bg-slate-50">Kirim Ulang Kode Verifikasi</button>
+            <button id="approvalOtpResend" type="button" class="hidden mx-auto rounded-lg border border-cyan-300 px-4 py-2 text-sm font-medium text-cyan-500 hover:bg-slate-50">
+              Kirim Ulang Kode Verifikasi
+            </button>
+            <p id="approvalOtpError" class="hidden text-center text-sm text-rose-600"></p>
           </div>
           <div class="flex items-center justify-between gap-4">
             <button type="button" id="approvalOutlineAction" class="rounded-xl border border-slate-200 px-6 py-2 font-semibold text-slate-700 transition hover:bg-slate-50 w-full">Tolak</button>
