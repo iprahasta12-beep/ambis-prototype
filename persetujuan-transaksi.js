@@ -367,18 +367,52 @@ const RANDOM_NOTE_WORDS = [
 
 const templateCache = new Map();
 
+function applyApprovalPrimaryVariant(enabled) {
+  if (!approvalPrimaryAction) return;
+  const variant = approvalPrimaryAction.dataset.variant || 'outline';
+  approvalPrimaryAction.classList.remove(
+    'border-cyan-500',
+    'border-slate-200',
+    'border-transparent',
+    'text-cyan-600',
+    'text-slate-400',
+    'text-white',
+    'bg-white',
+    'bg-slate-200',
+    'bg-cyan-500',
+    'bg-cyan-400',
+    'hover:bg-slate-50',
+    'hover:bg-cyan-600',
+  );
+
+  approvalPrimaryAction.classList.add('border');
+
+  if (variant === 'filled') {
+    approvalPrimaryAction.classList.add('border-transparent', 'text-white');
+    if (enabled) {
+      approvalPrimaryAction.classList.add('bg-cyan-500', 'hover:bg-cyan-600');
+    } else {
+      approvalPrimaryAction.classList.add('bg-cyan-400');
+    }
+  } else {
+    approvalPrimaryAction.classList.add('bg-white');
+    if (enabled) {
+      approvalPrimaryAction.classList.add('border-cyan-500', 'text-cyan-600', 'hover:bg-slate-50');
+    } else {
+      approvalPrimaryAction.classList.add('border-slate-200', 'text-slate-400');
+    }
+  }
+}
+
 function setApprovalPrimaryEnabled(enabled) {
   if (!approvalPrimaryAction) return;
   approvalPrimaryAction.disabled = !enabled;
   approvalPrimaryAction.classList.toggle('cursor-not-allowed', !enabled);
   approvalPrimaryAction.classList.toggle('opacity-50', !enabled);
   if (enabled) {
-    approvalPrimaryAction.classList.add('bg-cyan-500', 'hover:bg-cyan-600', 'text-white');
-    approvalPrimaryAction.classList.remove('bg-slate-200', 'text-slate-400');
-  } else {
-    approvalPrimaryAction.classList.remove('bg-cyan-500', 'hover:bg-cyan-600', 'text-white');
-    approvalPrimaryAction.classList.add('bg-slate-200', 'text-slate-400');
+    approvalPrimaryAction.classList.remove('border-slate-200', 'text-slate-400');
   }
+  applyApprovalPrimaryVariant(enabled);
 }
 
 function setApprovalButtonsToDefault() {
@@ -387,6 +421,7 @@ function setApprovalButtonsToDefault() {
   }
   if (approvalPrimaryAction) {
     approvalPrimaryAction.textContent = 'Setujui';
+    approvalPrimaryAction.dataset.variant = 'outline';
   }
   approvalFlowState.resultMode = false;
   approvalFlowState.currentAction = null;
@@ -399,6 +434,7 @@ function setApprovalButtonsToOtp() {
   }
   if (approvalPrimaryAction) {
     approvalPrimaryAction.textContent = 'Verifikasi';
+    approvalPrimaryAction.dataset.variant = 'filled';
   }
   setApprovalPrimaryEnabled(false);
 }
@@ -409,6 +445,7 @@ function setApprovalButtonsToResult() {
   }
   if (approvalPrimaryAction) {
     approvalPrimaryAction.textContent = 'Tutup Detail';
+    approvalPrimaryAction.dataset.variant = 'outline';
   }
   approvalFlowState.resultMode = true;
   setApprovalPrimaryEnabled(true);
