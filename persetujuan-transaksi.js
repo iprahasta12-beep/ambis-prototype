@@ -309,6 +309,30 @@ const drawerController =
     ? window.drawerManager.register(drawer, { manageAria: true })
     : null;
 
+const approvalOutlineAction = document.getElementById('approvalOutlineAction');
+const approvalPrimaryAction = document.getElementById('approvalPrimaryAction');
+const approvalOtpSection = document.getElementById('approvalOtpSection');
+const approvalOtpInputs = approvalOtpSection ? Array.from(approvalOtpSection.querySelectorAll('.otp-input')) : [];
+const approvalOtpCountdown = document.getElementById('approvalOtpCountdown');
+const approvalOtpCountdownMessage = document.getElementById('approvalOtpCountdownMessage');
+const approvalOtpTimer = document.getElementById('approvalOtpTimer');
+const approvalOtpResend = document.getElementById('approvalOtpResend');
+const approvalOtpError = document.getElementById('approvalOtpError');
+
+const APPROVAL_OTP_DURATION_SECONDS = 30;
+const APPROVAL_OTP_DEFAULT_COUNTDOWN_MESSAGE =
+  approvalOtpCountdownMessage?.textContent?.trim() || 'Sesi akan berakhir dalam';
+const APPROVAL_OTP_EXPIRED_MESSAGE = 'Kode verifikasi kedaluwarsa. Silakan kirim ulang kode untuk melanjutkan.';
+const APPROVAL_VALID_OTP = '29042404';
+
+const approvalFlowState = {
+  currentAction: null,
+  otpActive: false,
+  otpIntervalId: null,
+  otpTimeLeft: APPROVAL_OTP_DURATION_SECONDS,
+  resultMode: false,
+};
+
 const TEMPLATE_SOURCES = {
   transfer: { url: 'transfer.html', selector: '#successPane', type: 'transfer' },
   'beli bayar': { url: 'biller.html', selector: '#paymentSuccessInner', type: 'biller' },
@@ -342,6 +366,424 @@ const RANDOM_NOTE_WORDS = [
 ];
 
 const templateCache = new Map();
+
+function setApprovalPrimaryEnabled(enabled) {
+  if (!approvalPrimaryAction) return;
+  approvalPrimaryAction.disabled = !enabled;
+  approvalPrimaryAction.classList.toggle('cursor-not-allowed', !enabled);
+  approvalPrimaryAction.classList.toggle('opacity-50', !enabled);
+  if (enabled) {
+    approvalPrimaryAction.classList.add('bg-cyan-500', 'hover:bg-cyan-600', 'text-white');
+    approvalPrimaryAction.classList.remove('bg-slate-200', 'text-slate-400');
+  } else {
+    approvalPrimaryAction.classList.remove('bg-cyan-500', 'hover:bg-cyan-600', 'text-white');
+    approvalPrimaryAction.classList.add('bg-slate-200', 'text-slate-400');
+  }
+}
+
+function setApprovalButtonsToDefault() {
+  if (approvalOutlineAction) {
+    approvalOutlineAction.textContent = 'Tolak';
+  }
+  if (approvalPrimaryAction) {
+    approvalPrimaryAction.textContent = 'Setujui';
+  }
+  approvalFlowState.resultMode = false;
+  approvalFlowState.currentAction = null;
+  setApprovalPrimaryEnabled(true);
+}
+
+function setApprovalButtonsToOtp() {
+  if (approvalOutlineAction) {
+    approvalOutlineAction.textContent = 'Batalkan';
+  }
+  if (approvalPrimaryAction) {
+    approvalPrimaryAction.textContent = 'Verifikasi';
+  }
+  setApprovalPrimaryEnabled(false);
+}
+
+function setApprovalButtonsToResult() {
+  if (approvalOutlineAction) {
+    approvalOutlineAction.textContent = 'Kembali ke daftar';
+  }
+  if (approvalPrimaryAction) {
+    approvalPrimaryAction.textContent = 'Tutup Detail';
+  }
+  approvalFlowState.resultMode = true;
+  setApprovalPrimaryEnabled(true);
+}
+
+function clearApprovalOtpInterval() {
+  if (approvalFlowState.otpIntervalId) {
+    clearInterval(approvalFlowState.otpIntervalId);
+    approvalFlowState.otpIntervalId = null;
+  }
+}
+
+function formatApprovalOtpTime(value) {
+  const minutes = String(Math.floor(value / 60)).padStart(2, '0');
+  const seconds = String(value % 60).padStart(2, '0');
+  return `${minutes}:${seconds}`;
+}
+
+function updateApprovalOtpCountdownDisplay() {
+  if (approvalOtpTimer) {
+    approvalOtpTimer.textContent = formatApprovalOtpTime(approvalFlowState.otpTimeLeft);
+  }
+}
+
+function resetApprovalOtpInputs() {
+  approvalOtpInputs.forEach(input => {
+    input.value = '';
+  });
+}
+
+function hideApprovalOtpError() {
+  if (!approvalOtpError) return;
+  approvalOtpError.textContent = '';
+  approvalOtpError.classList.add('hidden');
+}
+
+function showApprovalOtpError(message) {
+  if (!approvalOtpError) return;
+  approvalOtpError.textContent = message;
+  approvalOtpError.classList.remove('hidden');
+}
+
+function updateApprovalVerifyState() {
+  if (!approvalFlowState.otpActive) return;
+  const filled = approvalOtpInputs.every(input => input.value && input.value.trim() !== '');
+  const canVerify = filled && approvalFlowState.otpTimeLeft > 0;
+  setApprovalPrimaryEnabled(canVerify);
+}
+
+function startApprovalOtpCountdown() {
+  if (approvalOtpCountdownMessage) {
+    approvalOtpCountdownMessage.textContent = APPROVAL_OTP_DEFAULT_COUNTDOWN_MESSAGE;
+  }
+  if (approvalOtpTimer) {
+    approvalOtpTimer.classList.remove('hidden');
+  }
+  if (approvalOtpResend) {
+    approvalOtpResend.classList.add('hidden');
+  }
+  approvalFlowState.otpTimeLeft = APPROVAL_OTP_DURATION_SECONDS;
+  updateApprovalOtpCountdownDisplay();
+  clearApprovalOtpInterval();
+  approvalFlowState.otpIntervalId = setInterval(handleApprovalOtpTick, 1000);
+}
+
+function resetApprovalOtpState() {
+  approvalFlowState.otpActive = false;
+  approvalFlowState.currentAction = null;
+  clearApprovalOtpInterval();
+  approvalFlowState.otpTimeLeft = APPROVAL_OTP_DURATION_SECONDS;
+  if (approvalOtpSection) {
+    approvalOtpSection.classList.add('hidden');
+  }
+  resetApprovalOtpInputs();
+  hideApprovalOtpError();
+  if (approvalOtpCountdown) {
+    approvalOtpCountdown.classList.remove('hidden');
+  }
+  if (approvalOtpCountdownMessage) {
+    approvalOtpCountdownMessage.textContent = APPROVAL_OTP_DEFAULT_COUNTDOWN_MESSAGE;
+  }
+  if (approvalOtpTimer) {
+    approvalOtpTimer.textContent = formatApprovalOtpTime(APPROVAL_OTP_DURATION_SECONDS);
+    approvalOtpTimer.classList.remove('hidden');
+  }
+  if (approvalOtpResend) {
+    approvalOtpResend.classList.add('hidden');
+  }
+  setApprovalButtonsToDefault();
+}
+
+function beginApprovalOtpFlow(action) {
+  if (!detailState.currentItemId) {
+    return;
+  }
+  approvalFlowState.currentAction = action;
+  approvalFlowState.otpActive = true;
+  approvalFlowState.resultMode = false;
+  setApprovalButtonsToOtp();
+  if (approvalOtpSection) {
+    approvalOtpSection.classList.remove('hidden');
+  }
+  resetApprovalOtpInputs();
+  hideApprovalOtpError();
+  startApprovalOtpCountdown();
+  updateApprovalVerifyState();
+  approvalOtpInputs[0]?.focus();
+}
+
+function getApprovalOtpValue() {
+  return approvalOtpInputs.map(input => input.value).join('');
+}
+
+function handleApprovalOtpTick() {
+  approvalFlowState.otpTimeLeft -= 1;
+  if (approvalFlowState.otpTimeLeft <= 0) {
+    approvalFlowState.otpTimeLeft = 0;
+    clearApprovalOtpInterval();
+    if (approvalOtpCountdownMessage) {
+      approvalOtpCountdownMessage.textContent = APPROVAL_OTP_EXPIRED_MESSAGE;
+    }
+    if (approvalOtpTimer) {
+      approvalOtpTimer.classList.add('hidden');
+    }
+    if (approvalOtpResend) {
+      approvalOtpResend.classList.remove('hidden');
+    }
+    showApprovalOtpError('Kode verifikasi kedaluwarsa. Silakan kirim ulang kode.');
+    setApprovalPrimaryEnabled(false);
+    return;
+  }
+  updateApprovalOtpCountdownDisplay();
+}
+
+function handleApprovalVerify() {
+  if (!approvalFlowState.otpActive) return;
+  if (approvalFlowState.otpTimeLeft <= 0) {
+    showApprovalOtpError('Kode verifikasi kedaluwarsa. Silakan kirim ulang kode.');
+    setApprovalPrimaryEnabled(false);
+    return;
+  }
+  const otpValue = getApprovalOtpValue();
+  if (!otpValue || otpValue.length < approvalOtpInputs.length) {
+    showApprovalOtpError('Kode verifikasi wajib diisi.');
+    setApprovalPrimaryEnabled(false);
+    return;
+  }
+  if (otpValue !== APPROVAL_VALID_OTP) {
+    showApprovalOtpError('Kode verifikasi salah. Silakan coba lagi.');
+    resetApprovalOtpInputs();
+    setApprovalPrimaryEnabled(false);
+    approvalOtpInputs[0]?.focus();
+    return;
+  }
+
+  hideApprovalOtpError();
+  clearApprovalOtpInterval();
+  approvalFlowState.otpActive = false;
+  const resultItem = mutateApprovalDataAfterDecision(detailState.currentItemId, approvalFlowState.currentAction);
+  renderApprovalResultView(approvalFlowState.currentAction, resultItem);
+  setApprovalButtonsToResult();
+  if (approvalOtpSection) {
+    approvalOtpSection.classList.add('hidden');
+  }
+  approvalFlowState.currentAction = null;
+}
+
+function resetApprovalFlowState() {
+  resetApprovalOtpState();
+  approvalFlowState.resultMode = false;
+}
+
+function mutateApprovalDataAfterDecision(itemId, action) {
+  if (!itemId) return null;
+
+  let foundItem = null;
+  let sourceListName = null;
+  let sourceIndex = -1;
+
+  Object.keys(approvalsData).some(listName => {
+    const list = approvalsData[listName];
+    if (!Array.isArray(list)) return false;
+    const index = list.findIndex(entry => entry.id === itemId);
+    if (index === -1) return false;
+    foundItem = list[index];
+    sourceListName = listName;
+    sourceIndex = index;
+    return true;
+  });
+
+  if (!foundItem) return null;
+
+  if (Array.isArray(approvalsData[sourceListName])) {
+    approvalsData[sourceListName].splice(sourceIndex, 1);
+  }
+
+  const updatedItem = { ...foundItem };
+  if (action === 'approve') {
+    updatedItem.status = 'Disetujui';
+    updatedItem.statusLabel = 'Disetujui';
+  } else {
+    updatedItem.status = 'Ditolak';
+    updatedItem.statusLabel = 'Ditolak';
+  }
+
+  if (!Array.isArray(approvalsData.selesai)) {
+    approvalsData.selesai = [];
+  }
+
+  approvalsData.selesai = approvalsData.selesai.filter(entry => entry.id !== updatedItem.id);
+  approvalsData.selesai.unshift(updatedItem);
+
+  updateCounts();
+  render(activeTab);
+
+  return updatedItem;
+}
+
+function renderApprovalResultView(action, item) {
+  const isApprove = action === 'approve';
+  if (paneApprovalStatus) {
+    paneApprovalStatus.textContent = isApprove ? '2/2' : 'Ditolak';
+  }
+  if (paneApprovalList) {
+    paneApprovalList.innerHTML = '';
+    const li = document.createElement('li');
+    li.className = 'px-5 py-4 text-sm rounded-xl border';
+    if (isApprove) {
+      li.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-700');
+      li.textContent = 'Semua tahapan persetujuan selesai.';
+    } else {
+      li.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-700');
+      li.textContent = 'Transaksi ini ditolak dan tidak akan diproses.';
+    }
+    paneApprovalList.appendChild(li);
+  }
+
+  if (!paneHost) return;
+
+  const title = isApprove ? 'Transaksi Berhasil Disetujui' : 'Transaksi Berhasil Ditolak';
+  const description = isApprove
+    ? 'Anda telah menyetujui transaksi berikut. Proses akan dilanjutkan sesuai jadwal.'
+    : 'Anda telah menolak transaksi berikut. Transaksi tidak akan dilanjutkan.';
+
+  const summaryTitle = item?.title || 'Detail transaksi';
+  const summaryCounterpart = item?.counterpart || '';
+
+  paneHost.innerHTML = '';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'p-6 space-y-6 text-center';
+
+  const icon = document.createElement('div');
+  icon.className = `mx-auto flex h-16 w-16 items-center justify-center rounded-full ${
+    isApprove ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
+  }`;
+  icon.innerHTML = isApprove
+    ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12.5L9.5 17L19 7" /></svg>'
+    : '<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M8 8L16 16"/><path stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M16 8L8 16"/></svg>';
+
+  const heading = document.createElement('div');
+  heading.className = 'space-y-2';
+  const headingTitle = document.createElement('h3');
+  headingTitle.className = 'text-xl font-semibold text-slate-900';
+  headingTitle.textContent = title;
+  const headingDesc = document.createElement('p');
+  headingDesc.className = 'text-sm text-slate-600';
+  headingDesc.textContent = description;
+  heading.append(headingTitle, headingDesc);
+
+  const summary = document.createElement('div');
+  summary.className = 'rounded-xl border border-slate-200 bg-slate-50 p-4 text-left';
+  const summaryTitleEl = document.createElement('p');
+  summaryTitleEl.className = 'text-sm font-semibold text-slate-700';
+  summaryTitleEl.textContent = summaryTitle;
+  summary.appendChild(summaryTitleEl);
+  if (summaryCounterpart) {
+    const counterpartEl = document.createElement('p');
+    counterpartEl.className = 'text-sm text-slate-500';
+    counterpartEl.textContent = summaryCounterpart;
+    summary.appendChild(counterpartEl);
+  }
+
+  wrapper.append(icon, heading, summary);
+  paneHost.appendChild(wrapper);
+}
+
+if (approvalOtpInputs.length) {
+  approvalOtpInputs.forEach((input, index) => {
+    input.addEventListener('input', event => {
+      const digit = event.target.value.replace(/\D/g, '').slice(0, 1);
+      event.target.value = digit;
+      if (digit && index < approvalOtpInputs.length - 1) {
+        approvalOtpInputs[index + 1].focus();
+      }
+      hideApprovalOtpError();
+      updateApprovalVerifyState();
+    });
+
+    input.addEventListener('keydown', event => {
+      if (event.key === 'Backspace' && !event.target.value && index > 0) {
+        approvalOtpInputs[index - 1].focus();
+        approvalOtpInputs[index - 1].value = '';
+        hideApprovalOtpError();
+        updateApprovalVerifyState();
+        return;
+      }
+      if (event.key === 'ArrowLeft' && index > 0) {
+        approvalOtpInputs[index - 1].focus();
+      } else if (event.key === 'ArrowRight' && index < approvalOtpInputs.length - 1) {
+        approvalOtpInputs[index + 1].focus();
+      }
+    });
+
+    input.addEventListener('paste', event => {
+      event.preventDefault();
+      const text = (event.clipboardData || window.clipboardData)?.getData('text') || '';
+      const digits = text.replace(/\D/g, '');
+      if (!digits) return;
+      resetApprovalOtpInputs();
+      const chars = digits.slice(0, approvalOtpInputs.length).split('');
+      chars.forEach((char, idx) => {
+        approvalOtpInputs[idx].value = char;
+      });
+      const focusIndex = Math.min(chars.length - 1, approvalOtpInputs.length - 1);
+      if (focusIndex >= 0) {
+        approvalOtpInputs[focusIndex].focus();
+      }
+      hideApprovalOtpError();
+      updateApprovalVerifyState();
+    });
+  });
+}
+
+if (approvalOtpResend) {
+  approvalOtpResend.addEventListener('click', () => {
+    if (approvalFlowState.resultMode || !approvalFlowState.currentAction) {
+      return;
+    }
+    approvalFlowState.otpActive = true;
+    hideApprovalOtpError();
+    resetApprovalOtpInputs();
+    startApprovalOtpCountdown();
+    updateApprovalVerifyState();
+    approvalOtpInputs[0]?.focus();
+  });
+}
+
+if (approvalOutlineAction) {
+  approvalOutlineAction.addEventListener('click', () => {
+    if (approvalFlowState.resultMode) {
+      closeDetailDrawer({ trigger: 'approval-result-back' });
+      return;
+    }
+    if (approvalFlowState.otpActive) {
+      resetApprovalFlowState();
+      return;
+    }
+    beginApprovalOtpFlow('reject');
+  });
+}
+
+if (approvalPrimaryAction) {
+  approvalPrimaryAction.addEventListener('click', () => {
+    if (approvalFlowState.resultMode) {
+      closeDetailDrawer({ trigger: 'approval-result-close' });
+      return;
+    }
+    if (approvalFlowState.otpActive) {
+      handleApprovalVerify();
+      return;
+    }
+    beginApprovalOtpFlow('approve');
+  });
+}
 
 function getRekeningApi() {
   if (typeof window === 'undefined') return null;
@@ -1104,6 +1546,8 @@ function fillApprovalPane(pane, item) {
 async function renderDetailPane(item) {
   if (!paneHost) return;
 
+  resetApprovalFlowState();
+
   paneHost.innerHTML = '';
 
   const config = getTemplateConfig(item?.category);
@@ -1185,6 +1629,8 @@ async function openDetailDrawer(item) {
 
 function closeDetailDrawer(options = {}) {
   if (!drawer) return;
+
+  resetApprovalFlowState();
 
   if (drawerController) {
     drawerController.close(options);
