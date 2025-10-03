@@ -60,7 +60,8 @@
 }
 
 /* Drawer panel that pushes main content instead of overlaying */
-#drawer{
+#drawer,
+#successDrawer{
   --drawer-max-width:550px;
   width:0;
   max-width:var(--drawer-max-width);
@@ -68,7 +69,8 @@
   transition:width .3s ease;
   border-left-width:0;
 }
-#drawer.open{
+#drawer.open,
+#successDrawer.open{
   width:100%;
   border-left-width:24px;
 }

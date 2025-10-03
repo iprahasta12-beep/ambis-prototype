@@ -294,6 +294,10 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('id-ID', {
 
 const detailState = {
   currentItemId: null,
+  currentItemData: null,
+  displayDate: null,
+  note: null,
+  templateConfig: null,
 };
 
 const drawer = document.getElementById('drawer');
@@ -307,6 +311,13 @@ const paneApprovalList = document.getElementById('detailApprovalList');
 const drawerController =
   drawer && window.drawerManager && typeof window.drawerManager.register === 'function'
     ? window.drawerManager.register(drawer, { manageAria: true })
+    : null;
+
+const successDrawer = document.getElementById('successDrawer');
+const successDrawerHost = document.getElementById('successDrawerHost');
+const successDrawerController =
+  successDrawer && window.drawerManager && typeof window.drawerManager.register === 'function'
+    ? window.drawerManager.register(successDrawer, { manageAria: true })
     : null;
 
 const approvalOutlineAction = document.getElementById('approvalOutlineAction');
@@ -578,7 +589,7 @@ function handleApprovalOtpTick() {
   updateApprovalOtpCountdownDisplay();
 }
 
-function handleApprovalVerify() {
+async function handleApprovalVerify() {
   if (!approvalFlowState.otpActive) return;
   if (approvalFlowState.otpTimeLeft <= 0) {
     showApprovalOtpError('Kode verifikasi kedaluwarsa. Silakan kirim ulang kode.');
@@ -594,13 +605,24 @@ function handleApprovalVerify() {
   hideApprovalOtpError();
   clearApprovalOtpInterval();
   approvalFlowState.otpActive = false;
-  const resultItem = mutateApprovalDataAfterDecision(detailState.currentItemId, approvalFlowState.currentAction);
-  renderApprovalResultView(approvalFlowState.currentAction, resultItem);
-  setApprovalButtonsToResult();
+  const action = approvalFlowState.currentAction || 'approve';
+  const resultItem = mutateApprovalDataAfterDecision(detailState.currentItemId, action);
   if (approvalOtpSection) {
     approvalOtpSection.classList.add('hidden');
   }
   approvalFlowState.currentAction = null;
+
+  try {
+    await openApprovalResultDrawer(action, resultItem, {
+      note: detailState.note,
+      displayDate: detailState.displayDate,
+      config: detailState.templateConfig,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+
+  closeDetailDrawer({ trigger: 'approval-success' });
 }
 
 function resetApprovalFlowState() {
@@ -654,31 +676,33 @@ function mutateApprovalDataAfterDecision(itemId, action) {
   return updatedItem;
 }
 
-function resolveDrawerHeroElements() {
-  if (!paneHost) {
+function resolveDrawerHeroElements(root = paneHost) {
+  const context = root || paneHost;
+  if (!context) {
     return { illustration: null, heading: null };
   }
 
-  const illustration = paneHost.querySelector('img[src*="illustration"]');
+  const illustration = context.querySelector('img[src*="illustration"]');
   let heading = null;
 
   if (illustration) {
     const heroContainer = illustration.closest('div');
-    if (heroContainer) {
+    if (heroContainer && context.contains(heroContainer)) {
       heading = heroContainer.querySelector('h3');
     }
   }
 
   if (!heading) {
-    heading = paneHost.querySelector('h3.text-2xl, h3[class*="text-2xl"]');
+    heading = context.querySelector('h3.text-2xl, h3[class*="text-2xl"]');
   }
 
   return { illustration, heading };
 }
 
-function renderApprovalResultView(action, item) {
+function renderApprovalResultView(action, item, root = paneHost) {
   const isApprove = action === 'approve';
-  const { illustration, heading } = resolveDrawerHeroElements();
+  const context = root || paneHost;
+  const { illustration, heading } = resolveDrawerHeroElements(context);
 
   if (illustration) {
     illustration.src = isApprove ? 'img/illustration-4.svg' : 'img/illustration-3.svg';
@@ -689,13 +713,90 @@ function renderApprovalResultView(action, item) {
     heading.textContent = isApprove ? 'Transaksi berhasil' : 'Transaksi dibatalkan';
   }
 
-  if (!paneHost || !item) {
+  if (!context || !item) {
     return;
   }
 
-  const statusPill = paneHost.querySelector('#successStatusPill');
+  const statusPill = context.querySelector('#successStatusPill');
   if (statusPill && item.statusLabel) {
     statusPill.textContent = item.statusLabel;
+  }
+}
+
+function closeSuccessDrawer(options = {}) {
+  if (!successDrawer) return;
+
+  if (successDrawerController) {
+    successDrawerController.close(options);
+  } else if (successDrawer.classList.contains('open')) {
+    successDrawer.classList.remove('open');
+    successDrawer.setAttribute('aria-hidden', 'true');
+  } else {
+    successDrawer.setAttribute('aria-hidden', 'true');
+  }
+
+  if (successDrawerHost) {
+    successDrawerHost.innerHTML = '';
+  }
+}
+
+async function openApprovalResultDrawer(action, item, options = {}) {
+  if (!successDrawer || !successDrawerHost) return;
+
+  const config = options.config || detailState.templateConfig || getTemplateConfig(item?.category);
+  const displayDate =
+    options.displayDate || detailState.displayDate || item?.__displayDateTime || getDashboardDisplayDateTime(item);
+  const noteCandidate = options.note || detailState.note;
+  const noteText = typeof noteCandidate === 'string' && noteCandidate.trim() ? noteCandidate : generateRandomNote();
+
+  successDrawerHost.innerHTML = '';
+
+  let paneElement = null;
+  if (config) {
+    paneElement = await loadTemplateElement(config);
+  }
+
+  if (!paneElement) {
+    const fallback = document.createElement('div');
+    fallback.className = 'p-6 text-sm text-slate-600';
+    fallback.textContent = 'Detail transaksi tidak tersedia.';
+    successDrawerHost.appendChild(fallback);
+  } else {
+    successDrawerHost.appendChild(paneElement);
+
+    if (config?.type === 'transfer') {
+      fillTransferPane(paneElement, item, displayDate, noteText, { stripChrome: false });
+      bindPaneClosers(paneElement, ['#successHeaderClose', '#successCloseBtn'], {
+        closeFn: () => closeSuccessDrawer({ trigger: 'pane-button' }),
+      });
+    } else if (config?.type === 'biller') {
+      fillBillerPane(paneElement, item, displayDate, noteText, { stripChrome: false });
+      bindPaneClosers(
+        paneElement,
+        ['#successDrawerCloseButton', '#successDrawerStatusButton'],
+        { closeFn: () => closeSuccessDrawer({ trigger: 'pane-button' }) },
+      );
+    } else if (config?.type === 'approval') {
+      fillApprovalPane(paneElement, item, { stripChrome: false });
+      bindPaneClosers(paneElement, ['#approvalPendingClose', '#approvalPendingDismiss'], {
+        closeFn: () => closeSuccessDrawer({ trigger: 'pane-button' }),
+      });
+    } else {
+      preparePaneElement(paneElement);
+    }
+
+    renderApprovalResultView(action, item, paneElement);
+  }
+
+  const trigger = action === 'approve' ? 'approval-approve-success' : 'approval-reject-success';
+
+  if (successDrawerController) {
+    successDrawerController.open({ trigger });
+  } else {
+    if (!successDrawer.classList.contains('open')) {
+      successDrawer.classList.add('open');
+    }
+    successDrawer.setAttribute('aria-hidden', 'false');
   }
 }
 
@@ -1427,13 +1528,17 @@ function renderApprovalMatrixList(container, entries) {
   container.innerHTML = html;
 }
 
-function bindPaneClosers(element, selectors = []) {
+function bindPaneClosers(element, selectors = [], options = {}) {
   if (!element) return;
+  const closeFn =
+    typeof options.closeFn === 'function'
+      ? options.closeFn
+      : () => closeDetailDrawer({ trigger: 'pane-button' });
   selectors.forEach(selector => {
     const target = element.querySelector(selector);
     if (target) {
       target.addEventListener('click', () => {
-        closeDetailDrawer({ trigger: 'pane-button' });
+        closeFn();
       });
     }
   });
@@ -1462,8 +1567,9 @@ async function loadTemplateElement(config) {
   return cached ? cached.cloneNode(true) : null;
 }
 
-function fillTransferPane(pane, item, displayDate, noteText) {
+function fillTransferPane(pane, item, displayDate, noteText, options = {}) {
   if (!pane) return;
+  const { stripChrome = true } = options || {};
 
   const source = buildTransferSourceAccount(item);
   const destination = item && item.destinationAccount ? item.destinationAccount : {};
@@ -1501,11 +1607,14 @@ function fillTransferPane(pane, item, displayDate, noteText) {
   setTextContent(pane.querySelector('#successNote'), noteDisplay);
   setTextContent(pane.querySelector('#successMethod'), method);
 
-  stripPaneChrome(pane);
+  if (stripChrome) {
+    stripPaneChrome(pane);
+  }
 }
 
-function fillBillerPane(pane, item, displayDate, noteText) {
+function fillBillerPane(pane, item, displayDate, noteText, options = {}) {
   if (!pane) return;
+  const { stripChrome = true } = options || {};
 
   preparePaneElement(pane);
 
@@ -1529,11 +1638,14 @@ function fillBillerPane(pane, item, displayDate, noteText) {
     appendDynamicRow(dynamicSection, 'Catatan', capitalizeSentence(noteText));
   }
 
-  stripPaneChrome(pane);
+  if (stripChrome) {
+    stripPaneChrome(pane);
+  }
 }
 
-function fillApprovalPane(pane, item) {
+function fillApprovalPane(pane, item, options = {}) {
   if (!pane) return;
+  const { stripChrome = true } = options || {};
 
   preparePaneElement(pane);
   setTextContent(pane.querySelector('h2'), item?.title || 'Approval Matrix');
@@ -1543,7 +1655,9 @@ function fillApprovalPane(pane, item) {
   }
   renderApprovalMatrixList(pane.querySelector('#approvalPendingList'), item?.approvalMatrix || []);
 
-  stripPaneChrome(pane);
+  if (stripChrome) {
+    stripPaneChrome(pane);
+  }
 }
 
 async function renderDetailPane(item) {
@@ -1557,6 +1671,11 @@ async function renderDetailPane(item) {
   const displayDate = item?.__displayDateTime || getDashboardDisplayDateTime(item);
   const note = generateRandomNote();
   const creatorName = getRandomName();
+
+  detailState.currentItemData = item || null;
+  detailState.displayDate = displayDate || null;
+  detailState.note = note || null;
+  detailState.templateConfig = config || null;
 
   if (paneCreator) {
     paneCreator.textContent = creatorName;
@@ -1610,6 +1729,8 @@ function highlightActiveRow(itemId, tab) {
 async function openDetailDrawer(item) {
   if (!item || !drawer) return;
 
+  closeSuccessDrawer({ trigger: 'detail-open' });
+
   detailState.currentItemId = item.id || null;
 
   try {
@@ -1643,6 +1764,10 @@ function closeDetailDrawer(options = {}) {
   }
 
   detailState.currentItemId = null;
+  detailState.currentItemData = null;
+  detailState.displayDate = null;
+  detailState.note = null;
+  detailState.templateConfig = null;
   highlightActiveRow(null, activeTab);
 }
 
@@ -1654,6 +1779,14 @@ if (drawer) {
   drawer.addEventListener('drawer:close', () => {
     detailState.currentItemId = null;
     highlightActiveRow(null, activeTab);
+  });
+}
+
+if (successDrawer) {
+  successDrawer.addEventListener('drawer:close', () => {
+    if (successDrawerHost) {
+      successDrawerHost.innerHTML = '';
+    }
   });
 }
 
