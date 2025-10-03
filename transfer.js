@@ -17,12 +17,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const initialPaneParam = (document.documentElement.dataset.transferInitialPane || searchParams.get('pane') || '').toLowerCase();
   const embeddedInitialPane = initialPaneParam === 'move' ? 'move' : 'transfer';
 
+  function isDrawerOpen() {
+    if (drawerController && typeof drawerController.isOpen === 'function') {
+      return drawerController.isOpen();
+    }
+    return drawer?.classList.contains('open') || false;
+  }
+
   function updateCardGridLayout() {
-    // Maintain a consistent card layout regardless of drawer state so cards
-    // stay in place when the column configuration would previously change.
     if (!cardGrid) return;
-    cardGrid.classList.add('md:grid-cols-3');
-    cardGrid.classList.remove('md:grid-cols-2');
+    const drawerOpen = isDrawerOpen();
+    cardGrid.classList.toggle('md:grid-cols-2', drawerOpen);
+    cardGrid.classList.toggle('md:grid-cols-3', !drawerOpen);
+  }
+
+  if (drawerController) {
+    drawerController.onOpen(() => updateCardGridLayout());
+    drawerController.onClose(() => updateCardGridLayout());
+  } else if (drawer) {
+    drawer.addEventListener('drawer:open', updateCardGridLayout);
+    drawer.addEventListener('drawer:close', updateCardGridLayout);
   }
 
   updateCardGridLayout();
