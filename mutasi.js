@@ -108,6 +108,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let eStatementMonth = '';
   let openDropdown = null;
   const savedFiltersByAccount = new Map();
+  const accountCardElements = new Map();
+
+  const ACCOUNT_CARD_ACTIVE_CLASS = 'border-cyan-500';
+  const ACCOUNT_CARD_INACTIVE_CLASS = 'border-slate-200';
+  const ACCOUNT_CARD_ACTIVE_ATTRIBUTE = 'data-account-card-active';
 
   const GRID_CLASS_THREE_COLUMNS = 'md:grid-cols-3';
   const GRID_CLASS_TWO_COLUMNS = 'md:grid-cols-2';
@@ -590,6 +595,25 @@ document.addEventListener('DOMContentLoaded', () => {
     return '__default__';
   }
 
+  function setAccountCardState(card, isActive) {
+    if (!card) return;
+    card.classList.toggle(ACCOUNT_CARD_ACTIVE_CLASS, Boolean(isActive));
+    card.classList.toggle(ACCOUNT_CARD_INACTIVE_CLASS, !isActive);
+    if (isActive) {
+      card.setAttribute(ACCOUNT_CARD_ACTIVE_ATTRIBUTE, 'true');
+    } else {
+      card.removeAttribute(ACCOUNT_CARD_ACTIVE_ATTRIBUTE);
+    }
+  }
+
+  function updateActiveAccountCard() {
+    const activeKey = resolveAccountKey(activeAccount);
+    const hasActiveAccount = activeKey && activeKey !== '__default__';
+    accountCardElements.forEach((card, key) => {
+      setAccountCardState(card, hasActiveAccount && key === activeKey);
+    });
+  }
+
   function persistCurrentFilters() {
     if (!filterGroup || !activeAccount) return;
     const accountKey = resolveAccountKey(activeAccount);
@@ -885,6 +909,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!drawer) return;
     activeAccount = account;
     activeData = null;
+    updateActiveAccountCard();
 
     resetEStatement();
     setActiveTab('mutasi');
@@ -949,6 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     activeAccount = null;
     activeData = null;
+    updateActiveAccountCard();
     if (loadTimer) {
       clearTimeout(loadTimer);
       loadTimer = null;
@@ -959,9 +985,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!container) return;
     const accounts = getAccounts();
     container.innerHTML = '';
+    accountCardElements.clear();
     accounts.forEach((account, index) => {
       const card = document.createElement('div');
-      card.className = 'rounded-2xl border border-slate-200 p-5 bg-white flex flex-col';
+      card.className = 'rounded-2xl border p-5 bg-white flex flex-col transition-colors cursor-pointer';
       const name = account.name || account.displayName || `Rekening ${index + 1}`;
       const initial = account.initial || (name ? name.charAt(0).toUpperCase() : '');
       const color = account.color || 'bg-cyan-100 text-cyan-600';
@@ -981,12 +1008,30 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
 
       const button = card.querySelector('button');
+      const accountKey = resolveAccountKey(account);
+      accountCardElements.set(accountKey, card);
+      setAccountCardState(card, false);
+
+      const handleSelect = () => {
+        openDrawer(account);
+      };
+
+      card.addEventListener('click', (event) => {
+        if (event.target && event.target.closest('button')) return;
+        handleSelect();
+      });
+
       if (button) {
-        button.addEventListener('click', () => openDrawer(account));
+        button.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          handleSelect();
+        });
       }
 
       container.appendChild(card);
     });
+    updateActiveAccountCard();
   }
 
   setupDropdown('year');
