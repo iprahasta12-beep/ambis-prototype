@@ -109,6 +109,31 @@ document.addEventListener('DOMContentLoaded', () => {
   let openDropdown = null;
   const savedFiltersByAccount = new Map();
 
+  const GRID_CLASS_THREE_COLUMNS = 'md:grid-cols-3';
+  const GRID_CLASS_TWO_COLUMNS = 'md:grid-cols-2';
+
+  function updateAccountGridColumns(drawerIsOpen) {
+    if (!container) return;
+    if (drawerIsOpen) {
+      container.classList.remove(GRID_CLASS_THREE_COLUMNS);
+      container.classList.add(GRID_CLASS_TWO_COLUMNS);
+    } else {
+      container.classList.add(GRID_CLASS_THREE_COLUMNS);
+      container.classList.remove(GRID_CLASS_TWO_COLUMNS);
+    }
+  }
+
+  if (drawer) {
+    drawer.addEventListener('drawer:open', () => updateAccountGridColumns(true));
+    drawer.addEventListener('drawer:close', () => updateAccountGridColumns(false));
+    updateAccountGridColumns(drawer.classList.contains('open'));
+  }
+
+  if (drawerController) {
+    drawerController.onOpen(() => updateAccountGridColumns(true));
+    drawerController.onClose(() => updateAccountGridColumns(false));
+  }
+
   function closeDropdownMenu(target) {
     if (!target || !target.panel) return;
     target.panel.classList.add('hidden');
@@ -888,6 +913,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (typeof window.sidebarCollapseForDrawer === 'function') {
             window.sidebarCollapseForDrawer();
           }
+          updateAccountGridColumns(true);
         }
       }
     }
@@ -919,6 +945,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof window.sidebarRestoreForDrawer === 'function') {
         window.sidebarRestoreForDrawer();
       }
+      updateAccountGridColumns(false);
     }
     activeAccount = null;
     activeData = null;
