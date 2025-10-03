@@ -322,6 +322,7 @@ const successDrawerController =
 
 const approvalOutlineAction = document.getElementById('approvalOutlineAction');
 const approvalPrimaryAction = document.getElementById('approvalPrimaryAction');
+const approvalActionsSection = document.getElementById('approvalActions');
 const approvalOtpSection = document.getElementById('approvalOtpSection');
 const approvalOtpInputs = approvalOtpSection ? Array.from(approvalOtpSection.querySelectorAll('.otp-input')) : [];
 const approvalOtpCountdown = document.getElementById('approvalOtpCountdown');
@@ -426,7 +427,7 @@ function setApprovalPrimaryEnabled(enabled) {
 
 function setApprovalButtonsToDefault() {
   if (approvalOutlineAction) {
-    approvalOutlineAction.textContent = 'Batalkan';
+    approvalOutlineAction.textContent = 'Tolak';
   }
   if (approvalPrimaryAction) {
     approvalPrimaryAction.textContent = 'Setujui';
@@ -628,6 +629,21 @@ async function handleApprovalVerify() {
 function resetApprovalFlowState() {
   resetApprovalOtpState();
   approvalFlowState.resultMode = false;
+}
+
+function updateDrawerActionsVisibility(tab) {
+  if (!approvalActionsSection) {
+    return;
+  }
+
+  const showActions = tab === 'butuh';
+  approvalActionsSection.classList.toggle('hidden', !showActions);
+
+  if (!showActions) {
+    resetApprovalFlowState();
+  } else {
+    setApprovalButtonsToDefault();
+  }
 }
 
 function mutateApprovalDataAfterDecision(itemId, action) {
@@ -863,6 +879,9 @@ if (approvalOtpResend) {
 
 if (approvalOutlineAction) {
   approvalOutlineAction.addEventListener('click', () => {
+    if (approvalActionsSection && approvalActionsSection.classList.contains('hidden')) {
+      return;
+    }
     if (approvalFlowState.resultMode) {
       closeDetailDrawer({ trigger: 'approval-result-back' });
       return;
@@ -877,6 +896,9 @@ if (approvalOutlineAction) {
 
 if (approvalPrimaryAction) {
   approvalPrimaryAction.addEventListener('click', () => {
+    if (approvalActionsSection && approvalActionsSection.classList.contains('hidden')) {
+      return;
+    }
     if (approvalFlowState.resultMode) {
       closeDetailDrawer({ trigger: 'approval-result-close' });
       return;
@@ -1664,6 +1686,8 @@ async function renderDetailPane(item) {
   if (!paneHost) return;
 
   resetApprovalFlowState();
+
+  updateDrawerActionsVisibility(activeTab);
 
   paneHost.innerHTML = '';
 
