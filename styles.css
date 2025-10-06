@@ -16,6 +16,21 @@
 .sb-item{ height:48px; min-height:48px; align-items:center; position:relative; }
 .sb-item img{ display:block; } /* no baseline jitter */
 
+/* Approval tables shared layout */
+.approval-table{
+  --approval-table-columns:minmax(0,1fr) minmax(0,1fr);
+}
+.approval-table--with-action{
+  --approval-table-columns:minmax(0,1.5fr) minmax(0,1fr) auto;
+}
+.approval-table--two-columns{
+  --approval-table-columns:minmax(0,1.35fr) minmax(0,1fr);
+}
+.approval-table-row{
+  display:grid;
+  grid-template-columns:var(--approval-table-columns);
+}
+
 /* collapse behavior */
 #sidebar{ transition: width .25s ease; overflow:visible; }
 #sidebar.collapsed,
