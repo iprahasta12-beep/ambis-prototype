@@ -1425,24 +1425,33 @@ function renderApprovalList(listElement, steps) {
   listElement.innerHTML = '';
 
   if (!Array.isArray(steps) || steps.length === 0) {
-    const emptyItem = document.createElement('li');
-    emptyItem.className = 'text-sm text-slate-500';
-    emptyItem.textContent = 'Belum ada daftar persetujuan.';
-    listElement.appendChild(emptyItem);
+    const emptyState = document.createElement('div');
+    emptyState.className = 'px-6 py-10 text-center text-sm text-slate-500';
+    emptyState.textContent = 'Belum ada daftar persetujuan.';
+    listElement.appendChild(emptyState);
     return;
   }
 
   steps.forEach(step => {
-    const item = document.createElement('li');
-    item.className = 'p-4';
+    const row = document.createElement('div');
+    row.className = 'approval-table-row items-center gap-4 px-6 py-4 text-sm';
 
-    const content = document.createElement('div');
-    content.className = 'flex items-center gap-3';
+    const stageWrap = document.createElement('div');
+    stageWrap.className = 'flex flex-col gap-1';
 
-    const badge = document.createElement('span');
-    badge.className = 'inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700';
-    badge.setAttribute('aria-label', 'Menunggu persetujuan');
-    badge.innerHTML = `
+    const label = document.createElement('span');
+    label.className = 'text-sm font-semibold text-slate-900';
+    label.textContent = (step && step.label) || 'Approval';
+    stageWrap.appendChild(label);
+
+    const approver = document.createElement('span');
+    approver.className = 'text-sm font-semibold text-slate-700';
+    approver.textContent = (step && step.approver) || '-';
+
+    const status = document.createElement('span');
+    status.className = 'inline-flex items-center justify-self-end gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700';
+    status.setAttribute('aria-label', 'Menunggu persetujuan');
+    status.innerHTML = `
       <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="10" cy="10" r="7" stroke="#F97316" stroke-width="1.5"></circle>
         <path d="M10 6.5V10.25L12.5 11.75" stroke="#F97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
@@ -1450,21 +1459,11 @@ function renderApprovalList(listElement, steps) {
       <span>Menunggu</span>
     `;
 
-    const textWrap = document.createElement('div');
-    textWrap.className = 'flex flex-col';
+    row.appendChild(stageWrap);
+    row.appendChild(approver);
+    row.appendChild(status);
 
-    const label = document.createElement('span');
-    label.className = 'text-sm font-semibold text-slate-900';
-    label.textContent = (step && step.label) || 'Approval';
-
-    textWrap.appendChild(label);
-
-    content.appendChild(badge);
-    content.appendChild(textWrap);
-
-    item.appendChild(content);
-
-    listElement.appendChild(item);
+    listElement.appendChild(row);
   });
 }
 
