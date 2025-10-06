@@ -217,27 +217,16 @@
   }
 
   function getDetailAvatarClasses(account) {
-    const baseClass = 'w-12 h-12 rounded-full grid place-items-center text-lg font-semibold';
+    const baseClass = 'w-10 h-10 rounded-full grid place-items-center font-semibold';
+    const defaultClass = `${baseClass} bg-cyan-100 text-cyan-600`;
     if (!account || typeof account !== 'object') {
-      return `${baseClass} bg-cyan-600 text-white`;
+      return defaultClass;
     }
-    const color = typeof account.color === 'string' ? account.color : '';
-    if (color.includes('orange')) {
-      return `${baseClass} bg-orange-500 text-white`;
+    const color = typeof account.color === 'string' ? account.color.trim() : '';
+    if (!color) {
+      return defaultClass;
     }
-    if (color.includes('pink')) {
-      return `${baseClass} bg-pink-500 text-white`;
-    }
-    if (color.includes('purple')) {
-      return `${baseClass} bg-purple-500 text-white`;
-    }
-    if (color.includes('emerald')) {
-      return `${baseClass} bg-emerald-500 text-white`;
-    }
-    if (color.includes('cyan')) {
-      return `${baseClass} bg-cyan-600 text-white`;
-    }
-    return `${baseClass} bg-cyan-600 text-white`;
+    return `${baseClass} ${color}`;
   }
 
   function isDrawerCurrentlyOpen() {
