@@ -404,6 +404,296 @@
     const successStatusButtonDefaultText = successStatusButton?.textContent?.trim() || 'Cek Status';
     const billerButtons = document.querySelectorAll('[data-biller]');
 
+    const historyDrawerOverlay = document.getElementById('historyDrawerOverlay');
+    const historyDrawerEl = document.getElementById('historyDrawer');
+    const historyDrawerCloseBtn = document.getElementById('historyDrawerCloseBtn');
+    const historyOpenButton = document.getElementById('openHistoryDrawerBtn');
+    const historyTabButtons = Array.from(document.querySelectorAll('.history-tab-button'));
+    const historyLoadingState = document.getElementById('historyLoading');
+    const historyErrorState = document.getElementById('historyError');
+    const historyEmptyState = document.getElementById('historyEmpty');
+    const historyEmptyTitle = document.getElementById('historyEmptyTitle');
+    const historyEmptySubtitle = document.getElementById('historyEmptySubtitle');
+    const historyList = document.getElementById('historyList');
+    const historyRetryBtn = document.getElementById('historyRetryBtn');
+    const historyFiltersGroup = document.querySelector('[data-filter-group="history"]');
+    const historyFilters = historyFiltersGroup ? Array.from(historyFiltersGroup.querySelectorAll('.filter')) : [];
+
+    let historyDrawerOpen = false;
+    let activeHistoryTab = 'processing';
+    let historyLoadingTimer = null;
+    const historyEntries = {
+      processing: Array.isArray(ambis.billerHistoryProcessing) ? ambis.billerHistoryProcessing : [],
+      completed: Array.isArray(ambis.billerHistoryCompleted) ? ambis.billerHistoryCompleted : [],
+    };
+
+    function setHistoryTriggerExpanded(expanded) {
+      if (!historyOpenButton) return;
+      historyOpenButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    }
+
+    function setHistoryState(state) {
+      if (historyLoadingState) historyLoadingState.classList.toggle('hidden', state !== 'loading');
+      if (historyErrorState) historyErrorState.classList.toggle('hidden', state !== 'error');
+      if (historyEmptyState) historyEmptyState.classList.toggle('hidden', state !== 'empty');
+      if (historyList) historyList.classList.toggle('hidden', state !== 'list');
+    }
+
+    function showHistoryEmptyState(reason = 'default') {
+      if (historyEmptyTitle) {
+        historyEmptyTitle.textContent = reason === 'filtered'
+          ? 'Tidak ada transaksi'
+          : 'Belum ada transaksi di periode ini';
+      }
+      if (historyEmptySubtitle) {
+        historyEmptySubtitle.textContent = 'Atur ulang filter atau tanggal untuk menemukan transaksi lain.';
+      }
+      setHistoryState('empty');
+    }
+
+    function hasHistoryFiltersApplied() {
+      return historyFilters.some((filter) => {
+        const applied = (filter.dataset.applied || '').trim();
+        if (!applied) return false;
+        const defaultOption = (filter.dataset.defaultOption || '').trim();
+        if (defaultOption && applied === defaultOption) return false;
+        return true;
+      });
+    }
+
+    function resetHistoryFilters() {
+      historyFilters.forEach((filter) => {
+        filter.dataset.applied = '';
+        const label = filter.querySelector('.filter-label');
+        if (label && filter.dataset.default) {
+          label.textContent = filter.dataset.default;
+        }
+        const defaultOption = filter.dataset.defaultOption || '';
+        const inputs = filter.querySelectorAll('input');
+        inputs.forEach((input) => {
+          if (input.type === 'radio' || input.type === 'checkbox') {
+            input.checked = defaultOption ? input.value === defaultOption : false;
+          } else {
+            if (input._airDatepicker && typeof input._airDatepicker.clear === 'function') {
+              input._airDatepicker.clear();
+              if (typeof input._airDatepicker.update === 'function') {
+                input._airDatepicker.update({ minDate: null, maxDate: null });
+              }
+            }
+            input.value = '';
+            if (input.dataset) {
+              delete input.dataset.isoValue;
+              if (input.dataset.defaultPlaceholder) {
+                input.setAttribute('placeholder', input.dataset.defaultPlaceholder);
+              }
+            }
+          }
+        });
+        const customRange = filter.querySelector('.custom-range');
+        if (customRange) customRange.classList.add('hidden');
+        if (typeof filter._setTriggerState === 'function') filter._setTriggerState(false);
+        if (typeof filter._ensureDefaultDateSelection === 'function') filter._ensureDefaultDateSelection();
+        if (typeof filter._refreshDateOptionHighlight === 'function') filter._refreshDateOptionHighlight();
+        if (typeof filter._ensureDefaultOptionSelection === 'function') filter._ensureDefaultOptionSelection();
+      });
+    }
+
+    function clearHistoryList() {
+      if (!historyList) return;
+      historyList.innerHTML = '';
+    }
+
+    function getHistoryEntriesForTab(tab) {
+      const key = tab === 'completed' ? 'completed' : 'processing';
+      const entries = historyEntries[key];
+      return Array.isArray(entries) ? entries : [];
+    }
+
+    function renderHistoryEntries(entries) {
+      if (!historyList) return;
+      clearHistoryList();
+      entries.forEach((entry) => {
+        const item = document.createElement('article');
+        item.className = 'rounded-xl border border-slate-200 bg-white p-4 shadow-sm';
+
+        const title = document.createElement('p');
+        title.className = 'text-sm font-semibold text-slate-900';
+        title.textContent = entry?.title || 'Transaksi';
+        item.append(title);
+
+        if (entry?.subtitle) {
+          const subtitle = document.createElement('p');
+          subtitle.className = 'mt-1 text-sm text-slate-500';
+          subtitle.textContent = entry.subtitle;
+          item.append(subtitle);
+        }
+
+        const footer = document.createElement('div');
+        footer.className = 'mt-4 flex items-center justify-between text-sm text-slate-500';
+        const left = document.createElement('span');
+        left.textContent = entry?.date || '-';
+        const right = document.createElement('span');
+        right.className = 'font-semibold text-slate-900';
+        right.textContent = entry?.amount || '';
+        footer.append(left, right);
+        item.append(footer);
+
+        historyList.append(item);
+      });
+    }
+
+    function updateHistoryViewDirect() {
+      const entries = getHistoryEntriesForTab(activeHistoryTab);
+      if (entries.length > 0) {
+        renderHistoryEntries(entries);
+        setHistoryState('list');
+        return;
+      }
+      clearHistoryList();
+      showHistoryEmptyState(hasHistoryFiltersApplied() ? 'filtered' : 'default');
+    }
+
+    function simulateHistoryFetch() {
+      if (!historyDrawerOpen) return;
+      clearHistoryList();
+      setHistoryState('loading');
+      if (historyLoadingTimer) {
+        window.clearTimeout(historyLoadingTimer);
+      }
+      historyLoadingTimer = window.setTimeout(() => {
+        historyLoadingTimer = null;
+        if (!historyDrawerOpen) return;
+        updateHistoryViewDirect();
+      }, 360);
+    }
+
+    function setHistoryTab(tab, { skipLoading = false } = {}) {
+      const nextTab = historyEntries[tab] ? tab : 'processing';
+      activeHistoryTab = nextTab;
+      historyTabButtons.forEach((button) => {
+        const isActive = button.dataset.historyTab === nextTab;
+        button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        button.classList.toggle('bg-white', isActive);
+        button.classList.toggle('shadow-sm', isActive);
+        button.classList.toggle('text-slate-900', isActive);
+        button.classList.toggle('border', !isActive);
+        button.classList.toggle('border-slate-200', !isActive);
+        button.classList.toggle('bg-transparent', !isActive);
+        button.classList.toggle('text-slate-500', !isActive);
+      });
+      if (skipLoading) {
+        updateHistoryViewDirect();
+      } else {
+        simulateHistoryFetch();
+      }
+    }
+
+    function openHistoryDrawer() {
+      if (!historyDrawerEl || historyDrawerOpen) return;
+      resetHistoryFilters();
+      clearHistoryList();
+      showHistoryEmptyState('default');
+      setHistoryTab('processing', { skipLoading: true });
+
+      historyDrawerEl.classList.remove('pointer-events-none');
+      if (historyDrawerOverlay) {
+        historyDrawerOverlay.classList.remove('pointer-events-none');
+        historyDrawerOverlay.classList.remove('hidden');
+        historyDrawerOverlay.setAttribute('aria-hidden', 'false');
+      }
+
+      requestAnimationFrame(() => {
+        if (historyDrawerOverlay) {
+          historyDrawerOverlay.classList.remove('opacity-0');
+          historyDrawerOverlay.classList.add('opacity-100');
+        }
+        historyDrawerEl.classList.remove('translate-x-full');
+      });
+
+      historyDrawerEl.setAttribute('aria-hidden', 'false');
+      historyDrawerOpen = true;
+      setHistoryTriggerExpanded(true);
+      if (typeof historyDrawerEl.focus === 'function') {
+        historyDrawerEl.focus({ preventScroll: true });
+      }
+    }
+
+    function closeHistoryDrawer({ focusTrigger = true } = {}) {
+      if (!historyDrawerEl || !historyDrawerOpen) return;
+      historyDrawerOpen = false;
+      if (historyLoadingTimer) {
+        window.clearTimeout(historyLoadingTimer);
+        historyLoadingTimer = null;
+      }
+
+      historyDrawerEl.classList.add('translate-x-full');
+      historyDrawerEl.setAttribute('aria-hidden', 'true');
+      setHistoryTriggerExpanded(false);
+      if (historyDrawerOverlay) {
+        historyDrawerOverlay.classList.remove('opacity-100');
+        historyDrawerOverlay.classList.add('opacity-0');
+        historyDrawerOverlay.setAttribute('aria-hidden', 'true');
+      }
+
+      const handleDrawerTransitionEnd = (event) => {
+        if (event.target !== historyDrawerEl || event.propertyName !== 'transform') return;
+        historyDrawerEl.classList.add('pointer-events-none');
+        historyDrawerEl.removeEventListener('transitionend', handleDrawerTransitionEnd);
+        if (focusTrigger && historyOpenButton) {
+          historyOpenButton.focus();
+        }
+      };
+
+      historyDrawerEl.addEventListener('transitionend', handleDrawerTransitionEnd);
+
+      const handleOverlayTransitionEnd = (event) => {
+        if (!historyDrawerOverlay || event.target !== historyDrawerOverlay || event.propertyName !== 'opacity') return;
+        if (!historyDrawerOpen) {
+          historyDrawerOverlay.classList.add('hidden');
+          historyDrawerOverlay.classList.add('pointer-events-none');
+        }
+        historyDrawerOverlay.removeEventListener('transitionend', handleOverlayTransitionEnd);
+      };
+
+      if (historyDrawerOverlay) {
+        historyDrawerOverlay.addEventListener('transitionend', handleOverlayTransitionEnd);
+      }
+    }
+
+    historyOpenButton?.addEventListener('click', (event) => {
+      event.preventDefault();
+      openHistoryDrawer();
+    });
+
+    historyDrawerCloseBtn?.addEventListener('click', () => {
+      closeHistoryDrawer();
+    });
+
+    historyDrawerOverlay?.addEventListener('click', (event) => {
+      if (event.target === historyDrawerOverlay) {
+        closeHistoryDrawer();
+      }
+    });
+
+    historyTabButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const targetTab = button.dataset.historyTab;
+        if (!targetTab || targetTab === activeHistoryTab) return;
+        setHistoryTab(targetTab);
+      });
+    });
+
+    historyRetryBtn?.addEventListener('click', (event) => {
+      event.preventDefault();
+      simulateHistoryFetch();
+    });
+
+    document.addEventListener('filter-change', (event) => {
+      const groupId = event?.detail?.groupId;
+      if (groupId !== 'history' || !historyDrawerOpen) return;
+      simulateHistoryFetch();
+    });
+
     const accountSheetState = {};
     const accountSheetController = window.bottomSheetManager?.create({
       overlay: accountSheetOverlay,
@@ -1895,6 +2185,8 @@
           closePaymentSheet();
         } else if (successDrawerOpen) {
           closeSuccessDrawerAndPanel();
+        } else if (historyDrawerOpen) {
+          closeHistoryDrawer();
         } else {
           closeDrawer();
         }
