@@ -79,6 +79,23 @@
   let lastTransferAccountPayload = null;
   let activeAccountCardNode = null;
   let activeAccountId = null;
+  let accountDetailPaneNode = null;
+  let accountDetailCloseButtons = [];
+  let accountDetailAvatarNode = null;
+  let accountDetailNameNode = null;
+  let accountDetailNumberNode = null;
+  let accountDetailCopyButtonNode = null;
+  let accountDetailActiveBalanceNode = null;
+  let accountDetailHeldBalanceNode = null;
+  let accountDetailTotalBalanceNode = null;
+  let accountDetailSpecToggleNode = null;
+  let accountDetailSpecContentNode = null;
+  let accountDetailSpecChevronNode = null;
+  let accountDetailScrollContainer = null;
+  let lastAccountDetailTriggerNode = null;
+  let activeDetailAccount = null;
+  let activeDetailAccountId = null;
+  let accountDetailSpecExpanded = true;
 
   const ACCOUNT_GRID_DEFAULT_COLUMNS_CLASS = 'xl:grid-cols-3';
   const ACCOUNT_GRID_DRAWER_COLUMNS_CLASS = 'xl:grid-cols-2';
@@ -121,6 +138,13 @@
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
+  const CURRENCY_FORMATTER_WITH_DECIMALS = new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  const DETAIL_DEFAULT_HELD_BALANCE = 1_000_000;
 
   const TOAST_BASE_INNER_CLASSES = 'pointer-events-auto flex items-center gap-3 rounded-2xl px-4 py-3 shadow-lg text-sm';
   const TOAST_BASE_ICON_WRAPPER_CLASSES = 'flex h-9 w-9 items-center justify-center rounded-full';
@@ -179,6 +203,41 @@
       return CURRENCY_FORMATTER.format(0).replace(/\s+/g, '');
     }
     return CURRENCY_FORMATTER.format(value).replace(/\s+/g, '');
+  }
+
+  function formatCurrencyWithDecimals(value) {
+    if (typeof value !== 'number') {
+      const parsed = Number(value);
+      value = Number.isFinite(parsed) ? parsed : 0;
+    }
+    if (!Number.isFinite(value)) {
+      return CURRENCY_FORMATTER_WITH_DECIMALS.format(0).replace(/\s+/g, '');
+    }
+    return CURRENCY_FORMATTER_WITH_DECIMALS.format(value).replace(/\s+/g, '');
+  }
+
+  function getDetailAvatarClasses(account) {
+    const baseClass = 'w-12 h-12 rounded-full grid place-items-center text-lg font-semibold';
+    if (!account || typeof account !== 'object') {
+      return `${baseClass} bg-cyan-600 text-white`;
+    }
+    const color = typeof account.color === 'string' ? account.color : '';
+    if (color.includes('orange')) {
+      return `${baseClass} bg-orange-500 text-white`;
+    }
+    if (color.includes('pink')) {
+      return `${baseClass} bg-pink-500 text-white`;
+    }
+    if (color.includes('purple')) {
+      return `${baseClass} bg-purple-500 text-white`;
+    }
+    if (color.includes('emerald')) {
+      return `${baseClass} bg-emerald-500 text-white`;
+    }
+    if (color.includes('cyan')) {
+      return `${baseClass} bg-cyan-600 text-white`;
+    }
+    return `${baseClass} bg-cyan-600 text-white`;
   }
 
   function isDrawerCurrentlyOpen() {
@@ -240,6 +299,164 @@
     targetCard.classList.add(ACCOUNT_CARD_ACTIVE_CLASS);
     targetCard.classList.remove(ACCOUNT_CARD_INACTIVE_CLASS);
     targetCard.setAttribute(ACCOUNT_CARD_ACTIVE_ATTRIBUTE, 'true');
+  }
+
+  function setAccountDetailSpecExpanded(expanded) {
+    accountDetailSpecExpanded = Boolean(expanded);
+    if (accountDetailSpecToggleNode) {
+      accountDetailSpecToggleNode.setAttribute('aria-expanded', accountDetailSpecExpanded ? 'true' : 'false');
+      accountDetailSpecToggleNode.dataset.expanded = accountDetailSpecExpanded ? 'true' : 'false';
+    }
+    if (accountDetailSpecContentNode) {
+      accountDetailSpecContentNode.classList.toggle('hidden', !accountDetailSpecExpanded);
+      accountDetailSpecContentNode.setAttribute('aria-hidden', accountDetailSpecExpanded ? 'false' : 'true');
+      accountDetailSpecContentNode.dataset.expanded = accountDetailSpecExpanded ? 'true' : 'false';
+    }
+    if (accountDetailSpecChevronNode) {
+      accountDetailSpecChevronNode.style.transform = accountDetailSpecExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+  }
+
+  function toggleAccountDetailSpec() {
+    setAccountDetailSpecExpanded(!accountDetailSpecExpanded);
+  }
+
+  function setAccountDetailContent(account, options = {}) {
+    if (!accountDetailPaneNode) return;
+    const preserveSpecState = Boolean(options && options.preserveSpecState);
+
+    if (!account || typeof account !== 'object') {
+      activeDetailAccount = null;
+      activeDetailAccountId = null;
+      if (accountDetailNameNode) accountDetailNameNode.textContent = '-';
+      if (accountDetailNumberNode) accountDetailNumberNode.textContent = '-';
+      if (accountDetailAvatarNode) {
+        accountDetailAvatarNode.className = getDetailAvatarClasses(null);
+        accountDetailAvatarNode.textContent = '';
+      }
+      if (accountDetailCopyButtonNode) {
+        accountDetailCopyButtonNode.disabled = true;
+        accountDetailCopyButtonNode.setAttribute('aria-disabled', 'true');
+        accountDetailCopyButtonNode.removeAttribute('data-account-number');
+        accountDetailCopyButtonNode.setAttribute('aria-label', 'Salin nomor rekening');
+      }
+      const zeroCurrency = formatCurrencyWithDecimals(0);
+      if (accountDetailActiveBalanceNode) accountDetailActiveBalanceNode.textContent = zeroCurrency;
+      if (accountDetailHeldBalanceNode) accountDetailHeldBalanceNode.textContent = zeroCurrency;
+      if (accountDetailTotalBalanceNode) accountDetailTotalBalanceNode.textContent = zeroCurrency;
+      if (!preserveSpecState) {
+        setAccountDetailSpecExpanded(true);
+      }
+      return;
+    }
+
+    const name = typeof account.name === 'string' && account.name.trim()
+      ? account.name.trim()
+      : typeof account.displayName === 'string' && account.displayName.trim()
+        ? account.displayName.trim()
+        : 'Rekening';
+    const initial = typeof account.initial === 'string' && account.initial.trim()
+      ? account.initial.trim().charAt(0).toUpperCase()
+      : name.charAt(0).toUpperCase() || 'R';
+    let formattedNumber = '';
+    if (typeof account.number === 'string' && account.number.trim()) {
+      formattedNumber = account.number.trim();
+    } else if (account.numberRaw) {
+      formattedNumber = formatAccountNumber(account.numberRaw);
+    }
+    const copySource = account.numberRaw || account.number || '';
+    const explicitActive = Number(account.activeBalance);
+    const activeBalanceValue = Number.isFinite(explicitActive) ? explicitActive : Number(account.balance) || 0;
+    const explicitHeld = Number(account.heldBalance);
+    const heldBalanceValue = Number.isFinite(explicitHeld) ? explicitHeld : DETAIL_DEFAULT_HELD_BALANCE;
+    const explicitTotal = Number(account.totalBalance);
+    const totalBalanceValue = Number.isFinite(explicitTotal) ? explicitTotal : activeBalanceValue + heldBalanceValue;
+
+    activeDetailAccount = {
+      ...account,
+      name,
+      initial,
+      number: formattedNumber || account.number || '',
+      numberRaw: copySource,
+      activeBalance: activeBalanceValue,
+      heldBalance: heldBalanceValue,
+      totalBalance: totalBalanceValue,
+    };
+    activeDetailAccountId = typeof account.id === 'string' ? account.id : null;
+
+    if (accountDetailNameNode) accountDetailNameNode.textContent = name;
+    if (accountDetailAvatarNode) {
+      accountDetailAvatarNode.className = getDetailAvatarClasses(account);
+      accountDetailAvatarNode.textContent = initial;
+    }
+    if (accountDetailNumberNode) accountDetailNumberNode.textContent = formattedNumber || '-';
+    if (accountDetailCopyButtonNode) {
+      const canCopy = Boolean(copySource);
+      accountDetailCopyButtonNode.disabled = !canCopy;
+      accountDetailCopyButtonNode.setAttribute('aria-disabled', canCopy ? 'false' : 'true');
+      if (canCopy) {
+        accountDetailCopyButtonNode.dataset.accountNumber = copySource;
+      } else {
+        delete accountDetailCopyButtonNode.dataset.accountNumber;
+      }
+      const ariaLabelParts = [];
+      if (name) ariaLabelParts.push(name);
+      if (formattedNumber) ariaLabelParts.push(formattedNumber);
+      const ariaLabel = ariaLabelParts.length
+        ? `Salin nomor rekening ${ariaLabelParts.join(' - ')}`
+        : 'Salin nomor rekening';
+      accountDetailCopyButtonNode.setAttribute('aria-label', ariaLabel);
+    }
+    if (accountDetailActiveBalanceNode) {
+      accountDetailActiveBalanceNode.textContent = formatCurrencyWithDecimals(activeBalanceValue);
+    }
+    if (accountDetailHeldBalanceNode) {
+      accountDetailHeldBalanceNode.textContent = formatCurrencyWithDecimals(heldBalanceValue);
+    }
+    if (accountDetailTotalBalanceNode) {
+      accountDetailTotalBalanceNode.textContent = formatCurrencyWithDecimals(totalBalanceValue);
+    }
+
+    if (!preserveSpecState) {
+      setAccountDetailSpecExpanded(true);
+    }
+  }
+
+  function openAccountDetailPane(account, trigger) {
+    if (!accountDetailPaneNode || !account || typeof account !== 'object') {
+      return;
+    }
+    setAccountDetailContent(account);
+    lastAccountDetailTriggerNode = trigger instanceof HTMLElement ? trigger : null;
+    if (account.id) {
+      const cardNode = findAccountCardByAccountId(account.id);
+      if (cardNode) {
+        setActiveAccountCard(cardNode, account.id);
+      }
+    }
+    showDrawerPane('accountDetail');
+    ensureDrawerOpen(trigger);
+    if (accountDetailScrollContainer) {
+      accountDetailScrollContainer.scrollTop = 0;
+    }
+    const focusTarget =
+      accountDetailPaneNode.querySelector('[data-account-detail-focus]') ||
+      (accountDetailCloseButtons.length ? accountDetailCloseButtons[0] : null);
+    if (focusTarget && typeof focusTarget.focus === 'function') {
+      try {
+        focusTarget.focus({ preventScroll: true });
+      } catch (err) {
+        focusTarget.focus();
+      }
+    }
+  }
+
+  function closeAccountDetailPane({ restoreFocus = true } = {}) {
+    closeDrawer({ restoreFocus });
+  }
+
+  function isAccountDetailPaneOpen() {
+    return Boolean(drawerNode && drawerNode.classList.contains('open') && activeDrawerPane === 'accountDetail');
   }
 
   function sanitizeNumber(value) {
@@ -1091,7 +1308,16 @@
         copy.number = formatAccountNumber(copy.numberRaw);
       }
     }
-    copy.balance = Number(copy.balance) || 0;
+    const normalisedBalance = Number(copy.balance) || 0;
+    copy.balance = normalisedBalance;
+    const explicitActiveBalance = Number(account.activeBalance);
+    copy.activeBalance = Number.isFinite(explicitActiveBalance) ? explicitActiveBalance : normalisedBalance;
+    const explicitHeldBalance = Number(account.heldBalance);
+    copy.heldBalance = Number.isFinite(explicitHeldBalance) ? explicitHeldBalance : DETAIL_DEFAULT_HELD_BALANCE;
+    const explicitTotalBalance = Number(account.totalBalance);
+    copy.totalBalance = Number.isFinite(explicitTotalBalance)
+      ? explicitTotalBalance
+      : copy.activeBalance + copy.heldBalance;
     copy.bank = typeof copy.bank === 'string' ? copy.bank.trim() : '';
     return copy;
   }
@@ -1237,13 +1463,25 @@
     }
   }
 
-  function createDetailLink(label) {
-    const link = document.createElement('a');
-    link.href = 'mutasi.html';
-    link.className = 'pt-3 font-semibold text-cyan-600 hover:text-cyan-700 flex items-center gap-1 whitespace-nowrap';
-    link.setAttribute('aria-label', `Lihat detail ${label}`);
-    link.innerHTML = 'Lihat Detail <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6.47 3.97a.75.75 0 0 1 1.06 0l3.5 3.5a.75.75 0 0 1 0 1.06l-3.5 3.5a.75.75 0 1 1-1.06-1.06L9.44 8 6.47 5.03a.75.75 0 0 1 0-1.06Z"/></svg>';
-    return link;
+  function createDetailLink(account) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'pt-3 font-semibold text-cyan-600 hover:text-cyan-700 flex items-center gap-1 whitespace-nowrap';
+    const accountName = account && typeof account === 'object' && typeof account.name === 'string' && account.name.trim()
+      ? account.name.trim()
+      : typeof account === 'string' && account.trim()
+        ? account.trim()
+        : 'rekening';
+    button.setAttribute('aria-label', `Lihat detail ${accountName}`);
+    button.innerHTML = 'Lihat Detail <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M6.47 3.97a.75.75 0 0 1 1.06 0l3.5 3.5a.75.75 0 0 1 0 1.06l-3.5 3.5a.75.75 0 1 1-1.06-1.06L9.44 8 6.47 5.03a.75.75 0 0 1 0-1.06Z"/></svg>';
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      const trigger = event.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+      if (account && typeof account === 'object') {
+        openAccountDetailPane(account, trigger);
+      }
+    });
+    return button;
   }
 
   function createMutasiActionButton(account) {
@@ -1360,7 +1598,7 @@
     info.appendChild(nameWrap);
 
     header.appendChild(info);
-    header.appendChild(createDetailLink(account.name));
+    header.appendChild(createDetailLink(account));
 
     const numberRow = document.createElement('div');
     numberRow.className = 'flex flex-col';
@@ -1444,6 +1682,9 @@
       accountGridNode.classList.add('hidden');
       if (emptyStateNode) emptyStateNode.classList.remove('hidden');
       setActiveAccountCard(null);
+      if (activeDrawerPane === 'accountDetail' && isAccountDetailPaneOpen()) {
+        closeAccountDetailPane({ restoreFocus: false });
+      }
     } else {
       accountGridNode.classList.remove('hidden');
       if (emptyStateNode) emptyStateNode.classList.add('hidden');
@@ -1459,6 +1700,16 @@
         setActiveAccountCard(restoredActiveCard, previousActiveAccountId);
       } else if (previousActiveAccountId) {
         setActiveAccountCard(null);
+      }
+      if (activeDrawerPane === 'accountDetail') {
+        if (activeDetailAccountId) {
+          const detailAccount = accounts.find((acc) => acc.id === activeDetailAccountId);
+          if (detailAccount) {
+            setAccountDetailContent(detailAccount, { preserveSpecState: true });
+          } else if (isAccountDetailPaneOpen()) {
+            closeAccountDetailPane({ restoreFocus: false });
+          }
+        }
       }
     }
 
@@ -1499,6 +1750,7 @@
   function showDrawerPane(name) {
     const paneMap = {
       addAccount: addAccountPaneNode,
+      accountDetail: accountDetailPaneNode,
       pendingApproval: pendingPaneNode,
       mutasi: mutasiPaneNode,
       transfer: transferPaneNode,
@@ -1655,6 +1907,7 @@
     if (!drawerNode) return;
     const wasTransferActive = activeDrawerPane === 'transfer';
     const wasMutasiActive = activeDrawerPane === 'mutasi';
+    const wasDetailActive = activeDrawerPane === 'accountDetail';
     showDrawerPane('addAccount');
     if (drawerController) {
       drawerController.close({ trigger: 'drawer' });
@@ -1670,7 +1923,9 @@
 
     let focusTarget = null;
     if (restoreFocus) {
-      if (wasTransferActive && lastTransferTriggerNode && document.body.contains(lastTransferTriggerNode)) {
+      if (wasDetailActive && lastAccountDetailTriggerNode && document.body.contains(lastAccountDetailTriggerNode)) {
+        focusTarget = lastAccountDetailTriggerNode;
+      } else if (wasTransferActive && lastTransferTriggerNode && document.body.contains(lastTransferTriggerNode)) {
         focusTarget = lastTransferTriggerNode;
       } else if (wasMutasiActive && lastMutasiTriggerNode && document.body.contains(lastMutasiTriggerNode)) {
         focusTarget = lastMutasiTriggerNode;
@@ -1689,6 +1944,11 @@
     if (wasMutasiActive) {
       lastMutasiTriggerNode = null;
     }
+    if (wasDetailActive) {
+      lastAccountDetailTriggerNode = null;
+    }
+    activeDetailAccount = null;
+    activeDetailAccountId = null;
   }
 
   function onKeyDown(event) {
@@ -1697,6 +1957,10 @@
     }
     if (isTransferPopoverOpen()) {
       closeTransferPopover({ restoreFocus: true });
+      return;
+    }
+    if (isAccountDetailPaneOpen()) {
+      closeAccountDetailPane({ restoreFocus: true });
       return;
     }
     if (isMutasiPaneOpen()) {
@@ -1752,6 +2016,23 @@
     }
     updateAccountGridLayoutForDrawer();
     addAccountPaneNode = document.getElementById('addAccountPane');
+    accountDetailPaneNode = document.getElementById('accountDetailPane');
+    accountDetailAvatarNode = document.getElementById('accountDetailAvatar');
+    accountDetailNameNode = document.getElementById('accountDetailName');
+    accountDetailNumberNode = document.getElementById('accountDetailNumber');
+    accountDetailCopyButtonNode = document.getElementById('accountDetailCopyBtn');
+    accountDetailActiveBalanceNode = document.getElementById('accountDetailActiveBalance');
+    accountDetailHeldBalanceNode = document.getElementById('accountDetailHeldBalance');
+    accountDetailTotalBalanceNode = document.getElementById('accountDetailTotalBalance');
+    accountDetailSpecToggleNode = document.getElementById('accountDetailSpecToggle');
+    accountDetailSpecContentNode = document.getElementById('accountDetailSpecContent');
+    accountDetailSpecChevronNode = accountDetailSpecToggleNode ? accountDetailSpecToggleNode.querySelector('[data-chevron]') : null;
+    accountDetailScrollContainer = accountDetailPaneNode
+      ? accountDetailPaneNode.querySelector('[data-account-detail-scroll]')
+      : null;
+    accountDetailCloseButtons = accountDetailPaneNode
+      ? Array.from(accountDetailPaneNode.querySelectorAll('[data-account-detail-close]'))
+      : [];
     formNode = document.getElementById('addAccountForm');
     giroAccordionButton = document.getElementById('giroSpecToggle');
     giroAccordionContent = document.getElementById('giroSpecContent');
@@ -1818,6 +2099,43 @@
     mutasiDrawerTitleNode = document.getElementById('mutasiDrawerTitle');
     mutasiDrawerCloseButton = document.getElementById('mutasiDrawerClose');
     mutasiInitialFocusNode = mutasiPaneNode ? mutasiPaneNode.querySelector('[data-mutasi-focus]') : null;
+    if (accountDetailSpecToggleNode) {
+      accountDetailSpecToggleNode.addEventListener('click', toggleAccountDetailSpec);
+      setAccountDetailSpecExpanded(true);
+    }
+    if (accountDetailCloseButtons.length) {
+      accountDetailCloseButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          closeAccountDetailPane({ restoreFocus: true });
+        });
+      });
+    }
+    if (accountDetailCopyButtonNode) {
+      accountDetailCopyButtonNode.addEventListener('click', () => {
+        if (accountDetailCopyButtonNode.disabled) {
+          return;
+        }
+        const value =
+          accountDetailCopyButtonNode.dataset.accountNumber ||
+          (activeDetailAccount && (activeDetailAccount.numberRaw || activeDetailAccount.number));
+        if (!value) {
+          showToast('Tidak dapat menyalin nomor rekening', { variant: 'error' });
+          return;
+        }
+        copyAccountNumber(value)
+          .then(() => {
+            showToast('Nomor rekening disalin.');
+          })
+          .catch(() => {
+            showToast('Tidak dapat menyalin nomor rekening', { variant: 'error' });
+          });
+      });
+      accountDetailCopyButtonNode.disabled = true;
+      accountDetailCopyButtonNode.setAttribute('aria-disabled', 'true');
+    }
+    if (accountDetailPaneNode) {
+      setAccountDetailContent(null);
+    }
     if (transferPaneFrameNode) {
       transferPaneFrameNode.addEventListener('load', () => {
         postTransferInitialPayload();
