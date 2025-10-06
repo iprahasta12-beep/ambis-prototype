@@ -278,7 +278,7 @@
 
     state.tableRows.forEach((row) => {
       const container = document.createElement('div');
-      container.className = 'grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] items-center gap-4 px-6 py-4';
+      container.className = 'approval-table-row items-center gap-4 px-6 py-4';
 
       const range = document.createElement('p');
       range.className = 'text-sm text-slate-700 text-left';
@@ -525,7 +525,7 @@
         const maxLabel = formatCurrency(entry.max);
         const approverLabel = formatApproverLabel(entry.approvers);
         return `
-          <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 min-h-[56px] px-4 py-4 text-sm">
+          <div class="approval-table-row items-center gap-4 min-h-[56px] px-4 py-4 text-sm">
             <span class="font-semibold text-slate-900">${minLabel} – ${maxLabel}</span>
             <span class="text-right text-sm font-semibold text-slate-700">${approverLabel}</span>
           </div>
@@ -551,7 +551,7 @@
         const maxLabel = formatCurrency(entry.max);
         const approverLabel = formatApproverLabel(entry.approvers);
         return `
-          <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 min-h-[56px] px-5 py-4 text-sm">
+          <div class="approval-table-row items-center gap-4 min-h-[56px] px-5 py-4 text-sm">
             <span class="font-semibold text-slate-900">${minLabel} – ${maxLabel}</span>
             <span class="text-right text-sm font-semibold text-slate-700">${approverLabel}</span>
           </div>
