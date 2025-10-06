@@ -127,6 +127,9 @@
     const labelSpan = trigger.querySelector('.filter-label');
     const iconEl = trigger.querySelector('img');
     const name = filter.dataset.name;
+    const defaultOptionValue = filter.dataset.defaultOption || '';
+    const ignoreDefaultHighlight = filter.dataset.ignoreDefaultHighlight === 'true';
+    const preserveDateDefaultLabel = filter.dataset.keepDefaultLabel === 'true';
     let defaultLabel = filter.dataset.default || '';
     const isMulti = options[0] && options[0].type === 'checkbox';
     const isDate = filter.dataset.filter === 'date';
@@ -181,7 +184,7 @@
 
     }
 
-    if (isDate) {
+    if (isDate && !preserveDateDefaultLabel) {
       defaultLabel = 'Tanggal';
       filter.dataset.default = defaultLabel;
     } else if (!defaultLabel) {
@@ -193,6 +196,16 @@
 
     if (labelSpan) {
       labelSpan.textContent = defaultLabel;
+    }
+
+    function ensureDefaultOptionSelection() {
+      if (!defaultOptionValue) return;
+      const hasChecked = Array.from(options).some(option => option.checked);
+      if (hasChecked) return;
+      const defaultOption = Array.from(options).find(option => option.value === defaultOptionValue);
+      if (defaultOption && defaultOption.type === 'radio') {
+        defaultOption.checked = true;
+      }
     }
 
     function setCustomRangeEnabled(enabled) {
@@ -220,6 +233,7 @@
     }
 
     filter._setTriggerState = setTriggerState;
+    filter._ensureDefaultOptionSelection = ensureDefaultOptionSelection;
     setTriggerState(Boolean(filter.dataset.applied));
 
     if (customRange) {
@@ -242,6 +256,9 @@
       if (!hasChecked && customRange) {
         hideCustomRange();
         clearCustomRange();
+      }
+      if (!hasChecked) {
+        ensureDefaultOptionSelection();
       }
       refreshDateOptionHighlight();
     }
@@ -499,6 +516,8 @@
         }
       if (isDate) {
         ensureDefaultDateSelection();
+      } else {
+        ensureDefaultOptionSelection();
       }
       updateButtons();
       panel.classList.remove('hidden');
@@ -547,6 +566,25 @@
 
     applyBtn.addEventListener('click', () => {
       const selected = getSelected();
+      if (
+        selected.length === 1
+        && defaultOptionValue
+        && selected[0] === defaultOptionValue
+        && ignoreDefaultHighlight
+      ) {
+        filter.dataset.applied = '';
+        labelSpan.textContent = defaultLabel;
+        if (isDate && customRange) {
+          hideCustomRange();
+          clearCustomRange();
+        }
+        ensureDefaultOptionSelection();
+        refreshDateOptionHighlight();
+        setTriggerState(false);
+        emitChange();
+        close();
+        return;
+      }
       if (isDate && selected[0] === 'custom') {
         const range = getSelectedRange();
         if (!range) {
@@ -634,6 +672,7 @@
           }
           if (typeof f._setTriggerState === 'function') f._setTriggerState(false);
           if (typeof f._ensureDefaultDateSelection === 'function') f._ensureDefaultDateSelection();
+          if (typeof f._ensureDefaultOptionSelection === 'function') f._ensureDefaultOptionSelection();
         });
         updateButtons();
         refreshDateOptionHighlight();
