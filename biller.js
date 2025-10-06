@@ -404,8 +404,8 @@
     const successStatusButtonDefaultText = successStatusButton?.textContent?.trim() || 'Cek Status';
     const billerButtons = document.querySelectorAll('[data-biller]');
 
-    const historyDrawerOverlay = document.getElementById('historyDrawerOverlay');
-    const historyDrawerEl = document.getElementById('historyDrawer');
+    const historyDrawerSection = document.getElementById('historyDrawer');
+    const paymentDrawerSection = document.getElementById('paymentDrawer');
     const historyDrawerCloseBtn = document.getElementById('historyDrawerCloseBtn');
     const historyOpenButton = document.getElementById('openHistoryDrawerBtn');
     const historyTabButtons = Array.from(document.querySelectorAll('.history-tab-button'));
@@ -420,8 +420,10 @@
     const historyFilters = historyFiltersGroup ? Array.from(historyFiltersGroup.querySelectorAll('.filter')) : [];
 
     let historyDrawerOpen = false;
+    let historyOpenedFromClosed = false;
     let activeHistoryTab = 'processing';
     let historyLoadingTimer = null;
+    let drawerController = null;
     const historyEntries = {
       processing: Array.isArray(ambis.billerHistoryProcessing) ? ambis.billerHistoryProcessing : [],
       completed: Array.isArray(ambis.billerHistoryCompleted) ? ambis.billerHistoryCompleted : [],
@@ -497,6 +499,21 @@
         if (typeof filter._ensureDefaultOptionSelection === 'function') filter._ensureDefaultOptionSelection();
       });
     }
+
+    function setActiveDrawerView(view) {
+      const isHistory = view === 'history';
+      if (paymentDrawerSection) {
+        paymentDrawerSection.classList.toggle('hidden', isHistory);
+      }
+      if (historyDrawerSection) {
+        historyDrawerSection.classList.toggle('hidden', !isHistory);
+      }
+      if (closeBtn) {
+        closeBtn.classList.toggle('hidden', isHistory);
+      }
+    }
+
+    setActiveDrawerView('payment');
 
     function clearHistoryList() {
       if (!historyList) return;
@@ -589,74 +606,77 @@
     }
 
     function openHistoryDrawer() {
-      if (!historyDrawerEl || historyDrawerOpen) return;
+      if (!drawer || !historyDrawerSection || historyDrawerOpen) return;
+      closeSavedSheet({ immediate: true });
+      closeAccountSheet({ immediate: true });
+      closePaymentSheet({ immediate: true });
+      hideSuccessDrawer({ immediate: true });
       resetHistoryFilters();
       clearHistoryList();
       showHistoryEmptyState('default');
       setHistoryTab('processing', { skipLoading: true });
 
-      historyDrawerEl.classList.remove('pointer-events-none');
-      if (historyDrawerOverlay) {
-        historyDrawerOverlay.classList.remove('pointer-events-none');
-        historyDrawerOverlay.classList.remove('hidden');
-        historyDrawerOverlay.setAttribute('aria-hidden', 'false');
+      const wasClosed = drawerController
+        ? !drawerController.isOpen()
+        : !drawer.classList.contains('open');
+
+      historyOpenedFromClosed = wasClosed;
+      setActiveDrawerView('history');
+      if (drawerInner) {
+        drawerInner.classList.remove('opacity-100', 'translate-x-0');
+        drawerInner.classList.add('opacity-0', 'translate-x-4');
       }
 
-      requestAnimationFrame(() => {
-        if (historyDrawerOverlay) {
-          historyDrawerOverlay.classList.remove('opacity-0');
-          historyDrawerOverlay.classList.add('opacity-100');
+      if (wasClosed) {
+        if (drawerController) {
+          drawerController.open({ trigger: historyOpenButton });
+        } else {
+          drawer.classList.add('open');
+          if (typeof window.sidebarCollapseForDrawer === 'function') {
+            window.sidebarCollapseForDrawer();
+          }
         }
-        historyDrawerEl.classList.remove('translate-x-full');
-      });
+      }
 
-      historyDrawerEl.setAttribute('aria-hidden', 'false');
       historyDrawerOpen = true;
       setHistoryTriggerExpanded(true);
-      if (typeof historyDrawerEl.focus === 'function') {
-        historyDrawerEl.focus({ preventScroll: true });
+      if (typeof historyDrawerSection.focus === 'function') {
+        historyDrawerSection.focus({ preventScroll: true });
       }
     }
 
     function closeHistoryDrawer({ focusTrigger = true } = {}) {
-      if (!historyDrawerEl || !historyDrawerOpen) return;
+      if (!drawer || !historyDrawerOpen) return;
       historyDrawerOpen = false;
       if (historyLoadingTimer) {
         window.clearTimeout(historyLoadingTimer);
         historyLoadingTimer = null;
       }
-
-      historyDrawerEl.classList.add('translate-x-full');
-      historyDrawerEl.setAttribute('aria-hidden', 'true');
       setHistoryTriggerExpanded(false);
-      if (historyDrawerOverlay) {
-        historyDrawerOverlay.classList.remove('opacity-100');
-        historyDrawerOverlay.classList.add('opacity-0');
-        historyDrawerOverlay.setAttribute('aria-hidden', 'true');
+      if (historyOpenedFromClosed) {
+        if (drawerController) {
+          drawerController.close({ trigger: historyDrawerCloseBtn || historyOpenButton });
+        } else {
+          drawer.classList.remove('open');
+          if (typeof window.sidebarRestoreForDrawer === 'function') {
+            window.sidebarRestoreForDrawer();
+          }
+        }
+        if (drawerInner) {
+          drawerInner.classList.add('opacity-0', 'translate-x-4');
+        }
+      } else {
+        if (drawerInner) {
+          drawerInner.classList.remove('opacity-0', 'translate-x-4');
+          drawerInner.classList.add('opacity-100', 'translate-x-0');
+        }
       }
 
-      const handleDrawerTransitionEnd = (event) => {
-        if (event.target !== historyDrawerEl || event.propertyName !== 'transform') return;
-        historyDrawerEl.classList.add('pointer-events-none');
-        historyDrawerEl.removeEventListener('transitionend', handleDrawerTransitionEnd);
-        if (focusTrigger && historyOpenButton) {
-          historyOpenButton.focus();
-        }
-      };
+      setActiveDrawerView('payment');
+      historyOpenedFromClosed = false;
 
-      historyDrawerEl.addEventListener('transitionend', handleDrawerTransitionEnd);
-
-      const handleOverlayTransitionEnd = (event) => {
-        if (!historyDrawerOverlay || event.target !== historyDrawerOverlay || event.propertyName !== 'opacity') return;
-        if (!historyDrawerOpen) {
-          historyDrawerOverlay.classList.add('hidden');
-          historyDrawerOverlay.classList.add('pointer-events-none');
-        }
-        historyDrawerOverlay.removeEventListener('transitionend', handleOverlayTransitionEnd);
-      };
-
-      if (historyDrawerOverlay) {
-        historyDrawerOverlay.addEventListener('transitionend', handleOverlayTransitionEnd);
+      if (focusTrigger && historyOpenButton) {
+        historyOpenButton.focus();
       }
     }
 
@@ -667,12 +687,6 @@
 
     historyDrawerCloseBtn?.addEventListener('click', () => {
       closeHistoryDrawer();
-    });
-
-    historyDrawerOverlay?.addEventListener('click', (event) => {
-      if (event.target === historyDrawerOverlay) {
-        closeHistoryDrawer();
-      }
     });
 
     historyTabButtons.forEach((button) => {
@@ -1911,7 +1925,7 @@
       paymentSheetOpen = true;
     }
 
-    const drawerController =
+    drawerController =
       window.drawerManager && typeof window.drawerManager.register === 'function'
         ? window.drawerManager.register(drawer)
         : null;
@@ -1919,6 +1933,15 @@
     function openDrawer(key, button) {
       const config = BILLER_CONFIG[key];
       if (!config) return;
+      if (historyDrawerOpen) {
+        historyDrawerOpen = false;
+      }
+      historyOpenedFromClosed = false;
+      setHistoryTriggerExpanded(false);
+      setActiveDrawerView('payment');
+      if (drawerInner) {
+        drawerInner.classList.remove('opacity-0', 'translate-x-4');
+      }
       closeSavedSheet({ immediate: true });
       closeAccountSheet({ immediate: true });
       closePaymentSheet({ immediate: true });
@@ -1947,6 +1970,10 @@
 
     function closeDrawer() {
       if (!drawer.classList.contains('open')) return;
+      historyDrawerOpen = false;
+      historyOpenedFromClosed = false;
+      setHistoryTriggerExpanded(false);
+      setActiveDrawerView('payment');
       hideSuccessDrawer({ immediate: true });
       drawerInner.classList.remove('opacity-100', 'translate-x-0');
       drawerInner.classList.add('opacity-0', 'translate-x-4');
