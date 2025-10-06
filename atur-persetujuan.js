@@ -285,7 +285,7 @@
       range.textContent = `${formatCurrency(row.min)} – ${formatCurrency(row.max)}`;
 
       const approvers = document.createElement('p');
-      approvers.className = 'text-sm font-semibold text-slate-500 text-center';
+      approvers.className = 'text-sm font-semibold text-slate-500 text-left pl-[8%]';
       approvers.textContent = `${row.approvers} Penyetuju`;
 
       const action = document.createElement('div');
