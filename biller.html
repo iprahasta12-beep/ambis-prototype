@@ -22,6 +22,7 @@
         "opacity-0","opacity-100","translate-y-0","translate-y-1",
         "translate-x-full","translate-x-0",
         "ring-2","ring-cyan-400","bg-cyan-50","border-cyan-300",
+        "border-cyan-500",
         "text-slate-900","text-slate-400"
       ]
     };
@@ -157,11 +158,11 @@
             <h3 class="font-medium">Listrik PLN</h3>
           </div>
           <div class="grid grid-cols-4 gap-4">
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-3">
+            <button data-biller="token-listrik" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-3">
               <img src="img/biller/pln.svg" class="w-6 h-6"/>
               Token Listrik
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-3">
+            <button data-biller="tagihan-listrik" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-3">
               <img src="img/biller/pln.svg" class="w-6 h-6"/>
               Tagihan Listrik
             </button>
@@ -175,16 +176,16 @@
             <h3 class="font-medium">Internet</h3>
           </div>
           <div class="grid grid-cols-4 gap-4">
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+            <button data-biller="indihome" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
               <img src="img/biller/indihome.svg" class="w-6 h-6"/> Indihome
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+            <button data-biller="myrepublic" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
               <img src="img/biller/myrepublic.svg" class="w-6 h-6"/> My Republic
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+            <button data-biller="cbn" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
               <img src="img/biller/cbn.png" class="w-6 h-6"/> CBN
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
+            <button data-biller="iconnet" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center gap-2">
               <img src="img/biller/iconnet.png" class="w-6 h-6"/> Iconnet
             </button>
           </div>
@@ -197,16 +198,16 @@
             <h3 class="font-medium">BPJS</h3>
           </div>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+            <button data-biller="bpjs-kesehatan-keluarga" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
               <img src="img/biller/bpjs.svg" class="w-6 h-6 mr-2"/> BPJS Kesehatan keluarga
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+            <button data-biller="bpjs-kesehatan-badan-usaha" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
               <img src="img/biller/bpjs.svg" class="w-6 h-6 mr-2"/> BPJS Kesehatan Badan Usaha
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+            <button data-biller="bpjstk-penerima-upah" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
               <img src="img/biller/jmo.svg" class="w-6 h-6 mr-2"/> BPJSTK Penerima Upah
             </button>
-            <button class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
+            <button data-biller="bpjstk-bukan-penerima-upah" class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 flex items-center">
               <img src="img/biller/jmo.svg" class="w-6 h-6 mr-2"/> BPJSTK Bukan Penerima Upah
             </button>
           </div>
@@ -303,6 +304,9 @@
         return;
       }
 
+      const billerButtons = document.querySelectorAll('button[data-biller]');
+      const backgroundClassesToClear = ['bg-white', 'bg-slate-50', 'bg-cyan-50'];
+
       function openDrawer() {
         overlay.classList.remove('pointer-events-none', 'opacity-0');
         overlay.classList.add('opacity-100');
@@ -317,6 +321,34 @@
         overlay.classList.add('opacity-0');
         overlay.classList.add('pointer-events-none');
       }
+
+      function setActiveBiller(button) {
+        billerButtons.forEach((btn) => {
+          btn.classList.remove('border-cyan-500', 'bg-cyan-50', 'bg-slate-50');
+
+          if (btn !== button) {
+            if (!btn.classList.contains('border-slate-200')) {
+              btn.classList.add('border-slate-200');
+            }
+            backgroundClassesToClear.forEach((cls) => {
+              if (cls === 'bg-white' && !btn.classList.contains('bg-white')) {
+                btn.classList.add('bg-white');
+              } else if (cls !== 'bg-white') {
+                btn.classList.remove(cls);
+              }
+            });
+            return;
+          }
+
+          btn.classList.remove('border-slate-200');
+          backgroundClassesToClear.forEach((cls) => btn.classList.remove(cls));
+          btn.classList.add('border-cyan-500');
+        });
+      }
+
+      billerButtons.forEach((btn) => {
+        btn.addEventListener('click', () => setActiveBiller(btn));
+      });
 
       openBtn.addEventListener('click', openDrawer);
       closeBtn.addEventListener('click', closeDrawer);
