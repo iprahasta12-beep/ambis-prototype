@@ -124,6 +124,95 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // --- Blocked feature dialog (Manajemen Pengguna)
+  const USER_MGMT_SELECTOR = 'a[href="manajemen-pengguna.html"]';
+  const userMgmtLinks = sidebar ? sidebar.querySelectorAll(USER_MGMT_SELECTOR) : [];
+
+  const DIALOG_ID = 'userMgmtAccessDialog';
+  let userMgmtOverlay = null;
+  let userMgmtDialog = null;
+  let userMgmtCloseBtn = null;
+  let userMgmtPrevOverflow = '';
+  let userMgmtLastFocus = null;
+
+  function hideUserMgmtDialog() {
+    if (!userMgmtOverlay) return;
+    userMgmtOverlay.classList.remove('is-visible');
+    userMgmtOverlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = userMgmtPrevOverflow;
+    if (userMgmtLastFocus && typeof userMgmtLastFocus.focus === 'function') {
+      userMgmtLastFocus.focus();
+    }
+  }
+
+  function showUserMgmtDialog() {
+    ensureUserMgmtDialog();
+    if (!userMgmtOverlay) return;
+    userMgmtLastFocus = document.activeElement;
+    userMgmtPrevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    userMgmtOverlay.classList.add('is-visible');
+    userMgmtOverlay.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(() => {
+      userMgmtCloseBtn?.focus();
+    });
+  }
+
+  function ensureUserMgmtDialog() {
+    if (userMgmtOverlay) return userMgmtOverlay;
+
+    userMgmtOverlay = document.getElementById(DIALOG_ID);
+    if (!userMgmtOverlay) {
+      userMgmtOverlay = document.createElement('div');
+      userMgmtOverlay.id = DIALOG_ID;
+      userMgmtOverlay.className = 'user-mgmt-overlay';
+      userMgmtOverlay.setAttribute('aria-hidden', 'true');
+      userMgmtOverlay.innerHTML = `
+        <div class="user-mgmt-dialog" role="dialog" aria-modal="true" aria-labelledby="userMgmtDialogTitle" aria-describedby="userMgmtDialogMessage" data-user-mgmt-dialog>
+          <div class="user-mgmt-icon" aria-hidden="true">
+            <span>i</span>
+          </div>
+          <h2 id="userMgmtDialogTitle">Belum Bisa Diakses</h2>
+          <p id="userMgmtDialogMessage">Fitur Manajemen Pengguna belum tersedia untuk akun Anda.</p>
+          <button type="button" class="user-mgmt-close" data-user-mgmt-close>Tutup</button>
+        </div>
+      `;
+      document.body.appendChild(userMgmtOverlay);
+    }
+
+    userMgmtDialog = userMgmtOverlay.querySelector('[data-user-mgmt-dialog]');
+    userMgmtCloseBtn = userMgmtOverlay.querySelector('[data-user-mgmt-close]');
+
+    userMgmtDialog?.addEventListener('click', (event) => {
+      event.stopPropagation();
+    });
+
+    userMgmtOverlay.addEventListener('click', (event) => {
+      if (event.target === userMgmtOverlay) hideUserMgmtDialog();
+    });
+
+    userMgmtCloseBtn?.addEventListener('click', hideUserMgmtDialog);
+
+    return userMgmtOverlay;
+  }
+
+  if (userMgmtLinks.length) {
+    ensureUserMgmtDialog();
+    userMgmtLinks.forEach(link => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        showUserMgmtDialog();
+      });
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && userMgmtOverlay?.classList.contains('is-visible')) {
+        hideUserMgmtDialog();
+      }
+    });
+  }
+
   // expose helper for other scripts
   window.sidebarSetCollapsed = (collapsed, opts = {}) => setCollapsed(collapsed, opts);
   window.isSidebarCollapsed = () => sidebar.classList.contains('collapsed');
