@@ -1221,7 +1221,8 @@
       updateConfirmState();
     }
 
-    const ACTIVE_CLASSES = ['ring-2', 'ring-cyan-400', 'border-cyan-300', 'bg-cyan-50'];
+    const ACTIVE_CLASSES = ['ring-2', 'ring-cyan-400', 'border-cyan-500', 'bg-cyan-50'];
+    const INACTIVE_CLASS = 'border-slate-200';
 
     let activeButton = null;
     let activeKey = '';
@@ -1276,9 +1277,11 @@
     function setActiveButton(next) {
       if (activeButton && activeButton !== next) {
         activeButton.classList.remove(...ACTIVE_CLASSES);
+        activeButton.classList.add(INACTIVE_CLASS);
       }
       activeButton = next || null;
       if (activeButton) {
+        activeButton.classList.remove(INACTIVE_CLASS);
         activeButton.classList.add(...ACTIVE_CLASSES);
       }
     }
@@ -1343,9 +1346,6 @@
       updateIdError();
       updateConfirmState();
 
-      requestAnimationFrame(() => {
-        idInput.focus({ preventScroll: true });
-      });
     }
 
     function checkValidity(value) {
