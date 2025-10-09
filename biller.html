@@ -20,6 +20,7 @@
     tailwind.config = {
       safelist: [
         "opacity-0","opacity-100","translate-y-0","translate-y-1",
+        "translate-x-full","translate-x-0",
         "ring-2","ring-cyan-400","bg-cyan-50","border-cyan-300",
         "text-slate-900","text-slate-400"
       ]
@@ -146,7 +147,7 @@
             <h2 class="font-semibold text-lg">Pilih Layanan</h2>
             <p class="text-slate-600">Akses catatan transaksi terkini melalui menu <span class="font-medium">Riwayat</span>.</p>
           </div>
-          <button class="h-9 px-4 rounded-lg border border-cyan-500 text-cyan-600 bg-white hover:bg-cyan-50">Riwayat</button>
+          <button id="openHistory" class="h-9 px-4 rounded-lg border border-cyan-500 text-cyan-600 bg-white hover:bg-cyan-50">Riwayat</button>
         </div>
 
         <!-- Listrik PLN -->
@@ -236,21 +237,6 @@
             </div>
           </div>
 
-          <div id="sheetOverlay" class="hidden absolute inset-0 z-10 rounded-3xl bg-black/20 opacity-0 pointer-events-none transition-opacity duration-200"></div>
-
-          <div id="bottomSheet" class="hidden pointer-events-none absolute left-0 right-0 bottom-0 z-20 translate-y-full transition-transform duration-200">
-            <div class="bg-white rounded-t-3xl shadow-xl overflow-hidden flex flex-col max-h-[520px]">
-              <div class="px-6 py-4 flex items-center justify-between border-b border-slate-200">
-                <h3 class="text-lg font-semibold">Sumber Rekening</h3>
-                <button id="sheetClose" type="button" class="w-10 h-10 grid place-items-center rounded-full text-2xl leading-none text-slate-500 hover:bg-slate-100">&times;</button>
-              </div>
-              <div id="sheetList" class="flex-1 overflow-y-auto px-6 py-4 space-y-3 bg-white"></div>
-              <div class="px-6 py-4 border-t border-slate-200 bg-white flex gap-3 sticky bottom-0 left-0 right-0">
-                <button id="sheetCancel" type="button" class="flex-1 h-12 rounded-xl border border-slate-200 font-semibold text-slate-700 hover:bg-slate-50">Batalkan</button>
-                <button id="sheetChoose" type="button" class="flex-1 h-12 rounded-xl font-semibold bg-slate-200 text-slate-400 opacity-50 cursor-not-allowed">Pilih Rekening</button>
-              </div>
-            </div>
-          </div>
         </div>
 
       </div>
@@ -258,199 +244,89 @@
     <!-- ============ /MAIN ============ -->
   </div>
 
+  <!-- History Drawer -->
+  <div id="historyOverlay" class="fixed inset-0 bg-slate-900/30 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+  <aside id="historyDrawer" class="fixed inset-y-0 right-0 w-full max-w-[420px] bg-white border-l border-slate-200 shadow-xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+      <div>
+        <h2 class="text-lg font-semibold">Riwayat Transaksi</h2>
+        <p class="text-sm text-slate-500">Aktivitas terbaru akan ditampilkan di sini.</p>
+      </div>
+      <button id="closeHistory" type="button" class="w-10 h-10 grid place-items-center rounded-full text-2xl leading-none text-slate-500 hover:bg-slate-100">&times;</button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-5 space-y-4">
+      <div class="border border-slate-200 rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-1">
+          <p class="font-semibold text-slate-900">Token Listrik</p>
+          <span class="text-sm text-slate-500">12 Mei 2024</span>
+        </div>
+        <p class="text-sm text-slate-500 mb-3">ID Pelanggan 650088001234</p>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-slate-500">Status</span>
+          <span class="text-sm font-semibold text-emerald-600">Berhasil</span>
+        </div>
+      </div>
+      <div class="border border-slate-200 rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-1">
+          <p class="font-semibold text-slate-900">Tagihan Listrik</p>
+          <span class="text-sm text-slate-500">7 Mei 2024</span>
+        </div>
+        <p class="text-sm text-slate-500 mb-3">ID Pelanggan 650088009900</p>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-slate-500">Status</span>
+          <span class="text-sm font-semibold text-slate-600">Menunggu Pembayaran</span>
+        </div>
+      </div>
+      <div class="border border-slate-200 rounded-2xl p-4">
+        <div class="flex items-center justify-between mb-1">
+          <p class="font-semibold text-slate-900">BPJS Kesehatan</p>
+          <span class="text-sm text-slate-500">29 Apr 2024</span>
+        </div>
+        <p class="text-sm text-slate-500 mb-3">Nomor VA 8800 3311 2200</p>
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-slate-500">Status</span>
+          <span class="text-sm font-semibold text-emerald-600">Berhasil</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
   <script src="sidebar.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const trigger = document.getElementById('btnRekening');
-      const overlay = document.getElementById('sheetOverlay');
-      const sheet = document.getElementById('bottomSheet');
-      const list = document.getElementById('sheetList');
-      const cancelBtn = document.getElementById('sheetCancel');
-      const chooseBtn = document.getElementById('sheetChoose');
-      const closeBtn = document.getElementById('sheetClose');
-      const nameLabel = document.getElementById('rekeningLabel');
-      const metaLabel = document.getElementById('rekeningMeta');
-      const balanceLabel = document.getElementById('rekeningBalance');
+      const openBtn = document.getElementById('openHistory');
+      const drawer = document.getElementById('historyDrawer');
+      const overlay = document.getElementById('historyOverlay');
+      const closeBtn = document.getElementById('closeHistory');
 
-      if (!trigger || !overlay || !sheet || !list || !cancelBtn || !chooseBtn || !closeBtn || !nameLabel || !metaLabel || !balanceLabel) {
+      if (!openBtn || !drawer || !overlay || !closeBtn) {
         return;
       }
 
-      const accounts = [
-        {
-          id: 'acc-001',
-          name: 'Rekening Operasional',
-          product: 'Giro IDR',
-          number: '6500 8800 1234',
-          balance: 'Rp 1.580.450.000'
-        },
-        {
-          id: 'acc-002',
-          name: 'Rekening Payroll',
-          product: 'Giro IDR',
-          number: '6500 8800 4567',
-          balance: 'Rp 830.210.400'
-        },
-        {
-          id: 'acc-003',
-          name: 'Dana Cadangan Proyek',
-          product: 'Tabungan Bisnis',
-          number: '6500 8800 9900',
-          balance: 'Rp 125.780.000'
-        }
-      ];
-
-      const entries = [];
-      let appliedAccountId = null;
-      let pendingAccountId = null;
-      let closingTimer = null;
-      const TRANSITION_MS = 200;
-
-      const getInitials = (label) =>
-        label
-          .split(' ')
-          .filter(Boolean)
-          .map(part => part[0])
-          .join('')
-          .slice(0, 2)
-          .toUpperCase();
-
-      const findAccount = (id) => accounts.find(account => account.id === id) || null;
-
-      function setChooseState(enable) {
-        chooseBtn.disabled = !enable;
-        chooseBtn.classList.toggle('opacity-50', !enable);
-        chooseBtn.classList.toggle('cursor-not-allowed', !enable);
-        chooseBtn.classList.toggle('bg-slate-200', !enable);
-        chooseBtn.classList.toggle('text-slate-400', !enable);
-        chooseBtn.classList.toggle('bg-cyan-600', enable);
-        chooseBtn.classList.toggle('text-white', enable);
-        chooseBtn.classList.toggle('hover:bg-cyan-700', enable);
+      function openDrawer() {
+        overlay.classList.remove('pointer-events-none', 'opacity-0');
+        overlay.classList.add('opacity-100');
+        drawer.classList.remove('translate-x-full');
+        drawer.classList.add('translate-x-0');
       }
 
-      function updateSelectionStyles() {
-        entries.forEach(({ radio, card, account }) => {
-          const selected = account.id === pendingAccountId;
-          radio.checked = selected;
-          card.classList.toggle('ring-2', selected);
-          card.classList.toggle('ring-cyan-400', selected);
-          card.classList.toggle('border-cyan-300', selected);
-          card.classList.toggle('bg-cyan-50', selected);
-        });
-      }
-
-      function buildList() {
-        entries.length = 0;
-        list.innerHTML = '';
-
-        accounts.forEach(account => {
-          const wrapper = document.createElement('label');
-          wrapper.className = 'block';
-          wrapper.innerHTML = `
-            <input type="radio" name="sheetAccount" value="${account.id}" class="sr-only">
-            <div data-card class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition">
-              <span class="w-10 h-10 rounded-full bg-cyan-100 text-cyan-600 font-semibold grid place-items-center">
-                ${getInitials(account.name)}
-              </span>
-              <div class="flex-1 min-w-0">
-                <p class="font-semibold text-slate-900 truncate">${account.name}</p>
-                <p class="text-sm text-slate-500 truncate">${account.product} · ${account.number}</p>
-              </div>
-              <span class="text-right text-sm text-slate-500">
-                <span class="block text-xs uppercase tracking-wide text-slate-400">Saldo</span>
-                <span class="block font-semibold text-slate-900">${account.balance}</span>
-              </span>
-            </div>
-          `;
-
-          const radio = wrapper.querySelector('input[type="radio"]');
-          const card = wrapper.querySelector('[data-card]');
-
-          radio.addEventListener('change', () => {
-            pendingAccountId = account.id;
-            updateSelectionStyles();
-            setChooseState(true);
-          });
-
-          list.appendChild(wrapper);
-          entries.push({ radio, card, account });
-        });
-
-        updateSelectionStyles();
-      }
-
-      function openSheet() {
-        if (closingTimer) {
-          clearTimeout(closingTimer);
-          closingTimer = null;
-        }
-        if (!sheet.classList.contains('hidden')) return;
-
-        pendingAccountId = appliedAccountId;
-        updateSelectionStyles();
-        setChooseState(Boolean(pendingAccountId));
-        list.scrollTop = 0;
-
-        overlay.classList.remove('hidden', 'pointer-events-none');
-        sheet.classList.remove('hidden', 'pointer-events-none');
-
-        requestAnimationFrame(() => {
-          overlay.classList.remove('opacity-0');
-          overlay.classList.add('opacity-100');
-          sheet.classList.remove('translate-y-full');
-          sheet.classList.add('translate-y-0');
-        });
-      }
-
-      function closeSheet() {
-        if (sheet.classList.contains('hidden')) return;
-
+      function closeDrawer() {
+        drawer.classList.remove('translate-x-0');
+        drawer.classList.add('translate-x-full');
         overlay.classList.remove('opacity-100');
         overlay.classList.add('opacity-0');
-        sheet.classList.remove('translate-y-0');
-        sheet.classList.add('translate-y-full');
         overlay.classList.add('pointer-events-none');
-        sheet.classList.add('pointer-events-none');
-
-        closingTimer = setTimeout(() => {
-          overlay.classList.add('hidden');
-          sheet.classList.add('hidden');
-          closingTimer = null;
-        }, TRANSITION_MS);
       }
 
-      trigger.addEventListener('click', openSheet);
-      overlay.addEventListener('click', closeSheet);
-      cancelBtn.addEventListener('click', closeSheet);
-      closeBtn.addEventListener('click', closeSheet);
-
-      chooseBtn.addEventListener('click', () => {
-        if (!pendingAccountId) return;
-
-        appliedAccountId = pendingAccountId;
-        const account = findAccount(appliedAccountId);
-        if (account) {
-          nameLabel.textContent = account.name;
-          nameLabel.classList.remove('text-slate-400');
-          metaLabel.textContent = `${account.product} · ${account.number}`;
-          metaLabel.classList.remove('text-slate-400');
-          metaLabel.classList.add('text-slate-500');
-          balanceLabel.textContent = `Saldo tersedia ${account.balance}`;
-          balanceLabel.classList.remove('text-slate-400');
-          balanceLabel.classList.add('text-slate-500');
-        }
-
-        closeSheet();
-      });
+      openBtn.addEventListener('click', openDrawer);
+      closeBtn.addEventListener('click', closeDrawer);
+      overlay.addEventListener('click', closeDrawer);
 
       document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
-          closeSheet();
+          closeDrawer();
         }
       });
-
-      buildList();
-      setChooseState(false);
     });
   </script>
 </body>
