@@ -1343,8 +1343,9 @@
       updateIdError();
       updateConfirmState();
 
-      // Removed autofocus on the ID input when the payment drawer opens to
-      // prevent stealing focus from other interactive elements.
+      requestAnimationFrame(() => {
+        idInput.focus({ preventScroll: true });
+      });
     }
 
     function checkValidity(value) {
