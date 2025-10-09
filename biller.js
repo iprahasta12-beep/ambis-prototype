@@ -333,7 +333,7 @@
     const drawer = document.getElementById('drawer');
     const drawerInner = document.getElementById('drawerInner');
     const drawerTitle = document.getElementById('drawerTitle');
-    const notesList = document.getElementById('drawerNotes');
+    const notesContainer = document.getElementById('drawerNotes');
     const notesEmpty = document.getElementById('drawerNotesEmpty');
     const idLabel = document.getElementById('idInputLabel');
     const idHint = document.getElementById('idInputHint');
@@ -1312,18 +1312,31 @@
     }
 
     function renderNotes(config) {
-      notesList.innerHTML = '';
+      if (!notesContainer) return;
+
+      notesContainer.innerHTML = '';
       const items = Array.isArray(config.notes) ? config.notes.filter((note) => note && note.trim()) : [];
       if (!items.length) {
         notesEmpty?.classList.remove('hidden');
         return;
       }
       notesEmpty?.classList.add('hidden');
+      if (items.length === 1) {
+        const paragraph = document.createElement('p');
+        paragraph.className = 'text-sm text-slate-700';
+        paragraph.textContent = items[0].trim();
+        notesContainer.appendChild(paragraph);
+        return;
+      }
+
+      const list = document.createElement('ul');
+      list.className = 'list-disc space-y-2 pl-5 text-sm text-slate-700';
       items.forEach((note) => {
         const li = document.createElement('li');
         li.textContent = note.trim();
-        notesList.appendChild(li);
+        list.appendChild(li);
       });
+      notesContainer.appendChild(list);
     }
 
     function applyValidationAttributes(validation) {
