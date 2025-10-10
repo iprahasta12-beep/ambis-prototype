@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function hideUserMgmtDialog() {
     if (!userMgmtOverlay) return;
-    userMgmtOverlay.classList.remove('is-visible');
+    userMgmtOverlay.classList.add('hidden');
     userMgmtOverlay.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = userMgmtPrevOverflow;
     if (userMgmtLastFocus && typeof userMgmtLastFocus.focus === 'function') {
@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     userMgmtLastFocus = document.activeElement;
     userMgmtPrevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    userMgmtOverlay.classList.add('is-visible');
+    userMgmtOverlay.classList.remove('hidden');
     userMgmtOverlay.setAttribute('aria-hidden', 'false');
     requestAnimationFrame(() => {
       userMgmtCloseBtn?.focus();
@@ -165,16 +165,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!userMgmtOverlay) {
       userMgmtOverlay = document.createElement('div');
       userMgmtOverlay.id = DIALOG_ID;
-      userMgmtOverlay.className = 'user-mgmt-overlay';
+      userMgmtOverlay.className = 'fixed inset-0 z-[9999] hidden grid place-items-center overflow-y-auto bg-slate-950/70 px-4 py-6 backdrop-blur-sm sm:px-6';
       userMgmtOverlay.setAttribute('aria-hidden', 'true');
       userMgmtOverlay.innerHTML = `
-        <div class="user-mgmt-dialog" role="dialog" aria-modal="true" aria-labelledby="userMgmtDialogTitle" aria-describedby="userMgmtDialogMessage" data-user-mgmt-dialog>
-          <div class="user-mgmt-icon" aria-hidden="true">
-            <span>i</span>
+        <div class="relative w-full max-w-md overflow-hidden rounded-2xl bg-white px-6 py-8 text-center shadow-2xl ring-1 ring-black/5 transition" role="dialog" aria-modal="true" aria-labelledby="userMgmtDialogTitle" aria-describedby="userMgmtDialogMessage" data-user-mgmt-dialog tabindex="-1">
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500 text-white shadow-lg shadow-cyan-500/40" aria-hidden="true">
+            <span class="text-3xl font-bold">i</span>
           </div>
-          <h2 id="userMgmtDialogTitle">Belum Bisa Diakses</h2>
-          <p id="userMgmtDialogMessage">Fitur Manajemen Pengguna belum tersedia untuk akun Anda.</p>
-          <button type="button" class="user-mgmt-close" data-user-mgmt-close>Tutup</button>
+          <div class="mt-6 space-y-3">
+            <h2 id="userMgmtDialogTitle" class="text-xl font-semibold text-slate-900">Belum Bisa Diakses</h2>
+            <p id="userMgmtDialogMessage" class="text-base text-slate-600">Fitur Manajemen Pengguna belum tersedia untuk akun Anda.</p>
+          </div>
+          <div class="mt-8">
+            <button type="button" class="inline-flex w-full items-center justify-center rounded-full bg-cyan-600 px-5 py-3 text-base font-semibold text-white shadow-lg shadow-cyan-600/40 transition hover:-translate-y-px hover:bg-cyan-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400" data-user-mgmt-close>Tutup</button>
+          </div>
         </div>
       `;
       document.body.appendChild(userMgmtOverlay);
@@ -215,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape' && userMgmtOverlay?.classList.contains('is-visible')) {
+      if (event.key === 'Escape' && userMgmtOverlay && !userMgmtOverlay.classList.contains('hidden')) {
         hideUserMgmtDialog();
       }
     });
