@@ -158,139 +158,16 @@
 
         <!-- Tabs -->
         <div class="flex items-center gap-6 border-b border-slate-200 mb-6">
-          <button type="button" data-tab="butuh" class="tab-btn relative py-3 font-semibold text-slate-900">
-            Butuh Persetujuan
-            <span class="tab-count hidden ml-2 text-white text-xs rounded-full bg-red-500 px-2 py-0.5">0</span>
-            <span class="tab-indicator absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
-          </button>
-          <button type="button" data-tab="menunggu" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
+          <button type="button" data-tab="menunggu" class="tab-btn relative py-3 font-semibold text-slate-900">
             Menunggu Persetujuan
-            <span class="tab-indicator hidden absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
+            <span class="tab-indicator absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
           <button type="button" data-tab="selesai" class="tab-btn py-3 text-slate-600 hover:text-slate-900">
             Selesai
             <span class="tab-indicator hidden absolute bottom-0 left-0 right-0 h-[2px] bg-cyan-500"></span>
           </button>
         </div>
-
-        <!-- Tab Panels -->
-        <section class="tab-panel space-y-4" data-tab-panel="butuh">
-          <div class="flex items-center gap-3" data-filter-group="butuh">
-            <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Tanggal">
-              <button class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[256px] w-[256px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold">
-                <img src="img/icon/date-picker.svg" class="w-5 h-5 flex-none" alt="Rentang Tanggal" />
-                <span class="filter-label flex-1 text-left leading-tight">Tanggal</span>
-              </button>
-              <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[360px]">
-                <div class="flex flex-col gap-3">
-                  <label class="flex items-start gap-3 text-sm text-slate-700">
-                    <input type="radio" name="butuh-date" value="7 Hari Terakhir" class="mt-1.5">
-                    <span class="font-medium leading-tight">7 Hari Terakhir</span>
-                  </label>
-                  <label class="flex items-start gap-3 text-sm text-slate-700">
-                    <input type="radio" name="butuh-date" value="30 Hari Terakhir" class="mt-1.5">
-                    <span class="font-medium leading-tight">30 Hari Terakhir</span>
-                  </label>
-                  <label class="flex items-start gap-3 text-sm text-slate-700">
-                    <input type="radio" name="butuh-date" value="1 Tahun Terakhir" class="mt-1.5">
-                    <span class="font-medium leading-tight">1 Tahun Terakhir</span>
-                  </label>
-                  <label class="flex items-start gap-3 text-sm text-slate-700">
-                    <input type="radio" name="butuh-date" value="custom" class="mt-1.5">
-                    <span class="font-medium leading-tight">Custom Rentang Tanggal</span>
-                  </label>
-                  <div class="custom-range hidden">
-                    <div class="grid grid-cols-2 gap-3">
-                      <label class="flex flex-col gap-2">
-                        <span class="text-sm font-semibold text-slate-900">Tanggal Awal</span>
-                        <div class="relative">
-                          <img
-                            src="img/icon/date-picker.svg"
-                            alt=""
-                            class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
-                          >
-                          <input
-                            type="text"
-                            class="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-700 placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-                            placeholder="DD/MM/YYYY"
-                            data-date-start
-                            readonly
-                          />
-                        </div>
-                      </label>
-                      <label class="flex flex-col gap-2">
-                        <span class="text-sm font-semibold text-slate-900">Tanggal Akhir</span>
-                        <div class="relative">
-                          <img
-                            src="img/icon/date-picker.svg"
-                            alt=""
-                            class="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
-                          >
-                          <input
-                            type="text"
-                            class="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-3 text-sm text-slate-700 placeholder-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
-                            placeholder="DD/MM/YYYY"
-                            data-date-end
-                            readonly
-                          />
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex justify-end gap-2 mt-4">
-                  <button class="cancel px-3 py-2 rounded-lg border text-slate-600 w-1/2">Batalkan</button>
-                  <button class="apply px-3 py-2 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-1/2" disabled>Terapkan</button>
-                </div>
-              </div>
-            </div>
-            <div class="filter relative" data-filter="Kategori" data-name="Kategori" data-default="Kategori">
-              <button class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[256px] w-[256px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold">
-                <img src="img/icon/filter.svg" class="w-5 h-5 flex-none" alt="Kategori" />
-                <span class="filter-label flex-1 text-left leading-tight">Kategori</span>
-              </button>
-              <div class="filter-panel absolute z-10 mt-2 p-4 rounded-xl border border-slate-200 bg-white shadow hidden w-[280px]">
-                <div class="flex flex-col gap-3">
-                  <label class="flex items-center gap-2 text-sm text-slate-700">
-                    <input type="checkbox" value="Transfer">
-                    <span class="font-medium leading-tight">Transfer</span>
-                  </label>
-                  <label class="flex items-center gap-2 text-sm text-slate-700">
-                    <input type="checkbox" value="Beli Bayar">
-                    <span class="font-medium leading-tight">Beli &amp; Bayar</span>
-                  </label>
-                  <label class="flex items-center gap-2 text-sm text-slate-700">
-                    <input type="checkbox" value="Limit Management">
-                    <span class="font-medium leading-tight">Limit Management</span>
-                  </label>
-                  <label class="flex items-center gap-2 text-sm text-slate-700">
-                    <input type="checkbox" value="Approval Matrix">
-                    <span class="font-medium leading-tight">Approval Matrix</span>
-                  </label>
-                </div>
-                <div class="flex justify-end gap-2 mt-4">
-                  <button class="cancel px-3 py-2 rounded-lg border text-slate-600 w-1/2">Batalkan</button>
-                  <button class="apply px-3 py-2 rounded-lg bg-cyan-600 text-white disabled:opacity-50 w-1/2" disabled>Terapkan</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="overflow-x-auto rounded-xl border border-slate-200">
-            <table class="min-w-full">
-              <thead class="bg-slate-50 text-slate-600">
-                <tr>
-                  <th class="text-left px-4 py-3 font-medium">Waktu Permintaan</th>
-                  <th class="text-left px-4 py-3 font-medium">Kategori</th>
-                  <th class="text-left px-4 py-3 font-medium">Deskripsi</th>
-                  <th class="px-4 py-3"></th>
-                </tr>
-              </thead>
-              <tbody class="divide-y" data-role="table-body"></tbody>
-            </table>
-          </div>
-        </section>
-
-        <section class="tab-panel space-y-4 hidden" data-tab-panel="menunggu">
+        <section class="tab-panel space-y-4" data-tab-panel="menunggu">
           <div class="flex items-center gap-3" data-filter-group="menunggu">
             <div class="filter relative" data-filter="date" data-name="Rentang Tanggal" data-default="Tanggal">
               <button class="filter-trigger h-11 px-4 rounded-xl border flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-0 active:bg-cyan-100 active:border-cyan-400 min-w-[256px] w-[256px] border-slate-300 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-semibold">
