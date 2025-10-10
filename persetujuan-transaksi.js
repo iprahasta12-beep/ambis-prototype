@@ -274,7 +274,7 @@ const approvalsData = {
 
 const tabButtons = document.querySelectorAll('.tab-btn');
 const tabPanels = document.querySelectorAll('[data-tab-panel]');
-let activeTab = 'butuh';
+let activeTab = 'menunggu';
 
 const CATEGORY_CLASS_MAP = {
   Transfer: '',
@@ -636,7 +636,7 @@ function updateDrawerActionsVisibility(tab) {
     return;
   }
 
-  const showActions = tab === 'butuh';
+  const showActions = tab === 'menunggu';
   approvalActionsSection.classList.toggle('hidden', !showActions);
 
   if (!showActions) {
