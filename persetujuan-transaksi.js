@@ -1444,10 +1444,6 @@ function renderApprovalList(listElement, steps) {
     label.textContent = (step && step.label) || 'Approval';
     stageWrap.appendChild(label);
 
-    const approver = document.createElement('span');
-    approver.className = 'text-sm font-semibold text-slate-700';
-    approver.textContent = (step && step.approver) || '-';
-
     const status = document.createElement('span');
     status.className = 'inline-flex items-center justify-self-end gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700';
     status.setAttribute('aria-label', 'Menunggu persetujuan');
@@ -1460,7 +1456,6 @@ function renderApprovalList(listElement, steps) {
     `;
 
     row.appendChild(stageWrap);
-    row.appendChild(approver);
     row.appendChild(status);
 
     listElement.appendChild(row);
