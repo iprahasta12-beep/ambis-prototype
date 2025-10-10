@@ -196,6 +196,14 @@ document.addEventListener('DOMContentLoaded', () => {
     return userMgmtOverlay;
   }
 
+  window.showUserMgmtAccessDialog = () => {
+    showUserMgmtDialog();
+  };
+
+  window.hideUserMgmtAccessDialog = () => {
+    hideUserMgmtDialog();
+  };
+
   if (userMgmtLinks.length) {
     ensureUserMgmtDialog();
     userMgmtLinks.forEach(link => {
