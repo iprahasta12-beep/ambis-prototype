@@ -243,5 +243,61 @@
 
   <script src="session.js"></script>
   <script src="sidebar.js"></script>
+  <script>
+    (function () {
+      const focusableSelectors = [
+        'a[href]',
+        'area[href]',
+        'button:not([disabled])',
+        'input:not([disabled])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]'
+      ];
+
+      function disableMainContent() {
+        const main = document.querySelector('main');
+        if (!main) return;
+
+        main.setAttribute('aria-hidden', 'true');
+        main.classList.add('is-user-mgmt-blocked');
+
+        const focusable = main.querySelectorAll(focusableSelectors.join(','));
+        focusable.forEach((node) => {
+          if (!node) return;
+          if (!node.hasAttribute('data-prev-tabindex')) {
+            const prev = node.getAttribute('tabindex');
+            if (prev !== null) {
+              node.setAttribute('data-prev-tabindex', prev);
+            }
+          }
+          node.setAttribute('tabindex', '-1');
+          node.setAttribute('aria-hidden', 'true');
+        });
+      }
+
+      function redirectOnClose() {
+        const closeBtn = document.querySelector('#userMgmtAccessDialog [data-user-mgmt-close]');
+        if (!closeBtn) return;
+        closeBtn.addEventListener('click', () => {
+          window.location.replace('dashboard.html');
+        }, { once: true });
+      }
+
+      function blockAccess() {
+        disableMainContent();
+        if (typeof window.showUserMgmtAccessDialog === 'function') {
+          window.showUserMgmtAccessDialog();
+        }
+        redirectOnClose();
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', blockAccess);
+      } else {
+        blockAccess();
+      }
+    })();
+  </script>
 </body>
 </html>
