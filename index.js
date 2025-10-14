@@ -174,18 +174,29 @@ const drawerController =
 const dashboardGrid = document.getElementById('dashboardGrid');
 const pendingSection = document.getElementById('pendingSection');
 
-function updateDashboardLayout() {
-  /*
-   * Keep the dashboard grid layout static so the content doesn't shift when
-   * the drawer opens or closes. Column adjustments previously triggered
-   * noticeable card/text movement, which we now avoid by leaving the grid
-   * configuration untouched.
-   */
+function updateDashboardLayout(isDrawerOpen) {
   if (!dashboardGrid || !pendingSection) return;
-  dashboardGrid.classList.add('lg:grid-cols-3');
-  dashboardGrid.classList.remove('lg:grid-cols-2');
-  pendingSection.classList.add('lg:col-span-1');
-  pendingSection.classList.remove('lg:col-span-2');
+
+  let drawerIsOpen;
+  if (typeof isDrawerOpen === 'boolean') {
+    drawerIsOpen = isDrawerOpen;
+  } else if (drawerController && typeof drawerController.isOpen === 'function') {
+    drawerIsOpen = drawerController.isOpen();
+  } else {
+    drawerIsOpen = drawer?.classList.contains('open') ?? false;
+  }
+
+  if (drawerIsOpen) {
+    dashboardGrid.classList.add('lg:grid-cols-2');
+    dashboardGrid.classList.remove('lg:grid-cols-3');
+    pendingSection.classList.add('lg:col-span-2');
+    pendingSection.classList.remove('lg:col-span-1');
+  } else {
+    dashboardGrid.classList.add('lg:grid-cols-3');
+    dashboardGrid.classList.remove('lg:grid-cols-2');
+    pendingSection.classList.add('lg:col-span-1');
+    pendingSection.classList.remove('lg:col-span-2');
+  }
 }
 
 updateDashboardLayout();
@@ -204,7 +215,7 @@ function openDrawer() {
       }
     }
   }
-  updateDashboardLayout();
+  updateDashboardLayout(true);
 }
 
 function closeDrawer() {
@@ -218,11 +229,19 @@ function closeDrawer() {
       }
     }
   }
-  updateDashboardLayout();
+  updateDashboardLayout(false);
 }
 
 openBtn?.addEventListener('click', openDrawer);
 closeBtn?.addEventListener('click', closeDrawer);
+
+if (drawerController) {
+  drawerController.onOpen?.(() => updateDashboardLayout(true));
+  drawerController.onClose?.(() => updateDashboardLayout(false));
+} else if (drawer) {
+  drawer.addEventListener('drawer:open', () => updateDashboardLayout(true));
+  drawer.addEventListener('drawer:close', () => updateDashboardLayout(false));
+}
 
 // Quick access configuration
 const aksesContainer = document.getElementById('aksesCepatContainer');
