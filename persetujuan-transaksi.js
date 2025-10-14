@@ -361,6 +361,24 @@ const RANDOM_NAMES = [
   'Sari Widyaningrum',
 ];
 
+function getStoredUserName() {
+  const fromDataset = document?.documentElement?.dataset?.ambisUserName;
+  if (typeof fromDataset === 'string' && fromDataset.trim()) {
+    return fromDataset.trim();
+  }
+
+  try {
+    const stored = localStorage.getItem('ambis:user-name');
+    if (typeof stored === 'string' && stored.trim()) {
+      return stored.trim();
+    }
+  } catch (error) {
+    /* Ignore storage access errors */
+  }
+
+  return '';
+}
+
 const RANDOM_NOTE_WORDS = [
   'cek',
   'ulang',
@@ -1340,6 +1358,11 @@ function getRandomFrom(list, fallback = '') {
 }
 
 function getRandomName() {
+  const storedName = getStoredUserName();
+  if (storedName) {
+    return storedName;
+  }
+
   return getRandomFrom(RANDOM_NAMES, 'Admin AMBIS');
 }
 
