@@ -77,7 +77,7 @@
 /* Drawer panel that pushes main content instead of overlaying */
 #drawer,
 #successDrawer{
-  --drawer-max-width:550px;
+  --drawer-max-width:620px;
   width:0;
   max-width:var(--drawer-max-width);
   overflow:hidden;
