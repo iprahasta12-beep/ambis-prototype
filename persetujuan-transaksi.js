@@ -1969,6 +1969,11 @@ function render(tab) {
           <span class="${categoryClass}">${item.category || '-'}</span>
         </td>
       `,
+      `
+        <td class="px-4 py-3">
+          <p class="text-sm font-semibold text-slate-900">${descriptionLine}</p>
+        </td>
+      `
     ];
 
     if (isSelesaiTab) {
@@ -1987,18 +1992,11 @@ function render(tab) {
       `);
     }
 
-    cells.push(
-      `
-        <td class="px-4 py-3">
-          <p class="text-sm font-semibold text-slate-900">${descriptionLine}</p>
-        </td>
-      `,
-      `
-        <td class="px-4 py-3 text-right align-top">
-          <button type="button" class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50" data-role="detail-button">${actionLabel}</button>
-        </td>
-      `
-    );
+    cells.push(`
+      <td class="px-4 py-3 text-right align-top">
+        <button type="button" class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50" data-role="detail-button">${actionLabel}</button>
+      </td>
+    `);
 
     tr.innerHTML = cells.join('');
 
