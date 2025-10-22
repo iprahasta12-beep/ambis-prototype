@@ -190,7 +190,8 @@ const approvalsData = {
       counterpart: 'Ke PT Prima Utama',
       amount: 'Rp500.000.000',
       date: '2025-08-10T11:00:00',
-      status: 'Selesai',
+      status: 'Disetujui',
+      statusLabel: 'Disetujui',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
       method: 'RTGS',
@@ -216,7 +217,7 @@ const approvalsData = {
       counterpart: 'Tagihan PDAM',
       amount: 'Rp750.000',
       date: '2025-08-11T08:15:00',
-      status: 'Selesai',
+      status: 'Dibatalkan',
       sourcePage: 'biller.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
       sourceAccountKey: 'operasional',
@@ -226,7 +227,7 @@ const approvalsData = {
       adminFee: 'Rp2.000',
       totalAmount: 'Rp752.000',
       paymentLabel: 'Tagihan PDAM',
-      statusLabel: 'Berhasil',
+      statusLabel: 'Dibatalkan',
     },
     {
       id: 'APR-20240809-01',
@@ -235,7 +236,8 @@ const approvalsData = {
       counterpart: 'Limit Rp200.000.000',
       amount: '',
       date: '2025-08-09T14:40:00',
-      status: 'Selesai',
+      status: 'Ditolak',
+      statusLabel: 'Ditolak',
       sourcePage: 'atur-persetujuan.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
       approvalMatrix: [
@@ -250,7 +252,8 @@ const approvalsData = {
       counterpart: 'Ke PT Nusantara',
       amount: 'Rp150.000.000',
       date: '2025-08-08T10:00:00',
-      status: 'Selesai',
+      status: 'Disetujui',
+      statusLabel: 'Disetujui',
       sourcePage: 'transfer.html',
       action: { label: 'Detail', type: 'drawer', task: 'pending' },
       method: 'BI Fast',
@@ -284,6 +287,19 @@ const CATEGORY_CLASS_MAP = {
 };
 
 const CATEGORY_BADGE_BASE = 'inline-flex items-center px-3 py-1';
+
+const STATUS_BADGE_BASE = 'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold';
+const STATUS_INDICATOR_BASE = 'h-2 w-2 rounded-full';
+const STATUS_CLASS_MAP = {
+  Disetujui: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  Dibatalkan: 'border-amber-200 bg-amber-50 text-amber-700',
+  Ditolak: 'border-rose-200 bg-rose-50 text-rose-700',
+};
+const STATUS_INDICATOR_CLASS_MAP = {
+  Disetujui: 'bg-emerald-500',
+  Dibatalkan: 'bg-amber-500',
+  Ditolak: 'bg-rose-500',
+};
 
 const CURRENCY_FORMATTER = new Intl.NumberFormat('id-ID', {
   style: 'currency',
@@ -1755,6 +1771,14 @@ function getCategoryClass(category) {
   return CATEGORY_CLASS_MAP[category] || '';
 }
 
+function getStatusClass(status) {
+  return STATUS_CLASS_MAP[status] || 'border-slate-200 bg-slate-100 text-slate-600';
+}
+
+function getStatusIndicatorClass(status) {
+  return STATUS_INDICATOR_CLASS_MAP[status] || 'bg-slate-400';
+}
+
 function highlightActiveRow(itemId, tab) {
   const panel = document.querySelector(`[data-tab-panel="${tab}"]`);
   if (!panel) return;
@@ -1896,6 +1920,9 @@ function render(tab) {
   const tbody = panel.querySelector('[data-role="table-body"]');
   if (!tbody) return;
 
+  const isSelesaiTab = tab === 'selesai';
+  const columnCount = isSelesaiTab ? 5 : 4;
+
   const filters = getFilters(tab);
   let list = approvalsData[tab] ? [...approvalsData[tab]] : [];
 
@@ -1914,7 +1941,7 @@ function render(tab) {
   if (list.length === 0) {
     const empty = document.createElement('tr');
     empty.innerHTML = `
-      <td class="px-4 py-6 text-center text-slate-500" colspan="4">Tidak ada data pada rentang ini.</td>
+      <td class="px-4 py-6 text-center text-slate-500" colspan="${columnCount}">Tidak ada data pada rentang ini.</td>
     `;
     tbody.appendChild(empty);
     return;
@@ -1931,20 +1958,49 @@ function render(tab) {
     const actionLabel = item.action && item.action.label ? item.action.label : 'Detail';
     const descriptionLine = getDescriptionLine(item);
 
-    tr.innerHTML = `
-      <td class="px-4 py-3 align-top">
-        <div class="text-sm font-semibold text-slate-900">${displayDateTime}</div>
-      </td>
-      <td class="px-4 py-3 align-top">
-        <span class="${categoryClass}">${item.category || '-'}</span>
-      </td>
-      <td class="px-4 py-3">
-        <p class="text-sm font-semibold text-slate-900">${descriptionLine}</p>
-      </td>
-      <td class="px-4 py-3 text-right align-top">
-        <button type="button" class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50" data-role="detail-button">${actionLabel}</button>
-      </td>
-    `;
+    const cells = [
+      `
+        <td class="px-4 py-3 align-top">
+          <div class="text-sm font-semibold text-slate-900">${displayDateTime}</div>
+        </td>
+      `,
+      `
+        <td class="px-4 py-3 align-top">
+          <span class="${categoryClass}">${item.category || '-'}</span>
+        </td>
+      `,
+    ];
+
+    if (isSelesaiTab) {
+      const statusLabel = item.statusLabel || item.status || '-';
+      const statusKey = (item.statusLabel || item.status || '').trim();
+      const statusClass = `${STATUS_BADGE_BASE} ${getStatusClass(statusKey)}`;
+      const indicatorClass = `${STATUS_INDICATOR_BASE} ${getStatusIndicatorClass(statusKey)}`;
+
+      cells.push(`
+        <td class="px-4 py-3 align-top">
+          <span class="${statusClass}">
+            <span class="${indicatorClass}" aria-hidden="true"></span>
+            ${statusLabel}
+          </span>
+        </td>
+      `);
+    }
+
+    cells.push(
+      `
+        <td class="px-4 py-3">
+          <p class="text-sm font-semibold text-slate-900">${descriptionLine}</p>
+        </td>
+      `,
+      `
+        <td class="px-4 py-3 text-right align-top">
+          <button type="button" class="px-4 py-1 rounded-lg border border-cyan-500 text-cyan-600 hover:bg-cyan-50" data-role="detail-button">${actionLabel}</button>
+        </td>
+      `
+    );
+
+    tr.innerHTML = cells.join('');
 
     const detailButton = tr.querySelector('[data-role="detail-button"]');
     if (detailButton) {
